@@ -1,0 +1,91 @@
+\documentclass{article}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{jpDMEQR: End-to-End Workflow}
+\author{jpDMEQR package}
+\date{}
+
+\begin{document}
+\maketitle
+
+%\VignetteIndexEntry{jpDMEQR workflow}
+%\VignetteEncoding{UTF-8}
+%\VignetteEngine{utils::Sweave}
+
+\section{Overview}
+
+\texttt{jpDMEQR} provides three modules for high-dimensional mixed-effects quantile regression:
+\begin{enumerate}
+\item Cluster-adjusted iterative screening (\texttt{CA\_IQR\_SIS}).
+\item Joint penalised fitting (\texttt{JP\_DME\_QR}).
+\item Debiased inference (\texttt{Debias\_Inference}).
+\end{enumerate}
+
+\section{Simulated Data Example}
+
+<<echo=TRUE, results=verbatim>>=
+library(jpDMEQR)
+
+set.seed(2026)
+dat <- generate_mixed_qr_data(
+  n = 80,
+  p = 200,
+  s = 10,
+  tau = 0.5,
+  scenario = "S1",
+  m_choices = c(4, 5, 6)
+)
+
+screened <- CA_IQR_SIS(
+  y = dat$y,
+  X = dat$X,
+  cluster_id = dat$cluster_id,
+  tau_grid = c(0.25, 0.5, 0.75),
+  tau_target = 0.5,
+  d_target = floor(3 * sqrt(length(unique(dat$cluster_id)))),
+  T_iter = 2
+)
+
+X_red <- dat$X[, screened, drop = FALSE]
+h <- dat$N^(-1 / 3)
+lambda1 <- sqrt(log(max(2, ncol(X_red))) / dat$N)
+
+fit <- JP_DME_QR(
+  y = dat$y,
+  X = X_red,
+  Z = dat$Z,
+  cluster_id = dat$cluster_id,
+  tau = 0.5,
+  h = h,
+  lambda1 = lambda1,
+  lambda2 = 1,
+  verbose = FALSE
+)
+
+inf <- Debias_Inference(
+  y = dat$y,
+  X = X_red,
+  Z = dat$Z,
+  cluster_id = dat$cluster_id,
+  beta_hat = fit$beta,
+  gamma_hat = fit$gamma,
+  tau = 0.5,
+  h = h,
+  lambda2 = 1,
+  method = "RIDGE"
+)
+
+c(length(screened), fit$iterations, mean(is.finite(inf$se)))
+@
+
+\section{Reproducibility Scripts}
+
+Manuscript-level scripts are distributed with the package:
+\begin{itemize}
+\item \texttt{inst/scripts/run\_simulation\_study.R}
+\item \texttt{inst/scripts/run\_real\_data\_analysis.R}
+\item \texttt{inst/REPRODUCIBILITY.md}
+\end{itemize}
+
+\end{document}
