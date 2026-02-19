@@ -42,3 +42,18 @@ Integer vector of selected variable indices.
 Iterative screening for clustered quantile-regression data using within-cluster
 median centering and marginal multi-quantile scores.
 }
+\examples{
+set.seed(1)
+dat <- generate_mixed_qr_data(
+  n = 10, p = 12, s = 3, tau = 0.5,
+  scenario = "S1", m_choices = c(2, 3)
+)
+active <- CA_IQR_SIS(
+  y = dat$y,
+  X = dat$X,
+  cluster_id = dat$cluster_id,
+  d_target = 5,
+  T_iter = 1
+)
+active
+}

@@ -20,3 +20,6 @@ Numeric scalar tuning level.
 Computes the default CLIME tuning level
 \verb{sqrt(log(p)/(N h)) + h^2}.
 }
+\examples{
+default_lambda_clime(p = 100, N = 500, h = 500^(-1 / 3))
+}

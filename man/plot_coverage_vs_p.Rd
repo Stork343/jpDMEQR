@@ -26,3 +26,12 @@ Invisibly returns \code{NULL}.
 \description{
 Plot Coverage Against Dimension
 }
+\examples{
+summary_df <- data.frame(
+  method = rep("JP-DME-QR", 3),
+  tau = rep(0.5, 3),
+  p = c(50, 100, 200),
+  coverage_signal_95_mean = c(0.93, 0.95, 0.94)
+)
+plot_coverage_vs_p(summary_df, method = "JP-DME-QR", tau = 0.5)
+}

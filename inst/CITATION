@@ -1,0 +1,18 @@
+citHeader("To cite jpDMEQR in publications, please use:")
+
+citEntry(
+  entry = "Manual",
+  title = "jpDMEQR: Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression",
+  author = personList(
+    person(given = "Jian", family = "Hou")
+  ),
+  year = "2026",
+  note = "R package version 0.1.1",
+  url = "https://github.com/Stork343/jpDMEQR",
+  textVersion = paste(
+    "Hou, J. (2026).",
+    "jpDMEQR: Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression.",
+    "R package version 0.1.1.",
+    "https://github.com/Stork343/jpDMEQR"
+  )
+)

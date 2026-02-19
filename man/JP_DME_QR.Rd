@@ -60,3 +60,25 @@ A list containing penalised estimates, diagnostics, and convergence info.
 Fits the smoothed objective using block coordinate descent with
 an \code{L1} penalty on fixed effects and ridge penalty on random effects.
 }
+\examples{
+set.seed(2)
+dat <- generate_mixed_qr_data(
+  n = 10, p = 12, s = 3, tau = 0.5,
+  scenario = "S1", m_choices = c(2, 3)
+)
+active <- CA_IQR_SIS(dat$y, dat$X, dat$cluster_id, d_target = 5, T_iter = 1)
+fit <- JP_DME_QR(
+  y = dat$y,
+  X = dat$X[, active, drop = FALSE],
+  Z = dat$Z,
+  cluster_id = dat$cluster_id,
+  tau = 0.5,
+  h = dat$N^(-1 / 3),
+  lambda1 = 0.1,
+  lambda2 = 1,
+  max_iter = 10,
+  tol = 1e-3,
+  obj_tol = 1e-4
+)
+fit$converged
+}

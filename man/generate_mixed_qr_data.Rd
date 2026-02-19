@@ -60,3 +60,10 @@ A list containing simulated response, design matrices, and truth.
 Simulates clustered data under one of six error scenarios used in the
 manuscript simulation study.
 }
+\examples{
+dat <- generate_mixed_qr_data(
+  n = 20, p = 30, s = 5, tau = 0.5,
+  scenario = "S2", seed = 2026
+)
+c(N = dat$N, p = dat$p, q = dat$q)
+}

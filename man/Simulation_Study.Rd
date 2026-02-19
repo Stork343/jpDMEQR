@@ -77,3 +77,21 @@ A list with \code{config_grid}, \code{raw_results}, and \code{summary}.
 Executes the manuscript simulation design across scenario/\code{p}/\code{tau} grids
 and returns both replication-level and aggregated outputs.
 }
+\examples{
+\dontrun{
+sim <- Simulation_Study(
+  B = 1,
+  n = 20,
+  m_choices = c(3, 4),
+  n_test = 200,
+  p_grid = c(30),
+  tau_grid = c(0.5),
+  scenarios = c("S1"),
+  methods = c("JP-DME-QR", "Naive QR-Lasso"),
+  inference_mode = "RIDGE",
+  jp_target = "beta0",
+  verbose = FALSE
+)
+names(sim)
+}
+}

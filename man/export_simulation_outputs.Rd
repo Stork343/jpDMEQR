@@ -23,3 +23,21 @@ Invisibly returns paths for raw and summary files.
 \description{
 Export Simulation Outputs to CSV
 }
+\examples{
+\dontrun{
+sim <- Simulation_Study(
+  B = 1,
+  n = 20,
+  m_choices = c(3, 4),
+  n_test = 200,
+  p_grid = c(30),
+  tau_grid = c(0.5),
+  scenarios = c("S1"),
+  methods = c("JP-DME-QR", "Naive QR-Lasso"),
+  inference_mode = "RIDGE",
+  jp_target = "beta0",
+  verbose = FALSE
+)
+export_simulation_outputs(sim, out_dir = tempdir(), prefix = "demo")
+}
+}

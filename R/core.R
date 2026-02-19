@@ -72,6 +72,20 @@ phi_smooth <- function(u, tau, h) {
 #' @param verbose Logical; print progress if `TRUE`.
 #'
 #' @return Integer vector of selected variable indices.
+#' @examples
+#' set.seed(1)
+#' dat <- generate_mixed_qr_data(
+#'   n = 10, p = 12, s = 3, tau = 0.5,
+#'   scenario = "S1", m_choices = c(2, 3)
+#' )
+#' active <- CA_IQR_SIS(
+#'   y = dat$y,
+#'   X = dat$X,
+#'   cluster_id = dat$cluster_id,
+#'   d_target = 5,
+#'   T_iter = 1
+#' )
+#' active
 #' @export
 CA_IQR_SIS <- function(y,
                        X,
@@ -189,6 +203,8 @@ soft_threshold <- function(x, lam) {
 #' @param h Smoothing bandwidth.
 #'
 #' @return Numeric scalar tuning level.
+#' @examples
+#' default_lambda_clime(p = 100, N = 500, h = 500^(-1 / 3))
 #' @export
 default_lambda_clime <- function(p, N, h) {
   if (h <= 0) stop("h must be positive.")
@@ -315,6 +331,27 @@ solve_beta_subproblem <- function(y_adj,
 #' @param verbose Logical; print progress if `TRUE`.
 #'
 #' @return A list containing penalised estimates, diagnostics, and convergence info.
+#' @examples
+#' set.seed(2)
+#' dat <- generate_mixed_qr_data(
+#'   n = 10, p = 12, s = 3, tau = 0.5,
+#'   scenario = "S1", m_choices = c(2, 3)
+#' )
+#' active <- CA_IQR_SIS(dat$y, dat$X, dat$cluster_id, d_target = 5, T_iter = 1)
+#' fit <- JP_DME_QR(
+#'   y = dat$y,
+#'   X = dat$X[, active, drop = FALSE],
+#'   Z = dat$Z,
+#'   cluster_id = dat$cluster_id,
+#'   tau = 0.5,
+#'   h = dat$N^(-1 / 3),
+#'   lambda1 = 0.1,
+#'   lambda2 = 1,
+#'   max_iter = 10,
+#'   tol = 1e-3,
+#'   obj_tol = 1e-4
+#' )
+#' fit$converged
 #' @export
 JP_DME_QR <- function(y,
                       X,
@@ -900,6 +937,40 @@ Debias_Inference.Ridge <- function(y,
 #' @param ... Additional arguments passed to the chosen method.
 #'
 #' @return A list with debiased estimates, standard errors, and variance diagnostics.
+#' @examples
+#' set.seed(3)
+#' dat <- generate_mixed_qr_data(
+#'   n = 10, p = 12, s = 3, tau = 0.5,
+#'   scenario = "S1", m_choices = c(2, 3)
+#' )
+#' active <- CA_IQR_SIS(dat$y, dat$X, dat$cluster_id, d_target = 5, T_iter = 1)
+#' X_sub <- dat$X[, active, drop = FALSE]
+#' fit <- JP_DME_QR(
+#'   y = dat$y,
+#'   X = X_sub,
+#'   Z = dat$Z,
+#'   cluster_id = dat$cluster_id,
+#'   tau = 0.5,
+#'   h = dat$N^(-1 / 3),
+#'   lambda1 = 0.1,
+#'   lambda2 = 1,
+#'   max_iter = 10,
+#'   tol = 1e-3,
+#'   obj_tol = 1e-4
+#' )
+#' inf <- Debias_Inference(
+#'   y = dat$y,
+#'   X = X_sub,
+#'   Z = dat$Z,
+#'   cluster_id = dat$cluster_id,
+#'   beta_hat = fit$beta,
+#'   gamma_hat = fit$gamma,
+#'   tau = 0.5,
+#'   h = dat$N^(-1 / 3),
+#'   lambda2 = 1,
+#'   method = "RIDGE"
+#' )
+#' head(inf$beta_tilde)
 #' @export
 Debias_Inference <- function(y,
                              X,

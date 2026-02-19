@@ -19,3 +19,12 @@ Invisibly returns \code{NULL}.
 \description{
 Plot \code{L2} Error Against Dimension
 }
+\examples{
+summary_df <- data.frame(
+  method = rep("JP-DME-QR", 3),
+  tau = rep(0.5, 3),
+  p = c(50, 100, 200),
+  l2_error_mean = c(0.75, 0.82, 0.91)
+)
+plot_l2_error_vs_p(summary_df, method = "JP-DME-QR", tau = 0.5)
+}

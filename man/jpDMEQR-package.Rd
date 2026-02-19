@@ -9,6 +9,14 @@
 Provides screening, penalised estimation, debiasing, and simulation tools
 for high-dimensional mixed-effects quantile regression.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/Stork343/jpDMEQR}
+  \item Report bugs at \url{https://github.com/Stork343/jpDMEQR/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Jian Hou \email{houjian@ruc.edu.cn}
 

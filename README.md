@@ -3,6 +3,13 @@
 `jpDMEQR` provides screening, jointly penalised estimation, and debiased inference
 for high-dimensional mixed-effects quantile regression.
 
+## Install (GitHub)
+
+```r
+install.packages("remotes")
+remotes::install_github("Stork343/jpDMEQR")
+```
+
 ## Install (local)
 
 ```r
@@ -55,4 +62,10 @@ These scripts are intended for end-to-end reproduction of manuscript outputs.
 
 ```r
 vignette("jpDMEQR-workflow", package = "jpDMEQR")
+```
+
+## Citation
+
+```r
+citation("jpDMEQR")
 ```

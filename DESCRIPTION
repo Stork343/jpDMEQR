@@ -1,7 +1,7 @@
 Package: jpDMEQR
 Type: Package
 Title: Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person(given = "Jian", family = "Hou", role = c("aut", "cre"), email = "houjian@ruc.edu.cn")
 Author: Jian Hou [aut, cre]
 Maintainer: Jian Hou <houjian@ruc.edu.cn>
@@ -9,6 +9,8 @@ Description: Implements cluster-adjusted screening, jointly penalised estimation
     and debiased inference for high-dimensional mixed-effects quantile
     regression with smoothed block coordinate descent.
 License: GPL (>= 3)
+URL: https://github.com/Stork343/jpDMEQR
+BugReports: https://github.com/Stork343/jpDMEQR/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports:
@@ -24,6 +26,7 @@ Suggests:
     glmmLasso,
     lqmm,
     testthat (>= 3.0.0)
+VignetteBuilder: utils
 Config/testthat/edition: 3
 NeedsCompilation: no
 RoxygenNote: 7.3.3

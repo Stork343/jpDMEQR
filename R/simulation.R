@@ -68,6 +68,12 @@ check_loss <- function(u, tau) {
 #' @param seed Optional random seed.
 #'
 #' @return A list containing simulated response, design matrices, and truth.
+#' @examples
+#' dat <- generate_mixed_qr_data(
+#'   n = 20, p = 30, s = 5, tau = 0.5,
+#'   scenario = "S2", seed = 2026
+#' )
+#' c(N = dat$N, p = dat$p, q = dat$q)
 #' @export
 generate_mixed_qr_data <- function(n = 200,
                                    p = 500,
@@ -1150,6 +1156,23 @@ estimate_beta_star_reference <- function(config_row,
 #' @param raw_results Data frame returned by [Simulation_Study()].
 #'
 #' @return A summary data frame with `_mean` and `_sd` columns.
+#' @examples
+#' \dontrun{
+#' sim <- Simulation_Study(
+#'   B = 1,
+#'   n = 20,
+#'   m_choices = c(3, 4),
+#'   n_test = 200,
+#'   p_grid = c(30),
+#'   tau_grid = c(0.5),
+#'   scenarios = c("S1"),
+#'   methods = c("JP-DME-QR", "Naive QR-Lasso"),
+#'   inference_mode = "RIDGE",
+#'   jp_target = "beta0",
+#'   verbose = FALSE
+#' )
+#' summarise_simulation_results(sim$raw_results)
+#' }
 #' @export
 summarise_simulation_results <- function(raw_results) {
   id_cols_pref <- c("scenario", "p", "tau", "s", "b0", "rho_x", "sigma_gamma2", "delta", "method", "target")
@@ -1214,6 +1237,23 @@ summarise_simulation_results <- function(raw_results) {
 #' @param verbose Logical; print progress if `TRUE`.
 #'
 #' @return A list with `config_grid`, `raw_results`, and `summary`.
+#' @examples
+#' \dontrun{
+#' sim <- Simulation_Study(
+#'   B = 1,
+#'   n = 20,
+#'   m_choices = c(3, 4),
+#'   n_test = 200,
+#'   p_grid = c(30),
+#'   tau_grid = c(0.5),
+#'   scenarios = c("S1"),
+#'   methods = c("JP-DME-QR", "Naive QR-Lasso"),
+#'   inference_mode = "RIDGE",
+#'   jp_target = "beta0",
+#'   verbose = FALSE
+#' )
+#' names(sim)
+#' }
 #' @export
 Simulation_Study <- function(B = 500,
                              n = 200,
@@ -1325,6 +1365,23 @@ Simulation_Study <- function(B = 500,
 #' @param prefix File prefix for generated CSV files.
 #'
 #' @return Invisibly returns paths for raw and summary files.
+#' @examples
+#' \dontrun{
+#' sim <- Simulation_Study(
+#'   B = 1,
+#'   n = 20,
+#'   m_choices = c(3, 4),
+#'   n_test = 200,
+#'   p_grid = c(30),
+#'   tau_grid = c(0.5),
+#'   scenarios = c("S1"),
+#'   methods = c("JP-DME-QR", "Naive QR-Lasso"),
+#'   inference_mode = "RIDGE",
+#'   jp_target = "beta0",
+#'   verbose = FALSE
+#' )
+#' export_simulation_outputs(sim, out_dir = tempdir(), prefix = "demo")
+#' }
 #' @export
 export_simulation_outputs <- function(sim_out, out_dir = "simulation_outputs", prefix = "jp_dme_qr") {
   if (!dir.exists(out_dir)) {
@@ -1346,6 +1403,14 @@ export_simulation_outputs <- function(sim_out, out_dir = "simulation_outputs", p
 #' @param coverage_col Coverage column name in `summary_df`.
 #'
 #' @return Invisibly returns `NULL`.
+#' @examples
+#' summary_df <- data.frame(
+#'   method = rep("JP-DME-QR", 3),
+#'   tau = rep(0.5, 3),
+#'   p = c(50, 100, 200),
+#'   coverage_signal_95_mean = c(0.93, 0.95, 0.94)
+#' )
+#' plot_coverage_vs_p(summary_df, method = "JP-DME-QR", tau = 0.5)
 #' @export
 plot_coverage_vs_p <- function(summary_df,
                                method = "JP-DME-QR",
@@ -1376,6 +1441,14 @@ plot_coverage_vs_p <- function(summary_df,
 #' @param tau Quantile level.
 #'
 #' @return Invisibly returns `NULL`.
+#' @examples
+#' summary_df <- data.frame(
+#'   method = rep("JP-DME-QR", 3),
+#'   tau = rep(0.5, 3),
+#'   p = c(50, 100, 200),
+#'   l2_error_mean = c(0.75, 0.82, 0.91)
+#' )
+#' plot_l2_error_vs_p(summary_df, method = "JP-DME-QR", tau = 0.5)
 #' @export
 plot_l2_error_vs_p <- function(summary_df, method = "JP-DME-QR", tau = 0.5) {
   sub <- summary_df[summary_df$method == method & abs(summary_df$tau - tau) < 1e-12, , drop = FALSE]

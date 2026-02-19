@@ -16,3 +16,21 @@ A summary data frame with \verb{_mean} and \verb{_sd} columns.
 Aggregates replication-level results into mean and standard deviation
 by scenario and method.
 }
+\examples{
+\dontrun{
+sim <- Simulation_Study(
+  B = 1,
+  n = 20,
+  m_choices = c(3, 4),
+  n_test = 200,
+  p_grid = c(30),
+  tau_grid = c(0.5),
+  scenarios = c("S1"),
+  methods = c("JP-DME-QR", "Naive QR-Lasso"),
+  inference_mode = "RIDGE",
+  jp_target = "beta0",
+  verbose = FALSE
+)
+summarise_simulation_results(sim$raw_results)
+}
+}

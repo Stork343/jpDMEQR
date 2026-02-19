@@ -48,3 +48,14 @@ A list with metadata, per-quantile results, and diagnostics.
 Executes screening, penalised fitting, and debiased inference on
 GEO series matrix data.
 }
+\examples{
+\dontrun{
+res <- run_real_data_analysis(
+  input_file = "data/GSE121239_series_matrix.txt.gz",
+  tau_grid = c(0.25, 0.5, 0.75),
+  random_effect = "intercept_slope",
+  verbose = FALSE
+)
+head(res$combined_table)
+}
+}

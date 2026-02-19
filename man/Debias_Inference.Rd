@@ -51,3 +51,38 @@ A list with debiased estimates, standard errors, and variance diagnostics.
 Applies Schur-complement adjustment and precision-matrix estimation
 (CLIME or ridge inverse) to obtain debiased estimates and standard errors.
 }
+\examples{
+set.seed(3)
+dat <- generate_mixed_qr_data(
+  n = 10, p = 12, s = 3, tau = 0.5,
+  scenario = "S1", m_choices = c(2, 3)
+)
+active <- CA_IQR_SIS(dat$y, dat$X, dat$cluster_id, d_target = 5, T_iter = 1)
+X_sub <- dat$X[, active, drop = FALSE]
+fit <- JP_DME_QR(
+  y = dat$y,
+  X = X_sub,
+  Z = dat$Z,
+  cluster_id = dat$cluster_id,
+  tau = 0.5,
+  h = dat$N^(-1 / 3),
+  lambda1 = 0.1,
+  lambda2 = 1,
+  max_iter = 10,
+  tol = 1e-3,
+  obj_tol = 1e-4
+)
+inf <- Debias_Inference(
+  y = dat$y,
+  X = X_sub,
+  Z = dat$Z,
+  cluster_id = dat$cluster_id,
+  beta_hat = fit$beta,
+  gamma_hat = fit$gamma,
+  tau = 0.5,
+  h = dat$N^(-1 / 3),
+  lambda2 = 1,
+  method = "RIDGE"
+)
+head(inf$beta_tilde)
+}
