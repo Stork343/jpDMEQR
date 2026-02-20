@@ -37,6 +37,9 @@ jobs:
         with:
           cache: true
 
+      - name: Install TeX package required by Sweave vignette
+        run: tlmgr install grfext
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
