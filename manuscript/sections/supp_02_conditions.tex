@@ -1,0 +1,81 @@
+\section{High-level conditions used in the proofs}\label{supp:conditions}
+
+Write $R_h(\beta)=\E[\min_{\gamma}\ell_{i,h}(\beta,\gamma)]$, let
+$\beta_h^{\star}=\argmin_{\beta}R_h(\beta)$, and let $H_h=\nabla^2R_h(\beta_h^{\star})$.
+For a targeted coordinate $k$, set $\omega_{k,h}=H_h^{-1}e_k$. The following conditions restate, in proof-ready form, the assumptions in the main paper.
+
+\begin{assumption}[Local target regularity]\label{ass:supp-target}
+The unsmoothed profile target $\beta^{\star}$ and smoothed target $\beta_h^{\star}$ are unique in a common neighbourhood. Along the line segment joining them, the averaged smoothed curvature
+\[
+ \overline H_h=\int_0^1\nabla^2R_h\{\beta^{\star}+t(\beta_h^{\star}-\beta^{\star})\}\,dt
+\]
+is nonsingular and $\norm{\overline H_h^{-1}}_{L_1}\leq C_H$. The local score perturbation obeys
+$\norm{\nabla R_h(\beta^{\star})}_{\infty}\leq C h^2$.
+\end{assumption}
+
+\begin{assumption}[Score and restricted curvature]\label{ass:supp-estimation}
+Let $S_h=\operatorname{supp}(\beta_h^{\star})$, $|S_h|\leq s$, and
+$\lambda_n=C\sqrt{\log(p)/n}$. With probability tending to one,
+\[
+ \norm{g_{n,h}(\beta_h^{\star})}_{\infty}\leq\lambda_n/2.
+\]
+For every $\Delta$ in the cone
+$\mathcal C(S_h,3)=\{\Delta:\norm{\Delta_{S_h^c}}_1\leq3\norm{\Delta_{S_h}}_1\}$
+and every $t\in[0,1]$ for which $\beta_h^{\star}+t\Delta$ lies in the local parameter set,
+\[
+ \Delta^{\mathsf T}\widehat H_{\mathrm{eff}}(\beta_h^{\star}+t\Delta)\Delta
+ \geq\kappa\norm{\Delta}_2^2.
+\]
+\end{assumption}
+
+\begin{assumption}[Effective-Hessian and inverse-row stability]\label{ass:supp-precision}
+For a deterministic sequence $\delta_{n,h}\to0$,
+\[
+ \norm{\widehat H_{\mathrm{eff}}(\widehat\beta)-H_h}_{\max}=O_p(\delta_{n,h}).
+\]
+Moreover, $\norm{H_h^{-1}}_{L_1}\leq C_{\Omega}$,
+$\norm{\omega_{k,h}}_1\leq C_{\omega}$,
+$\norm{\omega_{k,h}}_0\leq s_{\omega,k}$, and
+$s_{\omega,k}\delta_{n,h}=o(1)$. The Dantzig tolerance satisfies
+$\mu_n\geq2C_{\omega}\delta_{n,h}$ with probability tending to one.
+\end{assumption}
+
+\begin{assumption}[Local score expansion]\label{ass:supp-expansion}
+For $\Delta=\widehat\beta-\beta_h^{\star}$,
+\begin{equation}\label{eq:supp-score-expansion}
+ g_{n,h}(\widehat\beta)
+ =g_{n,h}(\beta_h^{\star})+H_h\Delta+r_{n,h},
+ \qquad
+ \norm{r_{n,h}}_{\infty}=O_p(\mathfrak t_{n,h}).
+\end{equation}
+The sequences satisfy
+\[
+ \sqrt n\,\mu_ns\lambda_n=o(1),\qquad
+ s_{\omega,k}\mu_n\sqrt{\log p}=o(1),\qquad
+ \sqrt n\,\mathfrak t_{n,h}=o(1).
+\]
+\end{assumption}
+
+\begin{assumption}[Cluster central limit and score plug-in stability]\label{ass:supp-variance}
+Let $S_{i,h}^{\star}=S_{i,h}(\beta_h^{\star})$ and
+$\xi_{ik,h}=\omega_{k,h}^{\mathsf T}S_{i,h}^{\star}$. The clusters are independent,
+$\E(\xi_{ik,h})=0$, and $\sup_{i,n}\E|\xi_{ik,h}|^{2+\nu}<\infty$ for some $\nu>0$.
+Furthermore,
+\[
+ \Var(\xi_{ik,h})\to\sigma_k^2\in(0,\infty),
+ \qquad
+ \frac1n\sum_{i=1}^n\norm{S_{i,h}^{\star}}_{\infty}^2=O_p(\log p),
+ \qquad
+ s_{\omega,k}^2\mu_n^2\log p=o(1),
+\]
+and, with $\widehat S_i=S_{i,h}(\widehat\beta)$,
+\begin{equation}\label{eq:supp-score-plugin}
+ \frac1n\sum_{i=1}^n
+ \left[\widehat\omega_k^{\mathsf T}
+ \{\widehat S_i-S_{i,h}^{\star}\}\right]^2=o_p(1).
+\end{equation}
+\end{assumption}
+
+Assumptions~\ref{ass:supp-precision}--\ref{ass:supp-variance} are the model-specific part of the analysis. For bounded cluster sizes, the oracle Hessian concentration rate is expected to be
+$\sqrt{\log(p)/(nh)}+h^2$. The additional term in the main paper, $\eta_{n,h}$, records evaluation at the estimated profile. The primitive proof must use local averaging over residuals near zero rather than applying the global bounds $\sup K_h=O(h^{-1})$ and $\sup|K_h'|=O(h^{-2})$ to every observation separately.
+

@@ -1,0 +1,27 @@
+\section{Computational specification}\label{supp:computation}
+
+\subsection{Optimisation}\label{supp:optimization}
+
+The fixed-effect step uses accelerated proximal gradient with backtracking. The gradient of the smooth part is
+\[
+ -n^{-1}\sum_i m_i^{-1}X_i^{\mathsf T}\psi_{\tau,h}(Y_i-X_i\beta-Z_i\gamma_i).
+\]
+Coordinates with penalty weight zero are updated by an ordinary gradient step. Each cluster-effect step uses a damped Newton direction
+\[
+ d_i=-\{Z_i^{\mathsf T}W_iZ_i+\Lambda\}^{-1}
+ \{-m_i^{-1}Z_i^{\mathsf T}\psi_{\tau,h}(r_i)+\Lambda\gamma_i\}.
+\]
+A line search enforces objective decrease. The implementation stores the objective, KKT residual, minimum eigenvalue of every $B_i$, and the number of backtracking steps.
+
+\subsection{Mandatory identity tests}\label{supp:identity-tests}
+
+For randomly generated small problems, the following tests are run before large-scale computation.
+\begin{enumerate}
+\item Compare the analytic profile gradient with a central finite difference of $L_{n,h}^{\mathrm{prof}}(\beta)$.
+\item Compare the analytic Schur-complement Hessian with a central finite difference of the analytic profile gradient.
+\item Compare the two Hessian formulas in Proposition~\ref{prop:supp-profile}.
+\item Verify the KKT equation $g_{n,h}(\widehat\beta)+\lambda_{\beta}\widehat z=0$ to the requested tolerance.
+\item Verify that the Dantzig constraints hold for every reported coordinate.
+\end{enumerate}
+Relative errors, not only pass/fail indicators, are written to the simulation log.
+

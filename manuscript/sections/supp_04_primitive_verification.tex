@@ -1,0 +1,24 @@
+\section{Primitive verification still required}\label{supp:primitive}
+
+The preceding proofs establish the theorem chain once the high-level cluster-profile rates hold. Before submission, those rates must be derived from primitive conditions. The verification is divided into four lemmas.
+
+First, a profile-smoothing lemma must condition on the complete cluster design and differentiate the expected minimised cluster loss. The profiled residual depends on the full outcome vector, so it cannot be treated as an ordinary observation-level structural error. The required conclusion is the $O(h^2)$ score perturbation in Assumption~\ref{ass:supp-target}.
+
+Second, an oracle effective-Hessian lemma must establish
+\[
+ \norm{\widehat H_{\mathrm{eff}}(\beta_h^{\star})-H_h}_{\max}
+ =O_p\!\left\{\sqrt{\frac{\log p}{nh}}+h^2\right\}.
+\]
+With bounded cluster sizes, this follows from cluster Bernstein inequalities after controlling the kernel-weighted summands.
+
+Third, a profile plug-in lemma must bound
+\[
+ \sup_{\beta\in\mathcal N_n}
+ \norm{\widehat H_{\mathrm{eff}}(\beta)-\widehat H_{\mathrm{eff}}(\beta_h^{\star})}_{\max}
+\]
+by $\eta_{n,h}$. The proof should exploit the fraction of residuals lying within the kernel window. A pointwise global derivative bound of order $h^{-2}$ is deliberately excluded.
+
+Fourth, a score-expansion and mean-square plug-in lemma must yield
+$\norm{r_{n,h}}_{\infty}=O_p(\mathfrak t_{n,h})$ and
+\eqref{eq:supp-score-plugin}. Separate verification is required for random-intercept and random-intercept--slope designs because the derivative of the nuisance profile map changes with $Z_i$.
+

@@ -1,0 +1,83 @@
+\section{Debiased profile inference}\label{sec:inference}
+
+\subsection{Effective information and row-wise inversion}\label{subsec:precision}
+
+Let
+\begin{equation}\label{eq:population-heff}
+ H_h=\E\{H_{i,h}(\beta_h^{\star})\},
+ \qquad
+ \Omega_h=H_h^{-1},
+\end{equation}
+where $H_{i,h}$ is the cluster contribution in \eqref{eq:heff-schur}. For inference on coordinate $k$, write $\omega_{k,h}=\Omega_he_k$. Estimating the full inverse is unnecessary when only a moderate set $\mathcal K$ of coordinates is inferentially targeted. For each $k\in\mathcal K$, define
+\begin{equation}\label{eq:dantzig-row}
+ \widehat\omega_k
+ \in\argmin_{\omega\in\R^p}\|\omega\|_1
+ \quad\text{subject to}\quad
+ \|\widehat H_{\mathrm{eff}}(\widehat\beta)\omega-e_k\|_{\infty}
+ \leq\mu_n.
+\end{equation}
+This is the row-wise Dantzig form of CLIME \cite{cai2011}. It is computationally preferable to estimating a complete $p\times p$ matrix and aligns the amount of inversion with the scientific targets.
+
+The constraint tolerance $\mu_n$ must dominate the elementwise error in the effective Hessian. A theoretical order is developed in Section~\ref{sec:theory}. In practice, a grid begins at $c\{\log(p)/(nh)\}^{1/2}$ and is enlarged until feasibility is achieved. The selected value, feasibility margin, $\|\widehat\omega_k\|_1$, and residual $\|\widehat H_{\mathrm{eff}}\widehat\omega_k-e_k\|_{\infty}$ are retained as diagnostics.
+
+\subsection{One-step correction and cluster influence scores}\label{subsec:onestep}
+
+The penalised joint minimiser is also a minimiser of
+$L_{n,h}^{\mathrm{prof}}(\beta)+\lambda_{\beta}\sum_kw_k|\beta_k|$.
+For $k\in\mathcal K$, define the one-step estimator
+\begin{equation}\label{eq:debiased-estimator}
+ \widetilde\beta_k
+ =\widehat\beta_k-\widehat\omega_k^{\mathsf T}g_{n,h}(\widehat\beta).
+\end{equation}
+The sign in \eqref{eq:debiased-estimator} follows from treating $g_{n,h}$ as the gradient of the profile loss. A first-order expansion gives
+\[
+ g_{n,h}(\widehat\beta)
+ \approx g_{n,h}(\beta_h^{\star})
+ +H_h(\widehat\beta-\beta_h^{\star}),
+\]
+so that the leading penalisation error cancels after multiplication by $\omega_{k,h}^{\mathsf T}$.
+
+Define the cluster score at a generic parameter by
+\begin{equation}\label{eq:cluster-score}
+ S_{i,h}(\beta)
+ =\frac{1}{m_i}X_i^{\mathsf T}
+ \psi_{\tau,h}\{Y_i-X_i\beta-Z_i\widehat\gamma_i(\beta)\}.
+\end{equation}
+Then $g_{n,h}(\beta)=-n^{-1}\sum_iS_{i,h}(\beta)$. At the smoothed population target, the first-order condition is $\E\{S_{i,h}(\beta_h^{\star})\}=0$. The leading influence contribution for coordinate $k$ is therefore
+\begin{equation}\label{eq:influence}
+ \xi_{ik,h}=\omega_{k,h}^{\mathsf T}S_{i,h}(\beta_h^{\star}).
+\end{equation}
+Within-cluster dependence is retained inside $S_{i,h}$; the central limit theorem is applied across independent clusters.
+
+\subsection{Sandwich variance and Wald inference}\label{subsec:variance}
+
+Let
+\[
+ \widehat S_i=S_{i,h}(\widehat\beta),
+ \qquad
+ \overline S=n^{-1}\sum_{i=1}^n\widehat S_i,
+ \qquad
+ \widehat\xi_{ik}=\widehat\omega_k^{\mathsf T}(\widehat S_i-\overline S).
+\]
+The cluster-sandwich variance estimator is
+\begin{equation}\label{eq:variance-estimator}
+ \widehat\sigma_k^2=\frac{1}{n}\sum_{i=1}^n\widehat\xi_{ik}^2.
+\end{equation}
+A pointwise $(1-\alpha)$ confidence interval for the unsmoothed target is
+\begin{equation}\label{eq:ci}
+ \left[
+ \widetilde\beta_k-z_{1-\alpha/2}\frac{\widehat\sigma_k}{\sqrt n},
+ \quad
+ \widetilde\beta_k+z_{1-\alpha/2}\frac{\widehat\sigma_k}{\sqrt n}
+ \right].
+\end{equation}
+No separate plug-in estimate of a scalar error density at zero is required; local density information is already contained in the smoothed effective Hessian.
+
+Equation~\eqref{eq:ci} is a pointwise statement for a prespecified coordinate. If a coordinate is selected from the same data because it appears large, the interval is not automatically post-selection valid. The application therefore separates confirmatory targets from exploratory gene discovery. Confirmatory module scores and clinical covariates are prespecified. Exploratory genes are selected on independent subject folds, followed by inference on held-out clusters; the roles of the folds are exchanged before aggregation. Simultaneous inference over a large selected set is left outside the main theorem unless a multiplier-bootstrap result is added.
+
+\subsection{Implementation and diagnostics}\label{subsec:implementation}
+
+Four groups of diagnostics are required. First, optimisation diagnostics include objective monotonicity, the maximum KKT residual, the number of outer iterations, and the distribution of Newton steps across clusters. Second, profile diagnostics include the three finite-difference checks following Proposition~\ref{prop:profile-calculus}. Third, curvature diagnostics include the smallest restricted eigenvalue on the active cone, condition numbers of the $B_i$ blocks, and Dantzig feasibility. Fourth, inferential diagnostics compare the empirical standard deviation of $\widetilde\beta_k$ with the average $\widehat\sigma_k/\sqrt n$ in simulation.
+
+No multiplicative factor is applied to the one-step correction, and no standard-error inflation factor is chosen by inspecting empirical coverage. Any finite-sample modification must be specified before simulation and justified as part of the estimator. This restriction is essential because coverage calibrated against known simulation truth cannot validate an inferential procedure.
+

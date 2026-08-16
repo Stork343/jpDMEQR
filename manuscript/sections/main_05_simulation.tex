@@ -1,0 +1,83 @@
+\section{Simulation studies}\label{sec:simulation}
+
+The numerical study is organised around the inferential claims of Sections~\ref{sec:inference} and \ref{sec:theory}. It has five purposes: to show when profiling is needed; to audit the finite-sample behaviour of each term in the theoretical expansion; to compare the method with classical, recent, and oracle procedures; to assess robustness across quantile levels and error distributions; and to identify the settings in which sparse effective-inverse or nuisance-structure assumptions fail. The earlier simulation output is not retained because it used a largely low-dimensional design and truth-based coverage calibration. The corrected study is generated only from an implementation that passes the profile-gradient, profile-Hessian, and Schur-identity tests.
+
+\subsection{Core design and modular registry}\label{subsec:sim-design}
+
+Independent clusters are generated from
+\[
+ Y_{ij}=X_{ij}^{\mathsf T}\beta^0+Z_{ij}^{\mathsf T}b_i+\varepsilon_{ij},
+ \qquad i=1,\ldots,n,
+\]
+with
+\[
+ n\in\{100,200,400\},\qquad
+ m_i\in\{3,4,5,6,7,8\},\qquad
+ p\in\{500,1000,2000\},\qquad
+ s\in\{5,8,10\}.
+\]
+The baseline fixed-effect design is Gaussian AR(1) with correlation $0.5$ and alternating nonzero coefficients of magnitude $0.75$. Independent, strongly correlated AR(1), block, factor, sparse-precision, and dense-precision designs form a separate effective-inverse stress module. The random-effect design is either $Z_{ij}=1$ or $Z_{ij}=(1,t_{ij})^{\mathsf T}$, where $t_{ij}$ is centred visit time. In the random-intercept--slope design, the two cluster effects have correlation $0.4$. Gaussian, heavy-tailed $t_5$, mixture, and centred log-normal random effects are considered.
+
+Every error innovation is shifted so that its conditional $\tau$-quantile is exactly zero. The required families are Gaussian, rescaled $t_3$, Laplace, standardised $\chi^2_3$, contaminated normal, asymmetric Laplace, heteroscedastic Gaussian, and heteroscedastic $t_3$. Target quantiles are $\tau\in\{0.25,0.50,0.75\}$. A copula-dependence sensitivity setting retains the selected marginal distribution while adding within-cluster serial dependence.
+
+The experiment registry is modular rather than a prohibitively large full factorial. Module A studies finite-sample scaling in $n$, $p$, and $s$ and records all theorem diagnostics. Module B studies quantile and error robustness. Module C varies random-effect strength, distribution, dimension, cluster size, working penalty, and omitted random slopes. Module D stresses design correlation and sparse precision recovery. Module E varies the smoothing, fixed-effect penalty, nuisance penalty, and Dantzig tolerance one component at a time. Module F studies independent-cluster screening when $p\in\{5000,10000\}$. Module G records runtime, memory, iteration counts, and numerical failures. The complete frozen registry is supplied with the replication code.
+
+In correctly specified centred slope designs, performance is reported relative to the structural coefficient. Under nuisance misspecification or other settings in which structural and regularised profile targets need not coincide, $\beta^{\star}$ is approximated by population optimisation over at least $10^5$ independently generated clusters. The approximation is repeated with at least four independent seeds, and its between-run error must be negligible relative to the Monte Carlo standard error before coverage is evaluated.
+
+\begin{table}[t]
+\caption{Primary simulation modules and their role in validating the method.}\label{tab:simulation-grid}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+Module & Principal factors and inferential purpose \\
+\midrule
+A: theory scaling & $n=100,200,400$; $p=500,1000,2000$; estimation, Hessian, precision-row, and Bahadur rates \\
+B: error robustness & Gaussian, $t_3$, Laplace, skewed, contaminated, asymmetric, and heteroscedastic errors at three quantiles \\
+C: nuisance structure & Random intercept/slope, non-Gaussian effects, variance strength, cluster size, omitted slopes, and working-$\Lambda$ sensitivity \\
+D: precision stress & Independent, AR(1), block, factor, sparse-inverse, and dense-inverse fixed-effect designs \\
+E: tuning sensitivity & Prespecified grids for $h$, $\lambda_{\beta}$, $\Lambda$, and the Dantzig tolerance \\
+F: screening & $p=5000,10000$ with independent subject screening, heuristic screening, and oracle support \\
+G: computation & Runtime, memory, iterations, KKT residuals, Dantzig feasibility, and failure classification \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Comparators and tuning}\label{subsec:sim-comparators}
+
+The practical proposed estimator is compared with four method classes. Classical procedures include pooled quantile Lasso and low-dimensional linear quantile mixed models \cite{geraci2014,geraci2014jss}. Direct mixed-quantile competitors include double-penalised quantile mixed modelling \cite{li2020} and the many-small-cluster bias-adjusted estimator of \citeA{battagliola2022}. Recent high-dimensional procedures include independent-observation debiased smoothed quantile regression \cite{yan2023}, penalised longitudinal quantile estimating equations \cite{zu2023}, and quadratic-inference-function variable selection \cite{bhattacharya2026}. Oracle procedures use the true support, generated nuisance effects, or population effective direction to isolate the costs of selection, nuisance estimation, and precision estimation.
+
+These procedures do not always target the same population quantity. Estimation, selection, prediction, and coverage comparisons are therefore separated. Low-dimensional methods receive either the oracle support or the same independently selected support, and the distinction is explicit. Marginal longitudinal methods are compared on their own target unless the data-generating design makes the marginal and profile targets coincide.
+
+All non-oracle tuning is nested within cluster-level folds. The reference grids satisfy $h=c_hn^{-1/3}$, $\lambda_{\beta}=c_{\lambda}\{\log(p)/n\}^{1/2}$, and
+\[
+ \mu=c_{\mu}\left[\left\{\frac{\log p}{nh}\right\}^{1/2}+h^2\right],
+\]
+with multipliers fixed before the experiment. The smallest feasible Dantzig tolerance on the frozen grid is used. Failed optimisation, infeasible precision programs, and warning fits are retained and classified. No tuning value, correction multiplier, or standard-error factor may depend on the known simulation truth, empirical bias, or empirical coverage.
+
+\subsection{Performance measures and finite-sample theory audit}\label{subsec:sim-metrics}
+
+For estimation we report $\ell_1$ and $\ell_2$ error, maximum active-coordinate error, true-positive rate, false-discovery proportion, exact support recovery, and selected model size. Prediction is evaluated on new clusters by pinball loss, skill relative to pooled and intercept-only quantile predictions, and empirical quantile calibration.
+
+For inference we report bias of $\widetilde\beta_k$, empirical standard deviation, mean estimated standard error, their ratio, 90\% and 95\% coverage, interval length, null type-I error, signal power, studentised quantile--quantile diagnostics, and null $p$-value uniformity. The proof architecture is assessed directly through smoothing-target error, effective-Hessian max-norm error, Schur-identity discrepancy, Dantzig residual, precision-row error, and the scaled Bahadur remainder. Computational reporting includes wall time, peak memory, outer and nuisance iterations, maximum nuisance gradient, KKT residual, Hessian condition number, solver status, and failure stage.
+
+The pilot registry uses 200 replications per configuration and is a debugging gate. Core inferential settings use 1000 replications; secondary robustness settings use 500. Every summary reports Monte Carlo standard errors and, for coverage and type-I error, a binomial interval. Method differences use common random numbers and paired Monte Carlo uncertainty.
+
+\subsection{Results structure and acceptance rules}\label{subsec:sim-results}
+
+Table~\ref{tab:simulation-results-shell} fixes the minimum inferential reporting structure before computation. The main experiment begins only after the reference implementation passes the numerical geometry tests and the pilot shows no systematic score sign, scaling, or variance error. A configuration is not declared successful merely because prediction improves. The empirical standard deviation and average estimated standard error must be commensurate, coverage should approach nominal as $n$ increases, the profile identity must remain at numerical precision, and all failure rates must be reported.
+
+\begin{table}[t]
+\caption{Principal inferential outputs to be populated from the frozen simulation registry. Dashes are deliberate placeholders.}\label{tab:simulation-results-shell}
+\small
+\begin{tabularx}{\textwidth}{@{}Xccccc@{}}
+\toprule
+Scenario & Bias & Emp. SD & Avg. SE & Coverage & Avg. length \\
+\midrule
+Random intercept, Gaussian & -- & -- & -- & -- & -- \\
+Random intercept--slope, $t_3$ & -- & -- & -- & -- & -- \\
+Contaminated and heteroscedastic errors & -- & -- & -- & -- & -- \\
+Omitted random slope, profile target & -- & -- & -- & -- & -- \\
+Dense effective inverse stress test & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabularx}
+\end{table}
+

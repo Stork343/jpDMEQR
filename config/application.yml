@@ -1,0 +1,53 @@
+project: jpDMEQR
+application_id: GSE65391_C3
+accession: GSE65391
+platform: GPL10558
+urls:
+  accession: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65391
+  series_matrix: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE65nnn/GSE65391/matrix/GSE65391_series_matrix.txt.gz
+  supplementary_directory: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE65nnn/GSE65391/suppl/
+  raw_tar: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE65nnn/GSE65391/suppl/GSE65391_RAW.tar
+  non_normalized_r1: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE65nnn/GSE65391/suppl/GSE65391_non-normalized_data_Illumina_HT12_V4_R1.txt.gz
+  non_normalized_r2: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE65nnn/GSE65391/suppl/GSE65391_non-normalized_data_Illumina_HT12_V4_R2.txt.gz
+primary_outcome:
+  source_field: c3
+  transform: log
+  audit_gates:
+    minimum_subjects: 100
+    minimum_visits: 500
+    minimum_repeated_subjects: 75
+    maximum_missing_fraction: 0.30
+    minimum_distinct_values: 20
+    maximum_modal_fraction: 0.20
+quantiles:
+  primary: [0.25, 0.50, 0.75]
+  sensitivity: [0.10]
+cluster:
+  id_field: subject
+  time_field: cumulative_time
+  minimum_visits: 2
+random_effects:
+  primary: [intercept]
+  sensitivity: [intercept, centered_time]
+always_included:
+  model_A: [centered_time, age, gender, race, treatment, batch]
+  model_B: [centered_time, age, gender, race, treatment, batch, sledai]
+expression:
+  primary_source: processed_series_matrix
+  optional_raw_sensitivity: true
+  remove_control_probes: true
+  remove_unannotated: true
+  remove_multi_mapping: true
+  collapse_rule: highest_training_mad
+  filter_sizes: [2000, 5000, 10000]
+validation:
+  outer_folds: 5
+  repetitions: 5
+  split_unit: subject
+  base_seed: 20260817
+method:
+  h_multiplier_grid: [0.75, 1.00, 1.25]
+  lambda_beta_multiplier_grid: [0.25, 0.50, 1.00, 2.00]
+  lambda_gamma_grid: [0.50, 1.00, 2.00]
+  dantzig_multiplier_grid: [0.50, 1.00, 2.00, 4.00]
+  screening_dimensions: [100, 200, 400]

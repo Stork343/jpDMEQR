@@ -1,0 +1,19 @@
+\section{GSE65391 audit and analysis protocol}\label{supp:gse}
+
+\subsection{Metadata audit}\label{supp:metadata}
+
+The audit script must produce a machine-readable table containing: GEO accession, sample identifier, subject identifier, visit number, cumulative time, days since last visit, batch, technical-replicate flag, C3, C4, anti-dsDNA, ESR, age, sex, race, treatment indicators, and expression-column identifier. Every exclusion receives one mutually exclusive reason. The script reports missingness by variable, number of visits per subject before and after outcome filtering, and whether visit spacing supports a random time slope.
+
+\subsection{Expression audit}\label{supp:expression}
+
+The expression workflow verifies the platform annotation version, identifies array-control probes, checks the supplied batch normalisation using healthy technical replicates, and records every probe-to-gene mapping decision. All filtering and scaling objects are estimated inside training clusters. The final analysis object contains no outcome-derived feature filter before the sample-splitting step.
+
+\subsection{Outcome and estimands}\label{supp:outcome}
+
+The primary outcome is C3. Units and data-entry conventions must be verified from the study documentation before transformation. If the empirical distribution is strongly right-skewed, log transformation is permitted only after checking positivity and is fixed before model comparison. Primary quantile levels are $0.25$, $0.50$, and $0.75$; $0.10$ is analysed only when the outcome audit and local-curvature diagnostics support it. The primary confirmatory estimands are profile coefficients for prespecified, versioned immune-module scores. At minimum these include reproducible interferon-response signatures; additional plasmablast or neutrophil modules are included only after their exact gene definitions are frozen. Gene-level estimands are exploratory and use independent subject selection/inference splits.
+
+\subsection{Reproducibility outputs}\label{supp:reproducibility}
+
+The final repository must contain the raw-data download script, checksum manifest, cohort-construction script, annotation version, preprocessing code, fixed random seeds, optimisation logs, simulation summaries, and a session-information file. Tables in the paper are generated directly from saved analysis objects. Manual transcription of numerical values into LaTeX is not permitted.
+
+\end{document}

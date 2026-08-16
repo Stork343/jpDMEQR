@@ -1,0 +1,8 @@
+\section{Full simulation protocol}\label{supp:simulation}
+
+For each replication, an independent training sample and a large test sample are generated at the cluster level. Random seeds are deterministic functions of scenario and replication identifiers. Tuning folds are common across methods. The population profile target in misspecified scenarios is computed once per scenario from a separate large Monte Carlo sample and is not reused for tuning.
+
+The primary result tables report each method's mean, Monte Carlo standard error, and number of successful replications. Coverage Monte Carlo uncertainty is displayed; for 500 replications, the standard error near 95\% coverage is approximately 0.010. A method with fewer than 95\% successful replications in a scenario is flagged, and both conditional-on-success and failure-inclusive summaries are reported.
+
+Sensitivity analyses vary $c_h$, $\lambda_{\gamma}$, the Dantzig tolerance multiplier, cluster-size imbalance, and design correlation. Screening, if examined, is treated as a computational supplement and is performed on an independent set of clusters. No sure-screening theorem is used as a premise of the main inferential result.
+

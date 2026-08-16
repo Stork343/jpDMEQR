@@ -1,0 +1,36 @@
+\documentclass[APA,STIX1COL]{WileyNJDv5}
+\articletype{Supporting Information}
+\received{00}\revised{00}\accepted{00}
+\hypersetup{hidelinks,pdftitle={Supporting Information: Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression},pdfauthor={Jian Hou, Tan Meng, and Maozai Tian}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Var}{Var}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\theproposition}{S\arabic{proposition}}
+\renewcommand{\thelemma}{S\arabic{lemma}}
+\renewcommand{\thetheorem}{S\arabic{theorem}}
+\renewcommand{\theassumption}{S\arabic{assumption}}
+\begin{document}
+\title{Supporting Information for ``Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression with Many Small Clusters''}
+\author[1]{Jian Hou}\author[1]{Tan Meng}\author[1]{Maozai Tian}
+\authormark{Hou et al.}\titlemark{Supporting Information: profile inference}
+\address[1]{\orgdiv{School of Statistics}, \orgname{Renmin University of China}, \orgaddress{\city{Beijing}, \country{China}}}
+\corres{Correspondence: Jian Hou. Email: houjian@ruc.edu.cn}
+\abstract[Summary]{This document gives the exact profile-calculus proof, proves the main estimation and inferential results under the high-level cluster-profile assumptions stated in the paper, records the remaining primitive empirical-process verification, and specifies the computational tests, simulation protocol, and GSE65391 data audit.}
+\keywords{clustered data; debiasing; profile Hessian; quantile regression; supporting information}
+\maketitle
+
+\noindent\textit{Scope.} Proposition~\ref{prop:supp-profile} and Theorems~\ref{thm:supp-target}--\ref{thm:supp-normality} are proved below. The remaining theoretical task before submission is to verify the high-level Hessian plug-in and score-remainder rates from primitive conditions for the general random-intercept--slope model.
+
+\input{sections/supp_01_profile_calculus}
+\input{sections/supp_02_conditions}
+\input{sections/supp_03_proofs}
+\input{sections/supp_04_primitive_verification}
+\input{sections/supp_05_computation}
+\input{sections/supp_06_simulation}
+\input{sections/supp_07_gse65391}

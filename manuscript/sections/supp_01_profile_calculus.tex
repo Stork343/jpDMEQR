@@ -1,0 +1,74 @@
+\section{Exact profile calculus}\label{supp:profile}
+
+For cluster $i$, write
+\[
+ \ell_{i,h}(\beta,\gamma)
+ =m_i^{-1}\sum_{j=1}^{m_i}\rho_{\tau,h}(Y_{ij}-X_{ij}^{\mathsf T}\beta-Z_{ij}^{\mathsf T}\gamma)
+ +\tfrac12\gamma^{\mathsf T}\Lambda\gamma.
+\]
+Let $\widehat\gamma_i(\beta)=\argmin_{\gamma}\ell_{i,h}(\beta,\gamma)$ and
+$L_{n,h}^{\mathrm{prof}}(\beta)=n^{-1}\sum_i\ell_{i,h}\{\beta,\widehat\gamma_i(\beta)\}$.
+
+\begin{proposition}[Profile gradient and Hessian]\label{prop:supp-profile}
+Let
+\[
+ W_i=m_i^{-1}\diag\{K_h(r_{ij})\},\qquad
+ B_i=Z_i^{\mathsf T}W_iZ_i+\Lambda,\qquad
+ A_i=B_i^{-1}Z_i^{\mathsf T}W_iX_i.
+\]
+Then
+\begin{equation}\label{eq:supp-gradient}
+ \nabla L_{n,h}^{\mathrm{prof}}(\beta)
+ =-n^{-1}\sum_i m_i^{-1}X_i^{\mathsf T}\psi_{\tau,h}(r_i),
+\end{equation}
+\begin{equation}\label{eq:supp-hessian}
+ \nabla^2L_{n,h}^{\mathrm{prof}}(\beta)
+ =n^{-1}\sum_i\{X_i^{\mathsf T}W_iX_i-X_i^{\mathsf T}W_iZ_iB_i^{-1}Z_i^{\mathsf T}W_iX_i\},
+\end{equation}
+and, with $\widetilde X_i=X_i-Z_iA_i$,
+\begin{equation}\label{eq:supp-identity}
+ X_i^{\mathsf T}W_iX_i-X_i^{\mathsf T}W_iZ_iB_i^{-1}Z_i^{\mathsf T}W_iX_i
+ =\widetilde X_i^{\mathsf T}W_i\widetilde X_i+A_i^{\mathsf T}\Lambda A_i.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+The stationarity equation for the nuisance profile is
+\begin{equation}\label{eq:supp-stationarity}
+ 0=\nabla_{\gamma}\ell_{i,h}\{\beta,\widehat\gamma_i(\beta)\}
+ =-m_i^{-1}Z_i^{\mathsf T}\psi_{\tau,h}\{r_i(\beta)\}
+ +\Lambda\widehat\gamma_i(\beta).
+\end{equation}
+Because $B_i\succeq\Lambda\succ0$, the profile map is locally continuously differentiable. The envelope theorem gives
+\[
+ \frac{d}{d\beta}\ell_{i,h}\{\beta,\widehat\gamma_i(\beta)\}
+ =\partial_{\beta}\ell_{i,h}\{\beta,\widehat\gamma_i(\beta)\}
+ =-m_i^{-1}X_i^{\mathsf T}\psi_{\tau,h}\{r_i(\beta)\},
+\]
+which proves \eqref{eq:supp-gradient}.
+
+Differentiate \eqref{eq:supp-stationarity} with respect to $\beta$. The block derivatives of the complete criterion are
+\[
+ H_{\beta\beta,i}=X_i^{\mathsf T}W_iX_i,
+ \qquad H_{\beta\gamma,i}=X_i^{\mathsf T}W_iZ_i,
+ \qquad H_{\gamma\gamma,i}=B_i.
+\]
+Implicit differentiation yields
+\[
+ \frac{d\widehat\gamma_i(\beta)}{d\beta}
+ =-B_i^{-1}Z_i^{\mathsf T}W_iX_i=-A_i.
+\]
+Differentiating the profile gradient therefore gives the Schur complement in \eqref{eq:supp-hessian}.
+
+For \eqref{eq:supp-identity}, note that $Z_i^{\mathsf T}W_iX_i=B_iA_i$ and $Z_i^{\mathsf T}W_iZ_i=B_i-\Lambda$. Hence
+\begin{align*}
+ \widetilde X_i^{\mathsf T}W_i\widetilde X_i
+ &=X_i^{\mathsf T}W_iX_i-2A_i^{\mathsf T}B_iA_i
+ +A_i^{\mathsf T}(B_i-\Lambda)A_i\\
+ &=X_i^{\mathsf T}W_iX_i-A_i^{\mathsf T}B_iA_i-A_i^{\mathsf T}\Lambda A_i.
+\end{align*}
+Adding $A_i^{\mathsf T}\Lambda A_i$ and using
+$A_i^{\mathsf T}B_iA_i=X_i^{\mathsf T}W_iZ_iB_i^{-1}Z_i^{\mathsf T}W_iX_i$
+proves the result.
+\end{proof}
+

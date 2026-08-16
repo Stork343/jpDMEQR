@@ -1,0 +1,39 @@
+% Compatibility copy of the letterspacing macros distributed with Wiley NJDv5.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{lettersp}[2026/08/17 Wiley NJDv5 letterspacing compatibility]
+\newdimen \naturalwidth
+\newdimen \naturaldepth
+\newdimen \naturalheight
+\newbox \l@tterspacebox
+\newtoks \l@tterspacetoks
+\def \sp@ce { }
+\def \hsss{\hskip 0 pt plus 1 fill minus 1 fill\relax}
+\let \@nd = \empty
+\let \@x = \expandafter
+\let \sp@cetoken = \relax
+\edef \t@mp {\let \sp@cetoken = \sp@ce}
+\t@mp \let \t@mp = \undefined
+\def \letterspace #1#{\def \hb@xmodifier {#1}%
+ \afterassignment \l@tterspace \l@tterspacetoks =}
+\def \l@tterspace{\setbox \l@tterspacebox = \hbox{\the \l@tterspacetoks}%
+ \naturalwidth = \wd \l@tterspacebox
+ \naturaldepth = \dp \l@tterspacebox
+ \naturalheight = \ht \l@tterspacebox
+ \hbox \hb@xmodifier\bgroup\hss
+ \@x \l@tt@rspace \the \l@tterspacetoks {}\@nd\hss\egroup}
+\def \l@tt@rspace #1\@nd{\ifx \@nd #1\@nd
+ \let \n@xt = \relax
+ \else
+ \p@rtition #1\@nd
+ \ifx \h@ad \sp@ce \hsss \h@ad \hsss
+ \else \h@ad \ifx \t@il \@nd \else \hsss \fi \fi
+ \@x \def \@x \n@xt \@x{\@x \l@tt@rspace \t@il \@nd}%
+ \fi \n@xt}
+\def \p@rtition #1\@nd{\m@kespacexplicit #1\@nd \@x \p@rtiti@n \b@dy \@nd}
+\def \p@rtiti@n #1#2\@nd{\def \h@ad {#1}\def \t@il {#2}}
+\def \m@kespacexplicit #1\@nd{\futurelet \h@ad \m@kesp@cexplicit #1\@nd}
+\def \m@kesp@cexplicit #1\@nd{\ifx \h@ad \sp@cetoken
+ \@x \def \@x \b@dy \@x {\pr@tectspace #1\@nd}%
+ \else \def \b@dy {#1}\fi}
+\@x \def \@x \pr@tectspace \sp@ce #1\@nd {{ }#1}
+\endinput

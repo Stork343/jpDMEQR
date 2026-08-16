@@ -1,0 +1,245 @@
+\section{Proofs of the main theoretical results}\label{supp:proofs}
+
+\subsection{Smoothing target approximation}\label{supp:target-proof}
+
+\begin{theorem}[Target approximation]\label{thm:supp-target}
+Under Assumption~\ref{ass:supp-target},
+\[
+ \norm{\beta_h^{\star}-\beta^{\star}}_{\infty}\leq C_HC h^2.
+\]
+If the difference is supported on a set of order $s$, then
+$\norm{\beta_h^{\star}-\beta^{\star}}_2=O(\sqrt{s}\,h^2)$.
+\end{theorem}
+
+\begin{proof}
+Let $d_h=\beta_h^{\star}-\beta^{\star}$. By the first-order condition and the integral mean-value identity,
+\[
+ 0=\nabla R_h(\beta_h^{\star})
+ =\nabla R_h(\beta^{\star})+\overline H_hd_h.
+\]
+Thus $d_h=-\overline H_h^{-1}\nabla R_h(\beta^{\star})$, and
+\[
+ \norm{d_h}_{\infty}
+ \leq\norm{\overline H_h^{-1}}_{L_1}
+ \norm{\nabla R_h(\beta^{\star})}_{\infty}
+ \leq C_HC h^2.
+\]
+The $\ell_2$ statement follows from
+$\norm{d_h}_2\leq\sqrt{|\operatorname{supp}(d_h)|}\norm{d_h}_{\infty}$.
+\end{proof}
+
+\subsection{Penalised profile rate}\label{supp:estimation-proof}
+
+\begin{theorem}[Penalised estimation]\label{thm:supp-estimation}
+Under Assumption~\ref{ass:supp-estimation}, choose
+$\lambda_{\beta}\geq2\norm{g_{n,h}(\beta_h^{\star})}_{\infty}$. Then
+\[
+ \norm{\widehat\beta-\beta_h^{\star}}_2
+ \leq C\sqrt{s}\lambda_{\beta},
+ \qquad
+ \norm{\widehat\beta-\beta_h^{\star}}_1
+ \leq Cs\lambda_{\beta}.
+\]
+The same orders hold for a finite block of unpenalised covariates after augmenting the restricted-curvature condition by that block.
+\end{theorem}
+
+\begin{proof}
+Set $\Delta=\widehat\beta-\beta_h^{\star}$ and $S=S_h$. The basic inequality is
+\begin{equation}\label{eq:supp-basic}
+ L_{n,h}^{\mathrm{prof}}(\beta_h^{\star}+\Delta)
+ -L_{n,h}^{\mathrm{prof}}(\beta_h^{\star})
+ +\lambda_{\beta}
+ \{\norm{\beta_h^{\star}+\Delta}_1-\norm{\beta_h^{\star}}_1\}\leq0.
+\end{equation}
+Restricted curvature and the score bound give
+\[
+ L_{n,h}^{\mathrm{prof}}(\beta_h^{\star}+\Delta)
+ -L_{n,h}^{\mathrm{prof}}(\beta_h^{\star})
+ \geq g_{n,h}(\beta_h^{\star})^{\mathsf T}\Delta
+ +\frac{\kappa}{2}\norm{\Delta}_2^2,
+\]
+and
+$|g_{n,h}(\beta_h^{\star})^{\mathsf T}\Delta|
+\leq(\lambda_{\beta}/2)\norm{\Delta}_1$.
+The decomposability inequality
+\[
+ \norm{\beta_h^{\star}+\Delta}_1-\norm{\beta_h^{\star}}_1
+ \geq\norm{\Delta_{S^c}}_1-\norm{\Delta_S}_1
+\]
+inserted into \eqref{eq:supp-basic} yields
+\[
+ \frac{\kappa}{2}\norm{\Delta}_2^2
+ +\frac{\lambda_{\beta}}{2}\norm{\Delta_{S^c}}_1
+ \leq\frac{3\lambda_{\beta}}{2}\norm{\Delta_S}_1.
+\]
+Hence $\Delta\in\mathcal C(S,3)$ and
+$\kappa\norm{\Delta}_2^2/2
+\leq3\lambda_{\beta}\sqrt{s}\norm{\Delta}_2/2$.
+This proves the $\ell_2$ bound. The cone inequality then gives
+$\norm{\Delta}_1\leq4\norm{\Delta_S}_1
+\leq4\sqrt{s}\norm{\Delta}_2$, proving the $\ell_1$ bound.
+\end{proof}
+
+\subsection{Row-wise Dantzig inversion}\label{supp:precision-proof}
+
+\begin{theorem}[Precision-row rate]\label{thm:supp-precision}
+Under Assumption~\ref{ass:supp-precision}, any solution of the row-wise Dantzig program satisfies
+\[
+ \norm{\widehat\omega_k-\omega_{k,h}}_{\infty}=O_p(\mu_n),
+ \qquad
+ \norm{\widehat\omega_k-\omega_{k,h}}_1
+ =O_p(s_{\omega,k}\mu_n).
+\]
+\end{theorem}
+
+\begin{proof}
+Write $H=H_h$, $\widehat H=\widehat H_{\mathrm{eff}}(\widehat\beta)$,
+$\omega=\omega_{k,h}$, and $u=\widehat\omega_k-\omega$.
+Because $H\omega=e_k$,
+\[
+ \norm{\widehat H\omega-e_k}_{\infty}
+ \leq\norm{\widehat H-H}_{\max}\norm{\omega}_1
+ \leq C_{\omega}\delta_{n,h}\leq\mu_n.
+\]
+Thus $\omega$ is feasible. The $\ell_1$ objective implies
+$\norm{u_{T^c}}_1\leq\norm{u_T}_1$ for $T=\operatorname{supp}(\omega)$, and therefore
+$\norm{u}_1\leq2s_{\omega,k}\norm{u}_{\infty}$.
+Since both $\widehat\omega_k$ and $\omega$ are feasible,
+$\norm{\widehat Hu}_{\infty}\leq2\mu_n$. Hence
+\begin{align*}
+ \norm{u}_{\infty}
+ &\leq\norm{H^{-1}}_{L_1}\norm{Hu}_{\infty}\\
+ &\leq C_{\Omega}
+ \{\norm{(H-\widehat H)u}_{\infty}+\norm{\widehat Hu}_{\infty}\}\\
+ &\leq C_{\Omega}\{2s_{\omega,k}\delta_{n,h}\norm{u}_{\infty}+2\mu_n\}.
+\end{align*}
+The first term is absorbed because $s_{\omega,k}\delta_{n,h}=o(1)$.
+This proves the $\ell_{\infty}$ rate, and the cone bound gives the $\ell_1$ rate.
+\end{proof}
+
+\subsection{Cluster Bahadur representation}\label{supp:bahadur-proof}
+
+\begin{theorem}[Bahadur representation]\label{thm:supp-bahadur}
+Under Assumptions~\ref{ass:supp-estimation}--\ref{ass:supp-expansion},
+\[
+ \sqrt n(\widetilde\beta_k-\beta_{h,k}^{\star})
+ =\frac1{\sqrt n}\sum_{i=1}^n
+ \omega_{k,h}^{\mathsf T}S_{i,h}(\beta_h^{\star})+o_p(1).
+\]
+\end{theorem}
+
+\begin{proof}
+Let $g^{\star}=g_{n,h}(\beta_h^{\star})$ and
+$\Delta=\widehat\beta-\beta_h^{\star}$. By
+\eqref{eq:supp-score-expansion},
+\begin{align*}
+ \widetilde\beta_k-\beta_{h,k}^{\star}
+ &=e_k^{\mathsf T}\Delta
+ -\widehat\omega_k^{\mathsf T}
+ (g^{\star}+H_h\Delta+r_{n,h})\\
+ &=-\omega_{k,h}^{\mathsf T}g^{\star}+R_{1k}+R_{2k}+R_{3k},
+\end{align*}
+where
+\begin{align*}
+ R_{1k}&=-(\widehat\omega_k-\omega_{k,h})^{\mathsf T}g^{\star},\\
+ R_{2k}&=(e_k-H_h\widehat\omega_k)^{\mathsf T}\Delta,\\
+ R_{3k}&=-\widehat\omega_k^{\mathsf T}r_{n,h}.
+\end{align*}
+Theorem~\ref{thm:supp-estimation} and Theorem~\ref{thm:supp-precision} imply
+\[
+ |R_{1k}|=O_p(s_{\omega,k}\mu_n\lambda_n).
+\]
+Moreover,
+\[
+ \norm{e_k-H_h\widehat\omega_k}_{\infty}
+ \leq\norm{e_k-\widehat H\widehat\omega_k}_{\infty}
+ +\norm{\widehat H-H_h}_{\max}\norm{\widehat\omega_k}_1
+ =O_p(\mu_n),
+\]
+so $|R_{2k}|=O_p(\mu_ns\lambda_n)$. Finally,
+$|R_{3k}|=O_p(\mathfrak t_{n,h})$ because
+$\norm{\widehat\omega_k}_1=O_p(1)$.
+The scaling in Assumption~\ref{ass:supp-expansion} makes each remainder
+$o_p(n^{-1/2})$. Since
+$g^{\star}=-n^{-1}\sum_iS_{i,h}(\beta_h^{\star})$, the result follows.
+\end{proof}
+
+\subsection{Normal approximation and studentisation}\label{supp:normality-proof}
+
+\begin{theorem}[Normality and variance consistency]\label{thm:supp-normality}
+Under Assumptions~\ref{ass:supp-estimation}--\ref{ass:supp-variance},
+\[
+ \frac{\sqrt n(\widetilde\beta_k-\beta_{h,k}^{\star})}{\sigma_k}
+ \rightsquigarrow N(0,1),
+ \qquad
+ \widehat\sigma_k^2\overset{p}{\longrightarrow}\sigma_k^2.
+\]
+If additionally $\sqrt n h^2\to0$, the statistic may be centred at
+$\beta_k^{\star}$.
+\end{theorem}
+
+\begin{proof}
+The Lyapunov ratio for the independent triangular array
+$\{\xi_{ik,h}:i=1,\ldots,n\}$ is bounded by
+\[
+ \frac{\sum_i\E|\xi_{ik,h}|^{2+\nu}}
+ \{\sum_i\Var(\xi_{ik,h})\}^{1+\nu/2}
+ \leq C n^{-\nu/2}\to0.
+\]
+The cluster central limit theorem and Theorem~\ref{thm:supp-bahadur} therefore give the first assertion for $\beta_{h,k}^{\star}$.
+Theorem~\ref{thm:supp-target} and $\sqrt n h^2\to0$ permit replacement by $\beta_k^{\star}$.
+
+For variance consistency, write
+$\widehat\xi_{ik}=\widehat\omega_k^{\mathsf T}(\widehat S_i-\overline S)$ and
+$\xi_{ik,h}=\omega_{k,h}^{\mathsf T}S_{i,h}^{\star}$. Before empirical centring,
+\begin{align*}
+ \widehat\omega_k^{\mathsf T}\widehat S_i-\xi_{ik,h}
+ &=(\widehat\omega_k-\omega_{k,h})^{\mathsf T}S_{i,h}^{\star}
+ +\widehat\omega_k^{\mathsf T}(\widehat S_i-S_{i,h}^{\star}).
+\end{align*}
+The average square of the first term is
+$O_p(s_{\omega,k}^2\mu_n^2\log p)=o_p(1)$ under coordinatewise cluster-score moment bounds; the average square of the second is $o_p(1)$ by \eqref{eq:supp-score-plugin}. Empirical centring changes the average squared difference by $o_p(1)$. Consequently,
+$n^{-1}\sum_i(\widehat\xi_{ik}-\xi_{ik,h})^2=o_p(1)$.
+The cluster law of large numbers gives
+$n^{-1}\sum_i\xi_{ik,h}^2\to_p\sigma_k^2$, proving variance consistency.
+\end{proof}
+
+\subsection{A feasible asymptotic regime}\label{supp:feasible}
+
+\begin{proposition}[Non-empty scaling region]\label{prop:supp-feasible}
+Let $s$ and $s_{\omega,k}$ be bounded, $h=n^{-1/3}$,
+$\lambda_n=\sqrt{\log(p)/n}$,
+\[
+ \eta_{n,h}=O_p(\lambda_n/h),\qquad
+ \mathfrak t_{n,h}=O_p(\lambda_n^2/h),\qquad
+ \log p=o(n^{1/6}),
+\]
+and
+$\delta_{n,h}=\sqrt{\log(p)/(nh)}+h^2+\eta_{n,h}$,
+$\mu_n\asymp\delta_{n,h}$. Then all scaling conditions in
+Assumptions~\ref{ass:supp-precision}--\ref{ass:supp-variance}, except the model-specific score plug-in statement \eqref{eq:supp-score-plugin}, are mutually compatible.
+\end{proposition}
+
+\begin{proof}
+Under $h=n^{-1/3}$,
+\[
+ \sqrt{\frac{\log p}{nh}}=n^{-1/3}\sqrt{\log p},
+ \quad h^2=n^{-2/3},
+ \quad \frac{\lambda_n}{h}=n^{-1/6}\sqrt{\log p}.
+\]
+Thus $\mu_n=O_p(n^{-1/6}\sqrt{\log p})$. It follows that
+\[
+ \sqrt n\,\mu_n\lambda_n=O_p(n^{-1/6}\log p),
+ \quad
+ \mu_n\sqrt{\log p}=O_p(n^{-1/6}\log p),
+\]
+and
+\[
+ \sqrt n\,\mathfrak t_{n,h}
+ =O_p(n^{-1/6}\log p).
+\]
+All tend to zero when $\log p=o(n^{1/6})$. In addition,
+$\sqrt n h^2=n^{-1/6}\to0$ and
+$\mu_n^2\log p=O_p(n^{-1/3}(\log p)^2)=o_p(1)$.
+\end{proof}
+

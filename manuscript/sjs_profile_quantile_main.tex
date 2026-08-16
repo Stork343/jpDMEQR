@@ -1,0 +1,54 @@
+\documentclass[APA,STIX1COL]{WileyNJDv5}
+
+\articletype{Original Article}
+\received{00}
+\revised{00}
+\accepted{00}
+
+\hypersetup{hidelinks,pdftitle={Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression with Many Small Clusters},pdfauthor={Jian Hou, Tan Meng, and Maozai Tian}}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Heff}{H_{\mathrm{eff}}}
+\newcommand{\Oeff}{\Omega_{\mathrm{eff}}}
+\newcommand{\supp}{Supporting Information}
+\newcommand{\pending}{\textit{pending}}
+
+\begin{document}
+
+\title{Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression with Many Small Clusters}
+
+\author[1]{Jian Hou}
+\author[1]{Tan Meng}
+\author[1]{Maozai Tian}
+
+\authormark{Hou et al.}
+\titlemark{Debiased profile inference for mixed-effects quantile regression}
+
+\address[1]{\orgdiv{School of Statistics}, \orgname{Renmin University of China}, \orgaddress{\city{Beijing}, \country{China}}}
+
+\corres{Correspondence: Jian Hou, School of Statistics, Renmin University of China, Beijing, China. Email: houjian@ruc.edu.cn}
+
+\abstract[Abstract]{High-dimensional longitudinal studies combine sparse fixed effects, within-cluster dependence, and a large collection of cluster-specific nuisance parameters. We develop a regularised profile framework for quantile regression when the number of independent clusters diverges, cluster sizes remain bounded, and the dimension of the fixed-effect vector can exceed the number of clusters. The inferential target is an unsmoothed ridge-profile population parameter, so the target does not depend on the computational bandwidth. Convolution smoothing is used to compute the estimator and estimate local curvature. Profiling the complete ridge-regularised cluster criterion yields an exact score based on the original fixed-effect design and a Schur-complement Hessian containing an additional ridge-curvature term. Row-wise Dantzig inversion of this effective Hessian and a one-step correction produce coordinate-wise debiased estimators. We formulate target-approximation and estimation bounds, a cluster-level Bahadur representation, asymptotic normality, and a consistent sandwich variance estimator under a non-empty bandwidth--sparsity regime. The numerical design evaluates estimation and inference without empirical coverage calibration. The proposed application uses the longitudinal GSE65391 paediatric systemic lupus erythematosus study, with continuous complement C3 as the response and whole-blood expression profiles as high-dimensional predictors.}
+
+\keywords{clustered data; convolution smoothing; debiased inference; high-dimensional statistics; mixed-effects model; profile M-estimation; quantile regression}
+
+\maketitle
+
+\noindent\textit{Working-draft status.} This version completes the structural rewrite in the Scandinavian Journal of Statistics/Wiley NJD format and replaces the previous empirical study. The exact profile calculus and the theorem implications under the stated high-level assumptions are closed. Primitive empirical-process verification, the corrected simulation run, and the GSE65391 numerical analysis remain to be completed; no numerical result is imputed or calibrated in this draft.
+
+\input{sections/main_01_introduction}
+\input{sections/main_02_model}
+\input{sections/main_03_inference}
+\input{sections/main_04_theory}
+\input{sections/main_05_simulation}
+\input{sections/main_06_application}
+\input{sections/main_07_discussion}
+\input{sections/main_08_acknowledgements}
+\input{sections/main_09_conflict}
+\input{sections/main_10_data_availability}
+\input{sections/main_11_supporting_information}

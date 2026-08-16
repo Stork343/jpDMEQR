@@ -1,4 +1,14 @@
 ^\.DS_Store$
+^\.github$
+^AGENTS\.md$
+^PROJECT_STATUS\.md$
+^CHANGELOG_SJS_RECONSTRUCTION\.md$
+^Makefile$
+^config$
+^data$
+^docs$
+^manuscript$
+^results$
+^scripts$
 ^code_v2$
 ^jss-article-tex$
-^\.github$

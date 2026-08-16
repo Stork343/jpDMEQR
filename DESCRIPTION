@@ -1,13 +1,18 @@
 Package: jpDMEQR
 Type: Package
-Title: Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression
-Version: 0.1.1
+Title: Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression
+Version: 0.2.0
 Authors@R: person(given = "Jian", family = "Hou", role = c("aut", "cre"), email = "houjian@ruc.edu.cn")
 Author: Jian Hou [aut, cre]
 Maintainer: Jian Hou <houjian@ruc.edu.cn>
-Description: Implements cluster-adjusted screening, jointly penalised estimation,
-    and debiased inference for high-dimensional mixed-effects quantile
-    regression with smoothed block coordinate descent.
+Description: Research implementation for regularised profile estimation and
+    coordinate-wise debiased inference in high-dimensional mixed-effects
+    quantile regression with many independent, small clusters. The repository
+    retains the original jointly penalised implementation for provenance and
+    adds a correctness-first reference implementation of the exact profile
+    score, Schur-complement effective Hessian, row-wise Dantzig inversion, and
+    cluster sandwich variance used in the Scandinavian Journal of Statistics
+    reconstruction.
 License: GPL (>= 3)
 URL: https://github.com/Stork343/jpDMEQR
 BugReports: https://github.com/Stork343/jpDMEQR/issues
@@ -19,13 +24,27 @@ Imports:
     stats,
     utils
 Suggests:
+    AnnotationDbi,
     BGLR,
     Biobase,
     CVXR,
+    data.table,
+    digest,
+    dplyr,
+    future.apply,
     GEOquery,
+    ggplot2,
     glmmLasso,
+    illuminaHumanv4.db,
+    limma,
     lqmm,
-    testthat (>= 3.0.0)
+    matrixStats,
+    peakRAM,
+    purrr,
+    readr,
+    testthat (>= 3.0.0),
+    tidyr,
+    yaml
 VignetteBuilder: utils
 Config/testthat/edition: 3
 NeedsCompilation: no

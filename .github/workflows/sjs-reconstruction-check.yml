@@ -1,0 +1,46 @@
+name: SJS reconstruction checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  syntax-and-geometry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+      - name: Install test dependency
+        shell: Rscript {0}
+        run: |
+          install.packages("testthat", repos = "https://cloud.r-project.org")
+      - name: Parse all R files and scripts
+        shell: Rscript {0}
+        run: |
+          files <- c(
+            list.files("R", pattern = "\\.R$", full.names = TRUE),
+            list.files("scripts", pattern = "\\.R$", recursive = TRUE, full.names = TRUE),
+            list.files("tests/testthat", pattern = "\\.R$", full.names = TRUE)
+          )
+          invisible(lapply(files, parse))
+          message("Parsed ", length(files), " R files.")
+      - name: Run exact profile-geometry audit
+        run: Rscript scripts/simulation/00_validate_profile_geometry.R
+      - name: Run v2 unit tests
+        shell: Rscript {0}
+        run: |
+          testthat::test_file("tests/testthat/test-profile-v2-geometry.R")
+          testthat::test_file("tests/testthat/test-simulation-v2-errors.R")
+      - name: Check required research files
+        run: |
+          test -f AGENTS.md
+          test -f docs/METHOD_SPECIFICATION.md
+          test -f docs/SIMULATION_PROTOCOL.md
+          test -f docs/EMPIRICAL_PROTOCOL_GSE65391.md
+          test -f docs/BENCHMARK_MATRIX.md
+          test -f config/simulation_main.csv
+          test -f manuscript/sjs_profile_quantile_main.tex
+          test -f manuscript/sjs_profile_quantile_supplement.tex

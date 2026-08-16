@@ -1,0 +1,151 @@
+\section{Theoretical properties}\label{sec:theory}
+
+This section states the working theorem system for the rebuilt estimator. Detailed proofs and the remaining proof-audit items are organised in the \supp. The assumptions are intentionally expressed at the cluster-profile level. Primitive sufficient conditions for random-intercept and random-intercept--slope designs are then used to verify the profile regularity bounds.
+
+\subsection{Assumptions}\label{subsec:assumptions}
+
+Let $S_h=\{k:\beta_{h,k}^{\star}\neq0\}$ denote the support of the smoothed profile target and let $s=\sup_{h\leq h_0}|S_h|$. We assume that $s$ is finite or grows slowly; approximate sparsity can be handled by adding the usual tail-approximation term. For a vector $v$, write $\|v\|_0$ for its number of nonzero entries, and for a matrix $M$, write $\|M\|_{\max}=\max_{k\ell}|M_{k\ell}|$.
+
+\begin{assumption}[Clusters and moments]\label{ass:clusters}
+The clusters $D_1,\ldots,D_n$ are independent and identically distributed after conditioning on prespecified design strata. Cluster sizes satisfy $2\leq m_i\leq m_{\max}<\infty$, and $q$ is fixed. The coordinates of $X_{ij}$ and $Z_{ij}$ have uniformly bounded sub-Gaussian norms. The cluster influence variables defined in \eqref{eq:influence} have uniformly bounded $(2+\nu)$ moments for some $\nu>0$.
+\end{assumption}
+
+\begin{assumption}[Working nuisance penalty and kernel]\label{ass:kernel}
+The eigenvalues of $\Lambda$ lie in $[c_{\Lambda},C_{\Lambda}]$ for fixed positive constants. The kernel $K$ is symmetric, bounded, Lipschitz, compactly supported, integrates to one, and has finite nonzero second moment. The bandwidth satisfies $h\to0$ and $nh/\log p\to\infty$.
+\end{assumption}
+
+\begin{assumption}[Profile target and local curvature]\label{ass:curvature}
+The unsmoothed profile risk $R$ has a unique minimiser $\beta^{\star}$. The smoothed risk $R_h$ has a unique local minimiser $\beta_h^{\star}$ in a neighbourhood $\mathcal N$ of $\beta^{\star}$. Its effective Hessian $H_h$ has eigenvalues bounded above, and it obeys a restricted eigenvalue condition: for all $\Delta$ in the cone $\|\Delta_{S_h^c}\|_1\leq3\|\Delta_{S_h}\|_1$,
+\[
+ \Delta^{\mathsf T}H_h\Delta\geq\kappa\|\Delta\|_2^2
+\]
+for a constant $\kappa>0$ uniformly in sufficiently small $h$.
+\end{assumption}
+
+\begin{assumption}[Second-order profile approximation]\label{ass:approximation}
+Uniformly for $\beta\in\mathcal N$, smoothing the complete cluster criterion satisfies
+\[
+ \|\nabla R_h(\beta)-\partial R(\beta)\|_{\infty}\leq C h^2,
+ \qquad
+ \|\nabla^2R_h(\beta)-H_0(\beta)\|_{\max}\leq C h^2,
+\]
+where $\partial R$ denotes the locally selected population subgradient and $H_0$ is a nonsingular limiting profile curvature. A sufficient condition is that the conditional cluster distribution induces twice continuously differentiable profiled residual densities near zero and that the ridge profile map is locally Lipschitz.
+\end{assumption}
+
+\begin{assumption}[Sparsity and effective inverse]\label{ass:sparsity}
+The smoothed profile target is uniformly sparse with $s=o(n/\log p)$. The inverse effective information satisfies $\|H_h^{-1}\|_{L_1}\leq C_{\Omega}$. For every targeted coordinate $k\in\mathcal K$, $\omega_{k,h}=H_h^{-1}e_k$ satisfies $\|\omega_{k,h}\|_1\leq C_{\omega}$ and $\|\omega_{k,h}\|_0\leq s_{\omega,k}$. The minimum diagonal asymptotic variance is bounded away from zero. Weak $\ell_r$ row sparsity can replace exact support sparsity, with the usual change from $s_{\omega,k}\mu_n$ to an $\ell_r$ approximation bound.
+\end{assumption}
+
+\begin{assumption}[Empirical profile regularity]\label{ass:empirical}
+Let $\lambda_n=C_{\lambda}\sqrt{\log(p)/n}$. With probability tending to one,
+\begin{align*}
+ \|g_{n,h}(\beta_h^{\star})\|_{\infty}&\leq \lambda_n/2,\\
+ \|\widehat H_{\mathrm{eff}}(\widehat\beta)-H_h\|_{\max}&\leq C\delta_{n,h},
+\end{align*}
+where
+\begin{equation}\label{eq:delta}
+ \delta_{n,h}=\sqrt{\frac{\log p}{nh}}+h^2+\eta_{n,h}.
+\end{equation}
+The term $\eta_{n,h}$ controls the plug-in effect from evaluating the profile Hessian at $(\widehat\beta,\widehat\gamma)$ rather than at the population profile. In addition, for $\Delta=\widehat\beta-\beta_h^{\star}$,
+\begin{equation}\label{eq:taylor-remainder}
+ \left\|
+ g_{n,h}(\widehat\beta)-g_{n,h}(\beta_h^{\star})
+ -H_h\Delta
+ \right\|_{\infty}
+ =O_p(\mathfrak t_{n,h}).
+\end{equation}
+The sequences satisfy $\delta_{n,h}\to0$ and $\sqrt n\,\mathfrak t_{n,h}\to0$ under the scaling stated in Theorem~\ref{thm:bahadur}.
+\end{assumption}
+
+Assumption~\ref{ass:empirical} isolates the only model-specific empirical-process step. The score is bounded and therefore concentrates at the ordinary cluster rate. The Hessian contains $K_h$, producing the factor $(nh)^{-1/2}$. The plug-in term must be controlled by local, averaged kernel stability; using only the global bound $\sup|K_h'|=O(h^{-2})$ is too crude and can create an empty bandwidth regime.
+
+\subsection{Target approximation and penalised estimation}\label{subsec:target-theory}
+
+\begin{theorem}[Target approximation]\label{thm:target}
+Under Assumptions~\ref{ass:kernel}--\ref{ass:approximation}, suppose the local inverse profile curvature has uniformly bounded row sums. Then, for all sufficiently small $h$,
+\begin{equation}\label{eq:target-rate}
+ \|\beta_h^{\star}-\beta^{\star}\|_{\infty}\leq C h^2.
+\end{equation}
+If $\beta_h^{\star}-\beta^{\star}$ is supported on a set of order $s$, then
+$\|\beta_h^{\star}-\beta^{\star}\|_2\leq C\sqrt{s}\,h^2$.
+\end{theorem}
+
+Theorem~\ref{thm:target} separates the inferential target from the numerical smoothing parameter. It also identifies the undersmoothing requirement needed to transfer a root-$n$ limit from $\beta_h^{\star}$ to $\beta^{\star}$.
+
+\begin{theorem}[Penalised profile estimation]\label{thm:estimation}
+Suppose Assumptions~\ref{ass:clusters}--\ref{ass:empirical} hold, and choose $\lambda_{\beta}\asymp\lambda_n$. Then
+\begin{equation}\label{eq:estimation-rates}
+ \|\widehat\beta-\beta_h^{\star}\|_1=O_p(s\lambda_n),
+ \qquad
+ \|\widehat\beta-\beta_h^{\star}\|_2=O_p(\sqrt{s}\lambda_n).
+\end{equation}
+Consequently,
+\[
+ \|\widehat\beta-\beta^{\star}\|_2
+ =O_p\!\left(\sqrt{\frac{s\log p}{n}}+\sqrt{s}\,h^2\right).
+\]
+\end{theorem}
+
+The proof uses the basic inequality for the profiled convex criterion, score concentration at $\beta_h^{\star}$, and restricted curvature of the effective Hessian. No sure-screening event is required. If outcome-guided screening is used for computational reasons, it must be performed on independent clusters or incorporated explicitly into the inferential target.
+
+\subsection{Effective precision and Bahadur representation}\label{subsec:bahadur}
+
+Set $\mu_n=C_{\mu}\delta_{n,h}$ in \eqref{eq:dantzig-row}. Standard Dantzig arguments give the following row-wise result.
+
+\begin{theorem}[Effective precision row]\label{thm:precision}
+Under Assumptions~\ref{ass:curvature}, \ref{ass:sparsity}, and \ref{ass:empirical}, if $s_{\omega,k}\mu_n=o(1)$, then for each fixed $k\in\mathcal K$,
+\begin{equation}\label{eq:precision-rate}
+ \|\widehat\omega_k-\omega_{k,h}\|_{\infty}=O_p(\mu_n),
+ \qquad
+ \|\widehat\omega_k-\omega_{k,h}\|_1=O_p(s_{\omega,k}\mu_n).
+\end{equation}
+\end{theorem}
+
+\begin{theorem}[Cluster Bahadur representation]\label{thm:bahadur}
+Suppose Assumptions~\ref{ass:clusters}--\ref{ass:empirical} hold. If, for a fixed $k\in\mathcal K$,
+\begin{equation}\label{eq:remainder-conditions}
+ \sqrt n\,\mu_n s\lambda_n\to0,
+ \qquad
+ s_{\omega,k}\mu_n\sqrt{\log p}\to0,
+ \qquad
+ \sqrt n\,\mathfrak t_{n,h}\to0,
+\end{equation}
+then
+\begin{equation}\label{eq:bahadur}
+ \sqrt n(\widetilde\beta_k-\beta_{h,k}^{\star})
+ =\frac{1}{\sqrt n}\sum_{i=1}^n
+ \omega_{k,h}^{\mathsf T}S_{i,h}(\beta_h^{\star})+o_p(1).
+\end{equation}
+If additionally $\sqrt n h^2\to0$, the left-hand side in \eqref{eq:bahadur} may be centred at $\beta_k^{\star}$.
+\end{theorem}
+
+The three conditions in \eqref{eq:remainder-conditions} correspond to approximate Hessian inversion multiplied by the $\ell_1$ estimation error, precision-row estimation multiplied by the high-dimensional score, and nonlinear profile-score remainder, respectively. They replace incompatible conditions obtained from a global third-derivative bound.
+
+\begin{theorem}[Asymptotic normality and variance consistency]\label{thm:normality}
+Under the conditions of Theorem~\ref{thm:bahadur}, suppose additionally that $\sqrt n h^2\to0$ and
+\[
+ \sigma_{k,h}^2=\Var\{\omega_{k,h}^{\mathsf T}S_{i,h}(\beta_h^{\star})\}
+ \to\sigma_k^2\in(0,\infty).
+\]
+Then
+\begin{equation}\label{eq:normality}
+ \frac{\sqrt n(\widetilde\beta_k-\beta_k^{\star})}{\sigma_k}
+ \rightsquigarrow N(0,1),
+ \qquad
+ \widehat\sigma_k^2\overset{p}{\longrightarrow}\sigma_k^2.
+\end{equation}
+Hence the interval in \eqref{eq:ci} has asymptotic coverage $1-\alpha$ for each prespecified coordinate.
+\end{theorem}
+
+\subsection{A non-empty bandwidth--sparsity regime}\label{subsec:feasible}
+
+The high-level conditions above are meaningful only if they can hold simultaneously. One conservative sufficient regime is useful for this purpose. Suppose $s$ and $s_{\omega,k}$ are bounded, $h=n^{-1/3}$,
+\begin{equation}\label{eq:feasible-regime}
+ \log p=o(n^{1/6}),
+ \qquad
+ \eta_{n,h}=O_p(\lambda_n/h),
+ \qquad
+ \mathfrak t_{n,h}=O_p(\lambda_n^2/h).
+\end{equation}
+Then $nh/\log p\to\infty$, $\sqrt n h^2=n^{-1/6}\to0$, and every term in \eqref{eq:remainder-conditions} tends to zero. This regime permits polynomial dimensional growth and slower sub-exponential growth. It is intentionally conservative; sharper local empirical-process arguments may weaken the exponent. Its purpose is to demonstrate feasibility and to prevent the theorem from being stated over an empty asymptotic set.
+

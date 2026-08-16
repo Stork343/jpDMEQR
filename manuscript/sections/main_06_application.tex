@@ -1,0 +1,65 @@
+\section{Longitudinal SLE transcriptomic study}\label{sec:application}
+
+\subsection{Scientific objective and data source}\label{subsec:data-source}
+
+The empirical study uses GEO accession GSE65391 \cite{banchereau2016}. The source study followed 158 paediatric SLE patients for up to four years and obtained 924 SLE whole-blood expression samples, together with healthy samples and technical replicates used in the study's batch assessment. Expression was measured on the Illumina HumanHT-12 V4.0 array. Public sample metadata include subject and visit identifiers, cumulative follow-up time, demographic variables, treatment, disease activity, complement C3 and C4, and other continuous laboratory measurements.
+
+The provisional primary response is log-transformed serum complement C3 at the same visit as the expression measurement. It is used only if a preregistered audit confirms sufficient subjects, repeated visits, observed positive values, distributional variation, and batch overlap. The primary quantiles are $\tau=0.25$, $0.50$, and $0.75$; $\tau=0.10$ is a sensitivity analysis when the effective sample size and local-curvature diagnostics support it. Whole-blood transcript abundance is the high-dimensional predictor block. The scientific question is whether transcriptomic associations with C3 vary across the conditional distribution after accounting for persistent subject heterogeneity, follow-up time, demographics, treatment, and batch.
+
+This dataset is aligned with the many-small-cluster design: the independent sampling units are subjects, each subject contributes a bounded number of visits, the response is continuous, and the same visits carry high-dimensional expression and clinical measurements. The application is observational. Coefficients describe associations with the selected regularised profile target and are not interpreted as causal treatment effects.
+
+\subsection{Data acquisition, outcome gate, and cohort construction}\label{subsec:preprocessing}
+
+The analysis begins from the processed GEO Series Matrix. The non-normalised R1/R2 files and raw archive form an optional preprocessing sensitivity analysis. Every downloaded file is recorded with its source URL, size, timestamp, and MD5 checksum. Sample identifiers are reconciled across expression and metadata before any modelling operation.
+
+The outcome model uses SLE biological visits only. Healthy samples and technical replicates are retained for quality control and batch diagnostics. The C3 analysis proceeds only if at least 100 subjects and 500 visits remain, at least 75 subjects have two or more eligible visits, missingness among SLE expression visits does not exceed 30\%, retained values are positive, and the response has adequate distinct values and no dominant point mass. A failed gate stops the pipeline; it does not automatically replace C3 by C4, SLEDAI, or another outcome.
+
+Expression preprocessing is outcome-blind within each outer training set. Array-control probes, unannotated probes, and probes mapping to multiple genes are removed. When multiple probes map uniquely to the same gene, the primary rule retains the probe with the largest training-subject median absolute deviation; a median-across-probes rule is a sensitivity analysis. Genes with negligible training variation are removed, and the 5000 genes with largest training-subject median absolute deviation are retained in the main high-dimensional analysis, with 2000 and 10000 as sensitivity values. Predictors are centred and scaled using training-subject quantities and applied unchanged to validation subjects.
+
+Always-included fixed covariates are centred cumulative follow-up time, age, sex, race/ancestry categories, treatment indicators, and source batch. Their penalty weights are zero. Because contemporaneous SLEDAI can be interpreted either as a broad severity adjustment or as a variable on a biological pathway, two prespecified models are reported: Model A excludes SLEDAI, and Model B adds it. The high-dimensional gene coefficients receive the $\ell_1$ penalty. The primary nuisance design is a subject-specific random intercept. A random intercept with centred-time slope is fitted as a sensitivity analysis only when the visit distribution, within-subject time variation, nuisance-block condition numbers, and convergence rate support it.
+
+\begin{table}[t]
+\caption{GSE65391 data audit and analysis plan. Known source-level quantities are separated from outcome-specific quantities produced by the reproducible audit.}\label{tab:data-audit}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+Quantity & Value or rule \\
+\midrule
+Public accession & GSE65391 \\
+SLE patients in source study & 158 \\
+SLE expression samples in source study & 924 \\
+Platform & Illumina HumanHT-12 V4.0 expression beadchip \\
+Provisional primary response & $\log(C3)$ at the same visit, conditional on the outcome gate \\
+Primary quantiles & $0.25$, $0.50$, and $0.75$; $0.10$ sensitivity if supported \\
+Eligible analysis subjects & At least two eligible visits; final count \pending \\
+Eligible analysis visits & Positive observed C3 and usable expression; final count \pending \\
+High-dimensional block & Gene-level expression after control and annotation filtering \\
+Unsupervised dimension filter & Top 5000 genes by training-subject median absolute deviation \\
+Always-included covariates & Time, age, sex, race, treatment, and batch; SLEDAI sensitivity \\
+Cluster effects & Random intercept primary; centred-time slope sensitivity \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Confirmatory and exploratory estimands}\label{subsec:estimands}
+
+The analysis separates two inferential layers. The confirmatory layer uses a small, versioned list of immune-module scores fixed before C3 associations are examined. At minimum, the list contains reproducible interferon-response signatures; plasmablast and neutrophil modules are included only when their exact gene definitions and source versions are frozen. Module scores enter as always-included fixed covariates and receive profile confidence intervals at each target quantile.
+
+The exploratory layer estimates sparse gene-level coefficients. Its first task is subject-held-out prediction and selection stability. Its second task is coordinate inference for a small number of genes selected on independent subjects. In each repeated split, one subject group performs selection and the other performs profile inference; roles are exchanged and estimates are combined by a prespecified rule. The same subjects are not used both to select a gene and to form its ordinary pointwise Wald interval. A large same-sample list of debiased $p$-values followed by an ordinary false-discovery-rate correction is not part of the primary analysis.
+
+For each quantile, the working model is
+\begin{equation}\label{eq:application-model}
+ Q_{\tau}(Y_{ij}\mid C_{ij},G_{ij},b_i)
+ =C_{ij}^{\mathsf T}\alpha_{\tau}
+ +G_{ij}^{\mathsf T}\beta_{\tau}
+ +Z_{ij}^{\mathsf T}b_{i,\tau},
+\end{equation}
+where $Y_{ij}=\log(C3_{ij})$, $C_{ij}$ contains always-included clinical and module covariates, and $G_{ij}$ contains the filtered gene-expression features. The inferential target for $\beta_{\tau}$ is the regularised profile parameter induced by the chosen $\Lambda$.
+
+\subsection{Subject-level validation and reporting}\label{subsec:application-reporting}
+
+Prediction and tuning use repeated five-fold cross-validation with subjects, rather than visits, as the splitting unit. Every preprocessing object that depends on the empirical feature distribution is estimated inside the outer training set. Fixed-effect and nuisance penalties are selected by inner subject-level validation; the Dantzig program uses the smallest feasible value on the frozen tolerance grid. New-subject prediction uses fixed effects and does not use unavailable latent random effects.
+
+Comparators include pooled high-dimensional quantile Lasso, longitudinal penalised quantile estimating equations, low-dimensional linear quantile mixed modelling for clinical/module covariates, and the proposed profile method. The primary predictive outputs are held-out pinball loss, paired loss differences, skill relative to intercept-only and pooled predictions, empirical quantile calibration, selected model size, stability, runtime, and convergence. Inferential outputs include confirmatory module estimates across quantiles, clinical-coordinate sensitivity, split-sample exploratory genes, Dantzig feasibility, and profile-identity diagnostics.
+
+The principal figure will display confirmatory module coefficients across quantiles with cluster-robust 95\% intervals. A second figure will show subject-held-out pinball-loss differences relative to the pooled procedure. Numerical entries are intentionally absent from this structural draft and will be generated only after the data audit, preprocessing rules, estimator, and outer folds are frozen.
+

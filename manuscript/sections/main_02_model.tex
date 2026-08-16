@@ -1,0 +1,143 @@
+\section{Model, profile target and penalised estimation}\label{sec:model}
+
+\subsection{Clustered quantile model and asymptotic regime}\label{subsec:model}
+
+Let $D_i=\{(Y_{ij},X_{ij},Z_{ij}):j=1,\ldots,m_i\}$ denote cluster $i$, where $i=1,\ldots,n$. The clusters are independent, while observations within a cluster may be arbitrarily dependent subject to the moment conditions stated later. Here $Y_{ij}\in\R$ is the response, $X_{ij}\in\R^p$ is the fixed-effect design, and $Z_{ij}\in\R^q$ is the design for cluster-specific effects. We consider
+\begin{equation}\label{eq:structural-model}
+ Q_{\tau}(Y_{ij}\mid X_i,Z_i,b_i)
+ =X_{ij}^{\mathsf T}\beta^0+Z_{ij}^{\mathsf T}b_i,
+ \qquad \tau\in(0,1),
+\end{equation}
+where $X_i=(X_{i1},\ldots,X_{im_i})^{\mathsf T}$ and $Z_i=(Z_{i1},\ldots,Z_{im_i})^{\mathsf T}$. The dimension $q$ is fixed. The number of clusters $n$ tends to infinity, the cluster sizes satisfy $m_i\leq m_{\max}<\infty$, and $p=p_n$ may exceed $n$. The structural representation in \eqref{eq:structural-model} motivates the working criterion, but the primary inferential target is the regularised profile parameter defined below.
+
+We use the number of independent clusters, rather than the total number of observations, as the asymptotic sample size. Each cluster receives equal weight by averaging its within-cluster loss. This convention avoids changing the population target when cluster sizes vary. Observation-weighted versions are obtained by replacing $m_i^{-1}$ by prespecified bounded weights; their profile calculus is identical after carrying the weights through the definitions.
+
+The fixed-effect vector may include a fixed number of always-included coefficients, such as an intercept, time, treatment, or demographic covariates. In computation these coordinates receive penalty weight zero. To keep notation concise, the theoretical statements write a single vector $\beta$ and impose sparsity on its high-dimensional component.
+
+\subsection{An unsmoothed regularised profile target}\label{subsec:target}
+
+For a positive-definite $q\times q$ working penalty matrix $\Lambda$, define the cluster criterion
+\begin{equation}\label{eq:cluster-unsmoothed}
+ \ell_i(\beta,\gamma;D_i)
+ =\frac{1}{m_i}\sum_{j=1}^{m_i}
+ \rho_{\tau}\!\left(Y_{ij}-X_{ij}^{\mathsf T}\beta-Z_{ij}^{\mathsf T}\gamma\right)
+ +\frac{1}{2}\gamma^{\mathsf T}\Lambda\gamma,
+\end{equation}
+where $\rho_{\tau}(u)=u\{\tau-I(u<0)\}$. Since $\Lambda$ is positive definite, the nuisance minimiser
+\begin{equation}\label{eq:gamma-target}
+ \gamma_i^{\dagger}(\beta;D_i)
+ =\argmin_{\gamma\in\R^q}\ell_i(\beta,\gamma;D_i)
+\end{equation}
+exists and is unique for every $\beta$ and realised cluster. The population profile risk is
+\begin{equation}\label{eq:population-profile-risk}
+ R(\beta)=\E\left[\ell_i\{\beta,\gamma_i^{\dagger}(\beta;D_i);D_i\}\right],
+ \qquad
+ \beta^{\star}=\argmin_{\beta\in\R^p}R(\beta).
+\end{equation}
+The expectation is over an independent generic cluster. The parameter $\beta^{\star}$ depends on $\Lambda$ but not on a smoothing bandwidth. We call it the regularised profile parameter.
+
+The distinction between $\beta^{\star}$ and $\beta^0$ is substantive. When cluster sizes remain bounded, the data contain limited information about each $b_i$. The ridge subproblem replaces the unidentified or unstable cluster effect by a regularised cluster projection, and $\beta^{\star}$ records the fixed-effect component of the resulting population projection. Equality $\beta^{\star}=\beta^0$ requires an orthogonality condition,
+\begin{equation}\label{eq:structural-orthogonality}
+ \E\left[\partial_{\beta}
+ \ell_i\{\beta^0,\gamma_i^{\dagger}(\beta^0;D_i);D_i\}\right]=0,
+\end{equation}
+interpreted through a subgradient when needed. This condition can hold for within-cluster centred slope covariates in a random-intercept location-shift model, but it does not generally hold for the intercept, between-cluster covariates, random-slope misspecification, or arbitrary shrinkage. We therefore state all inferential results for $\beta^{\star}$ and discuss structural interpretation coordinate by coordinate.
+
+The matrix $\Lambda$ may be written as $\lambda_{\gamma}G^{-1}$, where $G$ is a prespecified positive-definite working correlation matrix for the cluster effects. The main theory treats $\Lambda$ as fixed with bounded eigenvalues. Estimating a low-dimensional $G$ is a practically useful extension, but its uncertainty must be included in the profile linearisation before it is used in the main inferential theorem.
+
+\subsection{Convolution smoothing and the penalised estimator}\label{subsec:estimation}
+
+Let $K$ be a symmetric second-order probability density supported on a compact interval, and set $K_h(u)=h^{-1}K(u/h)$. The convolution-smoothed check loss is
+\begin{equation}\label{eq:smoothed-loss}
+ \rho_{\tau,h}(u)=\int \rho_{\tau}(u-hv)K(v)\,dv.
+\end{equation}
+Write $\psi_{\tau,h}(u)=\rho_{\tau,h}'(u)$ and $\phi_{\tau,h}(u)=\rho_{\tau,h}''(u)=K_h(u)$. The smoothed cluster criterion is
+\begin{equation}\label{eq:cluster-smoothed}
+ \ell_{i,h}(\beta,\gamma;D_i)
+ =\frac{1}{m_i}\sum_{j=1}^{m_i}
+ \rho_{\tau,h}\!\left(Y_{ij}-X_{ij}^{\mathsf T}\beta-Z_{ij}^{\mathsf T}\gamma\right)
+ +\frac{1}{2}\gamma^{\mathsf T}\Lambda\gamma.
+\end{equation}
+Its population profile minimiser is denoted by $\beta_h^{\star}$. The estimator is
+\begin{equation}\label{eq:penalised-estimator}
+ (\widehat\beta,\widehat\gamma)
+ \in\argmin_{\beta\in\R^p,\,\gamma_i\in\R^q}
+ \left[
+ \frac{1}{n}\sum_{i=1}^n\ell_{i,h}(\beta,\gamma_i;D_i)
+ +\lambda_{\beta}\sum_{k=1}^p w_k|\beta_k|
+ \right],
+\end{equation}
+where $w_k=0$ for always-included coordinates and $w_k=1$ for penalised coordinates. The criterion is jointly convex. The $\gamma_i$ subproblems are strictly convex and separable across clusters.
+
+A block algorithm alternates between a proximal-gradient update for $\beta$ and low-dimensional Newton updates for the $\gamma_i$. Because the objective is convex, standard sufficient-decrease and vanishing-inner-error conditions are enough for convergence to a global minimiser \cite{tseng2009,razaviyayn2013,wright2015}. We do not require global strong convexity of the fixed-effect block. Algorithm~\ref{alg:estimation} records the implementation used for the corrected numerical study.
+
+\begin{algorithm}[t]
+\caption{Smoothed regularised profile estimation}\label{alg:estimation}
+\begin{algorithmic}[1]
+\State Initialise $\beta^{(0)}$ by pooled smoothed quantile Lasso and set $\gamma_i^{(0)}=0$.
+\For{$t=0,1,\ldots$}
+  \State Update $\beta$ by proximal gradient/FISTA for the criterion in \eqref{eq:penalised-estimator} with $\gamma=\gamma^{(t)}$.
+  \For{$i=1,\ldots,n$ in parallel}
+    \State Update $\gamma_i$ by damped Newton minimisation of $\ell_{i,h}(\beta^{(t+1)},\gamma_i;D_i)$.
+  \EndFor
+  \State Stop when the relative objective change and the maximum KKT residual are below tolerance.
+\EndFor
+\State Return $(\widehat\beta,\widehat\gamma)$ and retain the complete optimisation log.
+\end{algorithmic}
+\end{algorithm}
+
+The theoretical order $\lambda_{\beta}\asymp\sqrt{\log(p)/n}$ supplies a reference grid. In finite samples, $\lambda_{\beta}$ and a scalar $\lambda_{\gamma}$ are selected by subject-level cross-validation, never by splitting individual observations within a cluster. The bandwidth is parameterised as $h=c_h\widehat s_Yn^{-1/3}$, where $\widehat s_Y$ is a robust response scale estimated within the training clusters and $c_h$ is varied over a fixed sensitivity grid. This order is compatible with the explicit feasible regime in Section~\ref{subsec:feasible}.
+
+\subsection{Exact profile score and effective Hessian}\label{subsec:profile-calculus}
+
+For each $\beta$, let
+\begin{equation}\label{eq:empirical-gamma-profile}
+ \widehat\gamma_i(\beta)
+ =\argmin_{\gamma\in\R^q}\ell_{i,h}(\beta,\gamma;D_i)
+\end{equation}
+and define
+\begin{equation}\label{eq:empirical-profile-loss}
+ L_{n,h}^{\mathrm{prof}}(\beta)
+ =\frac{1}{n}\sum_{i=1}^n
+ \ell_{i,h}\{\beta,\widehat\gamma_i(\beta);D_i\}.
+\end{equation}
+Let $r_i(\beta)=Y_i-X_i\beta-Z_i\widehat\gamma_i(\beta)$,
+\begin{equation}\label{eq:WiBiAi}
+ W_i(\beta)=\frac{1}{m_i}\diag\{\phi_{\tau,h}(r_{ij}(\beta))\}_{j=1}^{m_i},
+ \quad
+ B_i(\beta)=Z_i^{\mathsf T}W_i(\beta)Z_i+\Lambda,
+\end{equation}
+\begin{equation}\label{eq:Ai}
+ A_i(\beta)=B_i(\beta)^{-1}Z_i^{\mathsf T}W_i(\beta)X_i,
+ \qquad
+ \widetilde X_i(\beta)=X_i-Z_iA_i(\beta).
+\end{equation}
+
+\begin{proposition}[Exact profile calculus]\label{prop:profile-calculus}
+For every $\beta$ at which the smoothed criterion is twice differentiable, the gradient of the complete ridge-profile loss is
+\begin{equation}\label{eq:profile-score}
+ g_{n,h}(\beta)=\nabla L_{n,h}^{\mathrm{prof}}(\beta)
+ =-\frac{1}{n}\sum_{i=1}^n\frac{1}{m_i}
+ X_i^{\mathsf T}\psi_{\tau,h}\{r_i(\beta)\}.
+\end{equation}
+Its Hessian is
+\begin{align}
+ \widehat H_{\mathrm{eff}}(\beta)
+ &=\frac{1}{n}\sum_{i=1}^n
+ \left[
+ X_i^{\mathsf T}W_iX_i
+ -X_i^{\mathsf T}W_iZ_iB_i^{-1}Z_i^{\mathsf T}W_iX_i
+ \right] \label{eq:heff-schur}\\
+ &=\frac{1}{n}\sum_{i=1}^n
+ \left[
+ \widetilde X_i^{\mathsf T}W_i\widetilde X_i
+ +A_i^{\mathsf T}\Lambda A_i
+ \right]. \label{eq:heff-ridge-identity}
+\end{align}
+All matrices on the right-hand sides are evaluated at $\beta$. The two expressions are identical.
+\end{proposition}
+
+The proof follows from the envelope theorem, implicit differentiation of the $\gamma_i$ stationarity equations, and direct algebra; it is given in the \supp. Proposition~\ref{prop:profile-calculus} fixes the object used throughout the paper. The score in \eqref{eq:profile-score} uses $X_i$, not $\widetilde X_i$. Residualisation enters the Hessian through the derivative of the profile map. When the Schur complement is written as a weighted Gram matrix of $\widetilde X_i$, the positive term $A_i^{\mathsf T}\Lambda A_i$ is indispensable. It vanishes only when the nuisance penalty vanishes or the fixed and nuisance designs are locally orthogonal.
+
+The implementation evaluates three identities before any simulation or data analysis is accepted: a finite-difference check of \eqref{eq:profile-score}, a finite-difference check of \eqref{eq:heff-schur}, and a direct numerical comparison of \eqref{eq:heff-schur} with \eqref{eq:heff-ridge-identity}. These checks isolate algebraic errors from asymptotic approximation errors.
+
