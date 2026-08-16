@@ -128,7 +128,7 @@ validate_profile_geometry_v2 <- function(y,
                                          nuisance_control = list(
                                            reltol = 1e-13,
                                            maxit = 1000L,
-                                           grad_tol = 1e-9
+                                           grad_tol = 1e-8
                                          )) {
   analytic <- profile_components_v2(
     y, X, Z, cluster_id, beta, tau, h, lambda_gamma,
