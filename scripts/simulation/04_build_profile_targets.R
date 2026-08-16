@@ -55,7 +55,7 @@ for (ii in seq_len(nrow(cfg_df))) {
     fits[[rr]] <- fit_obj
     diag_index <- diag_index + 1L
     all_diagnostics[[diag_index]] <- data.frame(
-      experiment_id = cfg$experiment_id, repeat = rr, seed = seed,
+      experiment_id = cfg$experiment_id, repeat_id = rr, seed = seed,
       n_population = n_population, target_dimension = length(target_columns),
       converged = fit_obj$converged, kkt_residual = fit_obj$kkt_residual,
       profile_identity_error = fit_obj$fit$components$profile_identity_error,
