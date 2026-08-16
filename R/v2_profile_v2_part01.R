@@ -142,6 +142,11 @@ profile_cluster_gamma_v2 <- function(y_i,
   reltol <- control$reltol %||% 1e-11
   maxit <- control$maxit %||% 300L
   grad_tol <- control$grad_tol %||% 1e-8
+  newton_maxit <- control$newton_maxit %||% 100L
+  armijo <- control$armijo %||% 1e-4
+  backtrack_factor <- control$backtrack_factor %||% 0.5
+  max_backtrack <- control$max_backtrack %||% 50L
+  min_step <- control$min_step %||% 1e-14
 
   objective <- function(gamma) {
     r <- y_i - as.numeric(X_i %*% beta) - as.numeric(Z_i %*% gamma)
@@ -152,7 +157,16 @@ profile_cluster_gamma_v2 <- function(y_i,
     r <- y_i - as.numeric(X_i %*% beta) - as.numeric(Z_i %*% gamma)
     as.numeric(-crossprod(Z_i, psi_smooth_v2(r, tau, h)) / m_i + Lambda %*% gamma)
   }
+  hessian <- function(gamma) {
+    r <- y_i - as.numeric(X_i %*% beta) - as.numeric(Z_i %*% gamma)
+    w <- phi_smooth_v2(r, tau, h) / m_i
+    crossprod(Z_i, Z_i * w) + Lambda
+  }
 
+  # BFGS supplies a stable starting point across the compact-support smoothing
+  # regions. Because Lambda is positive definite, every nuisance Hessian is
+  # positive definite; a damped Newton refinement then enforces the strict
+  # stationarity tolerance needed by the profile-geometry audit.
   opt <- stats::optim(
     par = gamma_init,
     fn = objective,
@@ -160,19 +174,78 @@ profile_cluster_gamma_v2 <- function(y_i,
     method = "BFGS",
     control = list(reltol = reltol, maxit = maxit)
   )
-  grad <- gradient(opt$par)
-  converged <- identical(opt$convergence, 0L) && max(abs(grad)) <= grad_tol
+
+  gamma <- as.numeric(opt$par)
+  value <- objective(gamma)
+  grad <- gradient(gamma)
+  newton_iterations <- 0L
+  newton_backtracks <- 0L
+  newton_last_step <- NA_real_
+  newton_line_search_failed <- FALSE
+
+  if (all(is.finite(gamma)) && is.finite(value) && all(is.finite(grad))) {
+    for (iteration in seq_len(newton_maxit)) {
+      if (max(abs(grad)) <= grad_tol) break
+
+      H <- hessian(gamma)
+      direction <- tryCatch(
+        -as.numeric(solve_linear_pd_v2(H, grad, name = "nuisance Hessian")),
+        error = function(e) rep(NA_real_, q)
+      )
+      slope <- sum(grad * direction)
+      if (any(!is.finite(direction)) || !is.finite(slope) || slope >= 0) {
+        direction <- -grad
+        slope <- -sum(grad^2)
+      }
+
+      step <- 1
+      accepted <- FALSE
+      for (bt in 0:max_backtrack) {
+        candidate <- gamma + step * direction
+        candidate_value <- objective(candidate)
+        if (is.finite(candidate_value) &&
+            candidate_value <= value + armijo * step * slope) {
+          accepted <- TRUE
+          break
+        }
+        step <- step * backtrack_factor
+        if (step < min_step) break
+      }
+
+      newton_backtracks <- newton_backtracks + bt
+      if (!accepted) {
+        newton_line_search_failed <- TRUE
+        break
+      }
+
+      gamma <- candidate
+      value <- candidate_value
+      grad <- gradient(gamma)
+      newton_iterations <- iteration
+      newton_last_step <- step
+      if (any(!is.finite(grad))) break
+    }
+  }
+
+  grad <- gradient(gamma)
+  gradient_max <- max(abs(grad))
+  converged <- all(is.finite(gamma)) && is.finite(value) &&
+    all(is.finite(grad)) && gradient_max <= grad_tol
 
   list(
-    gamma = as.numeric(opt$par),
-    objective = as.numeric(opt$value),
+    gamma = gamma,
+    objective = as.numeric(value),
     gradient = grad,
-    gradient_max = max(abs(grad)),
+    gradient_max = gradient_max,
     converged = converged,
     optim_convergence = opt$convergence,
     optim_message = opt$message %||% "",
     function_evaluations = unname(opt$counts[["function"]] %||% NA_integer_),
-    gradient_evaluations = unname(opt$counts[["gradient"]] %||% NA_integer_)
+    gradient_evaluations = unname(opt$counts[["gradient"]] %||% NA_integer_),
+    newton_iterations = newton_iterations,
+    newton_backtracks = newton_backtracks,
+    newton_last_step = newton_last_step,
+    newton_line_search_failed = newton_line_search_failed
   )
 }
 
