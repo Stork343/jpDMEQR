@@ -12,13 +12,35 @@ install_bioc <- as_bool(get_arg("bioc", "true"))
 install_optional <- as_bool(get_arg("optional", "true"))
 
 cran_required <- c(
-  "quantreg", "CVXR", "testthat", "data.table", "yaml", "ggplot2",
-  "dplyr", "tidyr", "readr", "purrr", "matrixStats", "digest", "lqmm"
+  "quantreg",
+  "CVXR",
+  "clarabel",
+  "ECOSolveR",
+  "scs",
+  "testthat",
+  "data.table",
+  "yaml",
+  "jsonlite",
+  "digest",
+  "ggplot2",
+  "dplyr",
+  "tidyr",
+  "readr",
+  "purrr",
+  "matrixStats",
+  "lqmm"
 )
-cran_optional <- c("pbapply", "future.apply", "qs", "arrow", "peakRAM")
+cran_optional <- c(
+  "pbapply",
+  "future.apply",
+  "parallelly",
+  "qs",
+  "arrow",
+  "peakRAM"
+)
 
 repos <- getOption("repos")
-if (is.null(repos) || repos[["CRAN"]] == "@CRAN@") {
+if (is.null(repos) || is.na(repos[["CRAN"]]) || repos[["CRAN"]] == "@CRAN@") {
   options(repos = c(CRAN = "https://cloud.r-project.org"))
 }
 
@@ -28,21 +50,78 @@ install_missing_cran <- function(pkgs) {
     message("Installing CRAN packages: ", paste(missing, collapse = ", "))
     install.packages(missing, dependencies = TRUE)
   }
+  still_missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
+  if (length(still_missing)) {
+    stop(
+      "Required CRAN packages remain unavailable: ",
+      paste(still_missing, collapse = ", ")
+    )
+  }
   invisible(missing)
 }
 
 install_missing_cran(cran_required)
-if (install_optional) install_missing_cran(cran_optional)
-
-if (install_bioc) {
-  if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-  bioc <- c("GEOquery", "Biobase", "limma", "AnnotationDbi", "illuminaHumanv4.db")
-  missing_bioc <- bioc[!vapply(bioc, requireNamespace, logical(1), quietly = TRUE)]
-  if (length(missing_bioc)) {
-    message("Installing Bioconductor packages: ", paste(missing_bioc, collapse = ", "))
-    BiocManager::install(missing_bioc, ask = FALSE, update = FALSE)
+if (install_optional) {
+  optional_missing <- cran_optional[
+    !vapply(cran_optional, requireNamespace, logical(1), quietly = TRUE)
+  ]
+  if (length(optional_missing)) {
+    message(
+      "Installing optional CRAN packages: ",
+      paste(optional_missing, collapse = ", ")
+    )
+    try(
+      install.packages(optional_missing, dependencies = TRUE),
+      silent = FALSE
+    )
   }
 }
 
+if (install_bioc) {
+  if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+  }
+  bioc_required <- c(
+    "GEOquery",
+    "Biobase",
+    "limma",
+    "AnnotationDbi",
+    "illuminaHumanv4.db"
+  )
+  missing_bioc <- bioc_required[
+    !vapply(bioc_required, requireNamespace, logical(1), quietly = TRUE)
+  ]
+  if (length(missing_bioc)) {
+    message(
+      "Installing Bioconductor packages: ",
+      paste(missing_bioc, collapse = ", ")
+    )
+    BiocManager::install(
+      missing_bioc,
+      ask = FALSE,
+      update = FALSE
+    )
+  }
+  still_missing_bioc <- bioc_required[
+    !vapply(bioc_required, requireNamespace, logical(1), quietly = TRUE)
+  ]
+  if (length(still_missing_bioc)) {
+    stop(
+      "Required Bioconductor packages remain unavailable: ",
+      paste(still_missing_bioc, collapse = ", ")
+    )
+  }
+}
+
+solvers <- CVXR::installed_solvers()
+approved <- intersect(c("CLARABEL", "ECOS", "SCS"), solvers)
+if (!length(approved)) {
+  stop(
+    "CVXR is installed but no approved solver is available. Installed solvers: ",
+    paste(solvers, collapse = ", ")
+  )
+}
+
 message("Dependency check complete.")
+message("Approved CVXR solvers: ", paste(approved, collapse = ", "))
 print(sessionInfo())
