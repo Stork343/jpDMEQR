@@ -19,9 +19,12 @@ source(file.path(root, "scripts", "simulation", "_run_registry_helpers.R"))
 message("Refreshing manifests for the remaining adapters on commit ",
         current_commit_v2(root), " ...")
 sys.source(file.path(root, "scripts", "benchmarks",
+                     "accept_patch_adapters.R"), envir = environment())
+sys.source(file.path(root, "scripts", "benchmarks",
                      "accept_remaining_benchmarks.R"), envir = environment())
 sys.source(file.path(root, "scripts", "benchmarks",
                      "accept_oracle_adapters.R"), envir = environment())
 sys.source(file.path(root, "scripts", "benchmarks",
-                     "accept_patch_adapters.R"), envir = environment())
-message("All non-SQR acceptance manifests refreshed.")
+                     "accept_sqr_debiased_iid.R"), envir = environment())
+message("All acceptance manifests refreshed on commit ",
+        current_commit_v2(root), ".")
