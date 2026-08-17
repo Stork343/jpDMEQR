@@ -300,17 +300,17 @@ fit_benchmark_by_id_v2 <- function(method_id, train, tau, target_coords,
       train, tau, target_coords, tuning, seed,
       random_slope = ncol(train$Z) >= 2L, control = control
     ),
-    `BIAS-ADJ-LQMM` = benchmark_not_implemented_v2(
-      method_id,
-      "Faithful Battagliola et al. bias-adjusted implementation and fidelity evidence are required."
+    `BIAS-ADJ-LQMM` = fit_benchmark_bias_adj_lqmm_v2(
+      train, tau, target_coords, tuning, seed, context = context,
+      control = control
     ),
-    `DOUBLE-PEN-QLMM` = benchmark_not_implemented_v2(
-      method_id,
-      "Faithful Li, Liu and Luo double-penalised QLMM implementation and fidelity evidence are required."
+    `DOUBLE-PEN-QLMM` = fit_benchmark_double_pen_qlmm_v2(
+      train, tau, target_coords, tuning, seed, context = context,
+      control = control
     ),
-    `QGEE-SCAD` = benchmark_not_implemented_v2(
-      method_id,
-      "Faithful Zu et al. quantile GEE/SCAD implementation and fidelity evidence are required."
+    `QGEE-SCAD` = fit_benchmark_qgee_scad_v2(
+      train, tau, target_coords, tuning, seed, context = context,
+      control = control
     ),
     `QIF-SEE` = benchmark_not_implemented_v2(
       method_id,

@@ -194,7 +194,9 @@ solve_dantzig_row_v2 <- function(H,
       constraints
     )
     # CVXR >= 1.9 renamed the exported solver entry point from solve to
-    # psolve; keep both spellings working across installed versions.
+    # psolve and changed the return contract: psolve returns the optimal
+    # objective value, with the solution/status obtained via value() and
+    # status(). Older CVXR returned a result object with $status/$getValue.
     cvxr_solve <- if ("psolve" %in% getNamespaceExports("CVXR")) {
       getExportedValue("CVXR", "psolve")
     } else {
@@ -204,15 +206,21 @@ solve_dantzig_row_v2 <- function(H,
       do.call(cvxr_solve, c(list(problem = problem, solver = solver), solver_opts)),
       error = function(e) e
     )
-
     if (inherits(solved, "error")) {
       attempts[[ii]] <- data.frame(mu = mu, status = "solver_error",
                                    residual = NA_real_, message = conditionMessage(solved))
       next
     }
-
-    status <- solved$status %||% "unknown"
-    omega <- tryCatch(as.numeric(solved$getValue(omega_var)), error = function(e) NULL)
+    if (is.numeric(solved) && length(solved) == 1L &&
+        "value" %in% getNamespaceExports("CVXR") &&
+        "status" %in% getNamespaceExports("CVXR")) {
+      # CVXR >= 1.9 contract: solved is the objective value.
+      status <- tryCatch(CVXR::status(problem), error = function(e) "unknown")
+      omega <- tryCatch(as.numeric(CVXR::value(omega_var)), error = function(e) NULL)
+    } else {
+      status <- solved$status %||% "unknown"
+      omega <- tryCatch(as.numeric(solved$getValue(omega_var)), error = function(e) NULL)
+    }
     if (is.null(omega) || length(omega) != p || any(!is.finite(omega))) {
       attempts[[ii]] <- data.frame(mu = mu, status = status,
                                    residual = NA_real_, message = "No finite solution returned")
