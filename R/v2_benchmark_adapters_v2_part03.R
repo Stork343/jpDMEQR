@@ -312,9 +312,9 @@ fit_benchmark_by_id_v2 <- function(method_id, train, tau, target_coords,
       train, tau, target_coords, tuning, seed, context = context,
       control = control
     ),
-    `QIF-SEE` = benchmark_not_implemented_v2(
-      method_id,
-      "Faithful Bhattacharya et al. QIF smooth-threshold implementation and fidelity evidence are required."
+    `QIF-SEE` = fit_benchmark_qif_see_v2(
+      train, tau, target_coords, tuning, seed, context = context,
+      control = control
     ),
     `BAYES-MIXED-LASSO` = benchmark_not_implemented_v2(
       method_id,
