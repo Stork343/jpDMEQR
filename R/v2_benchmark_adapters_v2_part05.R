@@ -78,7 +78,7 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
     lqmm::lqmm(
       fixed = fixed_formula,
       random = ~1,
-      group = cluster,
+      group = df[["cluster"]],
       tau = tau,
       data = df,
       nK = nK,
@@ -176,7 +176,7 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
     df_boot$y <- y_boot
     step1b <- tryCatch(
       lqmm::lqmm(
-        fixed = fixed_formula, random = ~1, group = cluster, tau = tau,
+        fixed = fixed_formula, random = ~1, group = df_boot[["cluster"]], tau = tau,
         data = df_boot, nK = nK,
         type = control$lqmm_type %||% "normal",
         control = lqmm::lqmmControl(

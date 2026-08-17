@@ -27,7 +27,7 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
     lqmm::lqmm(
       fixed = fixed_formula,
       random = random_formula,
-      group = cluster,
+      group = df[["cluster"]],
       tau = tau,
       data = df,
       covariance = "pdSymm",
@@ -40,8 +40,8 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
   if (inherits(fit, "error")) {
     return(benchmark_failure_v2("LQMM", "penalised_fit", conditionMessage(fit), elapsed))
   }
-  beta <- tryCatch(as.numeric(lqmm::fixef(fit)), error = function(e) NULL)
-  if (is.null(beta)) beta <- tryCatch(as.numeric(stats::coef(fit)$fixed), error = function(e) NULL)
+  # lqmm >= 1.5.8 removed the fixef export; coef() returns the fixed effects.
+  beta <- tryCatch(as.numeric(stats::coef(fit)$fixed), error = function(e) NULL)
   if (is.null(beta)) beta <- tryCatch(as.numeric(stats::coef(fit)), error = function(e) NULL)
   if (is.null(beta)) {
     return(benchmark_failure_v2("LQMM", "coefficient_extraction",
