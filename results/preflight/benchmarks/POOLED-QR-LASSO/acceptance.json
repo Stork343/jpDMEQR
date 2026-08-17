@@ -1,6 +1,6 @@
 {
   "method_id": "POOLED-QR-LASSO",
-  "commit_sha": "3e6d256f57df2d7385ef7e3cd66a287a3aa2b53a",
+  "commit_sha": "acb5c71538fc644b00b5fe10f0093e70cf327159",
   "reference_identifier": "quantreg::rq.fit.lasso",
   "unit_test_pass": true,
   "limiting_case_pass": true,
@@ -8,6 +8,6 @@
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|selection|prediction",
-  "created_utc": "2026-08-17 18:34:00 UTC",
+  "created_utc": "2026-08-17 18:42:02 UTC",
   "notes": "Pooled l1 quantile regression; no coverage claim."
 }

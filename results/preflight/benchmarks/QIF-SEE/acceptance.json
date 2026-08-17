@@ -1,6 +1,6 @@
 {
   "method_id": "QIF-SEE",
-  "commit_sha": "3e6d256f57df2d7385ef7e3cd66a287a3aa2b53a",
+  "commit_sha": "acb5c71538fc644b00b5fe10f0093e70cf327159",
   "reference_identifier": "Bhattacharya-Bhuiyan-Chatla-2026-10.1111/sjos.70077",
   "unit_test_pass": true,
   "limiting_case_pass": true,
@@ -8,6 +8,6 @@
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|selection|prediction",
-  "created_utc": "2026-08-17 18:33:27 UTC",
+  "created_utc": "2026-08-17 18:43:12 UTC",
   "notes": "QIF (Qu et al. 2000) + SEE (Ueki 2009), rqPen initial, BIC tuning; smoothing note in docs/benchmark_notes/QIF-SEE.md; status ok:TRUE"
 }
