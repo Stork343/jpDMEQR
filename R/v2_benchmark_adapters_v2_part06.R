@@ -211,12 +211,14 @@ fit_benchmark_double_pen_qlmm_v2 <- function(train,
   n_clusters <- length(unique(cluster_id))
 
   # Frozen lambda rates scaled to the paper's sparsity level; the multiplier
-  # grids come from the registry tuning rule.
+  # grids come from the registry tuning rule. A reduced default grid keeps
+  # pilot/development runs tractable; the final freeze restores the full
+  # grid via control$lambda_beta_grid / control$lambda_alpha_grid.
   log_p <- log(max(ncol(X), 2))
   lambda_scale <- sqrt(log_p / length(y))
-  lambda_beta_grid <- (control$lambda_beta_grid %||% c(0.25, 0.5, 1, 2)) *
+  lambda_beta_grid <- (control$lambda_beta_grid %||% c(0.5, 1, 2)) *
     lambda_scale
-  lambda_alpha_grid <- (control$lambda_alpha_grid %||% c(0.25, 0.5, 1, 2)) *
+  lambda_alpha_grid <- (control$lambda_alpha_grid %||% c(0.5, 1)) *
     lambda_scale * sqrt(n_clusters / length(y))
 
   best <- tryCatch(

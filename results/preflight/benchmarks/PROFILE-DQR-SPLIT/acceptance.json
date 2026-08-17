@@ -1,6 +1,6 @@
 {
   "method_id": "PROFILE-DQR-SPLIT",
-  "commit_sha": "acb5c71538fc644b00b5fe10f0093e70cf327159",
+  "commit_sha": "4a879c0076a518f5b3bfd6ae02d51896248625e1",
   "reference_identifier": "docs/BENCHMARK_IMPLEMENTATION_ACCEPTANCE.md#profile-dqr-split",
   "unit_test_pass": true,
   "limiting_case_pass": true,
@@ -8,6 +8,6 @@
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|selection|prediction|coverage",
-  "created_utc": "2026-08-17 18:43:19 UTC",
+  "created_utc": "2026-08-17 20:41:13 UTC",
   "notes": "Patch-provided adapter; disjoint role sets verified in tests."
 }

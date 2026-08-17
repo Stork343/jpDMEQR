@@ -1,7 +1,7 @@
 {
   "pass": true,
   "strict": true,
-  "commit_sha": "267f03eb35ceff64eaf0d858d2795bfab121cccd",
+  "commit_sha": "2102be943fdedf2ed521facc6540faf694d13f48",
   "branch": "gpt/simulation-freeze-resolution",
   "seed_count": 20,
   "case_count": 760,
@@ -28,5 +28,5 @@
     "identity": 3.33066907387547e-16,
     "nuisance": 1.15999232441766e-08
   },
-  "created_utc": "2026-08-17 17:20:24 UTC"
+  "created_utc": "2026-08-17 21:31:53 UTC"
 }

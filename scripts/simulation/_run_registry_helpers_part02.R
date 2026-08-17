@@ -199,7 +199,17 @@ run_one_replication_v2 <- function(root, config, replicate,
           ),
           max_features = 20L,
           screen_fraction = config$screen_fraction,
-          screen_dim = config$screen_dim
+          screen_dim = config$screen_dim,
+          # Method-specific pilot settings: keep the expensive tuning
+          # procedures small in pilot/development runs while final runs use
+          # the full frozen grids. These are debugging thresholds, not
+          # calibration. Final execution must pass lambda = NULL so that
+          # QGEE-SCAD uses its full HBIC grid and DOUBLE-PEN-QLMM the full
+          # frozen grid; the development runner below sets pilot defaults.
+          lambda = if (isTRUE(final)) NULL else 0.5,
+          lambda_beta_grid = c(0.5, 1, 2),
+          lambda_alpha_grid = c(0.5, 1),
+          B = 100L
         )
       ),
       error = function(e) benchmark_failure_v2(

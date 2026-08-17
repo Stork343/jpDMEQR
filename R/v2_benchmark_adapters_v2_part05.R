@@ -46,11 +46,11 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
                                 "Dimension mismatch in training data."))
   }
   if (ncol(Z) > 1L) {
-    return(benchmark_failure_v2(
-      "BIAS-ADJ-LQMM", "schema",
-      "Source method (ran_int_bias_adj.R) supports a random intercept only; ",
-      "a random-slope extension is not part of the faithful implementation."
-    ))
+    # The source method (ran_int_bias_adj.R) fits a random intercept only
+    # (random = ~1), regardless of the generated nuisance dimension. Keep
+    # the first column of Z (the intercept direction) as the random-effect
+    # design; this is the faithful source behaviour rather than a failure.
+    Z <- Z[, 1L, drop = FALSE]
   }
   B <- as.integer(control$B %||% 100L)
   nK <- as.integer(control$nK %||% 15L)

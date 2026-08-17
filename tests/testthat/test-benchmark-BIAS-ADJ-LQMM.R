@@ -43,16 +43,17 @@ testthat::test_that("BIAS-ADJ-LQMM adapter is deterministic and schema-conforman
   testthat::expect_true(all(is.finite(inf$beta_tilde)))
 })
 
-testthat::test_that("BIAS-ADJ-LQMM rejects random-slope designs (source scope)", {
-  # q=2 design: source method supports random intercept only.
+testthat::test_that("BIAS-ADJ-LQMM uses the intercept direction for q>1 designs", {
+  # q=2 design: the source method fits a random intercept only; the adapter
+  # must keep the first Z column and run (not fail).
   train <- make_clustered_train(seed = 303)
   train$Z <- cbind(1, train$time)
   tuning <- list(h = 0.5, lambda_beta = 0.1, lambda_gamma = 1,
                  mu_grid = c(0.3, 0.6, 1.2))
   ans <- fit_benchmark_bias_adj_lqmm_v2(train, 0.5, colnames(train$X)[1:3],
                                         tuning, seed = 1L, control = list(B = 10))
-  testthat::expect_equal(ans$status, "failed")
-  testthat::expect_match(ans$failure_stage, "schema")
+  testthat::expect_equal(ans$status, "ok")
+  testthat::expect_true(all(is.finite(ans$beta_tilde)))
 })
 
 testthat::test_that("BIAS-ADJ-LQMM two-step estimate matches manual pipeline", {
