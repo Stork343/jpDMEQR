@@ -9,6 +9,7 @@ root <- if (file.exists("R/profile_v2.R")) "." else
 source(file.path(root, "scripts", "00_source_v2.R"))
 source_v2_module(root, "profile_v2", envir = environment())
 source_v2_module(root, "simulation_v2", envir = environment())
+source_v2_module(root, "metrics_v2", envir = environment())
 source(file.path(root, "scripts", "simulation", "_run_registry_helpers.R"))
 
 cli <- parse_cli_args_v2(commandArgs(trailingOnly = TRUE))
