@@ -1,6 +1,6 @@
 {
   "method_id": "LQMM",
-  "commit_sha": "e6fbed19bf33a7a9b63d429c75017b5260603a7a",
+  "commit_sha": "3e6d256f57df2d7385ef7e3cd66a287a3aa2b53a",
   "reference_identifier": "Geraci-Bottai-2014-10.1007/s11222-013-9381-9",
   "unit_test_pass": true,
   "limiting_case_pass": true,
@@ -8,6 +8,6 @@
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|prediction|coverage_source_supported",
-  "created_utc": "2026-08-17 18:31:39 UTC",
+  "created_utc": "2026-08-17 18:34:00 UTC",
   "notes": "lqmm package adapter on common screened/oracle low-dimensional sets."
 }

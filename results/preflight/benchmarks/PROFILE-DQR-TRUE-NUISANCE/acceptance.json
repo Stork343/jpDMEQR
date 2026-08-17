@@ -1,6 +1,6 @@
 {
   "method_id": "PROFILE-DQR-TRUE-NUISANCE",
-  "commit_sha": "e6fbed19bf33a7a9b63d429c75017b5260603a7a",
+  "commit_sha": "3e6d256f57df2d7385ef7e3cd66a287a3aa2b53a",
   "reference_identifier": "docs/BENCHMARK_IMPLEMENTATION_ACCEPTANCE.md#profile-dqr-true-nuisance",
   "unit_test_pass": true,
   "limiting_case_pass": true,
@@ -8,6 +8,6 @@
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|prediction|coverage|oracle_gap",
-  "created_utc": "2026-08-17 18:22:05 UTC",
+  "created_utc": "2026-08-17 18:41:17 UTC",
   "notes": "Patch-provided oracle adapter; oracle property verified in tests."
 }

@@ -96,7 +96,8 @@ manifests <- list(
     reference_identifier = "docs/BENCHMARK_IMPLEMENTATION_ACCEPTANCE.md#profile-dqr-split",
     unit_test_pass = unit_pass,
     limiting_case_pass = identical(a_sp$status, "ok"),
-    fidelity_check_pass = a_sp$screening$overlap_count == 0L,
+    fidelity_check_pass = isTRUE(a_sp$status == "ok") &&
+      isTRUE(a_sp$screening$overlap_count == 0L),
     schema_check_pass = TRUE,
     deterministic_seed_pass = identical(a_sp$status, "ok"),
     allowed_metrics = "estimation|selection|prediction|coverage",

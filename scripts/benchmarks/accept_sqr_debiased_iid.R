@@ -67,7 +67,7 @@ for (ii in seq_len(nrow(fid_rows))) {
 repro_pass <- NA
 if (as_bool_cli_v2(commandArgs(trailingOnly = TRUE) |> (\(x) {
   hit <- grep("^--repro=", x, value = TRUE)
-  if (length(hit)) sub("^--repro=", "", hit[1]) else "true"
+  if (length(hit)) sub("^--repro=", "", hit[1]) else "false"
 })(), TRUE)) {
   B <- 200L
   covered <- logical(B)

@@ -249,7 +249,8 @@ fit_benchmark_profile_split_v2 <- function(train,
     screen_clusters = split$a,
     fit_clusters = split$b,
     selected_global = selected,
-    scores = scr$scores
+    scores = scr$scores,
+    overlap_count = length(intersect(split$a, split$b))
   )
   ans$target_scope <- "regularised_profile_independent_split"
   benchmark_add_metadata_v2(
