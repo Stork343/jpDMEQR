@@ -209,7 +209,7 @@ run_one_replication_v2 <- function(root, config, replicate,
           lambda = if (isTRUE(final)) NULL else 0.5,
           lambda_beta_grid = c(0.5, 1, 2),
           lambda_alpha_grid = c(0.5, 1),
-          B = 100L
+          B = if (isTRUE(final)) 100L else 25L
         )
       ),
       error = function(e) benchmark_failure_v2(
