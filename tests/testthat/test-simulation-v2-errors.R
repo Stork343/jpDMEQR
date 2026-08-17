@@ -10,8 +10,10 @@ testthat::test_that("quantile-centred error generators have the requested quanti
   for (tau in c(0.25, 0.5, 0.75)) {
     for (dist in distributions) {
       e <- r_quantile_centered_error_v2(120000L, tau, dist)
-      testthat::expect_lt(abs(as.numeric(stats::quantile(e, tau, names = FALSE))), 0.035,
-                          info = paste(dist, tau))
+      testthat::expect_true(
+        abs(as.numeric(stats::quantile(e, tau, names = FALSE))) < 0.035,
+        info = paste(dist, tau)
+      )
     }
   }
 })

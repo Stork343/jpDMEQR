@@ -42,6 +42,21 @@ validate_registry_contract_v2 <- function(root, config_path,
                                           registry_type = c("main", "pilot", "preflight")) {
   registry_type <- match.arg(registry_type)
   cfg <- read_simulation_registry_v2(config_path)
+  # Normalise column types from the CSV before any numeric/logical comparison.
+  numeric_cols <- intersect(c(
+    "n_clusters", "p", "s", "tau", "q", "rho_x", "signal", "copula_rho",
+    "sigma_b0", "sigma_b1", "rho_b", "x_b_corr", "nonlinear_re_strength",
+    "lambda_gamma", "h_multiplier", "screen_dim", "screen_fraction",
+    "target_coordinate_count", "workers", "replications"
+  ), names(cfg))
+  for (nm in numeric_cols) {
+    cfg[[nm]] <- suppressWarnings(as.numeric(as.character(cfg[[nm]])))
+  }
+  bool_cols <- intersect(c("heteroskedastic", "informative_size",
+                           "force_target_inclusion"), names(cfg))
+  for (nm in bool_cols) {
+    cfg[[nm]] <- tolower(as.character(cfg[[nm]])) %in% c("true", "1", "yes", "y")
+  }
   problems <- character()
   warnings <- character()
   add_problem <- function(x) problems <<- c(problems, x)
