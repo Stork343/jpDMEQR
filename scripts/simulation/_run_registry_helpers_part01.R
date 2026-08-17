@@ -75,6 +75,20 @@ hardware_manifest_v2 <- function() {
 
 prepare_analysis_data_v2 <- function(dat, config, seed) {
   dat <- fit_working_nuisance_design_v2(dat, config$fit_random_effects)
+  # For profile_mc scenarios the inferential target is defined on the frozen
+  # target submodel (active coordinates plus designated null controls), not
+  # on the full generated design. Restrict the analysis design to those
+  # columns so that the profile-MC asset covers every fitted column, as
+  # required by docs/SIMULATION_FREEZE_DECISIONS.md (R6). The DGP still
+  # generates the full design; only the fitted/inferred columns are the
+  # submodel.
+  if (identical(config$target_mode, "profile_mc")) {
+    target_columns <- population_target_columns_v2(config)
+    if (max(target_columns) > ncol(dat$X)) {
+      stop("Target submodel columns exceed the generated design.")
+    }
+    dat <- subset_features_v2(dat, target_columns)
+  }
   full_names <- colnames(dat$X)
   full_active <- dat$active
   target_names_global <- resolve_target_coordinates_v2(config, dat)
