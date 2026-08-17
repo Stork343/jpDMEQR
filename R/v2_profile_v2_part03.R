@@ -193,8 +193,15 @@ solve_dantzig_row_v2 <- function(H,
       CVXR::Minimize(CVXR::p_norm(omega_var, 1)),
       constraints
     )
+    # CVXR >= 1.9 renamed the exported solver entry point from solve to
+    # psolve; keep both spellings working across installed versions.
+    cvxr_solve <- if ("psolve" %in% getNamespaceExports("CVXR")) {
+      getExportedValue("CVXR", "psolve")
+    } else {
+      getExportedValue("CVXR", "solve")
+    }
     solved <- tryCatch(
-      do.call(CVXR::solve, c(list(object = problem, solver = solver), solver_opts)),
+      do.call(cvxr_solve, c(list(problem = problem, solver = solver), solver_opts)),
       error = function(e) e
     )
 

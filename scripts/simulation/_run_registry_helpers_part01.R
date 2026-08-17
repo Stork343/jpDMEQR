@@ -19,7 +19,8 @@ as_bool_cli_v2 <- function(x, default = FALSE) {
 
 current_commit_v2 <- function(root = ".") {
   ans <- tryCatch(
-    system2("git", c("-C", root, "rev-parse", "HEAD"), stdout = TRUE, stderr = FALSE),
+    system2("git", c("-C", shQuote(root), "rev-parse", "HEAD"),
+            stdout = TRUE, stderr = FALSE),
     error = function(e) character()
   )
   if (length(ans)) trimws(ans[1]) else "unknown"
@@ -27,7 +28,7 @@ current_commit_v2 <- function(root = ".") {
 
 current_branch_v2 <- function(root = ".") {
   ans <- tryCatch(
-    system2("git", c("-C", root, "rev-parse", "--abbrev-ref", "HEAD"),
+    system2("git", c("-C", shQuote(root), "rev-parse", "--abbrev-ref", "HEAD"),
             stdout = TRUE, stderr = FALSE),
     error = function(e) character()
   )
