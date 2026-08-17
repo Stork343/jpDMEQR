@@ -1,7 +1,6 @@
 # Deterministic acceptance tests for SQR-DEBIASED-IID (JMLR 22-1217 fidelity).
 
-root <- if (file.exists(file.path("scripts", "00_source_v2.R"))) "." else
-  normalizePath(file.path(testthat::test_path(), "../.."), mustWork = TRUE)
+root <- v2_require_root()
 source(file.path(root, "scripts", "00_source_v2.R"), local = FALSE)
 source_v2_module(root, "profile_v2", envir = .GlobalEnv)
 source_v2_module(root, "simulation_v2", envir = .GlobalEnv)
