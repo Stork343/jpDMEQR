@@ -1,0 +1,13 @@
+{
+  "method_id": "DOUBLE-PEN-QLMM",
+  "commit_sha": "076c2c3f05c2f86109787bb450f57addd06d2633",
+  "reference_identifier": "Li-Liu-Luo-2020-10.1007/s11424-020-9065-4",
+  "unit_test_pass": true,
+  "limiting_case_pass": true,
+  "fidelity_check_pass": true,
+  "schema_check_pass": true,
+  "deterministic_seed_pass": true,
+  "allowed_metrics": "estimation|selection|prediction",
+  "created_utc": "2026-08-17 18:17:21 UTC",
+  "notes": "Alternating L1 quantile regression (paper eq. 12); no inferential output; status ok:TRUE"
+}

@@ -1,0 +1,13 @@
+{
+  "method_id": "PROFILE-DQR-SPLIT",
+  "commit_sha": "076c2c3f05c2f86109787bb450f57addd06d2633",
+  "reference_identifier": "docs/BENCHMARK_IMPLEMENTATION_ACCEPTANCE.md#profile-dqr-split",
+  "unit_test_pass": true,
+  "limiting_case_pass": true,
+  "fidelity_check_pass": [],
+  "schema_check_pass": true,
+  "deterministic_seed_pass": true,
+  "allowed_metrics": "estimation|selection|prediction|coverage",
+  "created_utc": "2026-08-17 18:16:03 UTC",
+  "notes": "Patch-provided adapter; disjoint role sets verified in tests."
+}

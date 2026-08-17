@@ -1,0 +1,13 @@
+{
+  "method_id": "QGEE-SCAD",
+  "commit_sha": "076c2c3f05c2f86109787bb450f57addd06d2633",
+  "reference_identifier": "Zu-Lian-Green-Yu-2023-10.1080/01621459.2022.2128806",
+  "unit_test_pass": true,
+  "limiting_case_pass": true,
+  "fidelity_check_pass": true,
+  "schema_check_pass": true,
+  "deterministic_seed_pass": true,
+  "allowed_metrics": "estimation|selection|prediction|coverage_own_target",
+  "created_utc": "2026-08-17 18:17:22 UTC",
+  "notes": "Official geeVerse 0.3.1 reference implementation; status ok/warning:TRUE"
+}
