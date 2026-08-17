@@ -1,13 +1,13 @@
 {
-  "method_id": "DOUBLE-PEN-QLMM",
+  "method_id": "POOLED-QR-LASSO",
   "commit_sha": "e6fbed19bf33a7a9b63d429c75017b5260603a7a",
-  "reference_identifier": "Li-Liu-Luo-2020-10.1007/s11424-020-9065-4",
+  "reference_identifier": "quantreg::rq.fit.lasso",
   "unit_test_pass": true,
   "limiting_case_pass": true,
   "fidelity_check_pass": true,
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|selection|prediction",
-  "created_utc": "2026-08-17 18:23:12 UTC",
-  "notes": "Alternating L1 quantile regression (paper eq. 12); no inferential output; status ok:TRUE"
+  "created_utc": "2026-08-17 18:31:39 UTC",
+  "notes": "Pooled l1 quantile regression; no coverage claim."
 }

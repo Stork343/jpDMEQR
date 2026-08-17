@@ -1,6 +1,6 @@
 {
   "method_id": "BIAS-ADJ-LQMM",
-  "commit_sha": "076c2c3f05c2f86109787bb450f57addd06d2633",
+  "commit_sha": "e6fbed19bf33a7a9b63d429c75017b5260603a7a",
   "reference_identifier": "Battagliola-et-al-2022-10.1016/j.ecosta.2021.07.003",
   "unit_test_pass": true,
   "limiting_case_pass": true,
@@ -8,6 +8,6 @@
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|bias|prediction_optional|coverage_source_supported",
-  "created_utc": "2026-08-17 18:17:17 UTC",
+  "created_utc": "2026-08-17 18:23:09 UTC",
   "notes": "RW-bootstrap bias-adjusted LQMM faithful to ran_int_bias_adj.R; status ok:TRUE; finite:TRUE"
 }

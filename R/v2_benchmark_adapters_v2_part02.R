@@ -42,6 +42,7 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
   }
   beta <- tryCatch(as.numeric(lqmm::fixef(fit)), error = function(e) NULL)
   if (is.null(beta)) beta <- tryCatch(as.numeric(stats::coef(fit)$fixed), error = function(e) NULL)
+  if (is.null(beta)) beta <- tryCatch(as.numeric(stats::coef(fit)), error = function(e) NULL)
   if (is.null(beta)) {
     return(benchmark_failure_v2("LQMM", "coefficient_extraction",
                                 "Could not extract fixed effects.", elapsed))
