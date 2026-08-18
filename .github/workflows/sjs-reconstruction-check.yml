@@ -22,6 +22,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libuv1-dev r-cran-testthat
+      - name: Install R package dependencies
+        shell: Rscript {0}
+        run: |
+          options(repos = c(CRAN = "https://cloud.r-project.org"))
+          install.packages(
+            c("CVXR", "clarabel", "quantreg", "jsonlite", "digest",
+              "testthat", "data.table", "yaml", "Matrix", "ggplot2")
+          )
+          solvers <- CVXR::installed_solvers()
+          stopifnot(any(c("CLARABEL", "ECOS", "SCS") %in% solvers))
       - name: Parse all R files and scripts
         shell: Rscript {0}
         run: |
