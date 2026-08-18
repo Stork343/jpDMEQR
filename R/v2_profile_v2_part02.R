@@ -36,7 +36,11 @@ profile_components_v2 <- function(y,
   objective_values <- numeric(n)
   identity_errors <- numeric(n)
 
-  for (ii in seq_len(n)) {
+  # Per-cluster worker: pure function of (y_i, X_i, Z_i, beta, ...) with no
+  # shared state, so parallel execution is numerically identical to the
+  # sequential loop. Each cluster's nuisance solve is deterministic (BFGS +
+  # damped Newton; no global RNG dependence beyond the supplied seed).
+  cluster_worker <- function(ii) {
     idx <- ci$rows[[ii]]
     cname <- ci$levels[ii]
     y_i <- y[idx]
@@ -54,9 +58,7 @@ profile_components_v2 <- function(y,
     r_i <- y_i - as.numeric(X_i %*% beta) - as.numeric(Z_i %*% gamma_i)
     psi_i <- psi_smooth_v2(r_i, tau, h)
 
-    gamma_list[[ii]] <- gamma_i
-    residual_list[[ii]] <- r_i
-    nuisance_diagnostics[[ii]] <- data.frame(
+    diag_row <- data.frame(
       cluster = cname,
       m_i = m_i,
       converged = ng$converged,
@@ -66,10 +68,13 @@ profile_components_v2 <- function(y,
       gradient_evaluations = ng$gradient_evaluations,
       stringsAsFactors = FALSE
     )
-    objective_values[ii] <- mean(rho_smooth_v2(r_i, tau, h)) +
+    objective_i <- mean(rho_smooth_v2(r_i, tau, h)) +
       0.5 * drop(crossprod(gamma_i, Lambda %*% gamma_i))
-    cluster_scores[ii, ] <- as.numeric(-crossprod(X_i, psi_i) / m_i)
+    score_i <- as.numeric(-crossprod(X_i, psi_i) / m_i)
 
+    H_i <- NULL
+    H_identity_i <- NULL
+    identity_err_i <- NA_real_
     if (need_hessian) {
       w <- phi_smooth_v2(r_i, tau, h) / m_i
       WX <- X_i * w
@@ -84,10 +89,40 @@ profile_components_v2 <- function(y,
       X_tilde <- X_i - Z_i %*% A_i
       H_identity_i <- crossprod(X_tilde, X_tilde * w) +
         t(A_i) %*% Lambda %*% A_i
+      identity_err_i <- max(abs(H_i - H_identity_i))
+    }
+    list(
+      ii = ii,
+      gamma = gamma_i,
+      residual = r_i,
+      diag = diag_row,
+      objective = objective_i,
+      score = score_i,
+      H = H_i,
+      H_identity = H_identity_i,
+      identity_error = identity_err_i
+    )
+  }
 
-      H_sum <- H_sum + H_i
-      H_identity_sum <- H_identity_sum + H_identity_i
-      identity_errors[ii] <- max(abs(H_i - H_identity_i))
+  cluster_cores <- getOption("jpDMEQR.cluster_cores", 1L)
+  out <- if (cluster_cores > 1L && .Platform$OS.type != "windows" && n > 1L) {
+    parallel::mclapply(seq_len(n), cluster_worker,
+                       mc.cores = min(cluster_cores, n),
+                       mc.preschedule = FALSE)
+  } else {
+    lapply(seq_len(n), cluster_worker)
+  }
+  for (item in out) {
+    ii <- item$ii
+    gamma_list[[ii]] <- item$gamma
+    residual_list[[ii]] <- item$residual
+    nuisance_diagnostics[[ii]] <- item$diag
+    objective_values[ii] <- item$objective
+    cluster_scores[ii, ] <- item$score
+    if (need_hessian) {
+      H_sum <- H_sum + item$H
+      H_identity_sum <- H_identity_sum + item$H_identity
+      identity_errors[ii] <- item$identity_error
     }
   }
 

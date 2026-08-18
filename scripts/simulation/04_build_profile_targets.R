@@ -53,14 +53,13 @@ all_diagnostics <- list(); dd <- 0L
 
 build_target_for_config <- function(cfg, repeats_local, label = "profile_target") {
   target_columns <- population_target_columns_v2(cfg)
-  fits <- vector("list", repeats_local)
-  for (rr in seq_len(repeats_local)) {
+  run_one <- function(rr) {
     seed <- seed_from_id_v2(base_seed, paste0(cfg$experiment_id, "_", label), rr, "population-target")
     message(sprintf(
       "%s %s repeat %d/%d with %d population clusters",
       label, cfg$experiment_id, rr, repeats_local, n_population
     ))
-    fits[[rr]] <- approximate_profile_target_v2(
+    approximate_profile_target_v2(
       config = cfg,
       target_columns = target_columns,
       n_population = n_population,
@@ -73,6 +72,18 @@ build_target_for_config <- function(cfg, repeats_local, label = "profile_target"
       ),
       retain_fit = FALSE
     )
+  }
+  # Parallel repeats: each repeat is an independent deterministic run with
+  # its own seed. mclapply is used on non-Windows; Windows falls back to a
+  # sequential loop (correctness identical, just slower).
+  repeat_cores <- getOption("jpDMEQR.repeat_cores", 1L)
+  fits <- if (repeat_cores > 1L && .Platform$OS.type != "windows" &&
+              repeats_local > 1L) {
+    parallel::mclapply(seq_len(repeats_local), run_one,
+                       mc.cores = min(repeat_cores, repeats_local),
+                       mc.preschedule = FALSE)
+  } else {
+    lapply(seq_len(repeats_local), run_one)
   }
   obj <- summarise_profile_target_repeats_v2(
     fits, cfg, target_columns, implementation_commit = commit
