@@ -18,6 +18,10 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
     X,
     check.names = FALSE
   )
+  # Standalone grouping vector: lqmm re-evaluates `group` in the formula
+  # environment, so passing df[["cluster"]] collides with the data.frame
+  # symbol `df`. A distinct variable name avoids the closure conflict.
+
   fixed_formula <- stats::as.formula(
     paste("y ~ 0 +", paste(colnames(X), collapse = " + "))
   )
@@ -27,7 +31,7 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
     lqmm::lqmm(
       fixed = fixed_formula,
       random = random_formula,
-      group = df[["cluster"]],
+      group = "cluster",
       tau = tau,
       data = df,
       covariance = "pdSymm",
