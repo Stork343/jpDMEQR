@@ -81,7 +81,7 @@ build_target_for_config <- function(cfg, repeats_local, label = "profile_target"
               repeats_local > 1L) {
     parallel::mclapply(seq_len(repeats_local), run_one,
                        mc.cores = min(repeat_cores, repeats_local),
-                       mc.preschedule = FALSE)
+                       mc.preschedule = TRUE)
   } else {
     lapply(seq_len(repeats_local), run_one)
   }

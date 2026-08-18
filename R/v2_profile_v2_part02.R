@@ -108,7 +108,7 @@ profile_components_v2 <- function(y,
   out <- if (cluster_cores > 1L && .Platform$OS.type != "windows" && n > 1L) {
     parallel::mclapply(seq_len(n), cluster_worker,
                        mc.cores = min(cluster_cores, n),
-                       mc.preschedule = FALSE)
+                       mc.preschedule = TRUE)
   } else {
     lapply(seq_len(n), cluster_worker)
   }
