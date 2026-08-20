@@ -310,15 +310,16 @@ validate_profile_target_asset_v2 <- function(obj,
     problems <- c(problems, "independent repeat count is below the final minimum")
   }
   if (!isTRUE(obj$all_converged)) problems <- c(problems, "one or more target fits did not converge")
-  if (!is.null(expected_commit) && !identical(obj$implementation_commit, expected_commit)) {
-    problems <- c(problems, "target asset implementation commit is stale")
-  }
   # Dependency-specific identity (theory decision section 4.1): the target is
   # the unsmoothed profile minimiser; when the dependency hash is supplied it
   # is authoritative over the full-registry commit identity.
-  if (!is.null(expected_dependency_hash) &&
-      !identical(obj$dependency_hash %||% NULL, expected_dependency_hash)) {
-    problems <- c(problems, "target asset dependency hash is stale")
+  if (!is.null(expected_dependency_hash)) {
+    if (!identical(obj$dependency_hash %||% NULL, expected_dependency_hash)) {
+      problems <- c(problems, "target asset dependency hash is stale")
+    }
+  } else if (!is.null(expected_commit) &&
+             !identical(obj$implementation_commit, expected_commit)) {
+    problems <- c(problems, "target asset implementation commit is stale")
   }
   list(valid = length(problems) == 0L, problems = problems)
 }

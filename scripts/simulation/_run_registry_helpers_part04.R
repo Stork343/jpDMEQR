@@ -276,15 +276,13 @@ validate_structural_target_audit_v2 <- function(obj, expected_commit = NULL,
         max(obj$max_nuisance_gradient, na.rm = TRUE) <= 1e-7)) {
     problems <- c(problems, "one or more audit fits did not converge")
   }
-  if (!is.null(expected_commit) && !identical(obj$implementation_commit, expected_commit)) {
+  if (!is.null(expected_dependency_hash)) {
+    if (!identical(obj$dependency_hash %||% NULL, expected_dependency_hash)) {
+      problems <- c(problems, "structural audit dependency hash is stale")
+    }
+  } else if (!is.null(expected_commit) &&
+             !identical(obj$implementation_commit, expected_commit)) {
     problems <- c(problems, "structural audit implementation commit is stale")
-  }
-  # Dependency-specific identity (theory decision section 4.1): the audit
-  # depends only on the target construction; when the dependency hash is
-  # supplied it is authoritative over the full-registry commit identity.
-  if (!is.null(expected_dependency_hash) &&
-      !identical(obj$dependency_hash %||% NULL, expected_dependency_hash)) {
-    problems <- c(problems, "structural audit dependency hash is stale")
   }
   if (!is.null(obj$target_displacement) && !is.null(obj$target_mc_se_by_coordinate)) {
     displacement <- abs(as.numeric(obj$target_displacement))
@@ -327,8 +325,13 @@ validate_target_gate_v2 <- function(root, cfg_df, final = TRUE, expected_config_
         expected_dependency_hash = if (final) dep_hash else NULL,
         final = final
       )
+      # Reused assets (authorised by the dependency hash) may carry the
+      # pre-change full-registry checksum; the dependency hash is then the
+      # authoritative identity and the config checksum comparison is skipped.
       checksum_ok <- is.null(expected_config_sha) ||
-        identical(as.character(obj$config_sha256), as.character(expected_config_sha))
+        (!final && identical(as.character(obj$config_sha256), as.character(expected_config_sha))) ||
+        (isTRUE(final) && !is.null(dep_hash) &&
+           identical(obj$dependency_hash %||% NULL, dep_hash))
       pass <- val$valid && checksum_ok
       reason <- c(val$problems, if (!checksum_ok) "config checksum mismatch")
       rows[[kk]] <- data.frame(experiment_id = id, asset = "profile_target",
@@ -354,7 +357,9 @@ validate_target_gate_v2 <- function(root, cfg_df, final = TRUE, expected_config_
         final = final
       )
       checksum_ok <- is.null(expected_config_sha) ||
-        identical(as.character(obj$config_sha256), as.character(expected_config_sha))
+        (!final && identical(as.character(obj$config_sha256), as.character(expected_config_sha))) ||
+        (isTRUE(final) && !is.null(dep_hash) &&
+           identical(obj$dependency_hash %||% NULL, dep_hash))
       pass <- val$valid && checksum_ok
       reason <- c(val$problems, if (!checksum_ok) "config checksum mismatch")
       rows[[kk]] <- data.frame(
