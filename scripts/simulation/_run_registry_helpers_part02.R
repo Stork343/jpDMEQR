@@ -5,14 +5,15 @@ build_tuning_for_analysis_v2 <- function(config, dat) {
   lambda_multiplier <- config$lambda_beta_multipliers[
     which.min(abs(config$lambda_beta_multipliers - 1))
   ]
+  # Primary inferential bandwidth h = c_h n^{-3/10} (theory decision:
+  # PILOT_GATE_THEORY_DECISIONS.md). Gives sqrt(n) h^2 -> 0 and n h^3 -> Inf.
+  h <- config$h_multiplier * dat$n_clusters^(-3 / 10)
   list(
-    h = config$h_multiplier * dat$n_clusters^(-1 / 3),
+    h = h,
     lambda_beta = lambda_multiplier * sqrt(log(max(ncol(dat$X), 2)) / dat$n_clusters),
     lambda_gamma = config$lambda_gamma,
     mu_grid = config$dantzig_multipliers *
-      (sqrt(log(max(ncol(dat$X), 2)) /
-              (dat$n_clusters * (config$h_multiplier * dat$n_clusters^(-1 / 3)))) +
-         (config$h_multiplier * dat$n_clusters^(-1 / 3))^2),
+      (sqrt(log(max(ncol(dat$X), 2)) / (dat$n_clusters * h)) + h^2),
     full_reference = values
   )
 }
@@ -39,6 +40,55 @@ inference_direction_table_v2 <- function(fit) {
   inf <- fit$inference_object %||% NULL
   if (is.null(inf) || is.null(inf$table)) return(data.frame())
   inf$table
+}
+
+# POP-H row-accuracy and inverse-defect diagnostics (theory decision section
+# 3.5): E2_k, E1_k, cosine similarity, D_k, and the scaled Bahadur remainder.
+# Diagnostics/gates only; never used to select mu.
+pop_direction_diagnostics_v2 <- function(fit, population_asset, nm,
+                                         delta_l1, n_clusters, tau,
+                                         beta_star = NA_real_) {
+  out <- list(E1 = NA_real_, E2 = NA_real_, cosine_pop = NA_real_,
+              D_k = NA_real_, bahadur_scaled = NA_real_)
+  if (is.null(population_asset) || is.null(population_asset$directions) ||
+      !nm %in% names(population_asset$directions)) return(out)
+  inf <- fit$inference_object$table
+  rr <- which(inf$coordinate == nm)[1]
+  if (!length(rr) || !isTRUE(inf$feasible[rr])) return(out)
+  fit_names <- names(fit$beta_hat)
+  pop_full <- setNames(rep(0, length(fit_names)), fit_names)
+  pop <- population_asset$directions[[nm]]$omega
+  common <- intersect(names(pop), fit_names)
+  pop_full[common] <- pop[common]
+  omega_hat <- as.numeric(fit$inference_object$directions[[rr]]$omega %||%
+                            rep(NA_real_, length(fit_names)))
+  if (length(omega_hat) != length(fit_names) || any(!is.finite(omega_hat))) return(out)
+  diffv <- omega_hat - pop_full
+  n_pop <- sqrt(sum(pop_full^2))
+  out$E2 <- sqrt(sum(diffv^2)) / max(n_pop, 1e-12)
+  out$E1 <- sum(abs(diffv)) / (1 + sum(abs(pop_full)))
+  denom <- sqrt(sum(omega_hat^2)) * n_pop
+  out$cosine_pop <- if (denom > 0) drop(crossprod(omega_hat, pop_full)) / denom else NA_real_
+  sigma0 <- population_asset$sigma0_pop[[nm]] %||% NA_real_
+  delta_k <- as.numeric(inf$dantzig_residual[rr])
+  if (is.finite(sigma0) && sigma0 > 0 && is.finite(delta_k) && is.finite(delta_l1)) {
+    out$D_k <- sqrt(n_clusters) * delta_k * delta_l1 / sigma0
+  }
+  # Scaled Bahadur remainder using the oracle (population) direction:
+  #   R_B,k = sqrt(n)(beta_tilde_k - beta*_k) - n^{-1/2} sum_i xi_{ik}^{oracle},
+  #   xi_{ik}^{oracle} = -omega_k^{pop}' g_i^{(0)} (unsmoothed sample scores),
+  # scaled by the population unsmoothed meat SD sigma0.
+  bt <- as.numeric(inf$beta_tilde[rr])
+  comp <- fit$fit_object$components
+  G0 <- comp$unsmoothed_cluster_scores
+  if (is.finite(bt) && is.finite(beta_star) && !is.null(G0) &&
+      ncol(G0) == length(fit_names) && is.finite(sigma0) && sigma0 > 0) {
+    proj <- as.numeric(G0 %*% pop_full)
+    xi_sum <- sum(proj)  # sum_i omega_pop' g_i^(0); xi = -omega'g so -sum(xi) = +xi_sum
+    rB <- sqrt(n_clusters) * (bt - beta_star) + (1 / sqrt(n_clusters)) * xi_sum
+    out$bahadur_scaled <- rB / sigma0
+  }
+  out
 }
 
 method_theory_diagnostics_v2 <- function(config, replicate, seed, method_id,
@@ -79,6 +129,25 @@ method_theory_diagnostics_v2 <- function(config, replicate, seed, method_id,
   }
   correction <- if (nrow(inf)) max(abs(inf$beta_tilde - inf$beta_hat), na.rm = TRUE) else NA_real_
   if (!is.finite(correction)) correction <- NA_real_
+  # POP-H row-accuracy / inverse-defect aggregates (theory decision 3.5).
+  Dvals <- numeric(); E1vals <- numeric(); E2vals <- numeric()
+  Bvals <- numeric()
+  if (nrow(inf) && !is.null(population_asset$directions)) {
+    delta_l1 <- if (!is.null(fit_obj$beta) && !is.null(target_obj$beta)) {
+      fitn <- names(fit_obj$beta)
+      tgt <- target_obj$beta
+      common <- intersect(fitn, names(tgt))
+      if (length(common)) sum(abs(fit_obj$beta[common] - tgt[common])) else NA_real_
+    } else NA_real_
+    for (nm in intersect(inf$coordinate, names(population_asset$directions))) {
+      pd <- pop_direction_diagnostics_v2(
+        fit, population_asset, nm, delta_l1, analysis_dat$n_clusters,
+        config$tau, beta_star = as.numeric(target_obj$beta[nm] %||% NA_real_)
+      )
+      Dvals <- c(Dvals, pd$D_k); E1vals <- c(E1vals, pd$E1)
+      E2vals <- c(E2vals, pd$E2); Bvals <- c(Bvals, pd$bahadur_scaled)
+    }
+  }
   data.frame(
     experiment_id = config$experiment_id,
     replicate = replicate,
@@ -107,7 +176,13 @@ method_theory_diagnostics_v2 <- function(config, replicate, seed, method_id,
     } else NA_real_,
     precision_row_error = precision_row_error,
     one_step_correction_max = correction,
-    scaled_bahadur_remainder = NA_real_,
+    max_E1_pop = if (length(E1vals)) max(E1vals[is.finite(E1vals)], na.rm = TRUE) else NA_real_,
+    max_E2_pop = if (length(E2vals)) max(E2vals[is.finite(E2vals)], na.rm = TRUE) else NA_real_,
+    max_D_k = if (length(Dvals)) max(Dvals[is.finite(Dvals)], na.rm = TRUE) else NA_real_,
+    median_D_k = if (length(Dvals)) stats::median(Dvals[is.finite(Dvals)], na.rm = TRUE) else NA_real_,
+    q90_D_k = if (length(Dvals)) stats::quantile(Dvals[is.finite(Dvals)], 0.9, na.rm = TRUE, names = FALSE) else NA_real_,
+    max_bahadur_scaled = if (length(Bvals)) max(abs(Bvals[is.finite(Bvals)]), na.rm = TRUE) else NA_real_,
+    scaled_bahadur_remainder = if (length(Bvals)) max(Bvals[is.finite(Bvals)], na.rm = TRUE) else NA_real_,
     score_skewness = NA_real_,
     score_excess_kurtosis = NA_real_,
     n_clusters = analysis_dat$n_clusters,
@@ -312,6 +387,9 @@ run_one_replication_v2 <- function(root, config, replicate,
 
     inf_tab <- inference_direction_table_v2(fit)
     if (nrow(inf_tab)) {
+      delta_l1 <- if (all(is.finite(beta_full)) && all(is.finite(beta_target))) {
+        sum(abs(beta_full - beta_target))
+      } else NA_real_
       coord_names <- intersect(inf_tab$coordinate, names(beta_target))
       for (nm in coord_names) {
         rr <- which(inf_tab$coordinate == nm)[1]
@@ -323,6 +401,10 @@ run_one_replication_v2 <- function(root, config, replicate,
                          nm %in% names(target_obj$target_mc_se_by_coordinate)) {
           target_obj$target_mc_se_by_coordinate[[nm]]
         } else target_obj$target_mc_se
+        popd <- pop_direction_diagnostics_v2(
+          fit, population_asset, nm, delta_l1, dat$n_clusters, config$tau,
+          beta_star = as.numeric(beta_target[nm])
+        )
         ccount <- ccount + 1L
         coordinate_rows[[ccount]] <- data.frame(
           experiment_id = config$experiment_id,
@@ -338,6 +420,7 @@ run_one_replication_v2 <- function(root, config, replicate,
           beta_hat = as.numeric(beta_full[nm]),
           beta_tilde = bt,
           estimated_se = se,
+          estimated_se_smoothed = as.numeric(inf_tab$se_smoothed[rr] %||% NA_real_),
           ci_level = 0.95,
           ci_lower = lower,
           ci_upper = upper,
@@ -356,6 +439,15 @@ run_one_replication_v2 <- function(root, config, replicate,
           dantzig_residual = inf_tab$dantzig_residual[rr] %||% NA_real_,
           omega_l1 = inf_tab$omega_l1[rr] %||% NA_real_,
           omega_l2 = inf_tab$omega_l2[rr] %||% NA_real_,
+          adjacent_stability = inf_tab$adjacent_stability[rr] %||% NA_real_,
+          mu_cv_min_loss = inf_tab$mu_cv_min_loss[rr] %||% NA_real_,
+          mu_cv_loss = inf_tab$mu_cv_loss[rr] %||% NA_real_,
+          mu_cv_se = inf_tab$mu_cv_se[rr] %||% NA_real_,
+          E1_pop = popd$E1,
+          E2_pop = popd$E2,
+          cosine_pop = popd$cosine_pop,
+          D_k = popd$D_k,
+          bahadur_scaled = popd$bahadur_scaled,
           status = fit$status,
           implementation_commit = commit,
           stringsAsFactors = FALSE

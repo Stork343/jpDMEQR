@@ -121,6 +121,14 @@ if (pilot_gate_requested) {
     stats::median(identity_values) < 1e-8 && max(identity_values) < 1e-6
   proposed_coords <- coords[coords$method_id == "PROFILE-DQR", , drop = FALSE]
   dantzig_pass <- nrow(proposed_coords) && mean(proposed_coords$feasible, na.rm = TRUE) >= 0.95
+  # Inverse-defect / row-accuracy gate (theory decision section 3.5): where a
+  # POP-H asset exists, require median(D_k) < 0.5 and Q0.9(D_k) < 1 for the
+  # baseline; a violation means the precision approximation is not yet in the
+  # first-order regime, not that the interval should be widened.
+  d_vals <- proposed_coords$D_k[is.finite(proposed_coords$D_k)]
+  inverse_defect_pass <- length(d_vals) > 0 &&
+    stats::median(d_vals) < 0.5 &&
+    stats::quantile(d_vals, 0.9, na.rm = TRUE, names = FALSE) < 1
   baseline_cov <- coverage_summary[
     coverage_summary$experiment_id == "P01" &
       coverage_summary$method_id == "PROFILE-DQR", , drop = FALSE
@@ -132,8 +140,8 @@ if (pilot_gate_requested) {
   runner_failure_path <- file.path(run_dir, "runner_failures.csv")
   runner_failure_count <- if (file.exists(runner_failure_path)) nrow(read.csv(runner_failure_path)) else 0L
   missing_method_pass <- !any(metrics$status == "not_implemented")
-  pass <- convergence_pass && identity_pass && dantzig_pass && se_ratio_pass &&
-    coverage_pass && runner_failure_count == 0L && missing_method_pass
+  pass <- convergence_pass && identity_pass && dantzig_pass && inverse_defect_pass &&
+    se_ratio_pass && coverage_pass && runner_failure_count == 0L && missing_method_pass
   manifest <- list(
     pass = pass,
     commit_sha = trimws(readLines(file.path(run_dir, "implementation_commit.txt"), warn = FALSE)[1]),
@@ -143,6 +151,7 @@ if (pilot_gate_requested) {
     convergence_pass = convergence_pass,
     identity_pass = identity_pass,
     dantzig_pass = dantzig_pass,
+    inverse_defect_pass = inverse_defect_pass,
     se_ratio_pass = se_ratio_pass,
     coverage_pass = coverage_pass,
     no_runner_failures = runner_failure_count == 0L,
@@ -152,6 +161,8 @@ if (pilot_gate_requested) {
       identity_median = 1e-8,
       identity_max = 1e-6,
       dantzig_feasible = 0.95,
+      inverse_defect_median = 0.5,
+      inverse_defect_q90 = 1,
       se_sd_ratio = c(0.80, 1.20),
       baseline_coverage = c(0.88, 0.98)
     )

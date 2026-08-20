@@ -58,7 +58,7 @@ for (seed in seeds) {
             cluster_id = dat$cluster_id,
             beta = beta_probe,
             tau = tau,
-            h = h_mult * dat$n_clusters^(-1 / 3),
+            h = h_mult * dat$n_clusters^(-3 / 10),
             lambda_gamma = Lambda,
             eps = 1e-5
           )
@@ -88,7 +88,7 @@ if (strict) {
       res <- validate_profile_geometry_v2(
         y = dat$y, X = dat$X, Z = dat$Z, cluster_id = dat$cluster_id,
         beta = dat$beta0 + c(0.08, -0.04, 0.03, -0.02),
-        tau = 0.5, h = dat$n_clusters^(-1 / 3),
+        tau = 0.5, h = dat$n_clusters^(-3 / 10),
         lambda_gamma = matrix(c(1.4, 0.18, 0.18, 0.9), 2, 2),
         eps = 5e-6
       )
@@ -121,7 +121,7 @@ if (!requireNamespace("CVXR", quietly = TRUE)) {
 dat_d <- generate_profile_qr_data_v2(18, 5, 2, 0.5, q = 2, seed = 909L)
 comp_d <- profile_components_v2(
   dat_d$y, dat_d$X, dat_d$Z, dat_d$cluster_id, dat_d$beta0,
-  tau = 0.5, h = 18^(-1 / 3),
+  tau = 0.5, h = 18^(-3 / 10),
   lambda_gamma = matrix(c(1.4, 0.18, 0.18, 0.9), 2, 2)
 )
 dantzig <- solve_dantzig_row_v2(

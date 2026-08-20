@@ -227,6 +227,10 @@ if (build_pop_h) {
       max_nuisance_gradient = max(vapply(direction_fits, `[[`, numeric(1), "max_nuisance_gradient")),
       implementation_commit = commit,
       config_sha256 = config_sha,
+      dependency_hash = pop_h_dependency_hash_v2(
+        cfg, n_population, length(direction_fits),
+        direction_fits[[1]]$n_analysis, direction_fits[[1]]$h_analysis
+      ),
       config = cfg,
       development = development,
       created_utc = format(Sys.time(), tz = "UTC", usetz = TRUE)

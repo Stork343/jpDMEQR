@@ -251,7 +251,8 @@ structural_target_audit_asset_path_v2 <- function(root, experiment_id) {
 }
 
 validate_structural_target_audit_v2 <- function(obj, expected_commit = NULL,
-                                                final = TRUE) {
+                                                final = TRUE,
+                                                expected_dependency_hash = NULL) {
   problems <- character()
   if (is.null(obj$target_displacement) || any(!is.finite(obj$target_displacement))) {
     problems <- c(problems, "target displacement is missing or non-finite")
@@ -278,6 +279,13 @@ validate_structural_target_audit_v2 <- function(obj, expected_commit = NULL,
   if (!is.null(expected_commit) && !identical(obj$implementation_commit, expected_commit)) {
     problems <- c(problems, "structural audit implementation commit is stale")
   }
+  # Dependency-specific identity (theory decision section 4.1): the audit
+  # depends only on the target construction; when the dependency hash is
+  # supplied it is authoritative over the full-registry commit identity.
+  if (!is.null(expected_dependency_hash) &&
+      !identical(obj$dependency_hash %||% NULL, expected_dependency_hash)) {
+    problems <- c(problems, "structural audit dependency hash is stale")
+  }
   if (!is.null(obj$target_displacement) && !is.null(obj$target_mc_se_by_coordinate)) {
     displacement <- abs(as.numeric(obj$target_displacement))
     mcse <- as.numeric(obj$target_mc_se_by_coordinate[names(obj$target_displacement)])
@@ -300,6 +308,7 @@ validate_target_gate_v2 <- function(root, cfg_df, final = TRUE, expected_config_
       cfg_df$lambda_gamma %in% c(0.25, 0.5, 2, 4)
   ]
   rows <- list(); kk <- 0L
+  cfg_lookup <- split(cfg_df, cfg_df$experiment_id)
   for (id in profile_ids) {
     kk <- kk + 1L
     path <- target_asset_path_v2(root, id)
@@ -308,9 +317,14 @@ validate_target_gate_v2 <- function(root, cfg_df, final = TRUE, expected_config_
                                pass = FALSE, reason = "missing")
     } else {
       obj <- readRDS(path)
+      dep_hash <- target_dependency_hash_v2(
+        config_row_to_list_v2(cfg_lookup[[id]]),
+        n_population = 100000L, repeats = 4L
+      )
       val <- validate_profile_target_asset_v2(
         obj, min_population = 100000L, min_repeats = 4L,
         expected_commit = if (final) current_commit_v2(root) else NULL,
+        expected_dependency_hash = if (final) dep_hash else NULL,
         final = final
       )
       checksum_ok <- is.null(expected_config_sha) ||
@@ -330,8 +344,13 @@ validate_target_gate_v2 <- function(root, cfg_df, final = TRUE, expected_config_
                                pass = FALSE, reason = "missing")
     } else {
       obj <- readRDS(path)
+      dep_hash <- target_dependency_hash_v2(
+        config_row_to_list_v2(cfg_lookup[[id]]),
+        n_population = 100000L, repeats = 4L
+      )
       val <- validate_structural_target_audit_v2(
         obj, expected_commit = if (final) current_commit_v2(root) else NULL,
+        expected_dependency_hash = if (final) dep_hash else NULL,
         final = final
       )
       checksum_ok <- is.null(expected_config_sha) ||
@@ -363,9 +382,17 @@ validate_target_gate_v2 <- function(root, cfg_df, final = TRUE, expected_config_
       # frozen acceptance threshold (same rule as the strict geometry gate).
       nuisance_ok <- !is.null(obj$max_nuisance_gradient) &&
         max(obj$max_nuisance_gradient, na.rm = TRUE) <= 1e-7
+      cfg_row <- config_row_to_list_v2(cfg_lookup[[id]])
+      n_analysis <- as.integer(cfg_row$n_clusters)
+      h_analysis <- cfg_row$h_multiplier * n_analysis^(-3 / 10)
+      dep_ok <- identical(obj$dependency_hash %||% NULL,
+                          pop_h_dependency_hash_v2(cfg_row, 100000L, 4L,
+                                                   n_analysis, h_analysis))
       pass <- identical(obj$experiment_id, id) && checksum_ok &&
         (!final || (obj$n_population >= 100000L && obj$repeats >= 4L &&
                       identical(obj$implementation_commit, current_commit_v2(root)))) &&
+        dep_ok &&
+        isTRUE(all.equal(as.numeric(obj$h_analysis), h_analysis, tolerance = 1e-12)) &&
         nuisance_ok &&
         max(vapply(obj$directions, `[[`, numeric(1), "residual")) <= 1e-5
       rows[[kk]] <- data.frame(experiment_id = id, asset = "population_direction",

@@ -6,6 +6,50 @@ population_target_columns_v2 <- function(config, extra_null = 3L) {
   sort(unique(c(active, null)))
 }
 
+# -----------------------------------------------------------------------------
+# Dependency-specific asset identity (theory decision section 4.1).
+#
+# The profile target is the UNSMOOTHED regularised profile minimiser; its MC
+# approximation depends only on the DGP, tau, lambda_gamma, the working
+# nuisance design and the target-approximation bandwidth rule -- NOT on the
+# analysis bandwidth, the Dantzig grid, or other registry fields. This hash
+# lets the freeze gate revalidate existing assets when unrelated registry or
+# analysis fields change, instead of rebuilding 100k-cluster assets.
+# -----------------------------------------------------------------------------
+target_dependency_fields_v2 <- c(
+  "n_clusters", "p", "s", "tau", "q", "h_multiplier", "lambda_gamma",
+  "fit_random_effects", "error_dist", "error_dependence", "design_type",
+  "rho_x", "signal", "random_effect_dist", "sigma_b0", "sigma_b1", "rho_b",
+  "x_b_corr", "informative_size", "nonlinear_re_strength", "m_rule",
+  "copula_rho", "heteroskedastic"
+)
+
+target_dependency_hash_v2 <- function(config, n_population, repeats,
+                                      kind = "profile_target") {
+  if (!requireNamespace("digest", quietly = TRUE)) stop("digest is required.")
+  digest::digest(list(
+    kind = kind,
+    version = "target-construction-v1",
+    n_population = as.integer(n_population),
+    repeats = as.integer(repeats),
+    fields = config[target_dependency_fields_v2]
+  ), algo = "sha256")
+}
+
+pop_h_dependency_hash_v2 <- function(config, n_population, direction_repeats,
+                                     n_analysis, h_analysis) {
+  if (!requireNamespace("digest", quietly = TRUE)) stop("digest is required.")
+  digest::digest(list(
+    kind = "population_direction",
+    version = "pop-h-v2-analysis-bandwidth",
+    n_population = as.integer(n_population),
+    direction_repeats = as.integer(direction_repeats),
+    n_analysis = as.integer(n_analysis),
+    h_analysis = h_analysis,
+    fields = config[target_dependency_fields_v2]
+  ), algo = "sha256")
+}
+
 fit_working_nuisance_design_v2 <- function(dat, fit_random_effects) {
   out <- dat
   if (identical(fit_random_effects, "intercept") && ncol(out$Z) > 1L) {
@@ -108,6 +152,9 @@ summarise_profile_target_repeats_v2 <- function(fits, config, target_columns,
     max_kkt_residual = max(vapply(fits, `[[`, numeric(1), "kkt_residual")),
     config = config,
     fits = fits,
+    dependency_hash = target_dependency_hash_v2(
+      config, unique(vapply(fits, `[[`, numeric(1), "n_population")), length(fits)
+    ),
     implementation_commit = implementation_commit,
     created_utc = format(Sys.time(), tz = "UTC", usetz = TRUE)
   )
@@ -145,12 +192,17 @@ approximate_population_direction_v2 <- function(config,
   if (any(!is.finite(beta_target))) stop("beta_target does not cover target_columns.")
 
   cfg <- config
+  # Preserve the scenario analysis cluster count: the population direction
+  # must approximate the FINITE-SAMPLE effective direction at the analysis
+  # bandwidth h = c_h n_analysis^{-3/10} (theory decision section 4.3).
+  # n_population only controls the Monte Carlo accuracy of H_pop.
+  n_analysis <- as.integer(config$n_clusters)
   cfg$n_clusters <- as.integer(n_population)
   cfg$p <- max(target_columns)
   dat <- simulate_from_config_v2(cfg, seed = seed)
   dat <- fit_working_nuisance_design_v2(dat, cfg$fit_random_effects)
   X_target <- dat$X[, target_columns, drop = FALSE]
-  h_analysis <- config$h_multiplier * config$n_clusters^(-1 / 3)
+  h_analysis <- config$h_multiplier * n_analysis^(-3 / 10)
   comp <- profile_components_v2(
     y = dat$y,
     X = X_target,
@@ -188,10 +240,32 @@ approximate_population_direction_v2 <- function(config,
   })
   names(directions) <- requested_coordinates
 
+  # Population-scale unsmoothed meat: sigma0_pop[k] is the per-cluster SD of
+  # the projected unsmoothed quantile score at the population fit, used by
+  # the inverse-defect gate D_k = sqrt(n) delta_k ||Delta||_1 / sigma0_pop[k]
+  # (theory decision section 3.5). Diagnostics only; never a tuning target.
+  G0 <- comp$unsmoothed_cluster_scores
+  if (!is.null(G0) && nrow(G0) == n_population) {
+    G0c <- sweep(G0, 2, colMeans(G0))
+    Sigma0_pop <- crossprod(G0c) / n_population
+    colnames(Sigma0_pop) <- rownames(Sigma0_pop) <- target_names
+    sigma0_pop <- sqrt(pmax(
+      diag(crossprod(Omega, Sigma0_pop %*% Omega)), 0
+    ))
+    names(sigma0_pop) <- target_names
+  } else {
+    Sigma0_pop <- NULL
+    sigma0_pop <- setNames(rep(NA_real_, length(target_names)), target_names)
+  }
+
   list(
     experiment_id = config$experiment_id,
     H_population = H,
     Omega_population = Omega,
+    Sigma0_population = Sigma0_pop,
+    sigma0_pop = sigma0_pop,
+    n_analysis = n_analysis,
+    h_analysis = h_analysis,
     directions = directions,
     target_columns = target_columns,
     target_names = target_names,
@@ -223,7 +297,8 @@ validate_profile_target_asset_v2 <- function(obj,
                                              min_population = 100000L,
                                              min_repeats = 4L,
                                              expected_commit = NULL,
-                                             final = TRUE) {
+                                             final = TRUE,
+                                             expected_dependency_hash = NULL) {
   problems <- character()
   if (is.null(obj$beta_star_mc) || any(!is.finite(obj$beta_star_mc))) {
     problems <- c(problems, "target estimate is missing or non-finite")
@@ -237,6 +312,13 @@ validate_profile_target_asset_v2 <- function(obj,
   if (!isTRUE(obj$all_converged)) problems <- c(problems, "one or more target fits did not converge")
   if (!is.null(expected_commit) && !identical(obj$implementation_commit, expected_commit)) {
     problems <- c(problems, "target asset implementation commit is stale")
+  }
+  # Dependency-specific identity (theory decision section 4.1): the target is
+  # the unsmoothed profile minimiser; when the dependency hash is supplied it
+  # is authoritative over the full-registry commit identity.
+  if (!is.null(expected_dependency_hash) &&
+      !identical(obj$dependency_hash %||% NULL, expected_dependency_hash)) {
+    problems <- c(problems, "target asset dependency hash is stale")
   }
   list(valid = length(problems) == 0L, problems = problems)
 }

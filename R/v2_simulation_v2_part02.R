@@ -461,7 +461,7 @@ simulate_from_config_v2 <- function(config, seed) {
 }
 
 reference_tuning_values_v2 <- function(config, p = config$p, n = config$n_clusters) {
-  h <- config$h_multiplier * n^(-1 / 3)
+  h <- config$h_multiplier * n^(-3 / 10)
   lambda_beta <- config$lambda_beta_multipliers * sqrt(log(max(p, 2)) / n)
   mu <- config$dantzig_multipliers *
     (sqrt(log(max(p, 2)) / (n * h)) + h^2)
