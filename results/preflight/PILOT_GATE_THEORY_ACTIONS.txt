@@ -1,0 +1,17 @@
+AUTHORITATIVE NEXT ACTIONS AFTER PILOT THEORY REVIEW
+
+1. Read docs/PILOT_GATE_THEORY_DECISIONS.md and results/preflight/PILOT_GATE_THEORY_DECISION.md.
+2. Do not run the main B=500/1000 registry.
+3. Synchronise METHOD_SPECIFICATION.md with:
+   - unsmoothed cluster-score meat as primary Wald variance;
+   - smoothed meat as sensitivity only;
+   - h = c_h n^(-3/10), c_h in {0.75,1,1.25};
+   - c_mu in {0.10,0.25,0.50,1,2,4};
+   - non-truth-based inverse-Hessian CV selection of c_mu.
+4. Implement/store both meat estimators and the new bandwidth/tolerance rules.
+5. Fix POP-H so h_analysis uses the scenario analysis n, not n_population.
+6. Add inverse-defect and POP-H row-accuracy diagnostics.
+7. Invalidate/rebuild POP-H direction assets. Revalidate profile-target assets only if their dependency hash is unchanged; otherwise rebuild.
+8. Rerun strict geometry and micro-preflight on the new commit.
+9. Rerun P01-P04 with B=200 from scratch.
+10. Keep the existing SE/SD and coverage pilot thresholds. If the corrected pilot fails, stop for another theory diagnosis rather than calibrating the thresholds.
