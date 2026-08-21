@@ -18,15 +18,20 @@ cluster_sandwich_coordinate_v2 <- function(cluster_scores, omega, df_correction 
 
 # -----------------------------------------------------------------------------
 # Non-truth-based inverse-Hessian CV selection of the Dantzig tolerance
-# (theory decision: PILOT_GATE_THEORY_DECISION.md section 3.4).
+# (ROUND-2 adjudication: docs/METHOD_SPECIFICATION_ROUND2_AMENDMENT.md).
 #
-# For each candidate mu on the frozen grid and each of the four deterministic
-# cluster folds: solve the Dantzig row on the training-fold Hessian and score
-# it on the held-out fold Hessian with the inverse quadratic loss
-#     L_f(mu) = 0.5 omega' H_val omega - e_k' omega,
-# whose population minimiser is H^{-1} e_k. The selected mu is the LARGEST
-# candidate whose mean loss is within one standard error of the minimum.
-# No simulation truth, coverage, or bias is used.
+# The round-1 rule (one-SE band, largest-in-band mu) is REVOKED: for Dantzig
+# inverse rows a larger mu admits a coarser row, so once the held-out loss is
+# flat, largest-in-band systematically biases toward the worst direction.
+#
+# New rule:
+#   - n < 200: deterministic 2-fold cluster CV;
+#   - n >= 200: deterministic 4-fold cluster CV;
+#   - held-out loss  L_defect_f(mu) = || H_val omega_train(-f)(mu) - e_k ||_inf;
+#   - choose argmin over mu of the fold-mean defect;
+#   - numerical ties choose the SMALLER mu.
+# The inverse-quadratic loss L_quad = 0.5 omega'H_val omega - e'omega is kept
+# as a diagnostic only. No simulation truth, coverage, or bias is used.
 select_mu_inverse_hessian_cv_v2 <- function(H,
                                             coordinate,
                                             mu_grid,
@@ -34,22 +39,45 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
                                             fold_counts,
                                             solver_preference = c("CLARABEL", "ECOS", "SCS"),
                                             solver_opts = list(),
-                                            n_folds = 4L) {
+                                            n_folds = NULL) {
   p <- nrow(H)
   H <- (H + t(H)) / 2
   n <- sum(fold_counts)
+  if (is.null(n_folds)) n_folds <- if (n < 200L) 2L else 4L
+  n_folds <- max(2L, as.integer(n_folds))
   e <- numeric(p); e[coordinate] <- 1
   mu_grid <- sort(unique(as.numeric(mu_grid)))
   mu_grid <- mu_grid[mu_grid > 0]
 
+  # Build fold indicators deterministically over the cluster indices stored in
+  # fold_counts has length = n_folds; if the counts came from a 4-fold build we
+  # re-bucket to n_folds deterministically.
+  # The fold sums are indexed 1..L (length(fold_sums)); if n_folds differs from
+  # length(fold_sums), merge adjacent fold buckets deterministically.
+  L <- length(fold_sums)
+  if (L < n_folds) stop("fold_sums length is smaller than the requested n_folds")
+  # profile_components stores 4 fold buckets (clusters by (ii-1)%%4).
+  # For n_folds=2, merging buckets (1,3)->1 and (2,4)->2 reproduces the
+  # deterministic ((ii-1)%%2) cluster partition.
+  bucket_to_fold <- rep(seq_len(n_folds), length.out = L)
+  H_folds <- lapply(seq_len(n_folds), function(f) {
+    idx <- which(bucket_to_fold == f)
+    s <- Reduce(`+`, fold_sums[idx])
+    cnt <- sum(fold_counts[idx])
+    if (cnt > 0) (s + t(s)) / 2 / cnt else NULL
+  })
+  fold_n <- vapply(seq_len(n_folds), function(f) sum(fold_counts[bucket_to_fold == f]), numeric(1))
+
   results <- lapply(mu_grid, function(mu) {
-    losses <- numeric(n_folds)
-    feasible_folds <- 0L
+    defects <- numeric(n_folds)
+    quads <- numeric(n_folds)
+    infeasible_folds <- 0L
     for (f in seq_len(n_folds)) {
-      n_f <- fold_counts[f]
+      n_f <- fold_n[f]
       if (n_f <= 0L || n_f >= n) next
-      H_val_f <- fold_sums[[f]] / n_f
-      H_val_f <- (H_val_f + t(H_val_f)) / 2
+      H_val_f <- H_folds[[f]]
+      if (is.null(H_val_f)) next
+      # H_train = (n H - n_f H_val)/(n - n_f)
       H_train_f <- (n * H - n_f * H_val_f) / (n - n_f)
       H_train_f <- (H_train_f + t(H_train_f)) / 2
       sol <- tryCatch(
@@ -59,42 +87,44 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
         ),
         error = function(e) list(feasible = FALSE, omega = NULL)
       )
-      if (!isTRUE(sol$feasible) || is.null(sol$omega)) next
-      feasible_folds <- feasible_folds + 1L
+      if (!isTRUE(sol$feasible) || is.null(sol$omega)) { infeasible_folds <- infeasible_folds + 1L; next }
       omega <- as.numeric(sol$omega)
-      losses[f] <- 0.5 * drop(crossprod(omega, H_val_f %*% omega)) -
-        drop(crossprod(e, omega))
+      r <- as.numeric(H_val_f %*% omega) - e
+      defects[f] <- max(abs(r))
+      quads[f] <- 0.5 * drop(crossprod(omega, H_val_f %*% omega)) - drop(crossprod(e, omega))
     }
-    if (feasible_folds < n_folds) return(NULL)
+    if (infeasible_folds > 0L && n_folds - infeasible_folds < ceiling(n_folds / 2)) {
+      return(NULL)
+    }
     list(
       mu = mu,
-      loss_mean = mean(losses),
-      loss_se = stats::sd(losses) / sqrt(n_folds),
-      feasible_folds = feasible_folds
+      defect_mean = mean(defects[is.finite(defects)]),
+      defect_se = stats::sd(defects[is.finite(defects)]) / sqrt(sum(is.finite(defects))),
+      quad_mean = mean(quads[is.finite(quads)]),
+      infeasible_folds = infeasible_folds
     )
   })
   ok <- results[!vapply(results, is.null, logical(1))]
   if (!length(ok)) {
-    return(list(mu = NA_real_, loss_mean = NA_real_, loss_se = NA_real_,
-                selected = FALSE, candidates = data.frame()))
+    return(list(mu = NA_real_, defect_mean = NA_real_, defect_se = NA_real_,
+                quad_mean = NA_real_, selected = FALSE, candidates = data.frame()))
   }
-  loss_means <- vapply(ok, `[[`, numeric(1), "loss_mean")
-  loss_ses <- vapply(ok, `[[`, numeric(1), "loss_se")
+  defect_means <- vapply(ok, `[[`, numeric(1), "defect_mean")
+  quad_means <- vapply(ok, `[[`, numeric(1), "quad_mean")
   mus <- vapply(ok, `[[`, numeric(1), "mu")
-  best <- which.min(loss_means)
-  threshold <- loss_means[best] + loss_ses[best]
-  in_one_se <- loss_means <= threshold
-  # largest feasible multiplier within one SE of the minimum (more regularised)
-  selected_idx <- which(in_one_se)[which.max(mus[in_one_se])]
+  # argmin of the held-out defect; ties choose the SMALLER mu (round-2).
+  loss_min <- min(defect_means, na.rm = TRUE)
+  cand <- which(abs(defect_means - loss_min) <= 1e-12 * pmax(1, abs(loss_min)))
+  selected_idx <- cand[which.min(mus[cand])]
   list(
     mu = mus[selected_idx],
-    loss_mean = loss_means[selected_idx],
-    loss_se = loss_ses[selected_idx],
-    min_loss = loss_means[best],
+    defect_mean = defect_means[selected_idx],
+    quad_mean = quad_means[selected_idx],
+    min_defect = loss_min,
     selected = TRUE,
     candidates = data.frame(
-      mu = mus, loss_mean = loss_means, loss_se = loss_ses,
-      in_one_se = in_one_se, stringsAsFactors = FALSE
+      mu = mus, defect_mean = defect_means, quad_mean = quad_means,
+      stringsAsFactors = FALSE
     )
   )
 }
@@ -162,8 +192,9 @@ debias_profile_coordinates_v2 <- function(fit,
         coordinate = names(fit$beta)[k], index = k, feasible = FALSE,
         beta_hat = fit$beta[k], beta_tilde = NA_real_, se = NA_real_,
         se_smoothed = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
-        mu = NA_real_, mu_cv_min_loss = cv$min_loss, mu_cv_loss = cv$loss_mean,
-        mu_cv_se = cv$loss_se, dantzig_residual = NA_real_,
+        mu = NA_real_, mu_cv_min_defect = cv$min_defect,
+        mu_cv_defect = cv$defect_mean, mu_cv_quad = cv$quad_mean,
+        dantzig_residual = NA_real_,
         omega_l1 = NA_real_, omega_l2 = NA_real_, adjacent_stability = NA_real_,
         stringsAsFactors = FALSE
       )
@@ -221,9 +252,9 @@ debias_profile_coordinates_v2 <- function(fit,
       ci_lower = beta_tilde - zcrit * se,
       ci_upper = beta_tilde + zcrit * se,
       mu = direction$mu,
-      mu_cv_min_loss = cv$min_loss,
-      mu_cv_loss = cv$loss_mean,
-      mu_cv_se = cv$loss_se,
+      mu_cv_min_defect = cv$min_defect,
+      mu_cv_defect = cv$defect_mean,
+      mu_cv_quad = cv$quad_mean,
       dantzig_residual = direction$residual,
       omega_l1 = direction$l1_norm,
       omega_l2 = direction$l2_norm,
