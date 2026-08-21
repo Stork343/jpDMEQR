@@ -1,17 +1,38 @@
-AUTHORITATIVE NEXT ACTIONS AFTER PILOT THEORY REVIEW
+AUTHORITATIVE NEXT ACTIONS AFTER PILOT V2 THEORY REVIEW — ROUND 2
 
-1. Read docs/PILOT_GATE_THEORY_DECISIONS.md and results/preflight/PILOT_GATE_THEORY_DECISION.md.
-2. Do not run the main B=500/1000 registry.
-3. Synchronise METHOD_SPECIFICATION.md with:
-   - unsmoothed cluster-score meat as primary Wald variance;
-   - smoothed meat as sensitivity only;
-   - h = c_h n^(-3/10), c_h in {0.75,1,1.25};
-   - c_mu in {0.10,0.25,0.50,1,2,4};
-   - non-truth-based inverse-Hessian CV selection of c_mu.
-4. Implement/store both meat estimators and the new bandwidth/tolerance rules.
-5. Fix POP-H so h_analysis uses the scenario analysis n, not n_population.
-6. Add inverse-defect and POP-H row-accuracy diagnostics.
-7. Invalidate/rebuild POP-H direction assets. Revalidate profile-target assets only if their dependency hash is unchanged; otherwise rebuild.
-8. Rerun strict geometry and micro-preflight on the new commit.
-9. Rerun P01-P04 with B=200 from scratch.
-10. Keep the existing SE/SD and coverage pilot thresholds. If the corrected pilot fails, stop for another theory diagnosis rather than calibrating the thresholds.
+1. Read, in order:
+   - docs/PILOT_GATE_THEORY_DECISIONS.md
+   - results/preflight/PILOT_V2_THEORY_DECISION_ROUND2.md
+   - results/preflight/PILOT_GATE_THEORY_DECISION.md for non-conflicting round-one decisions.
+2. Do not run the main B=500/1000 registry and do not start confirmatory GSE65391 inference.
+3. Ensure the evidence file results/preflight/PILOT_V2_P01_DECOMPOSITION.md is committed. If the analysis exists only locally, commit the full non-sensitive decomposition report before the next pilot gate.
+4. Replace the Dantzig selector:
+   - n < 200: deterministic 2-fold cluster CV;
+   - n >= 200: deterministic 4-fold cluster CV;
+   - primary held-out loss = ||H_val omega_train - e_k||_inf;
+   - choose minimum mean held-out defect;
+   - numerical ties choose the SMALLER mu;
+   - remove the one-SE/largest-in-band rule.
+5. Expand c_mu to {0.02,0.05,0.10,0.25,0.50,1,2,4}. Record infeasibility. Do not expand below 0.02 without another theory decision.
+6. Keep h = c_h n^(-3/10), c_h in {0.75,1,1.25}. Keep unsmoothed meat as primary asymptotic meat and smoothed meat as diagnostic.
+7. Add the P01 TRUE-SUPPORT variance ladder:
+   - population first-order variance;
+   - target-score meat with population direction;
+   - fitted-score meat with population direction;
+   - fitted-score meat with sample exact inverse row;
+   - Var(T), Var(L), Var(R), 2Cov(L,R) for T=L+R.
+8. Add TRUE-SUPPORT finite-sample diagnostics:
+   - delete-one-cluster jackknife variance;
+   - low-dimensional profile KC/CR2-style leverage-corrected sandwich;
+   - MD/CR3-style sensitivity.
+   These are diagnostics only; do not promote a correction to primary inference or select it by coverage.
+9. Demote D_k from a hard gate. Continue to report it, and add the actual simulation-only normalized inverse-defect inner product A_k, POP-H relative l1/l2 errors, cosine similarity, and normalized Bahadur remainder. None may tune mu.
+10. Add P05 and P06 baseline calibration cells:
+    - P05: n=200, p=500, s=5, tau=0.50, q=1, Gaussian random intercept baseline;
+    - P06: n=400, p=500, s=5, same DGP.
+    P01-P04 remain stress/diagnostic cells. Do not delete or hide them.
+11. Implement a CLARABEL-vs-HiGHS Dantzig solver parity suite on >=20 representative rows. HiGHS may become production default only after feasibility, l1 objective, one-step output and deterministic-status parity pass.
+12. Run a P01 B=50 mechanism check FIRST with the full mu path and all variance/precision diagnostics. It cannot satisfy the formal pilot gate.
+13. If the mechanism check is coherent, rerun P01-P06 from scratch at the frozen pilot replication counts. The [0.80,1.20] SE/SD and [0.88,0.98] broad coverage thresholds are not relaxed; the hard first-order calibration gate is evaluated at P05, with P06 used for scaling confirmation. P01-P04 retain correctness/identity/failure-accounting requirements.
+14. If P05 fails after these corrections, stop for another theory review. Do not add an empirical SE multiplier, widen thresholds, or choose a correction by coverage.
+15. GSE65391 download/build/audit and prediction-code work may proceed. Confirmatory inference remains blocked until the small-sample variance rule is frozen from simulation evidence.
