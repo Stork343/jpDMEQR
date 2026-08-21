@@ -57,7 +57,10 @@ variance_ladder_one_v2 <- function(dat, fit, beta_target, population_asset,
                                    Gs = NULL,
                                    h = fit$fit_object$components$h %||% 0,
                                    nuisance_control = NULL) {
-  fit_names <- names(fit$beta_hat)
+  # Use the FIT's own design dimension (for TRUE-SUPPORT this is the oracle
+  # sub-design, not the padded full beta_hat).
+  fit_names <- names(fit$fit_object$beta)
+  if (is.null(fit_names) || !coordinate %in% fit_names) fit_names <- names(fit$beta_hat)
   k <- match(coordinate, fit_names)
   e <- numeric(length(fit_names)); e[k] <- 1
   Hf <- fit$fit_object$components$hessian

@@ -417,8 +417,10 @@ run_one_replication_v2 <- function(root, config, replicate,
       # computed once per replication and shared across coordinates. Only for
       # reference-profile methods where the POP-H asset and exact rows exist.
       ladder_Gs <- NULL
-      ladder_wanted <- method_id %in% c("PROFILE-DQR", "PROFILE-DQR-TRUE-SUPPORT",
-                                        "PROFILE-DQR-POP-H") &&
+      # Ladder is computed on the FULL analysis design (dat), so only for the
+      # full-design reference methods; TRUE-SUPPORT operates on the oracle
+      # sub-design and its target-scores need a separate sub-design pass.
+      ladder_wanted <- method_id %in% c("PROFILE-DQR", "PROFILE-DQR-POP-H") &&
         !is.null(population_asset) && !is.null(population_asset$directions) &&
         length(coord_names) > 0 && exists("target_residual_scores_v2", mode = "function")
       if (ladder_wanted) {
