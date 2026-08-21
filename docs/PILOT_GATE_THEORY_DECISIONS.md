@@ -1,17 +1,24 @@
 # Pilot-gate theory decisions
 
-The authoritative detailed decision is stored in `results/preflight/PILOT_GATE_THEORY_DECISION.md` at the same commit. This short document promotes its status into the documentation hierarchy so subsequent agents do not treat the failed-pilot questions as unresolved.
+The current authoritative second-round decision is:
 
-Until `docs/METHOD_SPECIFICATION.md`, code, configs and tests are synchronised, the following decisions supersede the old provisions on sandwich meat, primary inference bandwidth and Dantzig tuning:
+`results/preflight/PILOT_V2_THEORY_DECISION_ROUND2.md`
 
-1. Primary Wald meat for the **unsmoothed** regularised profile target uses the ordinary quantile score
-   `psi_tau(u)=tau-I(u<0)` at fitted profile residuals. The smoothed-score meat is retained only as a diagnostic/sensitivity. The bread remains the corrected smoothed profile Hessian.
-2. Replace the primary inferential bandwidth `h=c_h n^{-1/3}` by `h=c_h n^{-3/10}`, `c_h in {0.75,1,1.25}`. This gives both `sqrt(n) h^2 -> 0` and `n h^3 -> infinity`.
-3. Expand the Dantzig multiplier candidates to `c_mu in {0.10,0.25,0.50,1,2,4}`. Feasibility alone is insufficient. Select the constant without truth/coverage using the frozen cluster-level inverse-Hessian cross-validation rule in the detailed decision and add inverse-defect/POP-H row diagnostics.
-4. No scalar cluster-size correction and no empirical SE multiplier are permitted.
-5. Existing pilot thresholds remain unchanged until the corrected pipeline is rerun.
-6. A pure `mu` change does not mathematically change target/direction assets, but this decision also changes `h`; therefore POP-H directions must be rebuilt. Profile-target assets may be revalidated if their mathematical dependency hash is unchanged.
-7. Fix POP-H construction so its analysis bandwidth is determined by the **scenario analysis cluster count**, not by the population Monte Carlo sample size.
-8. Retain Module-A `n=100` cells as stress/scaling cells; do not claim near-nominal inference unless the corrected results support it.
+It supersedes the Dantzig selection/gating and pilot-calibration provisions of `results/preflight/PILOT_GATE_THEORY_DECISION.md`. All non-conflicting round-one decisions remain in force.
 
-No final-scale simulation or confirmatory empirical inference is authorised until the detailed implementation sequence in `results/preflight/PILOT_GATE_THEORY_DECISION.md` is completed and a new pilot gate passes.
+The following rules are now authoritative:
+
+1. The inferential target remains the **unsmoothed regularised profile parameter**. The exact profile score and Schur-complement Hessian definitions in `docs/METHOD_SPECIFICATION.md` are unchanged.
+2. The primary asymptotic Wald meat remains the ordinary quantile cluster score at fitted profile residuals; smoothed-score meat remains a diagnostic. The residual oracle SE/SD shortfall is **not** repaired by a scalar multiplier. A target-score/fitted-score/population first-order variance ladder and a TRUE-SUPPORT delete-one-cluster jackknife must determine whether the remaining gap is score plug-in/leverage bias or a genuine nonlinear remainder.
+3. No additional scalar correction for unequal `m_i` is authorised. P01's bounded non-informative cluster sizes are already represented by `m_i^{-1}` cluster scores.
+4. Primary inference bandwidth remains `h=c_h n^{-3/10}`, `c_h in {0.75,1,1.25}`.
+5. The previous **one-SE/largest-in-band Dantzig rule is revoked**. For `n<200`, use deterministic two-fold cluster CV; for `n>=200`, use four folds. The primary validation loss is held-out inverse defect `||H_val omega_train-e_k||_inf`. Select the smallest mean defect; numerical ties go to the **smaller mu**. The inverse-quadratic loss is diagnostic only.
+6. The Dantzig multiplier grid for the next pilot is `c_mu in {0.02,0.05,0.10,0.25,0.50,1,2,4}`. Infeasible candidates are recorded; no further downward expansion is allowed without another theory decision.
+7. `D_k=sqrt(n) delta_k ||beta_hat-beta_star||_1/sigma0_pop` is a conservative Hölder upper bound. The old `median(D_k)<0.5, Q90(D_k)<1` values are **not hard freeze gates**. Record `D_k`, but also record the actual simulation-only normalized inverse-defect inner product, POP-H row errors/cosine similarity and the normalized Bahadur remainder. None may tune `mu`.
+8. P01--P04 remain stress/diagnostic cells. Add P05 (`n=200,p=500,s=5,tau=0.5,q=1`, baseline Gaussian random intercept) and P06 (`n=400,p=500,s=5`, same DGP). The `[0.80,1.20]` SE/SD and broad coverage calibration thresholds are **not relaxed**; the hard first-order calibration gate is assessed at P05, with P06 used to confirm scaling. P01--P04 must still pass correctness/identity/failure-accounting gates and are reported even when calibration is poor.
+9. Profile-target assets remain reusable when their dependency hash is unchanged. Their own small target-approximation bandwidth need not equal the analysis bandwidth. POP-H assets are defined at `h_analysis=c_h n_analysis^{-3/10}`; the population size controls Monte Carlo accuracy only. Top-level `n_analysis`, `h_analysis`, `sigma0_pop`, and `Sigma0_population` are the intended audit fields.
+10. HiGHS is authorised as an LP solver for the identical Dantzig program after a prospective parity suite against CLARABEL on at least 20 representative rows. The solver change is numerical, not methodological.
+11. Keep Module-A `n=100` as a prespecified finite-cluster boundary cell. Manuscript language is result-contingent: calibration is assessed over the `n=100,200,400` sequence; say it approaches nominal only if the results show that trend.
+12. GSE65391 remains viable, but confirmatory inference at roughly 129 subjects stays blocked until the small-sample variance mechanism is resolved. Low-dimensional confirmatory modules require a prespecified subject-level jackknife/leverage-correction audit; high-dimensional exploratory gene intervals require acceptable precision-row stability in a comparable simulation regime.
+
+No final-scale `B=500/1000` simulation or confirmatory empirical inference is authorised until the round-two implementation/action sequence is completed and a fresh freeze manifest passes.
