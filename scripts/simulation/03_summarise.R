@@ -110,7 +110,7 @@ if ("POOLED-QR-LASSO" %in% metrics$method_id) {
 
 if (pilot_gate_requested) {
   proposed <- metrics[metrics$method_id == "PROFILE-DQR", , drop = FALSE]
-  required_ids <- sprintf("P%02d", 1:4)
+  required_ids <- sprintf("P%02d", 1:6)
   per_id <- split(proposed, proposed$experiment_id)
   convergence_pass <- all(vapply(required_ids, function(id) {
     d <- per_id[[id]]
@@ -132,14 +132,24 @@ if (pilot_gate_requested) {
     A_k_median = if (length(a_vals)) stats::median(a_vals) else NA_real_,
     A_k_q90 = if (length(a_vals)) stats::quantile(a_vals, 0.9, na.rm = TRUE, names = FALSE) else NA_real_
   )
+  # Round-2 (A2): the HARD first-order calibration gate is P05 (n=200);
+  # P06 (n=400) is the scaling confirmation, P01-P04 are stress cells.
   baseline_cov <- coverage_summary[
-    coverage_summary$experiment_id == "P01" &
+    coverage_summary$experiment_id == "P05" &
       coverage_summary$method_id == "PROFILE-DQR", , drop = FALSE
   ]
   se_ratio_pass <- nrow(baseline_cov) &&
     all(baseline_cov$se_sd_ratio >= 0.80 & baseline_cov$se_sd_ratio <= 1.20, na.rm = TRUE)
   coverage_pass <- nrow(baseline_cov) &&
     all(baseline_cov$coverage >= 0.88 & baseline_cov$coverage <= 0.98, na.rm = TRUE)
+  # P06 scaling summary (diagnostic, not a pass gate)
+  p06_cov <- coverage_summary[
+    coverage_summary$experiment_id == "P06" &
+      coverage_summary$method_id == "PROFILE-DQR", , drop = FALSE
+  ]
+  p06_scaling <- if (nrow(p06_cov)) {
+    list(se_sd_ratio = p06_cov$se_sd_ratio, coverage = p06_cov$coverage)
+  } else NULL
   runner_failure_path <- file.path(run_dir, "runner_failures.csv")
   runner_failure_count <- if (file.exists(runner_failure_path)) nrow(read.csv(runner_failure_path)) else 0L
   missing_method_pass <- !any(metrics$status == "not_implemented")
@@ -155,6 +165,8 @@ if (pilot_gate_requested) {
     identity_pass = identity_pass,
     dantzig_pass = dantzig_pass,
     inverse_defect_diagnostic = inverse_defect_diagnostic,
+    p06_scaling = p06_scaling,
+    calibration_baseline = "P05",
     se_ratio_pass = se_ratio_pass,
     coverage_pass = coverage_pass,
     no_runner_failures = runner_failure_count == 0L,

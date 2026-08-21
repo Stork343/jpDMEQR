@@ -413,6 +413,24 @@ run_one_replication_v2 <- function(root, config, replicate,
         delta_l1 <- NA_real_
       }
       coord_names <- intersect(inf_tab$coordinate, names(beta_target))
+      # Oracle variance ladder (round-2 A1): target unsmoothed scores at beta*
+      # computed once per replication and shared across coordinates. Only for
+      # reference-profile methods where the POP-H asset and exact rows exist.
+      ladder_Gs <- NULL
+      ladder_wanted <- method_id %in% c("PROFILE-DQR", "PROFILE-DQR-TRUE-SUPPORT",
+                                        "PROFILE-DQR-POP-H") &&
+        !is.null(population_asset) && !is.null(population_asset$directions) &&
+        length(coord_names) > 0 && exists("target_residual_scores_v2", mode = "function")
+      if (ladder_wanted) {
+        ladder_Gs <- tryCatch(
+          target_residual_scores_v2(
+            dat, beta_target, config$tau, tuning$lambda_gamma,
+            h = tuning$h,
+            nuisance_control = list(reltol = 1e-10, maxit = 300L, grad_tol = 1e-7)
+          ),
+          error = function(e) NULL
+        )
+      }
       for (nm in coord_names) {
         rr <- which(inf_tab$coordinate == nm)[1]
         se <- as.numeric(inf_tab$se[rr])
@@ -427,6 +445,36 @@ run_one_replication_v2 <- function(root, config, replicate,
           fit, population_asset, nm, delta_l1, dat$n_clusters, config$tau,
           beta_star = as.numeric(beta_target[nm])
         )
+        ladd <- if (!is.null(ladder_Gs) && exists("variance_ladder_one_v2", mode = "function")) {
+          tryCatch(
+            variance_ladder_one_v2(
+              dat, fit, beta_target, population_asset, nm, config$tau,
+              tuning$lambda_gamma, Gs = ladder_Gs, h = tuning$h
+            ),
+            error = function(e) NULL
+          )
+        } else NULL
+        ncl <- dat$n_clusters
+        lse1 <- if (!is.null(ladd)) sqrt(max(ladd$meat1, 0) / ncl) else NA_real_
+        lse2 <- if (!is.null(ladd)) sqrt(max(ladd$meat2, 0) / ncl) else NA_real_
+        lse3 <- if (!is.null(ladd)) sqrt(max(ladd$meat3, 0) / ncl) else NA_real_
+        lse4 <- if (!is.null(ladd)) sqrt(max(ladd$meat4, 0) / ncl) else NA_real_
+        Lk <- if (!is.null(ladd)) ladd$L_k else NA_real_
+        # Finite-sample sandwich diagnostics (round-2 A1): CR0/CR3/KC are
+        # cheap per-coordinate; only meaningful where the exact row is close
+        # (TRUE-SUPPORT / low-dim), but computed for all reference-profile rows.
+        fsd <- if (exists("finite_sample_sandwich_diagnostics_v2", mode = "function") &&
+                   !is.null(fit$fit_object$components$unsmoothed_cluster_scores) &&
+                   isTRUE(inf_tab$feasible[rr])) {
+          tryCatch(finite_sample_sandwich_diagnostics_v2(
+            fit$fit_object$components$unsmoothed_cluster_scores,
+            as.numeric(fit$inference_object$directions[[rr]]$omega %||% rep(NA_real_, ncol(dat$X)))
+          ), error = function(e) NULL)
+        } else NULL
+        fs_cr0 <- if (!is.null(fsd)) fsd$se_cr0 else NA_real_
+        fs_cr3 <- if (!is.null(fsd)) fsd$se_cr3 else NA_real_
+        fs_kc <- if (!is.null(fsd)) fsd$se_kc else NA_real_
+        fs_lev <- if (!is.null(fsd)) fsd$leverage_max else NA_real_
         ccount <- ccount + 1L
         coordinate_rows[[ccount]] <- data.frame(
           experiment_id = config$experiment_id,
@@ -471,6 +519,9 @@ run_one_replication_v2 <- function(root, config, replicate,
           D_k = popd$D_k,
           A_k = popd$A_k,
           bahadur_scaled = popd$bahadur_scaled,
+          ladder_L_k = Lk,
+          ladder_se1 = lse1, ladder_se2 = lse2, ladder_se3 = lse3, ladder_se4 = lse4,
+          fs_se_cr0 = fs_cr0, fs_se_cr3 = fs_cr3, fs_se_kc = fs_kc, fs_leverage_max = fs_lev,
           status = fit$status,
           implementation_commit = commit,
           stringsAsFactors = FALSE

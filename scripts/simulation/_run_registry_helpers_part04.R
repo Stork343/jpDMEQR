@@ -65,8 +65,8 @@ validate_registry_contract_v2 <- function(root, config_path,
   if (registry_type == "main" && nrow(cfg) != 78L) {
     add_problem(paste0("Main registry must contain 78 experiment rows; found ", nrow(cfg), "."))
   }
-  if (registry_type == "pilot" && !setequal(cfg$experiment_id, sprintf("P%02d", 1:4))) {
-    add_problem("Pilot registry must contain exactly P01--P04.")
+  if (registry_type == "pilot" && !setequal(cfg$experiment_id, sprintf("P%02d", 1:6))) {
+    add_problem("Pilot registry must contain exactly P01--P06.")
   }
   if (any(!cfg$target_mode %in% c("structural", "profile_mc"))) {
     add_problem("Unknown target_mode in registry.")
