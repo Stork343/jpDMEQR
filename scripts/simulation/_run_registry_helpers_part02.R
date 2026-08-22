@@ -2,15 +2,23 @@
 
 build_tuning_for_analysis_v2 <- function(config, dat) {
   values <- reference_tuning_values_v2(config, p = ncol(dat$X), n = dat$n_clusters)
-  lambda_multiplier <- config$lambda_beta_multipliers[
-    which.min(abs(config$lambda_beta_multipliers - 1))
-  ]
+  # Round-3 first-stage lambda: cluster self-normalised profile-score penalty
+  # (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md section 1). lambda_0,n is the
+  # calibrated base; the coordinate penalty is lambda_0,n * ell_j_final
+  # computed inside fit_profile_lasso_calibrated_v2. lambda_beta (the old
+  # sqrt(log p / n) anchor) is retained for benchmark comparators whose
+  # first stage is unchanged (e.g. SQR-DEBIASED-IID).
+  lambda_meta <- lambda_0_n_v2(dat$n_clusters, ncol(dat$X))
   # Primary inferential bandwidth h = c_h n^{-3/10} (theory decision:
   # PILOT_GATE_THEORY_DECISIONS.md). Gives sqrt(n) h^2 -> 0 and n h^3 -> Inf.
   h <- config$h_multiplier * dat$n_clusters^(-3 / 10)
   list(
     h = h,
-    lambda_beta = lambda_multiplier * sqrt(log(max(ncol(dat$X), 2)) / dat$n_clusters),
+    lambda_beta = 1 * sqrt(log(max(ncol(dat$X), 2)) / dat$n_clusters),
+    lambda_0_n = lambda_meta$lambda_0,
+    lambda_alpha = lambda_meta$alpha,
+    lambda_normal_quantile = lambda_meta$normal_quantile,
+    lambda_safety_constant = lambda_meta$safety_constant,
     lambda_gamma = config$lambda_gamma,
     mu_grid = config$dantzig_multipliers *
       (sqrt(log(max(ncol(dat$X), 2)) / (dat$n_clusters * h)) + h^2),
@@ -281,9 +289,13 @@ run_one_replication_v2 <- function(root, config, replicate,
         control = list(
           ci_level = 0.95,
           fit_control = list(
-            max_iter = 180L,
-            beta_tol = 1e-6,
-            kkt_tol = 1e-5,
+            # Round-3 reference solver controls
+            # (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md section 3):
+            # max_iter >= 2000, max_backtrack >= 50, beta_tol = 1e-7.
+            max_iter = 2000L,
+            max_backtrack = 50L,
+            beta_tol = 1e-7,
+            kkt_normalized_tol = 1e-3,
             nuisance_control = list(
               reltol = 1e-11,
               maxit = 400L,
@@ -380,6 +392,7 @@ run_one_replication_v2 <- function(root, config, replicate,
       forced_target_count = length(prepared$screening$forced_target_names),
       h = tuning$h,
       lambda_beta = tuning$lambda_beta,
+      lambda_0_n = tuning$lambda_0_n,
       lambda_gamma = tuning$lambda_gamma,
       selected_size = sel$selected_size,
       tpr = sel$tpr,
@@ -396,6 +409,28 @@ run_one_replication_v2 <- function(root, config, replicate,
       kkt_residual = fit$kkt_residual %||% NA_real_,
       profile_identity_error = fit$profile_identity_error %||% NA_real_,
       max_nuisance_gradient = fit$max_nuisance_gradient %||% NA_real_,
+      lambda_rule = fit$lambda_rule %||% NA_character_,
+      lambda_alpha = fit$lambda_alpha %||% NA_real_,
+      lambda_normal_quantile = fit$lambda_normal_quantile %||% NA_real_,
+      lambda_safety_constant = fit$lambda_safety_constant %||% NA_real_,
+      lambda_base = fit$lambda_base %||% NA_real_,
+      lambda_loading_pass0_min = fit$lambda_loading_pass0_min %||% NA_real_,
+      lambda_loading_pass0_median = fit$lambda_loading_pass0_median %||% NA_real_,
+      lambda_loading_pass0_max = fit$lambda_loading_pass0_max %||% NA_real_,
+      lambda_loading_pass1_min = fit$lambda_loading_pass1_min %||% NA_real_,
+      lambda_loading_pass1_median = fit$lambda_loading_pass1_median %||% NA_real_,
+      lambda_loading_pass1_max = fit$lambda_loading_pass1_max %||% NA_real_,
+      lambda_coordinate_min = fit$lambda_coordinate_min %||% NA_real_,
+      lambda_coordinate_median = fit$lambda_coordinate_median %||% NA_real_,
+      lambda_coordinate_max = fit$lambda_coordinate_max %||% NA_real_,
+      zero_profile_score_max = fit$zero_profile_score_max %||% NA_real_,
+      zero_kkt_ratio_max = fit$zero_kkt_ratio_max %||% NA_real_,
+      preliminary_kkt_normalized = fit$preliminary_kkt_normalized %||% NA_real_,
+      final_kkt_normalized = fit$final_kkt_normalized %||% NA_real_,
+      final_kkt_absolute = fit$final_kkt_absolute %||% NA_real_,
+      first_stage_iterations = fit$first_stage_iterations %||% NA_integer_,
+      first_stage_beta_change = fit$first_stage_beta_change %||% NA_real_,
+      first_stage_nonzero_count = fit$first_stage_nonzero_count %||% NA_integer_,
       target_type = target_obj$target_type,
       target_mc_se = target_obj$target_mc_se,
       implementation_commit = commit,

@@ -37,7 +37,8 @@ run_registry_v2 <- function(root,
                             allow_missing_benchmarks = TRUE,
                             base_seed = 20260817L,
                             experiment_ids = character(),
-                            final = FALSE) {
+                            final = FALSE,
+                            replicate_subset = NULL) {
   cfg_df <- read_simulation_registry_v2(config_path)
   if (length(experiment_ids)) {
     cfg_df <- cfg_df[cfg_df$experiment_id %in% experiment_ids, , drop = FALSE]
@@ -51,7 +52,11 @@ run_registry_v2 <- function(root,
     B <- if (is.finite(max_reps)) {
       min(as.integer(cfg$replications), as.integer(max_reps))
     } else as.integer(cfg$replications)
-    for (r in seq_len(B)) {
+    reps <- seq_len(B)
+    if (!is.null(replicate_subset)) {
+      reps <- reps[reps %in% as.integer(replicate_subset)]
+    }
+    for (r in reps) {
       tcount <- tcount + 1L
       cfg$replicate <- r
       tasks[[tcount]] <- list(config = cfg, replicate = r)

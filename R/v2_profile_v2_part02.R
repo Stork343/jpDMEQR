@@ -239,3 +239,75 @@ kkt_residual_profile_v2 <- function(beta, score, lambda_beta, penalty_factor,
   out[inactive] <- pmax(0, abs(score[inactive]) - lambda_beta * pf[inactive])
   max(out)
 }
+
+# -----------------------------------------------------------------------------
+# Round-3 cluster self-normalised first-stage penalty (METHOD_SPECIFICATION_
+# ROUND3_AMENDMENT.md sections 1-3).
+# -----------------------------------------------------------------------------
+
+# ell_j(b) = [ n^{-1} sum_i { s_ij(b) - sbar_j(b) }^2 ]^{1/2}: the standard
+# deviation across INDEPENDENT CLUSTERS of the centred smoothed cluster score
+# contributions (n denominator, exactly as specified -- not the n-1 sample sd).
+score_loadings_v2 <- function(cluster_scores) {
+  S <- as.matrix(cluster_scores)
+  if (!nrow(S) || ncol(S) < 1L) stop("cluster_scores must be a non-empty matrix.")
+  if (any(!is.finite(S))) {
+    stop("Non-finite cluster score contributions in score_loadings_v2.")
+  }
+  if (nrow(S) == 1L) return(rep(0, ncol(S)))
+  S <- S - matrix(colMeans(S), nrow(S), ncol(S), byrow = TRUE)
+  sqrt(colMeans(S^2))
+}
+
+# Freeze: alpha_lambda,n = 0.10 / log(max(n,3));
+#        q_lambda,n      = Phi^{-1}(1 - alpha/(2 p_P));
+#        lambda_0,n      = 1.10 q_lambda,n / sqrt(n).
+lambda_0_n_v2 <- function(n, p_penalized, safety_constant = 1.10) {
+  n <- as.integer(n)
+  p_penalized <- as.integer(p_penalized)
+  if (n < 2L || p_penalized < 1L) stop("lambda_0_n_v2 requires n>=2 and p_P>=1.")
+  alpha <- 0.10 / log(max(n, 3))
+  q <- stats::qnorm(1 - alpha / (2 * p_penalized))
+  lambda_0 <- safety_constant * q / sqrt(n)
+  list(
+    alpha = alpha,
+    normal_quantile = q,
+    safety_constant = safety_constant,
+    lambda_0 = lambda_0
+  )
+}
+
+# Scale-normalised weighted KKT residual R_KKT (round-3 Q1(b)):
+#   r_j = |g_j + p_j sign(beta_j)|          j in P, |beta_j| > 1e-10
+#       = max(0, |g_j| - p_j)              j in P, |beta_j| <= 1e-10
+#       = |g_j|                            j in U (p_j == 0)
+#   p_ref = median positive p_j;
+#   R_KKT = max( max_{j in P} r_j/p_j, max_{j in U} r_j/p_ref ).
+# `penalty` is the EFFECTIVE coordinate penalty vector p_j (zero on U).
+kkt_residual_normalized_v2 <- function(beta, score, penalty,
+                                       active_tol = 1e-10) {
+  beta <- as.numeric(beta)
+  score <- as.numeric(score)
+  p <- as.numeric(penalty)
+  if (length(beta) != length(score) || length(score) != length(p)) {
+    stop("beta, score and penalty must have equal length.")
+  }
+  unpen <- p == 0
+  pen <- !unpen
+  r <- numeric(length(p))
+  active <- pen & abs(beta) > active_tol
+  inactive <- pen & !active
+  r[active] <- abs(score[active] + p[active] * sign(beta[active]))
+  r[inactive] <- pmax(0, abs(score[inactive]) - p[inactive])
+  r[unpen] <- abs(score[unpen])
+  p_pos <- p[pen & p > 0]
+  p_ref <- if (length(p_pos)) stats::median(p_pos) else NA_real_
+  if (!is.finite(p_ref) || p_ref <= 0) {
+    # No positive penalty anywhere: pure unpenalised KKT is the max |score|.
+    return(max(r))
+  }
+  max(c(
+    if (any(pen)) max(r[pen] / p[pen]) else 0,
+    if (any(unpen)) max(r[unpen]) / p_ref else 0
+  ))
+}

@@ -24,14 +24,22 @@ fit_profile_lasso_v2 <- function(y,
   beta <- as.numeric(beta_init %||% rep(0, p))
   if (length(beta) != p) stop("beta_init has wrong length.")
 
-  max_iter <- control$max_iter %||% 200L
-  beta_tol <- control$beta_tol %||% 1e-6
-  kkt_tol <- control$kkt_tol %||% 1e-5
+  # Round-3 reference solver controls (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md
+  # section 3): max_iter >= 2000, max_backtrack >= 50, beta_tol = 1e-7.
+  # The convergence beta-change rule is relative:
+  #   last beta_change <= beta_tol * max(1, ||beta_hat||_inf),
+  # and KKT acceptance uses the scale-normalised weighted residual R_KKT
+  # (kkt_residual_normalized_v2) with R_KKT <= kkt_normalized_tol.
+  max_iter <- control$max_iter %||% 2000L
+  beta_tol <- control$beta_tol %||% 1e-7
+  kkt_normalized_tol <- control$kkt_normalized_tol %||% 1e-3
   backtrack_factor <- control$backtrack_factor %||% 0.5
-  max_backtrack <- control$max_backtrack %||% 30L
+  max_backtrack <- control$max_backtrack %||% 50L
   min_step <- control$min_step %||% 1e-12
   verbose <- isTRUE(control$verbose)
   nuisance_control <- control$nuisance_control %||% list()
+
+  effective_penalty <- lambda_beta * penalty_factor
 
   current <- profile_components_v2(
     y, X, Z, cluster_id, beta, tau, h, lambda_gamma,
@@ -43,31 +51,64 @@ fit_profile_lasso_v2 <- function(y,
   converged <- FALSE
   failure_stage <- ""
 
+  # Optimiser implementation detail (statistical object unchanged: the
+  # acceptance contract is the scale-normalised KKT). Accelerated proximal
+  # gradient with momentum, monotone composite acceptance, and periodic
+  # curvature (Hessian) refresh: intermediate candidates need only the
+  # objective/score, which cuts the per-iteration cost by ~5x.
+  accelerate <- isTRUE(control$accelerate %||% TRUE)
+  refresh_every <- max(1L, as.integer(control$hessian_refresh %||% 5L))
+  t_mom <- 1
+  beta_prev <- beta
+  step <- NA_real_
+
   for (iter in seq_len(max_iter)) {
-    eigmax <- largest_eigenvalue_power_v2(current$hessian)
-    step <- 1 / max(eigmax, 1e-6)
-    score <- current$score
+    beta_prox <- if (accelerate && iter > 1L) {
+      beta + ((t_mom - 1) / t_mom) * (beta - beta_prev)
+    } else {
+      beta
+    }
+    refresh <- !accelerate || (iter %% refresh_every) == 1L
+    comp_prox <- tryCatch(
+      profile_components_v2(
+        y, X, Z, cluster_id, beta_prox, tau, h, lambda_gamma,
+        gamma_init = current$gamma, need_hessian = refresh,
+        nuisance_control = nuisance_control
+      ),
+      error = function(e) e
+    )
+    if (inherits(comp_prox, "error")) {
+      failure_stage <- "profile_components"
+      break
+    }
+    if (refresh) {
+      eigmax <- largest_eigenvalue_power_v2(comp_prox$hessian)
+      step <- 1 / max(eigmax, 1e-6)
+    }
+    score <- comp_prox$score
     accepted <- FALSE
     candidate <- NULL
 
     for (bt in 0:max_backtrack) {
       beta_new <- soft_threshold_weighted_v2(
-        beta - step * score,
+        beta_prox - step * score,
         step * lambda_beta * penalty_factor
       )
-      delta <- beta_new - beta
+      delta <- beta_new - beta_prox
       candidate <- tryCatch(
         profile_components_v2(
           y, X, Z, cluster_id, beta_new, tau, h, lambda_gamma,
-          gamma_init = current$gamma, need_hessian = TRUE,
+          gamma_init = comp_prox$gamma, need_hessian = FALSE,
           nuisance_control = nuisance_control
         ),
         error = function(e) e
       )
       if (!inherits(candidate, "error")) {
-        upper <- current$objective + sum(score * delta) +
+        upper <- comp_prox$objective + sum(score * delta) +
           sum(delta^2) / (2 * step) + 1e-12
-        if (candidate$objective <= upper) {
+        composite_new <- candidate$objective +
+          lambda_beta * sum(penalty_factor * abs(beta_new))
+        if (candidate$objective <= upper && composite_new <= composite + 1e-12) {
           accepted <- TRUE
           break
         }
@@ -77,15 +118,22 @@ fit_profile_lasso_v2 <- function(y,
     }
 
     if (!accepted) {
+      # Momentum restart: fall back to a plain proximal step from beta.
+      if (accelerate && t_mom > 1) {
+        t_mom <- 1
+        beta_prev <- beta
+        next
+      }
       failure_stage <- "profile_backtracking"
       break
     }
 
-    composite_new <- candidate$objective +
-      lambda_beta * sum(penalty_factor * abs(beta_new))
     beta_change <- max(abs(beta_new - beta))
     kkt <- kkt_residual_profile_v2(
       beta_new, candidate$score, lambda_beta, penalty_factor
+    )
+    kkt_norm <- kkt_residual_normalized_v2(
+      beta_new, candidate$score, lambda_beta * penalty_factor
     )
 
     history[[iter]] <- data.frame(
@@ -94,8 +142,10 @@ fit_profile_lasso_v2 <- function(y,
       composite_objective = composite_new,
       beta_change = beta_change,
       kkt_residual = kkt,
+      kkt_normalized = kkt_norm,
       step = step,
       backtracks = bt,
+      prox_refresh = refresh,
       nuisance_converged = candidate$nuisance_converged,
       max_nuisance_gradient = candidate$max_nuisance_gradient,
       profile_identity_error = candidate$profile_identity_error,
@@ -104,24 +154,46 @@ fit_profile_lasso_v2 <- function(y,
 
     if (verbose) {
       message(sprintf(
-        "iter=%d composite=%.8f change=%.3e kkt=%.3e step=%.3e",
-        iter, composite_new, beta_change, kkt, step
+        "iter=%d composite=%.8f change=%.3e kkt=%.3e kkt_norm=%.3e step=%.3e",
+        iter, composite_new, beta_change, kkt, kkt_norm, step
       ))
     }
 
+    beta_prev <- beta
     beta <- beta_new
     current <- candidate
     composite <- composite_new
+    if (accelerate) t_mom <- (1 + sqrt(1 + 4 * t_mom^2)) / 2
 
-    if (beta_change <= beta_tol && kkt <= kkt_tol && current$nuisance_converged) {
+    beta_change_ok <- beta_change <= beta_tol * max(1, max(abs(beta_new)))
+    if (beta_change_ok && kkt_norm <= kkt_normalized_tol &&
+        current$nuisance_converged && all(is.finite(beta)) &&
+        all(is.finite(candidate$score)) && is.finite(composite_new)) {
       converged <- TRUE
       break
     }
   }
 
+  # The returned components must carry the Hessian (used by the precision and
+  # variance stages); recompute once if the last accepted iterate was a
+  # no-Hessian candidate.
+  if (is.null(current$hessian)) {
+    current <- tryCatch(
+      profile_components_v2(
+        y, X, Z, cluster_id, beta, tau, h, lambda_gamma,
+        gamma_init = current$gamma, need_hessian = TRUE,
+        nuisance_control = nuisance_control
+      ),
+      error = function(e) current
+    )
+  }
+
   history <- do.call(rbind, history[!vapply(history, is.null, logical(1))])
   final_kkt <- kkt_residual_profile_v2(
     beta, current$score, lambda_beta, penalty_factor
+  )
+  final_kkt_norm <- kkt_residual_normalized_v2(
+    beta, current$score, lambda_beta * penalty_factor
   )
 
   list(
@@ -136,10 +208,249 @@ fit_profile_lasso_v2 <- function(y,
     converged = converged,
     failure_stage = failure_stage,
     kkt_residual = final_kkt,
+    kkt_normalized = final_kkt_norm,
+    first_stage_beta_change = if (nrow(history)) tail(history$beta_change, 1) else NA_real_,
+    first_stage_nonzero_count = sum(abs(beta) > 1e-10),
     iterations = nrow(history),
     history = history,
     call = match.call()
   )
+}
+
+# -----------------------------------------------------------------------------
+# Round-3 cluster self-normalised first-stage calibration
+# (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md sections 1.1-1.3, 3):
+#   pass 0:  ell_j^(0) at b^(0) = 0;
+#   pass 1:  preliminary fit with p_j^(0) = lambda_0,n * ell_j^(0),
+#            then ell_j^(1) at b^(1);
+#   final:   ell_j_final = max{ell_j^(0), ell_j^(1)};
+#            warm-started refit with p_j = lambda_0,n * ell_j_final on P,
+#            zero penalty on U.
+# Exactly one loading update. No truth/coverage/CV enters the penalty.
+# -----------------------------------------------------------------------------
+fit_profile_lasso_calibrated_v2 <- function(y,
+                                            X,
+                                            Z,
+                                            cluster_id,
+                                            tau,
+                                            h,
+                                            lambda_gamma = 1,
+                                            lambda_0_n,
+                                            base_penalty_factor = NULL,
+                                            beta_init = NULL,
+                                            control = list()) {
+  validate_tau_h_v2(tau, h)
+  X <- assert_numeric_matrix_v2(X, "X")
+  p <- ncol(X)
+  base_pf <- as.numeric(base_penalty_factor %||% rep(1, p))
+  if (length(base_pf) != p || any(!is.finite(base_pf)) || any(base_pf < 0)) {
+    stop("Invalid base_penalty_factor.")
+  }
+  P_idx <- which(base_pf > 0)
+  n_pen <- length(P_idx)
+  n_clusters_fit <- length(unique(cluster_id))
+
+  # No penalised coordinates: plain (unpenalised) fit, no loading machinery.
+  if (!n_pen) {
+    fit <- fit_profile_lasso_v2(
+      y, X, Z, cluster_id, tau, h, lambda_beta = 0,
+      lambda_gamma = lambda_gamma,
+      penalty_factor = base_pf,
+      beta_init = beta_init,
+      control = modifyList(
+        list(max_iter = 2000L, max_backtrack = 50L, beta_tol = 1e-7,
+             kkt_normalized_tol = 1e-3),
+        control$fit_control %||% list()
+      )
+    )
+    fit$first_stage_calibrated <- FALSE
+    return(fit)
+  }
+
+  # lambda_0,n is a function of (n, p_P) of the FITTED problem; compute it from
+  # the actual fit design (authoritative). For full-design methods this equals
+  # tuning$lambda_0_n; screened sub-designs get their own value.
+  lambda_meta <- lambda_0_n_v2(n_clusters_fit, n_pen)
+  if (is.null(lambda_0_n)) {
+    lambda_0_n <- lambda_meta$lambda_0
+  } else if (abs(lambda_meta$lambda_0 - lambda_0_n) > 1e-12 * max(1, lambda_0_n)) {
+    warning("lambda_0_n differs from the fit-design value; using the fit-design value.")
+    lambda_0_n <- lambda_meta$lambda_0
+  }
+  if (!is.finite(lambda_0_n) || lambda_0_n <= 0) stop("lambda_0_n must be positive.")
+
+  fit_control <- modifyList(
+    list(max_iter = 2000L, max_backtrack = 50L, beta_tol = 1e-7,
+         kkt_normalized_tol = 1e-3),
+    control$fit_control %||% list()
+  )
+  nuisance_control <- control$nuisance_control %||%
+    list(reltol = 1e-11, maxit = 400L, grad_tol = 1e-8)
+
+  base_audit <- list(
+    lambda_rule = "cluster-score-loading-v3",
+    lambda_alpha = lambda_meta$alpha,
+    lambda_normal_quantile = lambda_meta$normal_quantile,
+    lambda_safety_constant = lambda_meta$safety_constant,
+    lambda_base = lambda_0_n
+  )
+
+  loading_failure <- function(reason) {
+    out <- base_audit
+    out$beta <- setNames(rep(NA_real_, p), colnames(X))
+    out$gamma <- NULL
+    out$components <- NULL
+    out$converged <- FALSE
+    out$failure_stage <- reason
+    out$first_stage_calibrated <- TRUE
+    out$kkt_residual <- NA_real_
+    out$kkt_normalized <- NA_real_
+    out$iterations <- NA_integer_
+    out
+  }
+
+  # Pass 0: loadings at b^(0) = 0 (nuisance profiled at 0).
+  comp0 <- tryCatch(
+    profile_components_v2(
+      y, X, Z, cluster_id, rep(0, p), tau, h, lambda_gamma,
+      gamma_init = NULL, need_hessian = FALSE,
+      nuisance_control = nuisance_control
+    ),
+    error = function(e) e
+  )
+  if (inherits(comp0, "error")) return(loading_failure("lambda_loading_pass0"))
+  ell0 <- score_loadings_v2(comp0$cluster_scores)
+  zero_profile_score_max <- max(abs(comp0$score))
+  p0 <- lambda_0_n * ell0
+  zero_kkt_ratio_max <- if (n_pen && any(p0[P_idx] > 0)) {
+    max(abs(comp0$score[P_idx]) / p0[P_idx])
+  } else NA_real_
+
+  # Degenerate loadings (amendment 1.3): ell_ref = median positive loading on P.
+  check_loadings <- function(ell) {
+    ell_pos <- ell[P_idx]
+    ell_ref <- stats::median(ell_pos[ell_pos > 0])
+    !is.finite(ell_ref) || any(!is.finite(ell_pos)) ||
+      any(ell_pos < 1e-8 * ell_ref)
+  }
+  if (check_loadings(ell0)) {
+    return(loading_failure("lambda_loading_degenerate"))
+  }
+
+  # Preliminary fit with p_j^(0) = lambda_0,n * ell_j^(0) on P.
+  fit1 <- tryCatch(
+    fit_profile_lasso_v2(
+      y, X, Z, cluster_id, tau, h, lambda_beta = lambda_0_n,
+      lambda_gamma = lambda_gamma,
+      penalty_factor = ell0 * base_pf,
+      beta_init = beta_init,
+      control = fit_control
+    ),
+    error = function(e) e
+  )
+  if (inherits(fit1, "error")) {
+    out <- loading_failure("penalised_fit")
+    out$preliminary_error <- conditionMessage(fit1)
+    return(out)
+  }
+  preliminary_kkt_normalized <- fit1$kkt_normalized %||% NA_real_
+
+  # Pass 1: loadings at the preliminary fit b^(1).
+  comp1 <- tryCatch(
+    profile_components_v2(
+      y, X, Z, cluster_id, fit1$beta, tau, h, lambda_gamma,
+      gamma_init = fit1$gamma, need_hessian = FALSE,
+      nuisance_control = nuisance_control
+    ),
+    error = function(e) e
+  )
+  if (inherits(comp1, "error")) {
+    out <- loading_failure("lambda_loading_pass1")
+    out$preliminary_kkt_normalized <- preliminary_kkt_normalized
+    return(out)
+  }
+  ell1 <- score_loadings_v2(comp1$cluster_scores)
+  ell_final <- pmax(ell0, ell1)
+  if (check_loadings(ell_final)) {
+    out <- loading_failure("lambda_loading_degenerate")
+    out$preliminary_kkt_normalized <- preliminary_kkt_normalized
+    return(out)
+  }
+
+  # Final fit: warm start at b^(1), penalty p_j = lambda_0,n * ell_j_final.
+  fit <- tryCatch(
+    fit_profile_lasso_v2(
+      y, X, Z, cluster_id, tau, h, lambda_beta = lambda_0_n,
+      lambda_gamma = lambda_gamma,
+      penalty_factor = ell_final * base_pf,
+      beta_init = fit1$beta,
+      control = fit_control
+    ),
+    error = function(e) e
+  )
+  if (inherits(fit, "error")) {
+    out <- loading_failure("penalised_fit")
+    out$preliminary_kkt_normalized <- preliminary_kkt_normalized
+    return(out)
+  }
+
+  # Acceptance contract (amendment section 3):
+  #   R_KKT <= 1e-3; max_nuisance_gradient <= 1e-7;
+  #   last beta_change <= 1e-7 * max(1, ||beta_hat||_inf); all finite.
+  beta_change_ok <- is.finite(fit$first_stage_beta_change) &&
+    fit$first_stage_beta_change <= 1e-7 * max(1, max(abs(fit$beta)))
+  accepted <- isTRUE(fit$converged) &&
+    is.finite(fit$kkt_normalized) && fit$kkt_normalized <= 1e-3 &&
+    is.finite(fit$components$max_nuisance_gradient) &&
+    fit$components$max_nuisance_gradient <= 1e-7 &&
+    beta_change_ok && all(is.finite(fit$beta)) &&
+    is.finite(fit$composite_objective)
+  if (!accepted) {
+    fit$converged <- FALSE
+    fit$failure_stage <- "penalised_fit"
+  }
+
+  # Mandatory sequencing (amendment section 5 / Q2(c)): recompute every
+  # nuisance profile and Hessian contribution at the accepted final beta_hat;
+  # a beta=0 / preliminary / stale Hessian is invalid.
+  comp_final <- tryCatch(
+    profile_components_v2(
+      y, X, Z, cluster_id, fit$beta, tau, h, lambda_gamma,
+      gamma_init = fit$gamma, need_hessian = TRUE,
+      nuisance_control = nuisance_control
+    ),
+    error = function(e) e
+  )
+  if (!inherits(comp_final, "error")) {
+    fit$components <- comp_final
+    fit$gamma <- comp_final$gamma
+  }
+
+  p_final <- lambda_0_n * ell_final
+  fit$first_stage_calibrated <- TRUE
+  fit$lambda_rule <- base_audit$lambda_rule
+  fit$lambda_alpha <- base_audit$lambda_alpha
+  fit$lambda_normal_quantile <- base_audit$lambda_normal_quantile
+  fit$lambda_safety_constant <- base_audit$lambda_safety_constant
+  fit$lambda_base <- lambda_0_n
+  fit$lambda_loading_pass0_min <- min(ell0[P_idx])
+  fit$lambda_loading_pass0_median <- stats::median(ell0[P_idx])
+  fit$lambda_loading_pass0_max <- max(ell0[P_idx])
+  fit$lambda_loading_pass1_min <- min(ell1[P_idx])
+  fit$lambda_loading_pass1_median <- stats::median(ell1[P_idx])
+  fit$lambda_loading_pass1_max <- max(ell1[P_idx])
+  fit$lambda_coordinate_min <- min(p_final[P_idx])
+  fit$lambda_coordinate_median <- stats::median(p_final[P_idx])
+  fit$lambda_coordinate_max <- max(p_final[P_idx])
+  fit$zero_profile_score_max <- zero_profile_score_max
+  fit$zero_kkt_ratio_max <- zero_kkt_ratio_max
+  fit$preliminary_kkt_normalized <- preliminary_kkt_normalized
+  fit$final_kkt_normalized <- fit$kkt_normalized
+  fit$final_kkt_absolute <- fit$kkt_residual
+  fit$first_stage_iterations <- fit$iterations
+  fit$first_stage_beta_change <- fit$first_stage_beta_change
+  fit$first_stage_nonzero_count <- fit$first_stage_nonzero_count
+  fit
 }
 
 # -----------------------------------------------------------------------------

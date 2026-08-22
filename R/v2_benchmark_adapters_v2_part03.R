@@ -91,23 +91,34 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
   set.seed(seed)
   start <- proc.time()[[3]]
   fit <- tryCatch(
-    fit_profile_lasso_v2(
+    fit_profile_lasso_calibrated_v2(
       y = train$y,
       X = train$X,
       Z = train$Z,
       cluster_id = train$cluster_id,
       tau = tau,
       h = tuning$h,
-      lambda_beta = tuning$lambda_beta,
+      lambda_0_n = tuning$lambda_0_n,
       lambda_gamma = tuning$lambda_gamma,
-      penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
-      control = control$fit_control %||% list()
+      base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
+      control = list(
+        fit_control = control$fit_control %||% list(),
+        nuisance_control = control$fit_control$nuisance_control %||% list()
+      )
     ),
     error = function(e) e
   )
   if (inherits(fit, "error")) {
     return(benchmark_failure_v2(
       "PROFILE-DQR-POP-H", "penalised_fit", conditionMessage(fit),
+      proc.time()[[3]] - start
+    ))
+  }
+  # Round-3 numerical acceptance (amendment section 3).
+  if (isTRUE(fit$first_stage_calibrated) && !isTRUE(fit$converged)) {
+    return(benchmark_failure_v2(
+      "PROFILE-DQR-POP-H", fit$failure_stage %||% "penalised_fit",
+      "Round-3 first-stage acceptance failed",
       proc.time()[[3]] - start
     ))
   }
@@ -166,6 +177,17 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
 
   tab <- do.call(rbind, rows)
   elapsed <- proc.time()[[3]] - start
+  audit_names <- c(
+    "lambda_rule", "lambda_alpha", "lambda_normal_quantile",
+    "lambda_safety_constant", "lambda_base",
+    "lambda_loading_pass0_min", "lambda_loading_pass0_median", "lambda_loading_pass0_max",
+    "lambda_loading_pass1_min", "lambda_loading_pass1_median", "lambda_loading_pass1_max",
+    "lambda_coordinate_min", "lambda_coordinate_median", "lambda_coordinate_max",
+    "zero_profile_score_max", "zero_kkt_ratio_max",
+    "preliminary_kkt_normalized", "final_kkt_normalized", "final_kkt_absolute",
+    "first_stage_iterations", "first_stage_beta_change", "first_stage_nonzero_count"
+  )
+  audit <- setNames(lapply(audit_names, function(nm) fit[[nm]] %||% NA_real_), audit_names)
   ans <- list(
     method_id = "PROFILE-DQR-POP-H",
     status = if (fit$converged) "ok" else "warning",
@@ -187,9 +209,10 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
     max_nuisance_gradient = fit$components$max_nuisance_gradient,
     warning_messages = if (fit$converged) character() else
       "Penalised profile fit did not meet all stopping rules.",
-    implementation_version = "profile-v2-population-direction",
+    implementation_version = "profile-v2-population-direction-round3",
     target_scope = "regularised_profile_population_direction"
   )
+  ans[audit_names] <- audit
   benchmark_add_metadata_v2(
     ans,
     reference_identifier = "docs/BENCHMARK_IMPLEMENTATION_ACCEPTANCE.md#profile-dqr-pop-h",
