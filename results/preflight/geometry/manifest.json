@@ -1,0 +1,32 @@
+{
+  "pass": true,
+  "strict": true,
+  "commit_sha": "2102be943fdedf2ed521facc6540faf694d13f48",
+  "branch": "gpt/simulation-freeze-resolution",
+  "seed_count": 20,
+  "case_count": 760,
+  "tau_values": [0.25, 0.5, 0.75],
+  "q_values": [1, 2],
+  "h_multipliers": [0.75, 1, 1.25],
+  "balance_types": ["balanced", "unbalanced"],
+  "finite_difference_steps": [5e-06, 1e-05],
+  "non_diagonal_lambda_checked": true,
+  "dantzig_checked": true,
+  "dantzig_pass": true,
+  "dantzig_residual": 0.050000003816879,
+  "dantzig_mu": 0.05,
+  "thresholds": {
+    "gradient": 0.0002,
+    "hessian": 0.003,
+    "identity": 1e-08,
+    "nuisance": 1e-07,
+    "dantzig": 1e-06
+  },
+  "maxima": {
+    "gradient": 1.41624639468131e-09,
+    "hessian": 0.000122510700421408,
+    "identity": 3.33066907387547e-16,
+    "nuisance": 1.15999232441766e-08
+  },
+  "created_utc": "2026-08-17 21:31:53 UTC"
+}

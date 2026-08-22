@@ -1,0 +1,51 @@
+AUTHORITATIVE NEXT ACTIONS AFTER PILOT V2 THEORY REVIEW — ROUND 3
+
+1. Read, in order:
+   - results/preflight/PILOT_V2_THEORY_DECISION_ROUND3.md
+   - docs/METHOD_SPECIFICATION_ROUND3_AMENDMENT.md
+   - results/preflight/PILOT_V2_P05_CALIBRATION_GATE.md
+   - docs/METHOD_SPECIFICATION_ROUND2_AMENDMENT.md for non-conflicting round-two provisions.
+2. Do not run the final B=500/1000 registry and do not start confirmatory GSE65391 inference.
+3. Create a versioned pilot registry (for example config/simulation_pilot_v3.csv) and new pilot_v3_* run IDs. Preserve all P01--P06 round-two outputs as historical evidence.
+4. Remove the raw first-stage rule lambda=sqrt(log(p)/n) with unit penalty factors.
+5. Implement the cluster self-normalised profile-score penalty exactly:
+   - P = penalised coordinates; U = unpenalised coordinates;
+   - s_i(b) = -m_i^{-1} X_i' psi_{tau,h}{r_i(b)};
+   - ell_j(b) = SD across independent clusters of the centred s_ij(b);
+   - alpha_lambda = 0.10/log(max(n,3));
+   - q_lambda = qnorm(1-alpha_lambda/(2*p_P));
+   - lambda_0 = 1.10*q_lambda/sqrt(n);
+   - preliminary penalty p_j^(0)=lambda_0*ell_j(0);
+   - one update at b^(1), ell_j_final=max{ell_j(0),ell_j(b^(1))};
+   - final penalty p_j=lambda_0*ell_j_final;
+   - exactly two loading passes; no lambda CV and no truth/coverage tuning.
+6. Implement through the current optimiser as lambda_beta=lambda_0 and penalty_factor_j=ell_j_final*base_penalty_factor_j. Fail on non-finite or numerically degenerate loadings as specified in the amendment.
+7. Enforce first-stage numerical acceptance:
+   - normalized weighted KKT <= 1e-3;
+   - max nuisance gradient <= 1e-7;
+   - last beta change <= 1e-7*max(1,||beta_hat||_inf);
+   - max_iter >= 2000, max_backtrack >= 50;
+   - failure to pass is penalised_fit failure, never a successful non-converged estimate.
+8. Reinterpret lambda_beta_multipliers as explicit sensitivity multipliers around the calibrated coordinate penalties. Primary P01--P06 use multiplier 1 only; do not select a multiplier from the old grid.
+9. Keep the round-two Dantzig rule unchanged for this rerun:
+   - h=c_h*n^(-3/10);
+   - c_mu in {0.02,0.05,0.10,0.25,0.50,1,2,4};
+   - n<200: deterministic 2-fold cluster CV;
+   - n>=200: deterministic 4-fold cluster CV;
+   - minimise mean held-out inverse defect;
+   - numerical ties choose smaller mu.
+10. Run the precision stage only after the FINAL lambda-calibrated fit passes. Recompute nuisance profiles and every Hessian contribution at final beta_hat; do not reuse beta=0/preliminary/stale Hessians.
+11. Keep the exact profile score/Hessian, unsmoothed meat, smoothed-meat diagnostic, POP-H definition, A_k/D_k diagnostics, variance ladder, jackknife and CR2/CR3 diagnostics unchanged.
+12. Add unit tests for:
+   - score-loading scale and centring;
+   - deterministic lambda critical value;
+   - penalty-factor mapping;
+   - two-pass loading update;
+   - weighted normalized KKT;
+   - lambda change does not alter target/POP-H dependency hashes.
+13. First run a P05 B=50 lambda-mechanism diagnostic. Save all round-three audit fields, including loading ranges, coordinate penalties, zero-score/KKT ratios, preliminary/final KKT, iteration count, support size and simulation-only l1/l2 first-stage errors.
+14. If P05 B=50 confirms a non-degenerate, converged first stage and coherent one-step diagnostics, rerun P01--P06 FROM SCRATCH at frozen replication counts.
+15. The practical P05 hard gate remains SE/SD in [0.80,1.20] and coverage in [0.88,0.98]. P06 confirms scaling. TRUE-SUPPORT/POP-H results are mechanism diagnostics and do not independently fail the freeze because one oracle coordinate is 0.01 below the coverage band.
+16. Do not change the mu anchor in round 3. Reopen mu only if, after lambda repair, actual A_k, POP-H row errors, total Bahadur remainder and P05-to-P06 scaling remain poor jointly. D_k alone is not a hard gate.
+17. No empirical SE multiplier, threshold widening, truth/coverage-based lambda or mu selection, score/Hessian/target change, or silent deletion of failed replications is permitted.
+18. Only after the new P05 gate passes and P06 supports scaling may strict geometry/micro-preflight/freeze-preflight be refreshed for the matching commit and versioned registry.

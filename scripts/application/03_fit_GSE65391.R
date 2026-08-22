@@ -115,7 +115,7 @@ for (model_id in models) {
 
   for (tau in taus) {
     n_train_clusters <- length(unique(metadata$subject_id[train_rows]))
-    h <- h_multiplier * n_train_clusters^(-1 / 3)
+    h <- h_multiplier * n_train_clusters^(-3 / 10)
     lambda_beta <- lambda_beta_multiplier * sqrt(log(max(ncol(X_all), 2L)) / n_train_clusters)
     fit_start <- proc.time()[[3]]
     fit <- tryCatch(

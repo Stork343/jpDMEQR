@@ -1,0 +1,13 @@
+{
+  "method_id": "PROFILE-DQR-POP-H",
+  "commit_sha": "4a879c0076a518f5b3bfd6ae02d51896248625e1",
+  "reference_identifier": "docs/BENCHMARK_IMPLEMENTATION_ACCEPTANCE.md#profile-dqr-pop-h",
+  "unit_test_pass": true,
+  "limiting_case_pass": true,
+  "fidelity_check_pass": true,
+  "schema_check_pass": true,
+  "deterministic_seed_pass": true,
+  "allowed_metrics": "coverage|precision_gap",
+  "created_utc": "2026-08-17 20:41:13 UTC",
+  "notes": "Patch-provided adapter; final population-direction assets are built by scripts/simulation/04_build_profile_targets.R and validated by validate_target_gate_v2."
+}

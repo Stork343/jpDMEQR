@@ -1,4 +1,4 @@
-root <- if (file.exists(file.path("scripts", "00_source_v2.R"))) "." else normalizePath(file.path(testthat::test_path(), "../.."), mustWork = TRUE)
+root <- v2_require_root()
 source(file.path(root, "scripts", "00_source_v2.R"), local = FALSE)
 source_v2_module(root, "profile_v2", envir = .GlobalEnv)
 source_v2_module(root, "simulation_v2", envir = .GlobalEnv)
@@ -10,8 +10,10 @@ testthat::test_that("quantile-centred error generators have the requested quanti
   for (tau in c(0.25, 0.5, 0.75)) {
     for (dist in distributions) {
       e <- r_quantile_centered_error_v2(120000L, tau, dist)
-      testthat::expect_lt(abs(as.numeric(stats::quantile(e, tau, names = FALSE))), 0.035,
-                          info = paste(dist, tau))
+      testthat::expect_true(
+        abs(as.numeric(stats::quantile(e, tau, names = FALSE))) < 0.035,
+        info = paste(dist, tau)
+      )
     }
   }
 })
