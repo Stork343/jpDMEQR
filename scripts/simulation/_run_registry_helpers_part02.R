@@ -288,6 +288,10 @@ run_one_replication_v2 <- function(root, config, replicate,
         context = context,
         control = list(
           ci_level = 0.95,
+          # HiGHS is the production Dantzig solver (round-2 parity suite:
+          # feasibility/residual/objective parity with CLARABEL, deterministic);
+          # CLARABEL stays as reference/audit.
+          solver_preference = c("HIGHS", "CLARABEL", "ECOS", "SCS"),
           fit_control = list(
             # Round-3 reference solver controls
             # (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md section 3):
