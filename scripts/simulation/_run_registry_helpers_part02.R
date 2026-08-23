@@ -288,10 +288,12 @@ run_one_replication_v2 <- function(root, config, replicate,
         context = context,
         control = list(
           ci_level = 0.95,
-          # HiGHS is the production Dantzig solver (round-2 parity suite:
-          # feasibility/residual/objective parity with CLARABEL, deterministic);
-          # CLARABEL stays as reference/audit.
-          solver_preference = c("HIGHS", "CLARABEL", "ECOS", "SCS"),
+          # CLARABEL remains the production Dantzig solver: on the dense
+          # profile-Hessian LPs it solves a full mu-grid row in ~26s while
+          # HIGHS grinds >30min on the same problem (infeasibility proofs).
+          # HIGHS/ECOS/SCS stay available as audit solvers (round-2 parity
+          # suite: HIGHS results match CLARABEL where it terminates).
+          solver_preference = c("CLARABEL", "ECOS", "SCS"),
           fit_control = list(
             # Round-3 reference solver controls
             # (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md section 3):
