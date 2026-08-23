@@ -2,35 +2,43 @@
 
 The current authoritative decision is:
 
-`results/preflight/PILOT_V2_THEORY_DECISION_ROUND3.md`
+`results/preflight/PILOT_V3_THEORY_DECISION_ROUND4.md`
 
 with the executable specification in:
 
-`docs/METHOD_SPECIFICATION_ROUND3_AMENDMENT.md`.
+`docs/METHOD_SPECIFICATION_ROUND4_AMENDMENT.md`.
 
-Round 3 supersedes the first-stage penalty rule and the conflicting action sequence. Non-conflicting round-1 and round-2 decisions remain in force.
+Round 4 supersedes the use of the inference bandwidth inside the penalised first stage. Non-conflicting round-1, round-2 and round-3 decisions remain in force.
 
-The following rules are authoritative:
+Authoritative rules:
 
-1. The inferential target remains the **unsmoothed regularised profile parameter**. The exact profile score, corrected Schur-complement Hessian, one-step formula and POP-H definition are unchanged.
-2. The raw unit-loaded rule `lambda_beta=sqrt(log p/n)` is revoked. The first stage uses coordinate penalties calibrated to the empirical standard deviation of the exact smoothed **independent-cluster profile score**.
-3. Freeze
+1. The P05/P06 baseline DGP is unchanged. No reduction of AR(1) correlation, signal change, cluster-size change, or nuisance removal is authorised. The current evidence does not reject population identification.
+2. The single-bandwidth first-stage RSC guarantee is not certifiable at `n=200` or `n=400`. The standard high-dimensional SQR sufficient lower order contains `sqrt{s log(p)/n}`; for P05 this is about `0.394` versus the inference bandwidth `0.204`, and for P06 about `0.279` versus `0.166`.
+3. Introduce a **dual-bandwidth** procedure. The first-stage estimation bandwidth is
    \[
-   \alpha_{\lambda,n}=0.10/\log\{\max(n,3)\},
-   \quad
-   q_{\lambda,n}=\Phi^{-1}\{1-\alpha_{\lambda,n}/(2p_P)\},
-   \quad
-   \lambda_{0,n}=1.10q_{\lambda,n}/\sqrt n.
+   h_{est}=\{\log(p_P\vee2)/n\}^{1/4},
    \]
-   At `b=0`, compute centred cluster-score loadings `ell_j^(0)`, fit a preliminary estimator, update once at `b^(1)`, set `ell_j^final=max(ell_j^(0),ell_j^(1))`, and refit with coordinate penalty `lambda_0,n ell_j^final`. No lambda CV and no truth/coverage tuning are allowed.
-4. Implement the loaded penalty through scalar `lambda_beta=lambda_0,n` and vector `penalty_factor_j=ell_j^final*base_penalty_factor_j`. Non-finite or numerically degenerate retained loadings cause an explicit failure.
-5. A final first stage is accepted only when the weighted normalised KKT residual is at most `1e-3`, maximum nuisance gradient is at most `1e-7`, and the last coefficient change is at most `1e-7*max(1,||beta_hat||_inf)`. Use at least 2000 outer iterations and 50 backtracking steps; non-convergence remains a failed replication.
-6. The sparse first-stage rate remains `||beta_hat-beta_h_star||_1=O_p{s sqrt(log p/n)}` under score domination, uniformly comparable loadings, profile RSC and numerical KKT error `o_p(lambda_0,n)`. For the unsmoothed target add the smoothing-target discrepancy. The rate is not a unit-constant finite-sample cutoff, but an order-one empty fit is outside the intended regime.
-7. `lambda_beta_multipliers` now denotes explicit sensitivity multipliers around the calibrated coordinate penalty. The primary method uses multiplier `1`; alternative values occur only in separately registered sensitivity cells.
-8. Round 3 makes **no change** to the Dantzig anchor/grid/selector. Keep `h=c_h n^{-3/10}`, `c_mu in {0.02,0.05,0.10,0.25,0.50,1,2,4}`, two-fold cluster CV for `n<200`, four folds for `n>=200`, held-out inverse-defect loss, and smaller-`mu` tie-breaking.
-9. The precision stage begins only after the final lambda-calibrated fit passes. Recompute nuisance profiles and all Hessian contributions at that final fit before selecting `mu`. Reopen the `mu` rate only if actual `A_k`, POP-H row errors, total Bahadur remainder and P05--P06 scaling remain poor jointly after lambda repair; `D_k` alone is not a hard gate.
-10. The primary variance remains corrected smoothed bread plus unsmoothed fitted cluster-score meat. The P05 TRUE-SUPPORT result (`SE/SD=0.80--0.95`, coverage `0.87--0.92`, negligible bias) is acceptable as mild finite-sample diagnostic behaviour and does not authorise a scalar correction or reopen the variance formula. Jackknife/KC/CR2/MD/CR3 remain diagnostics.
-11. The practical proposed-method P05 gate retains `SE/SD in [0.80,1.20]` and coverage in `[0.88,0.98]`; P06 confirms scaling. Oracle methods are mechanism diagnostics and do not independently fail the freeze because one oracle coordinate is marginally below the coverage band.
-12. The lambda change invalidates all practical P01--P06 results for freeze purposes. Create a versioned pilot registry and new run IDs, run a P05 `B=50` lambda-mechanism diagnostic first, then rerun P01--P06 from scratch if the first stage is healthy.
-13. Profile-target and POP-H assets may be reused under matching dependency hashes because analysis lambda is not a mathematical dependency. Practical fits, Hessians, precision rows, intervals and summaries must be regenerated.
-14. No final-scale `B=500/1000` simulation or confirmatory empirical inference is authorised until the round-three action sequence is completed and a fresh matching freeze manifest passes.
+   where `p_P` is the number of penalised fitted coordinates. The primary constant is `c_est=1` and is not data-selected.
+4. Keep the inference bandwidth unchanged:
+   \[
+   h_{inf}=c_hn^{-3/10},\qquad c_h=1
+   \]
+   for the primary pilot.
+5. Compute the round-3 cluster score loadings and both penalised first-stage passes using `h_est`. Keep the round-3 lambda critical value, two-pass loadings, weighted KKT contract, and primary lambda sensitivity multiplier `a=1` unchanged.
+6. Do **not** lower `a` or add lambda CV/BIC in round 4. The P05 evidence was obtained in an uncertified first-stage curvature regime; changing lambda before repairing that regime would confound mechanisms and weaken the retained score-domination argument.
+7. After the final first stage passes, discard its nuisance/Hessian objects for inference. At the accepted `beta_hat`, reprofile nuisance effects and recompute the exact score/Hessian/fold Hessians using `h_inf`; only then run the frozen Dantzig selector and one-step correction.
+8. The first-stage bound is written
+   \[
+   ||beta_hat-beta_star||_1
+   =O_p\{s sqrt(log p/n)+s h_{est}^2\}.
+   \]
+   Since `h_est^2=sqrt(log p/n)`, the retained order is still `O_p{s sqrt(log p/n)}` up to constants.
+9. The Dantzig anchor/grid/selector is unchanged from round 2. Reopen `mu` only if, after the dual-bandwidth first stage is healthy, actual `A_k`, POP-H row errors, total Bahadur remainder and P05-to-P06 scaling remain jointly poor. `D_k` alone is not a hard gate.
+10. The primary variance remains corrected smoothed inferential bread plus unsmoothed fitted cluster-score meat. No scalar finite-sample variance correction is authorised.
+11. Add simulation-only first-stage RSC diagnostics: population/sample active-set minimum Hessian eigenvalues, condition numbers, a deterministic cone-curvature proxy, and `h_est/sqrt{s log(p)/n}`. Truth is diagnostic only and cannot tune the method.
+12. Create a versioned `pilot_v4` registry. After implementation/tests, run **both** P05-v4 and P06-v4 at `B=50` as a paired mechanism/scaling probe. The old P05-v3 result is historical only because the estimator has changed.
+13. The B=50 probe is not a formal coverage gate. Do not launch the full P01--P06 rerun until its first-stage/RSC/Bahadur scaling is reviewed.
+14. The full practical P05 gate remains `SE/SD in [0.80,1.20]` and coverage in `[0.88,0.98]`; these are freeze/debug criteria, not theorem promises.
+15. If P05/P06 show coherent monotone scaling but the later full P05 gate still fails, a P07 scaling cell is conditionally authorised: `n=800,p=500,s=5,tau=0.50,q=1`, same baseline DGP, `B=200`. P07 does not automatically replace P05 as the gate; any change in manuscript applicability requires a later theory/project decision.
+16. Profile-target assets remain reusable under matching dependency hashes. POP-H remains defined by `h_inf` and is reusable if its inferential dependency hash is unchanged. Every practical fit/Hessian/direction/interval must be regenerated.
+17. No final-scale `B=500/1000` simulation or confirmatory GSE65391 high-dimensional inference is authorised until the round-4 mechanism probe and subsequent freeze sequence pass.
