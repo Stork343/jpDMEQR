@@ -97,7 +97,8 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
       Z = train$Z,
       cluster_id = train$cluster_id,
       tau = tau,
-      h = tuning$h,
+      h_est = tuning$h_est,
+      h_inf = tuning$h,
       lambda_0_n = tuning$lambda_0_n,
       lambda_gamma = tuning$lambda_gamma,
       base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
@@ -122,6 +123,15 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
       proc.time()[[3]] - start
     ))
   }
+  # Round-4 hard separation: inferential precision runs on h_inf components.
+  tryCatch(
+    assert_inferential_components_v2(fit, tuning$h),
+    error = function(e) benchmark_failure_v2(
+      "PROFILE-DQR-POP-H", "inference_bandwidth_mismatch", conditionMessage(e),
+      proc.time()[[3]] - start
+    )
+  ) -> guard_ans
+  if (is.list(guard_ans) && identical(guard_ans$status, "failed")) return(guard_ans)
 
   coords <- if (is.character(target_coords)) target_coords else names(fit$beta)[as.integer(target_coords)]
   alpha <- 1 - (control$ci_level %||% 0.95)

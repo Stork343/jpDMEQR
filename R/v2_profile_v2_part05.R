@@ -200,3 +200,78 @@ oracle_jackknife_v2 <- function(dat, active, target_coords, tau, h, lambda_gamma
   list(jack_se = setNames(as.numeric(jack_se), colnames(jack)),
        full = full, n_clusters = n)
 }
+
+# -----------------------------------------------------------------------------
+# Round-4 first-stage RSC diagnostics (METHOD_SPECIFICATION_ROUND4_AMENDMENT.md
+# section 6). Simulation-only, truth-permitted (SS = true active block); must
+# never tune h_est, lambda or mu.
+# -----------------------------------------------------------------------------
+
+# Deterministic cone-direction bank from the replication seed (drawn before any
+# outcome is inspected): n_dir sparse directions, support size s, entries
+# +/-1/sqrt(s).
+cone_direction_bank_v2 <- function(p, s, seed, n_dir = 64L) {
+  set.seed(as.integer(seed) %% 2^31)
+  lapply(seq_len(n_dir), function(d) {
+    dir <- numeric(p)
+    supp <- sample.int(p, size = min(s, p))
+    dir[supp] <- sample(c(-1, 1), length(supp), replace = TRUE) / sqrt(length(supp))
+    dir
+  })
+}
+
+restricted_eigen_v2 <- function(H, idx) {
+  if (is.null(H) || !is.finite(H[1, 1])) return(c(lambda_min = NA_real_, condition = NA_real_))
+  Hs <- (H[idx, idx, drop = FALSE] + t(H[idx, idx, drop = FALSE])) / 2
+  ev <- tryCatch(eigen(Hs, symmetric = TRUE, only.values = TRUE)$values,
+                 error = function(e) numeric())
+  if (!length(ev) || any(!is.finite(ev))) return(c(lambda_min = NA_real_, condition = NA_real_))
+  ev <- ev[ev > 1e-14]
+  c(lambda_min = if (length(ev)) min(ev) else NA_real_,
+    condition = if (length(ev) >= 1L && min(ev) > 0) max(ev) / min(ev) else NA_real_)
+}
+
+# One row of RSC diagnostics for a calibrated first-stage fit.
+#   rsc_ss          : true active index set (diagnostics only)
+#   tgt_components  : profile_components_v2 at the frozen target with h_est
+#                     (computed once per replication, shared across methods)
+#   pop_restricted_ev : population restricted min eigenvalue from the per-cell
+#                     diagnostic asset (or NA)
+first_stage_rsc_diagnostics_v2 <- function(fit, dat, beta_target, h_est, h_inf,
+                                           rsc_ss, tgt_components = NULL,
+                                           pop_restricted_ev = NA_real_,
+                                           cone_seed = 1L) {
+  p <- ncol(dat$X)
+  s <- length(rsc_ss)
+  n <- dat$n_clusters
+  rsc_order <- sqrt(s * log(p) / n)
+  H_fit <- fit$components_first_stage$hessian %||% NULL
+  ev_fit <- restricted_eigen_v2(H_fit, rsc_ss)
+  ev_tgt <- if (!is.null(tgt_components)) {
+    restricted_eigen_v2(tgt_components$hessian, rsc_ss)
+  } else c(lambda_min = NA_real_, condition = NA_real_)
+  # Deterministic cone-curvature proxy on the FULL fitted h_est Hessian.
+  bank <- cone_direction_bank_v2(p, s, cone_seed)
+  cone_min <- NA_real_
+  if (!is.null(H_fit)) {
+    Hf <- (H_fit + t(H_fit)) / 2
+    vals <- vapply(bank, function(d) drop(crossprod(d, Hf %*% d)) / drop(crossprod(d)),
+                   numeric(1))
+    vals <- vals[is.finite(vals)]
+    if (length(vals)) cone_min <- min(vals)
+  }
+  data.frame(
+    h_est = h_est,
+    h_inf = h_inf,
+    rsc_order_lower = rsc_order,
+    h_est_over_rsc_order = h_est / rsc_order,
+    lambda_min_Hest_SS_population = pop_restricted_ev,
+    lambda_min_Hest_SS_target_sample = ev_tgt[["lambda_min"]],
+    lambda_min_Hest_SS_fitted_sample = ev_fit[["lambda_min"]],
+    condition_Hest_SS_population = NA_real_,
+    condition_Hest_SS_target_sample = ev_tgt[["condition"]],
+    condition_Hest_SS_fitted_sample = ev_fit[["condition"]],
+    cone_curvature_proxy_min = cone_min,
+    stringsAsFactors = FALSE
+  )
+}

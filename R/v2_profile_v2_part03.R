@@ -218,28 +218,30 @@ fit_profile_lasso_v2 <- function(y,
 }
 
 # -----------------------------------------------------------------------------
-# Round-3 cluster self-normalised first-stage calibration
-# (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md sections 1.1-1.3, 3):
-#   pass 0:  ell_j^(0) at b^(0) = 0;
-#   pass 1:  preliminary fit with p_j^(0) = lambda_0,n * ell_j^(0),
-#            then ell_j^(1) at b^(1);
-#   final:   ell_j_final = max{ell_j^(0), ell_j^(1)};
-#            warm-started refit with p_j = lambda_0,n * ell_j_final on P,
-#            zero penalty on U.
-# Exactly one loading update. No truth/coverage/CV enters the penalty.
+# Round-3 cluster self-normalised first-stage calibration with round-4 dual
+# bandwidths (METHOD_SPECIFICATION_ROUND4_AMENDMENT.md sections 1-5):
+#   h_est = (log(p_P)/n)^{1/4}  -- first-stage estimation bandwidth only
+#   h_inf = c_h n^{-3/10}       -- inferential bandwidth only
+# All loading passes and first-stage fits run at h_est. After acceptance, the
+# first-stage nuisance/score/Hessian objects are DISCARDED for inferential use;
+# nuisance effects are reprofiled at h_inf and the exact inferential score,
+# effective Hessian and fold Hessians are recomputed at the accepted beta_hat.
+# The h_est components are retained ONLY in fit$components_first_stage for
+# first-stage RSC diagnostics; they must never enter the Dantzig/one-step
+# pipeline (guarded by assert_inferential_components_v2).
 # -----------------------------------------------------------------------------
 fit_profile_lasso_calibrated_v2 <- function(y,
                                             X,
                                             Z,
                                             cluster_id,
                                             tau,
-                                            h,
+                                            h_est = NULL,
+                                            h_inf = NULL,
                                             lambda_gamma = 1,
                                             lambda_0_n,
                                             base_penalty_factor = NULL,
                                             beta_init = NULL,
                                             control = list()) {
-  validate_tau_h_v2(tau, h)
   X <- assert_numeric_matrix_v2(X, "X")
   p <- ncol(X)
   base_pf <- as.numeric(base_penalty_factor %||% rep(1, p))
@@ -249,11 +251,17 @@ fit_profile_lasso_calibrated_v2 <- function(y,
   P_idx <- which(base_pf > 0)
   n_pen <- length(P_idx)
   n_clusters_fit <- length(unique(cluster_id))
+  # h_est fallback: (log(p_P)/n)^{1/4} from the FITTED design (round-4 1.1).
+  if (is.null(h_est) || !is.finite(h_est) || h_est <= 0) {
+    h_est <- (log(max(n_pen, 2)) / n_clusters_fit)^(1 / 4)
+  }
+  validate_tau_h_v2(tau, h_est)
 
   # No penalised coordinates: plain (unpenalised) fit, no loading machinery.
+  # Such fits are inference-focused refits (e.g. TRUE-SUPPORT), so use h_inf.
   if (!n_pen) {
     fit <- fit_profile_lasso_v2(
-      y, X, Z, cluster_id, tau, h, lambda_beta = 0,
+      y, X, Z, cluster_id, tau, h_inf %||% h_est, lambda_beta = 0,
       lambda_gamma = lambda_gamma,
       penalty_factor = base_pf,
       beta_init = beta_init,
@@ -265,6 +273,9 @@ fit_profile_lasso_calibrated_v2 <- function(y,
     )
     fit$first_stage_calibrated <- FALSE
     return(fit)
+  }
+  if (is.null(h_inf) || !is.finite(h_inf) || h_inf <= 0) {
+    stop("h_inf is required for the calibrated first stage (round-4 dual bandwidth).")
   }
 
   # lambda_0,n is a function of (n, p_P) of the FITTED problem; compute it from
@@ -309,10 +320,10 @@ fit_profile_lasso_calibrated_v2 <- function(y,
     out
   }
 
-  # Pass 0: loadings at b^(0) = 0 (nuisance profiled at 0).
+  # Pass 0: loadings at b^(0) = 0 (nuisance profiled at 0), at h_est.
   comp0 <- tryCatch(
     profile_components_v2(
-      y, X, Z, cluster_id, rep(0, p), tau, h, lambda_gamma,
+      y, X, Z, cluster_id, rep(0, p), tau, h_est, lambda_gamma,
       gamma_init = NULL, need_hessian = FALSE,
       nuisance_control = nuisance_control
     ),
@@ -337,10 +348,10 @@ fit_profile_lasso_calibrated_v2 <- function(y,
     return(loading_failure("lambda_loading_degenerate"))
   }
 
-  # Preliminary fit with p_j^(0) = lambda_0,n * ell_j^(0) on P.
+  # Preliminary fit with p_j^(0) = lambda_0,n * ell_j^(0) on P, at h_est.
   fit1 <- tryCatch(
     fit_profile_lasso_v2(
-      y, X, Z, cluster_id, tau, h, lambda_beta = lambda_0_n,
+      y, X, Z, cluster_id, tau, h_est, lambda_beta = lambda_0_n,
       lambda_gamma = lambda_gamma,
       penalty_factor = ell0 * base_pf,
       beta_init = beta_init,
@@ -355,10 +366,10 @@ fit_profile_lasso_calibrated_v2 <- function(y,
   }
   preliminary_kkt_normalized <- fit1$kkt_normalized %||% NA_real_
 
-  # Pass 1: loadings at the preliminary fit b^(1).
+  # Pass 1: loadings at the preliminary fit b^(1), at h_est.
   comp1 <- tryCatch(
     profile_components_v2(
-      y, X, Z, cluster_id, fit1$beta, tau, h, lambda_gamma,
+      y, X, Z, cluster_id, fit1$beta, tau, h_est, lambda_gamma,
       gamma_init = fit1$gamma, need_hessian = FALSE,
       nuisance_control = nuisance_control
     ),
@@ -377,10 +388,11 @@ fit_profile_lasso_calibrated_v2 <- function(y,
     return(out)
   }
 
-  # Final fit: warm start at b^(1), penalty p_j = lambda_0,n * ell_j_final.
+  # Final fit: warm start at b^(1), penalty p_j = lambda_0,n * ell_j_final,
+  # at h_est.
   fit <- tryCatch(
     fit_profile_lasso_v2(
-      y, X, Z, cluster_id, tau, h, lambda_beta = lambda_0_n,
+      y, X, Z, cluster_id, tau, h_est, lambda_beta = lambda_0_n,
       lambda_gamma = lambda_gamma,
       penalty_factor = ell_final * base_pf,
       beta_init = fit1$beta,
@@ -410,12 +422,13 @@ fit_profile_lasso_calibrated_v2 <- function(y,
     fit$failure_stage <- "penalised_fit"
   }
 
-  # Mandatory sequencing (amendment section 5 / Q2(c)): recompute every
-  # nuisance profile and Hessian contribution at the accepted final beta_hat;
-  # a beta=0 / preliminary / stale Hessian is invalid.
+  # Round-4 hard separation (amendment section 5): the h_est first-stage
+  # components are diagnostics only; the inferential objects are recomputed at
+  # h_inf at the accepted beta_hat.
+  fit$components_first_stage <- fit$components  # h_est, diagnostics only
   comp_final <- tryCatch(
     profile_components_v2(
-      y, X, Z, cluster_id, fit$beta, tau, h, lambda_gamma,
+      y, X, Z, cluster_id, fit$beta, tau, h_inf, lambda_gamma,
       gamma_init = fit$gamma, need_hessian = TRUE,
       nuisance_control = nuisance_control
     ),
@@ -450,7 +463,29 @@ fit_profile_lasso_calibrated_v2 <- function(y,
   fit$first_stage_iterations <- fit$iterations
   fit$first_stage_beta_change <- fit$first_stage_beta_change
   fit$first_stage_nonzero_count <- fit$first_stage_nonzero_count
+  fit$h_est <- h_est
+  fit$h_inf <- h_inf
   fit
+}
+
+# Round-4 guard: the inferential precision/one-step pipeline must run on the
+# h_inf-reprofiled components. This check fails if an h_est (or otherwise
+# mismatched) Hessian/nuisance object is passed downstream.
+assert_inferential_components_v2 <- function(fit, h_inf, tol = 1e-12) {
+  if (isTRUE(fit$first_stage_calibrated)) {
+    comp_h <- fit$components$h %||% NA_real_
+    if (!is.finite(comp_h) || abs(comp_h - h_inf) > tol * max(1, h_inf)) {
+      stop(sprintf(
+        "Inferential components bandwidth mismatch: got h=%.6f, required h_inf=%.6f. ",
+        comp_h, h_inf
+      ))
+    }
+    if (is.null(fit$components_first_stage) ||
+        !is.finite(fit$components_first_stage$h)) {
+      stop("Calibrated fit is missing the h_est first-stage diagnostic components.")
+    }
+  }
+  invisible(TRUE)
 }
 
 # -----------------------------------------------------------------------------

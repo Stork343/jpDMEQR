@@ -38,7 +38,8 @@ run_registry_v2 <- function(root,
                             base_seed = 20260817L,
                             experiment_ids = character(),
                             final = FALSE,
-                            replicate_subset = NULL) {
+                            replicate_subset = NULL,
+                            seed_experiment = NULL) {
   cfg_df <- read_simulation_registry_v2(config_path)
   if (length(experiment_ids)) {
     cfg_df <- cfg_df[cfg_df$experiment_id %in% experiment_ids, , drop = FALSE]
@@ -98,6 +99,7 @@ run_registry_v2 <- function(root,
     allow_missing_benchmarks = allow_missing_benchmarks,
     final = final,
     base_seed = base_seed,
+    seed_experiment = seed_experiment %||% "default",
     experiment_ids = cfg_df$experiment_id,
     started_utc = format(Sys.time(), tz = "UTC", usetz = TRUE)
   ), file.path(run_dir, "run_request.json"))
@@ -108,7 +110,8 @@ run_registry_v2 <- function(root,
         root, task$config, task$replicate,
         base_seed = base_seed,
         allow_missing_benchmarks = allow_missing_benchmarks,
-        final = final
+        final = final,
+        seed_experiment = seed_experiment
       ),
       error = function(e) list(
         error = conditionMessage(e),

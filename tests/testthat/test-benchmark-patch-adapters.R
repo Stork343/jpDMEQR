@@ -52,13 +52,15 @@ testthat::test_that("PROFILE-DQR matches its reference fit on a small design", {
   train <- make_train(seed = 303)
   coords <- colnames(train$X)[1:3]
   ans <- fit_benchmark_profile_dqr_v2(train, 0.5, coords, tuning, seed = 3L)
-  # Round-3 reference: cluster self-normalised calibrated first stage with the
-  # same fit-design lambda_0,n (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md 1-3).
+  # Round-3/4 reference: cluster self-normalised calibrated first stage with
+  # dual bandwidths (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md 1-3;
+  # ROUND4_AMENDMENT.md 1-5).
   lam0 <- lambda_0_n_v2(length(unique(train$cluster_id)), ncol(train$X))$lambda_0
   ref <- fit_profile_lasso_calibrated_v2(
     y = train$y, X = train$X, Z = train$Z,
     cluster_id = train$cluster_id, tau = 0.5,
-    h = tuning$h, lambda_0_n = lam0,
+    h_est = tuning$h_est, h_inf = tuning$h,
+    lambda_0_n = lam0,
     lambda_gamma = tuning$lambda_gamma,
     base_penalty_factor = rep(1, ncol(train$X)),
     control = list(fit_control = list(max_iter = 2000L, max_backtrack = 50L,

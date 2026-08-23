@@ -2,6 +2,13 @@
 
 build_tuning_for_analysis_v2 <- function(config, dat) {
   values <- reference_tuning_values_v2(config, p = ncol(dat$X), n = dat$n_clusters)
+  # Round-4 dual bandwidths (METHOD_SPECIFICATION_ROUND4_AMENDMENT.md section 1):
+  #   h_est = (log(p_P)/n)^{1/4}, c_est = 1 -- first-stage estimation only;
+  #   h_inf = c_h n^{-3/10}                  -- inference only (unchanged).
+  # p_P = number of penalised coordinates in the fitted design (all-X default;
+  # the calibrated wrapper recomputes h_est from its own fit design).
+  p_P <- ncol(dat$X)
+  h_est <- (log(max(p_P, 2)) / dat$n_clusters)^(1 / 4)
   # Round-3 first-stage lambda: cluster self-normalised profile-score penalty
   # (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md section 1). lambda_0,n is the
   # calibrated base; the coordinate penalty is lambda_0,n * ell_j_final
@@ -9,11 +16,13 @@ build_tuning_for_analysis_v2 <- function(config, dat) {
   # sqrt(log p / n) anchor) is retained for benchmark comparators whose
   # first stage is unchanged (e.g. SQR-DEBIASED-IID).
   lambda_meta <- lambda_0_n_v2(dat$n_clusters, ncol(dat$X))
-  # Primary inferential bandwidth h = c_h n^{-3/10} (theory decision:
+  # Primary inferential bandwidth h_inf = c_h n^{-3/10} (theory decision:
   # PILOT_GATE_THEORY_DECISIONS.md). Gives sqrt(n) h^2 -> 0 and n h^3 -> Inf.
-  h <- config$h_multiplier * dat$n_clusters^(-3 / 10)
+  h_inf <- config$h_multiplier * dat$n_clusters^(-3 / 10)
   list(
-    h = h,
+    h = h_inf,
+    h_est = h_est,
+    h_inf = h_inf,
     lambda_beta = 1 * sqrt(log(max(ncol(dat$X), 2)) / dat$n_clusters),
     lambda_0_n = lambda_meta$lambda_0,
     lambda_alpha = lambda_meta$alpha,
@@ -21,7 +30,7 @@ build_tuning_for_analysis_v2 <- function(config, dat) {
     lambda_safety_constant = lambda_meta$safety_constant,
     lambda_gamma = config$lambda_gamma,
     mu_grid = config$dantzig_multipliers *
-      (sqrt(log(max(ncol(dat$X), 2)) / (dat$n_clusters * h)) + h^2),
+      (sqrt(log(max(ncol(dat$X), 2)) / (dat$n_clusters * h_inf)) + h_inf^2),
     full_reference = values
   )
 }
@@ -220,8 +229,13 @@ method_theory_diagnostics_v2 <- function(config, replicate, seed, method_id,
 run_one_replication_v2 <- function(root, config, replicate,
                                    base_seed = 20260817L,
                                    allow_missing_benchmarks = TRUE,
-                                   final = FALSE) {
-  seed <- seed_from_id_v2(base_seed, config$experiment_id, replicate, "training")
+                                   final = FALSE,
+                                   seed_experiment = NULL) {
+  # seed_experiment overrides the experiment_id used in seed derivation. Used
+  # by the round-4 paired probe to nest P06 clusters inside P05 (common random
+  # numbers, unchanged marginal DGPs).
+  seed_exp <- seed_experiment %||% config$experiment_id
+  seed <- seed_from_id_v2(base_seed, seed_exp, replicate, "training")
   commit <- current_commit_v2(root)
   dat0 <- simulate_from_config_v2(config, seed)
   prepared <- prepare_analysis_data_v2(dat0, config, seed)
@@ -233,12 +247,37 @@ run_one_replication_v2 <- function(root, config, replicate,
     target_names <- head(names(beta_target), min(2L, length(beta_target)))
   }
   tuning <- build_tuning_for_analysis_v2(config, dat)
+  # Round-4 first-stage RSC diagnostics context (shared across methods):
+  # target components at h_est computed once per replication; per-cell
+  # population restricted curvature from a diagnostic asset (truth-permitted,
+  # never used in tuning).
+  rsc_ctx <- NULL
+  if (any(c("PROFILE-DQR", "PROFILE-DQR-POP-H") %in% config$methods) &&
+      exists("first_stage_rsc_diagnostics_v2", mode = "function")) {
+    rsc_ctx <- list(
+      target_components = tryCatch(
+        profile_components_v2(
+          dat$y, dat$X, dat$Z, dat$cluster_id, beta_target, config$tau,
+          tuning$h_est, tuning$lambda_gamma, need_hessian = TRUE,
+          nuisance_control = list(reltol = 1e-11, maxit = 400L, grad_tol = 1e-8)
+        ),
+        error = function(e) NULL
+      ),
+      pop_restricted_ev = {
+        pop_path <- file.path(root, "results", "preflight",
+                              paste0("rsc_pop_curvature_", config$experiment_id, ".rds"))
+        if (file.exists(pop_path)) {
+          tryCatch(readRDS(pop_path)$lambda_min, error = function(e) NA_real_)
+        } else NA_real_
+      }
+    )
+  }
   need_pop_h <- "PROFILE-DQR-POP-H" %in% config$methods
   population_asset <- load_population_direction_asset_v2(
     root, config, required = need_pop_h, final = final
   )
 
-  test_seed <- seed_from_id_v2(base_seed, config$experiment_id, replicate, "test")
+  test_seed <- seed_from_id_v2(base_seed, seed_exp, replicate, "test")
   test_dat0 <- simulate_from_config_v2(config, test_seed)
   test_dat <- apply_feature_map_to_test_v2(
     test_dat0, prepared$screening, config$fit_random_effects
@@ -262,7 +301,8 @@ run_one_replication_v2 <- function(root, config, replicate,
       screening = prepared$screening,
       population_direction_asset = population_asset,
       config = config,
-      beta_target = beta_target
+      beta_target = beta_target,
+      rsc_ctx = rsc_ctx
     )
     if (method_requires_low_dimensional_subset_v2(method_id)) {
       low <- common_lqmm_subset_v2(
@@ -443,6 +483,36 @@ run_one_replication_v2 <- function(root, config, replicate,
       requested_workers = config$workers,
       stringsAsFactors = FALSE
     )
+
+    # Round-4 first-stage RSC diagnostics (simulation-only; never tune).
+    rsc_cols <- if (method_id %in% c("PROFILE-DQR", "PROFILE-DQR-POP-H") &&
+                    !is.null(context$rsc_ctx) &&
+                    isTRUE(fit$fit_object$first_stage_calibrated %||% FALSE) &&
+                    exists("first_stage_rsc_diagnostics_v2", mode = "function")) {
+      tryCatch(
+        first_stage_rsc_diagnostics_v2(
+          fit$fit_object, dat, beta_target, tuning$h_est, tuning$h_inf,
+          rsc_ss = dat$active,
+          tgt_components = context$rsc_ctx$target_components,
+          pop_restricted_ev = context$rsc_ctx$pop_restricted_ev,
+          cone_seed = seed
+        ),
+        error = function(e) NULL
+      )
+    } else NULL
+    if (is.null(rsc_cols)) {
+      rsc_cols <- data.frame(
+        h_est = NA_real_, h_inf = NA_real_, rsc_order_lower = NA_real_,
+        h_est_over_rsc_order = NA_real_, lambda_min_Hest_SS_population = NA_real_,
+        lambda_min_Hest_SS_target_sample = NA_real_,
+        lambda_min_Hest_SS_fitted_sample = NA_real_,
+        condition_Hest_SS_population = NA_real_,
+        condition_Hest_SS_target_sample = NA_real_,
+        condition_Hest_SS_fitted_sample = NA_real_,
+        cone_curvature_proxy_min = NA_real_
+      )
+    }
+    method_rows[[mcount]] <- cbind(method_rows[[mcount]], rsc_cols)
 
     inf_tab <- inference_direction_table_v2(fit)
     if (nrow(inf_tab)) {

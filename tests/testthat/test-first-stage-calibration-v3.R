@@ -69,7 +69,8 @@ testthat::test_that("calibrated first stage: two-pass loadings and penalty mappi
   lam0 <- lambda_0_n_v2(n, p)$lambda_0
   base <- rep(1, p)
   fit <- fit_profile_lasso_calibrated_v2(
-    dat$y, dat$X, dat$Z, dat$cluster_id, tau = 0.5, h = 0.45,
+    dat$y, dat$X, dat$Z, dat$cluster_id, tau = 0.5,
+    h_est = 0.45, h_inf = 0.35,
     lambda_gamma = 1, lambda_0_n = lam0, base_penalty_factor = base,
     control = list(fit_control = list(max_iter = 2000L, max_backtrack = 50L,
                                       beta_tol = 1e-7, kkt_normalized_tol = 1e-3))
@@ -77,6 +78,19 @@ testthat::test_that("calibrated first stage: two-pass loadings and penalty mappi
   testthat::expect_true(isTRUE(fit$first_stage_calibrated))
   testthat::expect_true(isTRUE(fit$converged),
                         info = paste("failure_stage:", fit$failure_stage))
+  # Round-4 dual bandwidths: inferential components at h_inf, first-stage
+  # components at h_est, and the hard separation.
+  testthat::expect_equal(fit$h_est, 0.45, tolerance = 1e-12)
+  testthat::expect_equal(fit$h_inf, 0.35, tolerance = 1e-12)
+  testthat::expect_equal(fit$components$h, 0.35, tolerance = 1e-12)
+  testthat::expect_equal(fit$components_first_stage$h, 0.45, tolerance = 1e-12)
+  # The guard rejects a fit whose inferential components carry the h_est
+  # bandwidth (an h_est Hessian must never reach the precision pipeline).
+  tampered <- fit
+  tampered$components <- tampered$components_first_stage
+  testthat::expect_error(assert_inferential_components_v2(tampered, h_inf = 0.35),
+                         "bandwidth mismatch")
+  testthat::expect_true(assert_inferential_components_v2(fit, h_inf = 0.35))
   # Pass-0 loading recomputed independently at beta=0.
   comp0 <- profile_components_v2(dat$y, dat$X, dat$Z, dat$cluster_id,
                                  rep(0, p), 0.5, 0.45, 1,
@@ -117,7 +131,8 @@ testthat::test_that("calibrated first stage: unpenalised short-circuit", {
   n <- length(unique(dat$cluster_id)); p <- ncol(dat$X)
   lam0 <- lambda_0_n_v2(n, p)$lambda_0
   fit <- fit_profile_lasso_calibrated_v2(
-    dat$y, dat$X, dat$Z, dat$cluster_id, tau = 0.5, h = 0.45,
+    dat$y, dat$X, dat$Z, dat$cluster_id, tau = 0.5,
+    h_est = 0.45, h_inf = 0.35,
     lambda_gamma = 1, lambda_0_n = lam0, base_penalty_factor = rep(0, p)
   )
   testthat::expect_false(isTRUE(fit$first_stage_calibrated))
