@@ -1,44 +1,58 @@
-AUTHORITATIVE NEXT ACTIONS AFTER PILOT V3 THEORY REVIEW — ROUND 4
+AUTHORITATIVE NEXT ACTIONS AFTER PILOT V4 THEORY REVIEW — ROUND 5
 
 1. Read, in order:
-   - results/preflight/PILOT_V3_THEORY_DECISION_ROUND4.md
-   - docs/METHOD_SPECIFICATION_ROUND4_AMENDMENT.md
-   - results/preflight/PILOT_V3_P05_MECHANISM_CHECK.md
+   - results/preflight/PILOT_V4_THEORY_DECISION_ROUND5.md
+   - docs/METHOD_SPECIFICATION_ROUND5_AMENDMENT.md
+   - results/preflight/PILOT_V4_PAIRED_PROBE.md
+   - docs/METHOD_SPECIFICATION_ROUND4_AMENDMENT.md for non-conflicting h_est/h_inf rules
    - docs/METHOD_SPECIFICATION_ROUND3_AMENDMENT.md for non-conflicting lambda/KKT rules
    - docs/METHOD_SPECIFICATION_ROUND2_AMENDMENT.md for non-conflicting mu/variance rules.
-2. Do not run the final B=500/1000 registry and do not start confirmatory GSE65391 high-dimensional inference.
-3. Create a new versioned pilot registry, e.g. config/simulation_pilot_v4.csv, and new pilot_v4_* run IDs. Preserve all round-3 results as immutable mechanism evidence.
-4. Keep the P05/P06 DGP unchanged. Do not alter rho_x, signal, cluster-size distribution, q, random-effect structure, score, Hessian, target or variance definition.
-5. Introduce the first-stage estimation bandwidth:
-   h_est = (log(p_P)/n)^(1/4), primary c_est=1,
-   where p_P is the number of penalised fitted coordinates.
-6. Keep the inferential bandwidth separately:
-   h_inf = c_h*n^(-3/10), primary c_h=1.
-7. Compute ALL round-3 lambda loadings and both first-stage fits using h_est. Keep the round-3 score-loaded lambda critical value, exactly two loading passes, weighted normalised KKT contract, and primary sensitivity multiplier a=1 unchanged. No lambda CV/BIC and no reduction to a=0.5/0.25 is authorised.
-8. After the final first stage passes, discard its nuisance/score/Hessian objects for inferential use. At the accepted beta_hat, reprofile nuisance effects with h_inf and recompute the exact inferential score, full/fold Hessians, Dantzig rows and one-step estimator from scratch.
-9. Keep the round-2 Dantzig rule unchanged:
-   c_mu in {0.02,0.05,0.10,0.25,0.50,1,2,4};
-   n<200: deterministic 2-fold cluster CV;
-   n>=200: deterministic 4-fold cluster CV;
-   minimise mean held-out inverse defect;
-   numerical ties choose smaller mu.
-10. Keep the primary variance unchanged: h_inf-based corrected bread plus unsmoothed fitted cluster-score meat. Smoothed meat, jackknife, KC/CR2 and MD/CR3 remain diagnostics/sensitivities only.
-11. Add tests that explicitly distinguish h_est and h_inf and fail if an h_est Hessian/nuisance object enters the inferential Dantzig/one-step pipeline.
-12. Add simulation-only first-stage RSC diagnostics:
-   - population active-set minimum Hessian eigenvalue at h_est;
-   - sample active-set minimum Hessian eigenvalue at the frozen target and final first-stage fit;
-   - corresponding condition numbers;
-   - deterministic cone-curvature proxy;
-   - h_est/sqrt(s*log(p)/n).
-   Truth is diagnostic only and may not tune h_est, lambda or mu.
-13. Reuse profile-target assets under matching dependency hashes. Reuse POP-H only if its dependency hash is based on h_inf and excludes first-stage-only h_est. Do not rebuild POP-H solely because h_est changed.
-14. Before a full pilot, run the paired round-4 mechanism probe:
-   - P05-v4: n=200,p=500,s=5,tau=0.5,q=1,B=50;
-   - P06-v4: n=400,p=500,s=5,tau=0.5,q=1,B=50.
-   Same DGP and method rules. Common random numbers/nested clusters across n are preferred where feasible but not required.
-15. The B=50 probe is diagnostic, not a formal coverage gate. Save first-stage l1/l2 errors, RSC diagnostics, active/null bias, active selection count, A_k/D_k, POP-H row errors, Bahadur remainder, lambda/KKT diagnostics, and practical/oracle SE/SD and coverage with explicit MCSE.
-16. Do not launch the full P01--P06 rerun until the paired B=50 report is reviewed.
-17. The full practical P05 gate remains SE/SD in [0.80,1.20] and coverage in [0.88,0.98]. P06 confirms scaling. These are freeze/debug criteria, not theorem promises.
-18. If the round-4 P05/P06 mechanism diagnostics improve coherently but the subsequent full P05 gate still fails, P07 is conditionally authorised as a scaling diagnostic only: n=800,p=500,s=5,tau=0.5,q=1,same baseline DGP,B=200. P07 does not automatically replace P05 as the freeze gate.
-19. If P05 fails while P06/P07 pass, stop for another theory/project decision before narrowing the manuscript inference regime or changing the GSE65391 inferential scope.
-20. No empirical SE multiplier, threshold widening, truth/coverage-based a/lambda/mu choice, DGP weakening, score/Hessian/target change, or silent deletion of failed replications is permitted.
+2. Do not run the final B=500/1000 registry, do not run the full P01-P06 pilot, do not run P07-B=200, and do not start confirmatory GSE65391 high-dimensional inference.
+3. Create a new versioned pilot registry, e.g. config/simulation_pilot_v5.csv, and new pilot_v5_* run IDs. Preserve all round-four outputs as immutable mechanism evidence.
+4. Keep the P05/P06 DGP, score-loaded lambda, a=1, h_est, h_inf, exact profile score/Hessian, Dantzig anchor/grid/CV selector and primary variance unchanged.
+5. Add the post-L1 profile refit:
+   - beta_l1 = accepted round-four penalised selection estimator;
+   - S_hat = penalised coordinates with |beta_l1_j| > 1e-10;
+   - U = always-included unpenalised coordinates;
+   - T = registry-prespecified target coordinates;
+   - S_R = S_hat union U union T;
+   - require |S_R| <= floor(n/log(max(n,3))).
+6. Fit the reduced model on S_R with ZERO L1 penalty at h_inf and the unchanged nuisance ridge. Warm-start from beta_l1[S_R]. Set coefficients outside S_R to zero.
+7. Accept the post-refit only if:
+   - max reduced-model profile gradient <= 1e-7;
+   - max nuisance gradient <= 1e-7;
+   - last beta change <= 1e-8*max(1,||beta_refit||_inf);
+   - reduced Hessian min eigenvalue > 1e-8;
+   - reduced Hessian condition number < 1e10;
+   - all quantities finite.
+   Use max_iter >=1000 and max_backtrack >=50. Failure is explicit; no fallback to beta_l1.
+8. After beta_refit passes, embed it in the full p-vector and recompute ALL full-design nuisance profiles, exact score, full effective Hessian and deterministic fold Hessians at h_inf. Do not reuse reduced Hessians for the primary Dantzig row.
+9. Run the unchanged round-two Dantzig selector on the post-refit full-p Hessian:
+   - c_mu in {0.02,0.05,0.10,0.25,0.50,1,2,4};
+   - n<200: 2-fold cluster CV;
+   - n>=200: 4-fold cluster CV;
+   - minimise mean held-out inverse defect;
+   - numerical ties choose smaller mu.
+10. The practical one-step is beta_refit_k - omega_hat_k' g_hinf(beta_refit). Keep beta_l1 separately for selection diagnostics.
+11. Add POSTREFIT-EXACT-H as a simulation-only diagnostic:
+   - invert the data-selected reduced Hessian on S_R when numerically valid;
+   - extend the requested row by zero outside S_R;
+   - use the full-p score at beta_refit for the one-step;
+   - never use this object to choose lambda, support or mu and never label it primary.
+12. Add/retain audit fields required by the round-five amendment, including l1/l2 errors for beta_l1 and beta_refit, omitted-active count (simulation only), post-refit convergence/curvature, A_k from the refit start, full mu path, POP-H and Bahadur diagnostics.
+13. Add deterministic tests for:
+   - S_R construction and forced target inclusion;
+   - refit dimension gate;
+   - zero-L1 reduced profile refit at h_inf;
+   - no h_est/reduced Hessian leakage into primary full-p inference;
+   - post-refit numerical acceptance and explicit failure paths;
+   - target/POP-H dependency hashes unchanged by the practical post-refit rule.
+14. Run only the paired round-five mechanism probe first:
+   - P05-v5: n=200,p=500,s=5,tau=.5,q=1,B=50;
+   - P06-v5: n=400,p=500,s=5,tau=.5,q=1,B=50;
+   - nested clusters/common random numbers preferred where feasible.
+15. The B=50 probe is diagnostic only. Compare beta_l1 versus beta_refit error, support inclusion/refit size, practical Dantzig versus POP-H versus POSTREFIT-EXACT-H versus TRUE-SUPPORT, A_k/D_k, row errors, Bahadur remainder, bias/coverage and MCSE.
+16. Do NOT change the mu rate in round five. Reopen precision only if beta_refit error becomes small but practical A_k/row errors/Bahadur remain poor. If both practical and POP-H remain poor after refit, reopen h_inf/population-direction theory rather than merely shrinking c_mu.
+17. If P06-v5 moves materially toward POP-H/TRUE-SUPPORT but remains outside the gate while P05-to-P06 scaling is coherent, P07-v5 is conditionally authorised FIRST at B=50. P07-B=200 still requires another review.
+18. Only after the round-five mechanism report is reviewed may a full P01-P06 rerun be authorised.
+19. Keep the practical calibration bands unchanged: SE/SD in [0.80,1.20], coverage in [0.88,0.98]. No B=50 formal gate, no empirical SE multiplier, no threshold widening, no truth/coverage-based tuning, no DGP weakening and no silent deletion of failures.
