@@ -196,7 +196,11 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
     "lambda_coordinate_min", "lambda_coordinate_median", "lambda_coordinate_max",
     "zero_profile_score_max", "zero_kkt_ratio_max",
     "preliminary_kkt_normalized", "final_kkt_normalized", "final_kkt_absolute",
-    "first_stage_iterations", "first_stage_beta_change", "first_stage_nonzero_count"
+    "first_stage_iterations", "first_stage_beta_change", "first_stage_nonzero_count",
+    "selected_support_size", "refit_set_size", "refit_contains_targets",
+    "post_refit_status", "post_refit_iterations", "post_refit_gradient_max",
+    "post_refit_nuisance_gradient_max", "post_refit_beta_change",
+    "post_refit_hessian_min_eigenvalue", "post_refit_hessian_condition_number"
   )
   audit <- setNames(lapply(audit_names, function(nm) fit[[nm]] %||% NA_real_), audit_names)
   ans <- list(
@@ -342,6 +346,13 @@ fit_benchmark_postrefit_exact_h_v2 <- function(train, tau, target_coords,
     directions[[ii]] <- list(omega = omega, residual = residual, feasible = TRUE)
   }
   tab <- do.call(rbind, rows)
+  audit_names <- c(
+    "selected_support_size", "refit_set_size", "refit_contains_targets",
+    "post_refit_status", "post_refit_iterations", "post_refit_gradient_max",
+    "post_refit_nuisance_gradient_max", "post_refit_beta_change",
+    "post_refit_hessian_min_eigenvalue", "post_refit_hessian_condition_number"
+  )
+  audit <- setNames(lapply(audit_names, function(nm) fit[[nm]] %||% NA_real_), audit_names)
   ans <- list(
     method_id = "POSTREFIT-EXACT-H",
     status = if (fit$converged) "ok" else "warning",
@@ -365,6 +376,7 @@ fit_benchmark_postrefit_exact_h_v2 <- function(train, tau, target_coords,
     implementation_version = "postrefit-exact-h-v5-diagnostic",
     target_scope = "regularised_profile_refit_exact"
   )
+  ans[audit_names] <- audit
   benchmark_add_metadata_v2(
     ans,
     reference_identifier = "docs/METHOD_SPECIFICATION_ROUND5_AMENDMENT.md#postrefit-exact-h",

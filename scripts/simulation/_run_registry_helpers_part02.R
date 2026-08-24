@@ -601,8 +601,8 @@ run_one_replication_v2 <- function(root, config, replicate,
         popd_l1 <- NULL
         if (!is.null(fit$fit_object$beta_l1)) {
           l1v <- fit$fit_object$beta_l1
-          full_l1 <- setNames(rep(0, length(fit_names)), fit_names)
-          common <- intersect(names(l1v), fit_names)
+          full_l1 <- setNames(rep(0, length(beta_full)), names(beta_full))
+          common <- intersect(names(l1v), names(beta_full))
           full_l1[common] <- l1v[common]
           dl1 <- full_l1 - beta_target
           popd_l1 <- tryCatch(pop_direction_diagnostics_v2(

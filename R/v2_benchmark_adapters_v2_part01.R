@@ -171,7 +171,11 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
     "lambda_coordinate_min", "lambda_coordinate_median", "lambda_coordinate_max",
     "zero_profile_score_max", "zero_kkt_ratio_max",
     "preliminary_kkt_normalized", "final_kkt_normalized", "final_kkt_absolute",
-    "first_stage_iterations", "first_stage_beta_change", "first_stage_nonzero_count"
+    "first_stage_iterations", "first_stage_beta_change", "first_stage_nonzero_count",
+    "selected_support_size", "refit_set_size", "refit_contains_targets",
+    "post_refit_status", "post_refit_iterations", "post_refit_gradient_max",
+    "post_refit_nuisance_gradient_max", "post_refit_beta_change",
+    "post_refit_hessian_min_eigenvalue", "post_refit_hessian_condition_number"
   )
   audit <- setNames(lapply(audit_names, function(nm) fit[[nm]] %||% NA_real_), audit_names)
   out <- list(
