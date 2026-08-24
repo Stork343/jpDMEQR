@@ -241,6 +241,7 @@ fit_profile_lasso_calibrated_v2 <- function(y,
                                             lambda_0_n,
                                             base_penalty_factor = NULL,
                                             beta_init = NULL,
+                                            target_coordinates = NULL,
                                             control = list()) {
   X <- assert_numeric_matrix_v2(X, "X")
   p <- ncol(X)
@@ -426,17 +427,101 @@ fit_profile_lasso_calibrated_v2 <- function(y,
   # components are diagnostics only; the inferential objects are recomputed at
   # h_inf at the accepted beta_hat.
   fit$components_first_stage <- fit$components  # h_est, diagnostics only
-  comp_final <- tryCatch(
-    profile_components_v2(
-      y, X, Z, cluster_id, fit$beta, tau, h_inf, lambda_gamma,
-      gamma_init = fit$gamma, need_hessian = TRUE,
-      nuisance_control = nuisance_control
-    ),
-    error = function(e) e
-  )
-  if (!inherits(comp_final, "error")) {
-    fit$components <- comp_final
-    fit$gamma <- comp_final$gamma
+
+  # ---------------------------------------------------------------------------
+  # Round-5 post-L1 profile refit (METHOD_SPECIFICATION_ROUND5_AMENDMENT.md
+  # sections 1-5): the penalised L1 estimator is the SELECTION estimator only;
+  # the inferential starting estimator is the zero-L1 profile refit on
+  # S_R = S_hat U U U T at h_inf. Explicit failure; no fallback to beta_l1.
+  # ---------------------------------------------------------------------------
+  fit$beta_l1 <- fit$beta
+  fit$post_refit_status <- "not_attempted"
+  if (isTRUE(fit$converged)) {
+    S_hat <- P_idx[abs(fit$beta[P_idx]) > 1e-10]
+    T_idx <- if (length(target_coordinates) && !all(is.na(target_coordinates))) {
+      sort(unique(match(as.character(target_coordinates), colnames(X))))
+    } else integer()
+    T_idx <- T_idx[!is.na(T_idx)]
+    S_R <- sort(unique(c(S_hat, which(base_pf == 0), T_idx)))
+    d_R <- length(S_R)
+    refit_gate <- floor(n_clusters_fit / log(max(n_clusters_fit, 3)))
+    fit$selected_support_size <- length(S_hat)
+    fit$refit_set_size <- d_R
+    fit$refit_contains_targets <- all(T_idx %in% S_R)
+    if (d_R > refit_gate) {
+      fit$converged <- FALSE
+      fit$failure_stage <- "post_refit_dimension"
+      fit$post_refit_status <- "dimension_gate_failed"
+    } else {
+      refit_control <- modifyList(
+        list(max_iter = 1000L, max_backtrack = 50L, beta_tol = 1e-8,
+             kkt_normalized_tol = 1e-7),
+        control$refit_control %||% list()
+      )
+      refit <- tryCatch(
+        fit_profile_lasso_v2(
+          y = y, X = X[, S_R, drop = FALSE], Z = Z, cluster_id = cluster_id,
+          tau = tau, h = h_inf, lambda_beta = 0, lambda_gamma = lambda_gamma,
+          penalty_factor = rep(0, d_R), beta_init = fit$beta[S_R],
+          control = refit_control
+        ),
+        error = function(e) e
+      )
+      if (inherits(refit, "error")) {
+        fit$converged <- FALSE
+        fit$failure_stage <- "post_refit"
+        fit$post_refit_status <- "error"
+      } else {
+        H_R <- refit$components$hessian
+        ev_R <- tryCatch(eigen((H_R + t(H_R)) / 2, symmetric = TRUE,
+                               only.values = TRUE)$values,
+                         error = function(e) numeric())
+        grad_ok <- is.finite(refit$kkt_normalized) && refit$kkt_normalized <= 1e-7
+        nuis_ok <- is.finite(refit$components$max_nuisance_gradient) &&
+          refit$components$max_nuisance_gradient <= 1e-7
+        bch_ok <- is.finite(refit$first_stage_beta_change) &&
+          refit$first_stage_beta_change <= 1e-8 * max(1, max(abs(refit$beta)))
+        eig_ok <- length(ev_R) && is.finite(min(ev_R)) && min(ev_R) > 1e-8 &&
+          is.finite(max(ev_R) / min(ev_R)) && (max(ev_R) / min(ev_R)) < 1e10
+        fin_ok <- all(is.finite(refit$beta)) && is.finite(refit$composite_objective)
+        post_ok <- isTRUE(refit$converged) && grad_ok && nuis_ok && bch_ok &&
+          eig_ok && fin_ok
+        if (!post_ok) {
+          fit$converged <- FALSE
+          fit$failure_stage <- "post_refit"
+          fit$post_refit_status <- "acceptance_failed"
+        } else {
+          beta_refit <- setNames(rep(0, p), colnames(X))
+          beta_refit[S_R] <- refit$beta
+          fit$beta_refit <- beta_refit
+          fit$beta <- beta_refit
+          fit$refit_set <- S_R
+          fit$refit_set_names <- colnames(X)[S_R]
+          fit$post_refit_status <- "ok"
+          fit$post_refit_iterations <- refit$iterations
+          fit$post_refit_gradient_max <- refit$kkt_normalized
+          fit$post_refit_nuisance_gradient_max <- refit$components$max_nuisance_gradient
+          fit$post_refit_beta_change <- refit$first_stage_beta_change
+          fit$post_refit_hessian_min_eigenvalue <- min(ev_R)
+          fit$post_refit_hessian_condition_number <- max(ev_R) / min(ev_R)
+          # Full-p inferential reprofile at h_inf at beta_refit: every nuisance
+          # profile, exact score, full effective Hessian and fold Hessians.
+          # Reduced-model objects are discarded for the primary precision step.
+          comp_final <- tryCatch(
+            profile_components_v2(
+              y, X, Z, cluster_id, beta_refit, tau, h_inf, lambda_gamma,
+              gamma_init = NULL, need_hessian = TRUE,
+              nuisance_control = nuisance_control
+            ),
+            error = function(e) e
+          )
+          if (!inherits(comp_final, "error")) {
+            fit$components <- comp_final
+            fit$gamma <- comp_final$gamma
+          }
+        }
+      }
+    }
   }
 
   p_final <- lambda_0_n * ell_final
@@ -465,6 +550,17 @@ fit_profile_lasso_calibrated_v2 <- function(y,
   fit$first_stage_nonzero_count <- fit$first_stage_nonzero_count
   fit$h_est <- h_est
   fit$h_inf <- h_inf
+  # Round-5 post-refit audit fields (amendment section 10).
+  fit$selected_support_size <- fit$selected_support_size %||% NA_integer_
+  fit$refit_set_size <- fit$refit_set_size %||% NA_integer_
+  fit$refit_contains_targets <- fit$refit_contains_targets %||% NA
+  fit$post_refit_status <- fit$post_refit_status %||% "not_attempted"
+  fit$post_refit_iterations <- fit$post_refit_iterations %||% NA_integer_
+  fit$post_refit_gradient_max <- fit$post_refit_gradient_max %||% NA_real_
+  fit$post_refit_nuisance_gradient_max <- fit$post_refit_nuisance_gradient_max %||% NA_real_
+  fit$post_refit_beta_change <- fit$post_refit_beta_change %||% NA_real_
+  fit$post_refit_hessian_min_eigenvalue <- fit$post_refit_hessian_min_eigenvalue %||% NA_real_
+  fit$post_refit_hessian_condition_number <- fit$post_refit_hessian_condition_number %||% NA_real_
   fit
 }
 

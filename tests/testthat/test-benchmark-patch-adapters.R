@@ -63,6 +63,7 @@ testthat::test_that("PROFILE-DQR matches its reference fit on a small design", {
     lambda_0_n = lam0,
     lambda_gamma = tuning$lambda_gamma,
     base_penalty_factor = rep(1, ncol(train$X)),
+    target_coordinates = coords,
     control = list(fit_control = list(max_iter = 2000L, max_backtrack = 50L,
                                       beta_tol = 1e-7, kkt_normalized_tol = 1e-3))
   )

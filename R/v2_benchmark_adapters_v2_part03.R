@@ -102,6 +102,7 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
       lambda_0_n = tuning$lambda_0_n,
       lambda_gamma = tuning$lambda_gamma,
       base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
+      target_coordinates = target_coords,
       control = list(
         fit_control = control$fit_control %||% list(),
         nuisance_control = control$fit_control$nuisance_control %||% list()
@@ -208,7 +209,7 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
     se = setNames(tab$se, tab$coordinate),
     ci_lower = setNames(tab$ci_lower, tab$coordinate),
     ci_upper = setNames(tab$ci_upper, tab$coordinate),
-    selected = which(abs(fit$beta) > (control$selection_tol %||% 1e-8)),
+    selected = which(abs(fit$beta_l1 %||% fit$beta) > (control$selection_tol %||% 1e-8)),
     fit_object = fit,
     inference_object = list(table = tab, directions = directions),
     population_direction_asset = population_direction_asset,
@@ -227,6 +228,147 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
     ans,
     reference_identifier = "docs/BENCHMARK_IMPLEMENTATION_ACCEPTANCE.md#profile-dqr-pop-h",
     fidelity_status = "implementation_present_acceptance_pending"
+  )
+}
+
+# -----------------------------------------------------------------------------
+# POSTREFIT-EXACT-H: simulation-only diagnostic (METHOD_SPECIFICATION_ROUND5_
+# AMENDMENT.md section 9). Uses the DATA-SELECTED refit set S_R (no truth):
+# exact reduced inverse H_R^{-1} extended by zero outside S_R, one-step with
+# the full-p score at beta_refit, primary unsmoothed sandwich. Never used to
+# select mu/lambda/support; never labelled primary.
+# -----------------------------------------------------------------------------
+fit_benchmark_postrefit_exact_h_v2 <- function(train, tau, target_coords,
+                                               tuning, seed, control = list()) {
+  set.seed(seed)
+  start <- proc.time()[[3]]
+  fit <- tryCatch(
+    fit_profile_lasso_calibrated_v2(
+      y = train$y,
+      X = train$X,
+      Z = train$Z,
+      cluster_id = train$cluster_id,
+      tau = tau,
+      h_est = tuning$h_est,
+      h_inf = tuning$h,
+      lambda_0_n = tuning$lambda_0_n,
+      lambda_gamma = tuning$lambda_gamma,
+      base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
+      target_coordinates = target_coords,
+      control = list(
+        fit_control = control$fit_control %||% list(),
+        nuisance_control = control$fit_control$nuisance_control %||% list()
+      )
+    ),
+    error = function(e) e
+  )
+  elapsed <- proc.time()[[3]] - start
+  if (inherits(fit, "error")) {
+    return(benchmark_failure_v2("POSTREFIT-EXACT-H", "penalised_fit",
+                                conditionMessage(fit), elapsed))
+  }
+  if (isTRUE(fit$first_stage_calibrated) && !isTRUE(fit$converged)) {
+    return(benchmark_failure_v2(
+      "POSTREFIT-EXACT-H", fit$failure_stage %||% "penalised_fit",
+      "Round-5 first-stage/post-refit acceptance failed", elapsed
+    ))
+  }
+  tryCatch(
+    assert_inferential_components_v2(fit, tuning$h),
+    error = function(e) benchmark_failure_v2(
+      "POSTREFIT-EXACT-H", "inference_bandwidth_mismatch", conditionMessage(e), elapsed
+    )
+  ) -> guard_ans
+  if (is.list(guard_ans) && identical(guard_ans$status, "failed")) return(guard_ans)
+
+  S_R <- fit$refit_set
+  if (is.null(S_R) || !length(S_R)) {
+    return(benchmark_failure_v2("POSTREFIT-EXACT-H", "post_refit",
+                                "No data-selected refit set available", elapsed))
+  }
+  p <- ncol(train$X)
+  Hf <- fit$components$hessian
+  G0u <- fit$components$unsmoothed_cluster_scores
+  score_full <- fit$components$score
+  beta_refit <- fit$beta
+  H_R <- (Hf[S_R, S_R, drop = FALSE] + t(Hf[S_R, S_R, drop = FALSE])) / 2
+  Hinv_R <- tryCatch(
+    solve_linear_pd_v2(H_R, diag(length(S_R)), name = "H_R inverse (POSTREFIT-EXACT-H)"),
+    error = function(e) NULL
+  )
+  if (is.null(Hinv_R)) {
+    return(benchmark_failure_v2("POSTREFIT-EXACT-H", "precision_solver",
+                                "Reduced exact inverse failed", elapsed))
+  }
+  zcrit <- stats::qnorm(1 - (control$ci_level %||% 0.95) / 2)
+  rows <- vector("list", length(target_coords))
+  directions <- vector("list", length(target_coords))
+  names(directions) <- target_coords
+  for (ii in seq_along(target_coords)) {
+    nm <- target_coords[ii]
+    k <- match(nm, colnames(train$X))
+    if (is.na(k) || !(k %in% S_R)) {
+      rows[[ii]] <- data.frame(
+        coordinate = nm, index = k, feasible = FALSE,
+        beta_hat = NA_real_, beta_tilde = NA_real_, se = NA_real_,
+        ci_lower = NA_real_, ci_upper = NA_real_, mu = NA_real_,
+        dantzig_residual = NA_real_, omega_l1 = NA_real_, omega_l2 = NA_real_,
+        stringsAsFactors = FALSE
+      )
+      next
+    }
+    e_R <- numeric(length(S_R)); e_R[match(k, S_R)] <- 1
+    omega_R <- as.numeric(Hinv_R %*% e_R)
+    omega <- numeric(p); omega[S_R] <- omega_R
+    beta_tilde <- as.numeric(beta_refit[k] - sum(omega * score_full))
+    sand <- cluster_sandwich_coordinate_v2(
+      G0u, omega, df_correction = isTRUE(control$df_correction)
+    )
+    residual <- max(abs(as.numeric(Hf %*% omega -
+                                     replace(numeric(p), k, 1))))
+    rows[[ii]] <- data.frame(
+      coordinate = nm, index = k, feasible = TRUE,
+      beta_hat = as.numeric(beta_refit[k]),
+      beta_tilde = beta_tilde,
+      se = sand$se,
+      ci_lower = beta_tilde - zcrit * sand$se,
+      ci_upper = beta_tilde + zcrit * sand$se,
+      mu = NA_real_,
+      dantzig_residual = residual,
+      omega_l1 = sum(abs(omega)),
+      omega_l2 = sqrt(sum(omega^2)),
+      stringsAsFactors = FALSE
+    )
+    directions[[ii]] <- list(omega = omega, residual = residual, feasible = TRUE)
+  }
+  tab <- do.call(rbind, rows)
+  ans <- list(
+    method_id = "POSTREFIT-EXACT-H",
+    status = if (fit$converged) "ok" else "warning",
+    failure_stage = "",
+    failure_message = "",
+    beta_hat = fit$beta,
+    beta_tilde = setNames(tab$beta_tilde, tab$coordinate),
+    se = setNames(tab$se, tab$coordinate),
+    ci_lower = setNames(tab$ci_lower, tab$coordinate),
+    ci_upper = setNames(tab$ci_upper, tab$coordinate),
+    selected = which(abs(fit$beta_l1 %||% fit$beta) > (control$selection_tol %||% 1e-8)),
+    fit_object = fit,
+    inference_object = list(table = tab, directions = directions),
+    runtime_sec = elapsed,
+    converged = fit$converged,
+    kkt_residual = fit$kkt_residual,
+    profile_identity_error = fit$components$profile_identity_error,
+    max_nuisance_gradient = fit$components$max_nuisance_gradient,
+    warning_messages = if (fit$converged) character() else
+      "First-stage/post-refit acceptance failed.",
+    implementation_version = "postrefit-exact-h-v5-diagnostic",
+    target_scope = "regularised_profile_refit_exact"
+  )
+  benchmark_add_metadata_v2(
+    ans,
+    reference_identifier = "docs/METHOD_SPECIFICATION_ROUND5_AMENDMENT.md#postrefit-exact-h",
+    fidelity_status = "diagnostic_present_acceptance_pending"
   )
 }
 
@@ -321,6 +463,9 @@ fit_benchmark_by_id_v2 <- function(method_id, train, tau, target_coords,
       train, tau, target_coords, tuning, seed,
       population_direction_asset = context$population_direction_asset,
       control = control
+    ),
+    `POSTREFIT-EXACT-H` = fit_benchmark_postrefit_exact_h_v2(
+      train, tau, target_coords, tuning, seed, control
     ),
     `PROFILE-DQR-SPLIT` = fit_benchmark_profile_split_v2(
       train, tau, target_coords, tuning, seed,

@@ -94,6 +94,7 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
         lambda_0_n = tuning$lambda_0_n,
         lambda_gamma = tuning$lambda_gamma,
         base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
+        target_coordinates = target_coords,
         control = list(
           fit_control = control$fit_control %||% list(),
           nuisance_control = control$fit_control$nuisance_control %||% list()
@@ -154,7 +155,9 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
                                 conditionMessage(inf), elapsed))
   }
 
-  selected <- which(abs(fit$beta) > (control$selection_tol %||% 1e-8))
+  # Selection record uses the L1 selection support (round-5: beta_l1 is the
+  # selection estimator; the refit support is recorded separately).
+  selected <- which(abs(fit$beta_l1 %||% fit$beta) > (control$selection_tol %||% 1e-8))
   status <- if (fit$converged && all(inf$table$feasible)) "ok" else "warning"
   warnings <- c(
     if (!fit$converged) "Penalised profile fit did not meet all stopping rules.",

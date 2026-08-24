@@ -64,7 +64,8 @@ inference_direction_table_v2 <- function(fit) {
 # Diagnostics/gates only; never used to select mu.
 pop_direction_diagnostics_v2 <- function(fit, population_asset, nm,
                                          delta_l1, n_clusters, tau,
-                                         beta_star = NA_real_) {
+                                         beta_star = NA_real_,
+                                         delta_override = NULL) {
   out <- list(E1 = NA_real_, E2 = NA_real_, cosine_pop = NA_real_,
               D_k = NA_real_, A_k = NA_real_, bahadur_scaled = NA_real_)
   if (is.null(population_asset) || is.null(population_asset$directions) ||
@@ -93,9 +94,11 @@ pop_direction_diagnostics_v2 <- function(fit, population_asset, nm,
   }
   # A_k: the ACTUAL normalized inverse-defect inner product (round-2, B2):
   #   A_k = sqrt(n) |(e_k - H omega_hat)' Delta| / sigma0_pop,
-  # Delta = beta_hat - beta_star (full vector set by caller as fit$delta_full).
+  # Delta = beta_hat - beta_star (full vector set by caller as fit$delta_full;
+  # round-5: delta_override lets the caller plug the L1-start delta for the
+  # A_k_lasso_start diagnostic).
   Hf <- fit$fit_object$components$hessian
-  delta_vec <- fit$delta_full
+  delta_vec <- delta_override %||% fit$delta_full
   if (is.finite(sigma0) && sigma0 > 0 && !is.null(Hf) && length(delta_vec) == length(fit_names) &&
       all(is.finite(delta_vec))) {
     e <- numeric(length(fit_names)); e[match(nm, fit_names)] <- 1
@@ -477,6 +480,41 @@ run_one_replication_v2 <- function(root, config, replicate,
       first_stage_iterations = fit$first_stage_iterations %||% NA_integer_,
       first_stage_beta_change = fit$first_stage_beta_change %||% NA_real_,
       first_stage_nonzero_count = fit$first_stage_nonzero_count %||% NA_integer_,
+      # Round-5 post-refit audit fields (METHOD_SPECIFICATION_ROUND5_AMENDMENT.md
+      # section 10); l1/l2 errors are simulation-only.
+      selected_support_size = fit$selected_support_size %||% NA_integer_,
+      refit_set_size = fit$refit_set_size %||% NA_integer_,
+      refit_contains_targets = fit$refit_contains_targets %||% NA,
+      post_refit_status = fit$post_refit_status %||% NA_character_,
+      post_refit_iterations = fit$post_refit_iterations %||% NA_integer_,
+      post_refit_gradient_max = fit$post_refit_gradient_max %||% NA_real_,
+      post_refit_nuisance_gradient_max = fit$post_refit_nuisance_gradient_max %||% NA_real_,
+      post_refit_beta_change = fit$post_refit_beta_change %||% NA_real_,
+      post_refit_hessian_min_eigenvalue = fit$post_refit_hessian_min_eigenvalue %||% NA_real_,
+      post_refit_hessian_condition_number = fit$post_refit_hessian_condition_number %||% NA_real_,
+      l1_error_lasso = if (!is.null(fit$fit_object$beta_l1) && all(is.finite(beta_full))) {
+        l1v <- fit$fit_object$beta_l1
+        common <- intersect(names(l1v), names(beta_target))
+        if (length(common)) sum(abs(l1v[common] - beta_target[common])) else NA_real_
+      } else NA_real_,
+      l1_error_refit = if (!is.null(fit$fit_object$beta_refit) && all(is.finite(beta_full))) {
+        l1v <- fit$fit_object$beta_refit
+        common <- intersect(names(l1v), names(beta_target))
+        if (length(common)) sum(abs(l1v[common] - beta_target[common])) else NA_real_
+      } else NA_real_,
+      l2_error_lasso = if (!is.null(fit$fit_object$beta_l1) && all(is.finite(beta_full))) {
+        l1v <- fit$fit_object$beta_l1
+        common <- intersect(names(l1v), names(beta_target))
+        if (length(common)) sqrt(sum((l1v[common] - beta_target[common])^2)) else NA_real_
+      } else NA_real_,
+      l2_error_refit = if (!is.null(fit$fit_object$beta_refit) && all(is.finite(beta_full))) {
+        l1v <- fit$fit_object$beta_refit
+        common <- intersect(names(l1v), names(beta_target))
+        if (length(common)) sqrt(sum((l1v[common] - beta_target[common])^2)) else NA_real_
+      } else NA_real_,
+      omitted_active_count = if (!is.null(fit$fit_object$refit_set)) {
+        sum(!(dat$active %in% fit$fit_object$refit_set))
+      } else NA_integer_,
       target_type = target_obj$target_type,
       target_mc_se = target_obj$target_mc_se,
       implementation_commit = commit,
@@ -558,6 +596,21 @@ run_one_replication_v2 <- function(root, config, replicate,
           fit, population_asset, nm, delta_l1, dat$n_clusters, config$tau,
           beta_star = as.numeric(beta_target[nm])
         )
+        # Round-5 A_k from the L1 starting estimator (selection-start delta);
+        # the primary A_k above uses the post-refit start.
+        popd_l1 <- NULL
+        if (!is.null(fit$fit_object$beta_l1)) {
+          l1v <- fit$fit_object$beta_l1
+          full_l1 <- setNames(rep(0, length(fit_names)), fit_names)
+          common <- intersect(names(l1v), fit_names)
+          full_l1[common] <- l1v[common]
+          dl1 <- full_l1 - beta_target
+          popd_l1 <- tryCatch(pop_direction_diagnostics_v2(
+            fit, population_asset, nm, sum(abs(dl1)), dat$n_clusters, config$tau,
+            beta_star = as.numeric(beta_target[nm]), delta_override = dl1
+          ), error = function(e) NULL)
+        }
+        A_k_lasso <- if (!is.null(popd_l1)) popd_l1$A_k else NA_real_
         ladd <- if (!is.null(ladder_Gs) && exists("variance_ladder_one_v2", mode = "function")) {
           tryCatch(
             variance_ladder_one_v2(
@@ -631,7 +684,9 @@ run_one_replication_v2 <- function(root, config, replicate,
           cosine_pop = popd$cosine_pop,
           D_k = popd$D_k,
           A_k = popd$A_k,
+          A_k_lasso_start = A_k_lasso,
           bahadur_scaled = popd$bahadur_scaled,
+          bahadur_refit_scaled = popd$bahadur_scaled,
           ladder_L_k = Lk,
           ladder_se1 = lse1, ladder_se2 = lse2, ladder_se3 = lse3, ladder_se4 = lse4,
           fs_se_cr0 = fs_cr0, fs_se_cr3 = fs_cr3, fs_se_kc = fs_kc, fs_leverage_max = fs_lev,

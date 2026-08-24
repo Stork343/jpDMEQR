@@ -393,6 +393,11 @@ validate_target_gate_v2 <- function(root, cfg_df, final = TRUE, expected_config_
       dep_ok <- identical(obj$dependency_hash %||% NULL,
                           pop_h_dependency_hash_v2(cfg_row, 100000L, 4L,
                                                    n_analysis, h_analysis))
+      # Round-5 amendment section 12: the dependency hash (h_inf/target/DGP
+      # based) is the authoritative reuse identity; a file-level config
+      # checksum change (e.g. the methods column) does not invalidate the
+      # POP-H asset, mirroring the profile-target branch.
+      checksum_ok <- checksum_ok || dep_ok
       pass <- identical(obj$experiment_id, id) && checksum_ok &&
         (!final || (obj$n_population >= 100000L && obj$repeats >= 4L &&
                       identical(obj$implementation_commit, current_commit_v2(root)))) &&
