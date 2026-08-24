@@ -65,8 +65,12 @@ validate_registry_contract_v2 <- function(root, config_path,
   if (registry_type == "main" && nrow(cfg) != 78L) {
     add_problem(paste0("Main registry must contain 78 experiment rows; found ", nrow(cfg), "."))
   }
-  if (registry_type == "pilot" && !setequal(cfg$experiment_id, sprintf("P%02d", 1:6))) {
-    add_problem("Pilot registry must contain exactly P01--P06.")
+  if (registry_type == "pilot") {
+    ids <- cfg$experiment_id
+    if (!all(sprintf("P%02d", 1:6) %in% ids) ||
+        any(!ids %in% sprintf("P%02d", 1:7))) {
+      add_problem("Pilot registry must contain P01--P06 (P07 allowed as scaling diagnostic).")
+    }
   }
   if (any(!cfg$target_mode %in% c("structural", "profile_mc"))) {
     add_problem("Unknown target_mode in registry.")
