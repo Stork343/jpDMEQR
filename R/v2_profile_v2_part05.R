@@ -202,6 +202,70 @@ oracle_jackknife_v2 <- function(dat, active, target_coords, tau, h, lambda_gamma
 }
 
 # -----------------------------------------------------------------------------
+# Round-6 T=L+Q+R variance decomposition and four-level meat ladder
+# (METHOD_SPECIFICATION_ROUND6_AMENDMENT.md sections 2-3).
+#
+# For replication r, coordinate k:
+#   T_k   = sqrt(n) (beta_tilde_k - beta*_k)
+#   G*    = n^{-1/2} sum_i g*_i      (target ordinary quantile cluster scores)
+#   L_k   = -omega_pop' G*
+#   Q_k   = -(omega_hat - omega_pop)' G*
+#   R_k   = T_k - L_k - Q_k
+# Ladder (root-n scales, unsmoothed scores):
+#   V^fit,fit    fitted direction + fitted scores (current primary)
+#   V^fit,target fitted direction + target scores
+#   V^pop,fit    population direction + fitted scores
+#   V^pop,target population direction + target scores
+# Diagnostics only; no SE multiplier, no production change.
+# -----------------------------------------------------------------------------
+variance_ladder_v6_one_v2 <- function(fit, dat, beta_target, omega_pop,
+                                      coordinate, h_inf, lambda_gamma,
+                                      nuisance_control = list(reltol = 1e-11,
+                                                              maxit = 400L,
+                                                              grad_tol = 1e-8)) {
+  fit_names <- names(fit$fit_object$beta)
+  k <- match(coordinate, fit_names)
+  if (is.na(k)) stop("Coordinate not in fit design: ", coordinate)
+  n <- dat$n_clusters
+  tau <- dat$tau %||% 0.5
+
+  # Target ordinary quantile cluster scores at beta* (unsmoothed psi).
+  g_star <- target_residual_scores_v2(
+    dat, beta_target, tau, lambda_gamma, h = h_inf, nuisance_control = nuisance_control
+  )
+  # Fitted ordinary (unsmoothed) cluster scores at beta_refit (h_inf reprofile).
+  g_fit <- fit$fit_object$components$unsmoothed_cluster_scores
+  # The inference-object directions are indexed by position in the coordinate
+  # table (NOT by the column index k).
+  pos <- match(coordinate, fit$inference_object$table$coordinate)
+  omega_hat <- as.numeric(fit$inference_object$directions[[pos]]$omega %||%
+                            rep(NA_real_, length(fit_names)))
+  beta_tilde <- as.numeric(fit$inference_object$table$beta_tilde[pos])
+  if (length(omega_hat) != length(omega_pop) || any(!is.finite(omega_hat)) ||
+      any(!is.finite(omega_pop)) || !is.finite(beta_tilde)) {
+    return(list(T = NA_real_, L = NA_real_, Q = NA_real_, R = NA_real_,
+                V_fit_fit = NA_real_, V_fit_target = NA_real_,
+                V_pop_fit = NA_real_, V_pop_target = NA_real_))
+  }
+  G_star_vec <- colSums(g_star) / sqrt(n)
+  T <- sqrt(n) * (beta_tilde - as.numeric(beta_target[k]))
+  L <- -drop(crossprod(omega_pop, G_star_vec))
+  Q <- -drop(crossprod(omega_hat - omega_pop, G_star_vec))
+  R <- T - L - Q
+  V_fun <- function(w, G) {
+    proj <- as.numeric(G %*% w)
+    mean((proj - mean(proj))^2)
+  }
+  list(
+    T = T, L = L, Q = Q, R = R,
+    V_fit_fit = V_fun(omega_hat, g_fit),
+    V_fit_target = V_fun(omega_hat, g_star),
+    V_pop_fit = V_fun(omega_pop, g_fit),
+    V_pop_target = V_fun(omega_pop, g_star)
+  )
+}
+
+# -----------------------------------------------------------------------------
 # Round-4 first-stage RSC diagnostics (METHOD_SPECIFICATION_ROUND4_AMENDMENT.md
 # section 6). Simulation-only, truth-permitted (SS = true active block); must
 # never tune h_est, lambda or mu.
