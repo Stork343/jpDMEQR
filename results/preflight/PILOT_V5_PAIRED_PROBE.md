@@ -67,6 +67,45 @@ practical fitted-direction sandwich (se/sd 0.62-0.80 at n=400) that POP-H
 theory-sanctioned amendment (e.g., a stated higher-order term in the fitted
 meat) is deferred until P07-v5 scaling is measured.
 
+## 6. P07-v5 scaling locator (n=800, B=50) — addendum
+
+Run: results/raw/simulation/pilot_v5_P07_B50 (4 shards, 0 runner errors,
+150 method rows; methods PROFILE-DQR | POSTREFIT-EXACT-H |
+PROFILE-DQR-TRUE-SUPPORT; no POP-H at n=800 because no population-direction
+asset exists for the P07 cell).
+
+First stage: l1_lasso med 1.569 -> l1_refit med 0.163 (q25 0.135, q75 0.209),
+l2_refit 0.075, sel_size med 5 (all actives), refit_set 7, omitted 0,
+post_refit ok 1.000, status ok 1.000.
+
+PROFILE-DQR: bias <= 0.003; coverage 0.840/0.840/0.840/0.940 (mcse 0.03-0.05);
+se/sd 0.77/0.72/0.77/0.87. TRUE-SUPPORT: coverage 0.88-0.96, se/sd 0.89-0.99.
+
+Three-cell nested scaling of the practical variance gap (active coords):
+
+| cell | se/sd x00001 | se/sd x00002 | cov x00001 | cov x00002 |
+|---|---|---|---|---|
+| n=200 | 0.68 | 0.27 | 0.820 | 0.360 |
+| n=400 | 0.75 | 0.65 | 0.860 | 0.760 |
+| n=800 | 0.77 | 0.72 | 0.840 | 0.840 |
+
+Interpretation: the fitted-direction sandwich under-estimation closes
+monotonically with n (se/sd 0.27-0.68 -> 0.72-0.87) but remains ~13-28% below
+1 at n=800, keeping practical coverage at 0.84-0.94 (1 mcse below the lower
+band edge for 3/4 coordinates) while TRUE-SUPPORT is in band. Bias and
+precision are no longer limiting at any cell.
+
+## 7. Status and next decision
+
+Per action 19: P05 fails while P06/P07 move toward/into calibration but do not
+fully enter the band at B=50. The full P01-P06 rerun and P07-B=200 remain
+unauthorised pending review of this report. Candidate round-6 questions:
+(i) whether the persistent ~15-25% fitted-meat shortfall warrants a
+theory-sanctioned higher-order variance statement (POP-H and TRUE-SUPPORT are
+in band, localising the term to the fitted-direction meat);
+(ii) the manuscript inference-regime wording (n>=400/800) and the GSE65391
+confirmatory high-dimensional Wald scope, per round-4 Q5.
+
 ## 5. Compliance
 
 No mu/lambda/h change; round-5 spec implemented verbatim; all 300 method
