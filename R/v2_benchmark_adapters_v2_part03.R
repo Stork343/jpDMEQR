@@ -304,7 +304,8 @@ fit_benchmark_postrefit_exact_h_v2 <- function(train, tau, target_coords,
     return(benchmark_failure_v2("POSTREFIT-EXACT-H", "precision_solver",
                                 "Reduced exact inverse failed", elapsed))
   }
-  zcrit <- stats::qnorm(1 - (control$ci_level %||% 0.95) / 2)
+  alpha <- 1 - (control$ci_level %||% 0.95)
+  zcrit <- stats::qnorm(1 - alpha / 2)
   rows <- vector("list", length(target_coords))
   directions <- vector("list", length(target_coords))
   names(directions) <- target_coords
