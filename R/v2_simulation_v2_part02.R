@@ -5,7 +5,18 @@ draw_cluster_sizes_v2 <- function(n_clusters,
                                   m_rule = "uniform",
                                   random_intercept = NULL,
                                   latent_size = NULL,
-                                  geometric_prob = 0.35) {
+                                  geometric_prob = 0.35,
+                                  m_multiset = NULL) {
+  # Frozen empirical multiset (round-6 PAPP cells): the cluster sizes are
+  # returned verbatim, deterministic, no RNG draw.
+  if (!is.null(m_multiset)) {
+    m_multiset <- as.integer(m_multiset)
+    if (length(m_multiset) != n_clusters ||
+        any(!is.finite(m_multiset)) || any(m_multiset < 1L)) {
+      stop("m_multiset must contain exactly n_clusters positive integers.")
+    }
+    return(m_multiset)
+  }
   m_values <- sort(unique(as.integer(m_values)))
   if (!length(m_values) || any(m_values < 1L)) stop("m_values must contain positive integers.")
   if (m_rule %in% c("", "uniform")) {
@@ -69,6 +80,7 @@ generate_profile_qr_data_v2 <- function(n_clusters,
                                         x_b_corr = 0,
                                         informative_size = FALSE,
                                         nonlinear_re_strength = 0,
+                                        m_multiset = NULL,
                                         seed = 1L) {
   set.seed(seed)
   n_clusters <- as.integer(n_clusters)
@@ -95,7 +107,8 @@ generate_profile_qr_data_v2 <- function(n_clusters,
     m_values = m_values,
     m_rule = effective_m_rule,
     random_intercept = b_mat[, 1] / max(sigma_b0, 1e-8),
-    latent_size = latent_size
+    latent_size = latent_size,
+    m_multiset = m_multiset
   )
   total_rows <- sum(m_i)
   cluster_id <- rep(cluster_names, times = m_i)
@@ -383,6 +396,10 @@ config_row_to_list_v2 <- function(row) {
     row[[nm]] <- if (is.na(value) || !nzchar(value)) NA_real_ else as.numeric(value)
   }
   row$m_values <- parse_semicolon_numeric_v2(row$m_values)
+  row$m_multiset <- if (!is.null(row$m_multiset) && !is.na(row$m_multiset) &&
+                       nzchar(as.character(row$m_multiset))) {
+    parse_semicolon_numeric_v2(row$m_multiset)
+  } else NULL
   row$lambda_beta_multipliers <- parse_semicolon_numeric_v2(row$lambda_beta_multipliers)
   row$dantzig_multipliers <- parse_semicolon_numeric_v2(row$dantzig_multipliers)
   row$methods <- parse_pipe_character_v2(row$methods)
@@ -456,6 +473,7 @@ simulate_from_config_v2 <- function(config, seed) {
     x_b_corr = config$x_b_corr,
     informative_size = config$informative_size,
     nonlinear_re_strength = config$nonlinear_re_strength,
+    m_multiset = config$m_multiset %||% NULL,
     seed = seed
   )
 }
