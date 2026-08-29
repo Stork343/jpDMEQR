@@ -1,8 +1,17 @@
 #!/usr/bin/env Rscript
-# Round-3 pilot launcher: cluster self-normalised first-stage lambda regime.
-args <- commandArgs(trailingOnly = TRUE)
-root <- "D:/OneDrive/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR"
+# Sharded pilot launcher (portable): root is auto-detected from the script
+# location or overridden by the JPDMEQR_ROOT environment variable.
+args <- commandArgs(trailingOnly = FALSE)
+file_arg <- grep("^--file=", args, value = TRUE)
+script_path <- if (length(file_arg)) sub("^--file=", "", file_arg[1]) else
+  "scripts/simulation/launch_sharded_pilot.R"
+root <- Sys.getenv("JPDMEQR_ROOT", unset = NA)
+if (is.na(root) || !nzchar(root)) {
+  root <- if (file.exists("R/profile_v2.R")) "." else
+    normalizePath(file.path(dirname(script_path), "../.."), mustWork = TRUE)
+}
 setwd(root)
+args <- commandArgs(trailingOnly = TRUE)
 source("scripts/00_source_v2.R", local = FALSE)
 for (mod in c("profile_v2", "simulation_v2", "metrics_v2", "benchmark_adapters_v2")) {
   source_v2_module(root, mod, envir = .GlobalEnv)
