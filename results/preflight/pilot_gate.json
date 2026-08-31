@@ -1,0 +1,27 @@
+{
+  "pass": false,
+  "commit_sha": "54285dd",
+  "gate_status": "formal B=200 pilot complete; calibration bands are V1 finite-sample diagnostics per round-6 (not binary implementation blockers)",
+  "notes": "Mechanism evidence completed; production variance unchanged (V1); final B=500/1000 registry blocked until freeze-preflight.",
+  "mechanism_evidence": [
+    {"run_id": "pilot_v2r2_P05b", "commit": "d8ad8f5", "B": 200, "report": "results/preflight/PILOT_V2_P05_CALIBRATION_GATE.md", "formal_gate": false},
+    {"run_id": "pilot_v4_P05_B50", "commit": "a446a76", "B": 50, "report": "results/preflight/PILOT_V4_PAIRED_PROBE.md", "formal_gate": false},
+    {"run_id": "pilot_v4_P06_B50", "commit": "a446a76", "B": 50, "report": "results/preflight/PILOT_V4_PAIRED_PROBE.md", "formal_gate": false},
+    {"run_id": "pilot_v5_P05_B50", "commit": "0dcc159", "B": 50, "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md", "formal_gate": false},
+    {"run_id": "pilot_v5_P06_B50", "commit": "0dcc159", "B": 50, "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md", "formal_gate": false},
+    {"run_id": "pilot_v5_P07_B50", "commit": "0dcc159", "B": 50, "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md", "formal_gate": false},
+    {"run_id": "pilot_v6_ladder_P06", "commit": "da95c4d", "B": 50, "report": "results/preflight/PILOT_V6_VARIANCE_LADDER.md", "formal_gate": false},
+    {"run_id": "pilot_v5_B200", "commit": "1dcc159", "B": 200, "report": "results/preflight/PILOT_V5_FINAL_REPORT.md", "formal_gate": true},
+    {"run_id": "pilot_v5_P07_B200", "commit": "1dcc159", "B": 200, "report": "results/preflight/PILOT_V5_P07_B200_REPORT.md", "formal_gate": false},
+    {"run_id": "papp_hd_srv3 (cloud)", "commit": "54285dd", "B": 200, "report": "results/preflight/PILOT_V6_PAPP_REPORT.md", "formal_gate": false},
+    {"run_id": "papp_ld_B200 (cloud, running)", "commit": "54285dd", "B": 200, "report": "results/preflight/PILOT_V6_PAPP_REPORT.md", "formal_gate": false}
+  ],
+  "thresholds": {
+    "convergence": 0.98,
+    "identity_median": 1e-08,
+    "identity_max": 1e-06,
+    "dantzig_feasible": 0.95,
+    "se_sd_ratio": [0.8, 1.2],
+    "baseline_coverage": [0.88, 0.98]
+  }
+}
