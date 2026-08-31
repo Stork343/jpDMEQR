@@ -1,10 +1,7 @@
 #!/usr/bin/env Rscript
-# PAPP-LD: prespecified low-dimensional inferential-layer validation
-# (METHOD_SPECIFICATION_ROUND6_AMENDMENT.md section 7.2).
-# n=129, d=20, s=5, q=1, AR1 rho=0.5, empirical GSE visit multiset,
-# zero L1 penalty, B=200 per tau in {0.25, 0.50, 0.75}.
-# Reports BOTH the ordinary unsmoothed cluster-sandwich interval and the full
-# delete-one-cluster jackknife interval; neither is chosen by coverage.
+# PAPP-LD runner v2 (optimised): full delete-one-cluster jackknife computed ONCE
+# per replication (all coordinates from the same leave-out fits), warm-started
+# from the full-data fit, parallelised over leave-out clusters on Linux.
 # Usage: Rscript scripts/simulation/08_papp_ld.R [shard_index] [n_shards]
 args <- commandArgs(trailingOnly = FALSE)
 file_arg <- grep("^--file=", args, value = TRUE)
@@ -32,6 +29,7 @@ multiset <- read.csv(file.path(root, "config", "gse65391_visit_multiset.csv"))$c
 out_dir <- file.path(root, "results", "raw", "simulation", "papp_ld_B200")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_file <- file.path(out_dir, sprintf("papp_ld_s%d.csv", shard))
+jack_cores <- as.integer(Sys.getenv("JPDMEQR_LD_CORES", unset = "2"))
 
 rows <- list()
 k <- 0L
@@ -53,7 +51,7 @@ for (tau in taus) {
       fit_profile_lasso_v2(y, X, Z, cid, tau, h_inf, lambda_beta = 0,
                            lambda_gamma = 1, penalty_factor = rep(0, 20L),
                            control = list(max_iter = 1000L, max_backtrack = 50L,
-                                          beta_tol = 1e-8, kkt_normalized_tol = 1e-7,
+                                          beta_tol = 1e-8, kkt_normalized_tol = 1e-6,
                                           nuisance_control = nc)),
       error = function(e) e
     )
@@ -65,36 +63,36 @@ for (tau in taus) {
                                 sand_cov = NA, jack_cov = NA, status = paste("error:", conditionMessage(fit)),
                                 stringsAsFactors = FALSE)
       }
+      cat(sprintf("shard %d: tau=%.2f rep %d ERROR %s\n", shard, tau, r,
+                  conditionMessage(fit)), file = stderr())
       next
     }
+    # ONE jackknife pass over leave-out clusters, warm-started from the full fit.
+    rows_by_cluster <- split(seq_along(cid), cid)
+    jack_fun <- function(ix) {
+      f <- tryCatch(fit_profile_lasso_v2(
+        y[-ix], X[-ix, , drop = FALSE], Z[-ix, , drop = FALSE], cid[-ix],
+        tau, h_inf, lambda_beta = 0, lambda_gamma = 1, penalty_factor = rep(0, 20L),
+        beta_init = fit$beta,
+        control = list(max_iter = 300L, beta_tol = 1e-7, kkt_normalized_tol = 1e-5)
+      ), error = function(e) NULL)
+      if (is.null(f)) rep(NA_real_, 20L) else f$beta
+    }
+    jack_beta <- if (jack_cores > 1L && .Platform$OS.type != "windows") {
+      do.call(rbind, parallel::mclapply(rows_by_cluster, jack_fun, mc.cores = jack_cores))
+    } else {
+      do.call(rbind, lapply(rows_by_cluster, jack_fun))
+    }
     G0 <- fit$components$unsmoothed_cluster_scores
-    # Ordinary cluster sandwich for each target coordinate (full design, no Dantzig).
+    Hf <- fit$components$hessian
     for (coord in colnames(X)[1:4]) {
       kk <- match(coord, colnames(X))
       e <- numeric(20L); e[kk] <- 1
-      Hf <- fit$components$hessian
       omega <- tryCatch(as.numeric(solve((Hf + t(Hf)) / 2, e)), error = function(e) NULL)
-      # delete-one-cluster jackknife of beta_hat (full refit per leave-out),
-      # parallelised over leave-out clusters on Linux (deterministic order).
-      rows_by_cluster <- split(seq_along(cid), cid)
-      jack_cores <- as.integer(Sys.getenv("JPDMEQR_LD_CORES", unset = "2"))
-      jack_fun <- function(ix) {
-        f <- tryCatch(fit_profile_lasso_v2(
-          y[-ix], X[-ix, , drop = FALSE], Z[-ix, , drop = FALSE], cid[-ix],
-          tau, h_inf, lambda_beta = 0, lambda_gamma = 1, penalty_factor = rep(0, 20L),
-          control = list(max_iter = 500L, kkt_normalized_tol = 1e-6)
-        ), error = function(e) NULL)
-        if (is.null(f)) NA_real_ else f$beta[kk]
-      }
-      jack <- if (jack_cores > 1L && .Platform$OS.type != "windows") {
-        unlist(parallel::mclapply(rows_by_cluster, jack_fun, mc.cores = jack_cores),
-               use.names = FALSE)
-      } else {
-        vapply(rows_by_cluster, jack_fun, numeric(1))
-      }
-      jack_ok <- length(jack) > 1L && sum(is.finite(jack)) > 1L
-      jack_se <- if (jack_ok) {
-        j <- jack[is.finite(jack)]
+      jvals <- jack_beta[, kk]
+      jok <- sum(is.finite(jvals)) > 1L
+      jack_se <- if (jok) {
+        j <- jvals[is.finite(jvals)]
         sqrt((length(j) - 1) / length(j) * sum((j - mean(j))^2))
       } else NA_real_
       sand_se <- if (!is.null(omega)) {
@@ -103,9 +101,7 @@ for (tau in taus) {
       } else NA_real_
       beta_hat <- fit$beta[kk]
       tgt <- as.numeric(beta0[kk])
-      sand_cov <- if (is.finite(sand_se)) {
-        abs(beta_hat - tgt) <= 1.96 * sand_se
-      } else NA
+      sand_cov <- if (is.finite(sand_se)) abs(beta_hat - tgt) <= 1.96 * sand_se else NA
       jack_cov <- if (is.finite(jack_se)) abs(beta_hat - tgt) <= 1.96 * jack_se else NA
       k <- k + 1L
       rows[[k]] <- data.frame(tau = tau, replicate = r, seed = seed, coordinate = coord,
@@ -113,10 +109,9 @@ for (tau in taus) {
                               sand_cov = sand_cov, jack_cov = jack_cov, status = "ok",
                               stringsAsFactors = FALSE)
     }
-    # Progress to stderr (unbuffered, visible in nohup logs).
     cat(sprintf("shard %d: tau=%.2f rep %d done\n", shard, tau, r), file = stderr())
   }
 }
 tab <- do.call(rbind, rows)
 write.csv(tab, out_file, row.names = FALSE)
-cat("PAPP-LD shard", shard, "written:", nrow(tab), "rows\n")
+cat("PAPP-LD shard", shard, "written:", nrow(tab), "rows\n", file = stderr())
