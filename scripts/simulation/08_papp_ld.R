@@ -74,16 +74,24 @@ for (tau in taus) {
       e <- numeric(20L); e[kk] <- 1
       Hf <- fit$components$hessian
       omega <- tryCatch(as.numeric(solve((Hf + t(Hf)) / 2, e)), error = function(e) NULL)
-      # delete-one-cluster jackknife of beta_hat (full refit per leave-out)
+      # delete-one-cluster jackknife of beta_hat (full refit per leave-out),
+      # parallelised over leave-out clusters on Linux (deterministic order).
       rows_by_cluster <- split(seq_along(cid), cid)
-      jack <- vapply(rows_by_cluster, function(ix) {
+      jack_cores <- as.integer(Sys.getenv("JPDMEQR_LD_CORES", unset = "2"))
+      jack_fun <- function(ix) {
         f <- tryCatch(fit_profile_lasso_v2(
           y[-ix], X[-ix, , drop = FALSE], Z[-ix, , drop = FALSE], cid[-ix],
           tau, h_inf, lambda_beta = 0, lambda_gamma = 1, penalty_factor = rep(0, 20L),
           control = list(max_iter = 500L, kkt_normalized_tol = 1e-6)
         ), error = function(e) NULL)
         if (is.null(f)) NA_real_ else f$beta[kk]
-      }, numeric(1))
+      }
+      jack <- if (jack_cores > 1L && .Platform$OS.type != "windows") {
+        unlist(parallel::mclapply(rows_by_cluster, jack_fun, mc.cores = jack_cores),
+               use.names = FALSE)
+      } else {
+        vapply(rows_by_cluster, jack_fun, numeric(1))
+      }
       jack_ok <- length(jack) > 1L && sum(is.finite(jack)) > 1L
       jack_se <- if (jack_ok) {
         j <- jack[is.finite(jack)]
@@ -105,7 +113,8 @@ for (tau in taus) {
                               sand_cov = sand_cov, jack_cov = jack_cov, status = "ok",
                               stringsAsFactors = FALSE)
     }
-    cat(sprintf("shard %d: tau=%.2f rep %d done\n", shard, tau, r))
+    # Progress to stderr (unbuffered, visible in nohup logs).
+    cat(sprintf("shard %d: tau=%.2f rep %d done\n", shard, tau, r), file = stderr())
   }
 }
 tab <- do.call(rbind, rows)
