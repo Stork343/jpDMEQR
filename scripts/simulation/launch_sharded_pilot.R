@@ -28,7 +28,10 @@ jobs <- if (length(args) > 3 && nzchar(args[4])) as.integer(args[4]) else 1L
 n_shards <- if (length(args) > 4 && nzchar(args[5])) as.integer(args[5]) else 1L
 shard_index <- if (length(args) > 5 && nzchar(args[6])) as.integer(args[6]) else 1L
 seed_exp <- if (length(args) > 6 && nzchar(args[7])) args[7] else NULL
-options(jpDMEQR.cluster_cores = jobs)
+# Cluster-level parallelism inside each task: default follows jobs; may be
+# set independently via JPDMEQR_CLUSTER_CORES (Linux mclapply; results are
+# deterministic - cluster contributions are order-preserved and additive).
+options(jpDMEQR.cluster_cores = as.integer(Sys.getenv("JPDMEQR_CLUSTER_CORES", unset = as.character(jobs))))
 
 rep_subset <- NULL
 if (n_shards > 1L) {
