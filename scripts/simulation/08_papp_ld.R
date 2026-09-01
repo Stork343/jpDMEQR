@@ -34,6 +34,15 @@ jack_cores <- as.integer(Sys.getenv("JPDMEQR_LD_CORES", unset = "2"))
 rows <- list()
 k <- 0L
 for (tau in taus) {
+  # Resume support: a per-tau checkpoint already written (previous interrupted
+  # run) means this tau block is complete; skip it.
+  ck_file <- sub("\\.csv$", sprintf("_tau%.0f.csv", tau * 100), out_file)
+  if (file.exists(ck_file)) {
+    cat(sprintf("shard %d: tau=%.2f checkpoint exists, skipping\n", shard, tau),
+        file = stderr())
+    rows[[length(rows) + 1L]] <- read.csv(ck_file, stringsAsFactors = FALSE)
+    next
+  }
   reps <- seq.int(from = shard, to = B, by = n_shards)
   for (r in reps) {
     seed <- seed_from_id_v2(20260817L, paste0("PAPP-LD", tau * 100), r, "training")
@@ -111,6 +120,11 @@ for (tau in taus) {
     }
     cat(sprintf("shard %d: tau=%.2f rep %d done\n", shard, tau, r), file = stderr())
   }
+  # Checkpoint after each tau block: an interrupted run loses at most the
+  # current tau block, and a re-run resumes from the next tau.
+  write.csv(do.call(rbind, rows), ck_file, row.names = FALSE)
+  cat(sprintf("shard %d: tau=%.2f checkpoint written (%d rows)\n", shard, tau,
+              length(rows)), file = stderr())
 }
 tab <- do.call(rbind, rows)
 write.csv(tab, out_file, row.names = FALSE)
