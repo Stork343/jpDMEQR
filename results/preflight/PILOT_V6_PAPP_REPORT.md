@@ -30,5 +30,21 @@ layer (PAPP-LD, pending).
 ## PAPP-LD (n=129, d=20, s=5, empirical multiset, B=200 per tau in
 {0.25, 0.50, 0.75}; ordinary sandwich vs delete-one-cluster jackknife)
 
-Status: running on the cloud server (~456 CPU-h total; first reps complete,
-ETA ~21:00). Report section filled after completion.
+Run: cloud server (48 shards, checkpoint-capable runner post-d40d6a9); 2400
+rows, 200 replications, status ok = 1.000, no failures.
+
+Coverage (sandwich, mcse 0.009-0.017): tau=0.25: 0.970-0.985;
+tau=0.50: 0.935-0.980; tau=0.75: 0.935-0.960. SE/SD 1.02-1.22 (mild
+over-dispersion). All 12 (tau x coordinate) cells inside or within mcse of the
+[0.88, 0.98] band.
+
+Delete-one-cluster jackknife coverage: tau=0.25: 0.960-0.985;
+tau=0.50: 0.935-0.975; tau=0.75: 0.930-0.960; SE/SD 1.00-1.19. Per-cell
+sandwich - jackknife coverage difference <= 0.01 in 11/12 cells (max 0.01).
+
+Interpretation: in the prespecified low-dimensional layer (d=20 < n/log n at
+n=129) the ordinary unsmoothed cluster sandwich is calibrated, and the full
+delete-one-cluster jackknife confirms it (no material disagreement). This is
+the empirical basis for the application's two-layer announcement: the
+high-dimensional layer at n=129 is exploratory only (PAPP-HD: 0.33-0.76), the
+prespecified low-dimensional layer is inferential (PAPP-LD: 0.93-0.99).
