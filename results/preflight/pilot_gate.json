@@ -1,10 +1,78 @@
 {
   "pass": true,
-  "commit_sha": "107d87a938036b721a86ae280942e9eeed08619f",
+  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
   "v1_classification": "V1 (round-6 ladder; bands are diagnostics)",
+  "mechanism_evidence": [
+    {
+      "run_id": "pilot_v2r2_P05b",
+      "B": 200,
+      "report": "results/preflight/PILOT_V2_P05_CALIBRATION_GATE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v4_P05_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V4_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v4_P06_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V4_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v5_P05_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v5_P06_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v5_P07_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v6_ladder_P06",
+      "B": 50,
+      "report": "results/preflight/PILOT_V6_VARIANCE_LADDER.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v5_B200",
+      "B": 200,
+      "report": "results/preflight/PILOT_V5_FINAL_REPORT.md",
+      "formal_gate": true
+    },
+    {
+      "run_id": "pilot_v5_P07_B200",
+      "B": 200,
+      "report": "results/preflight/PILOT_V5_P07_B200_REPORT.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "papp_hd_srv3",
+      "B": 200,
+      "report": "results/preflight/PILOT_V6_PAPP_REPORT.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "papp_ld_B200",
+      "B": 200,
+      "report": "results/preflight/PILOT_V6_PAPP_REPORT.md",
+      "formal_gate": false
+    }
+  ],
   "run_id": "pilot_v5_B200",
   "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\pilot_v5_B200",
-  "evaluated_utc": "2026-09-01 00:16:19 UTC",
+  "evaluated_utc": "2026-09-01 01:58:34 UTC",
   "convergence_pass": true,
   "identity_pass": true,
   "dantzig_pass": true,

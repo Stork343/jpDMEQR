@@ -1,0 +1,451 @@
+{
+  "pass": false,
+  "final": true,
+  "commit_sha": "93d13628f37eea733a3ab74d3f95478913c06345",
+  "branch": "gpt/simulation-freeze-resolution",
+  "config_path": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\config\\simulation_main.csv",
+  "config_sha256": "3da319d4ead5927968b2e1540acf8ef10656cc068cc34db1120b36b37551b132",
+  "created_utc": "2026-09-01 00:41:44 UTC",
+  "governance": {
+    "pass": true,
+    "missing": []
+  },
+  "registry": {
+    "pass": true,
+    "problems": [],
+    "warnings": [],
+    "row_count": 78,
+    "experiment_ids": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12", "B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B12", "B13", "B14", "B15", "B16", "B17", "B18", "B19", "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16", "D01", "D02", "D03", "D04", "D05", "D06", "E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "F01", "F02", "F03", "F04", "F05", "F06", "G01", "G02", "G03", "G04", "G05", "G06", "G07", "H01", "H02", "H03", "H04"],
+    "methods": ["BIAS-ADJ-LQMM", "DOUBLE-PEN-QLMM", "LQMM", "POOLED-QR-LASSO", "PROFILE-DQR", "PROFILE-DQR-POP-H", "PROFILE-DQR-SPLIT", "PROFILE-DQR-TRUE-NUISANCE", "PROFILE-DQR-TRUE-SUPPORT", "QGEE-SCAD", "QIF-SEE", "SQR-DEBIASED-IID"],
+    "config_sha256": "3da319d4ead5927968b2e1540acf8ef10656cc068cc34db1120b36b37551b132",
+    "registry_type": "main"
+  },
+  "benchmark": {
+    "pass": true,
+    "table": [
+      {
+        "method_id": "BIAS-ADJ-LQMM",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "DOUBLE-PEN-QLMM",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "LQMM",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "POOLED-QR-LASSO",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "PROFILE-DQR",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "PROFILE-DQR-POP-H",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "PROFILE-DQR-SPLIT",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "PROFILE-DQR-TRUE-NUISANCE",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "PROFILE-DQR-TRUE-SUPPORT",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "QGEE-SCAD",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "QIF-SEE",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "method_id": "SQR-DEBIASED-IID",
+        "pass": true,
+        "reason": "accepted"
+      }
+    ]
+  },
+  "geometry": {
+    "pass": true,
+    "reason": "accepted",
+    "manifest": {
+      "pass": true,
+      "strict": true,
+      "commit_sha": "93d13628f37eea733a3ab74d3f95478913c06345",
+      "branch": "gpt/simulation-freeze-resolution",
+      "seed_count": 20,
+      "case_count": 760,
+      "tau_values": [0.25, 0.5, 0.75],
+      "q_values": [1, 2],
+      "h_multipliers": [0.75, 1, 1.25],
+      "balance_types": ["balanced", "unbalanced"],
+      "finite_difference_steps": [5e-06, 1e-05],
+      "non_diagonal_lambda_checked": true,
+      "dantzig_checked": true,
+      "dantzig_pass": true,
+      "dantzig_residual": 0.050000000133404,
+      "dantzig_mu": 0.05,
+      "thresholds": {
+        "gradient": 0.0002,
+        "hessian": 0.003,
+        "identity": 1e-08,
+        "nuisance": 1e-07,
+        "dantzig": 1e-06
+      },
+      "maxima": {
+        "gradient": 1.5004392173168e-09,
+        "hessian": 9.97268143565488e-05,
+        "identity": 3.33066907387547e-16,
+        "nuisance": 9.99355637132382e-09
+      },
+      "created_utc": "2026-09-01 00:33:14 UTC"
+    }
+  },
+  "targets": {
+    "pass": false,
+    "table": [
+      {
+        "experiment_id": "C06",
+        "asset": "profile_target",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "experiment_id": "C07",
+        "asset": "profile_target",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "experiment_id": "C14",
+        "asset": "profile_target",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "experiment_id": "C15",
+        "asset": "profile_target",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "experiment_id": "C16",
+        "asset": "profile_target",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "experiment_id": "E03",
+        "asset": "structural_target_audit",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "experiment_id": "E04",
+        "asset": "structural_target_audit",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "experiment_id": "E05",
+        "asset": "structural_target_audit",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "experiment_id": "E06",
+        "asset": "structural_target_audit",
+        "pass": true,
+        "reason": "accepted"
+      },
+      {
+        "experiment_id": "A01",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A02",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A03",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A04",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A05",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A06",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A07",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A08",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A09",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A10",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A11",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "A12",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "C06",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "C07",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "C14",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "C15",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "C16",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "D01",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "D02",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "D03",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "D04",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "D05",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      },
+      {
+        "experiment_id": "D06",
+        "asset": "population_direction",
+        "pass": false,
+        "reason": "invalid, inaccurate, or stale"
+      }
+    ]
+  },
+  "micro_preflight": {
+    "pass": true,
+    "reason": "accepted",
+    "manifest": {
+      "pass": true,
+      "commit_sha": "93d13628f37eea733a3ab74d3f95478913c06345",
+      "config_sha256": "ec2e45ba1896c07bc2d7e272231fbdecc126f37a9f30ebc20bda47e1e103f4c6",
+      "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\micro_preflight_06",
+      "method_rows": 34,
+      "coordinate_rows": 112,
+      "runner_failure_count": 0,
+      "created_utc": "2026-09-01 00:37:58 UTC"
+    }
+  },
+  "pilot": {
+    "pass": true,
+    "reason": "accepted",
+    "manifest": {
+      "pass": true,
+      "commit_sha": "93d13628f37eea733a3ab74d3f95478913c06345",
+      "v1_classification": "V1 (round-6 ladder; bands are diagnostics)",
+      "mechanism_evidence": [
+        {
+          "run_id": "pilot_v2r2_P05b",
+          "B": 200,
+          "report": "results/preflight/PILOT_V2_P05_CALIBRATION_GATE.md",
+          "formal_gate": false
+        },
+        {
+          "run_id": "pilot_v4_P05_B50",
+          "B": 50,
+          "report": "results/preflight/PILOT_V4_PAIRED_PROBE.md",
+          "formal_gate": false
+        },
+        {
+          "run_id": "pilot_v4_P06_B50",
+          "B": 50,
+          "report": "results/preflight/PILOT_V4_PAIRED_PROBE.md",
+          "formal_gate": false
+        },
+        {
+          "run_id": "pilot_v5_P05_B50",
+          "B": 50,
+          "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md",
+          "formal_gate": false
+        },
+        {
+          "run_id": "pilot_v5_P06_B50",
+          "B": 50,
+          "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md",
+          "formal_gate": false
+        },
+        {
+          "run_id": "pilot_v5_P07_B50",
+          "B": 50,
+          "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md",
+          "formal_gate": false
+        },
+        {
+          "run_id": "pilot_v6_ladder_P06",
+          "B": 50,
+          "report": "results/preflight/PILOT_V6_VARIANCE_LADDER.md",
+          "formal_gate": false
+        },
+        {
+          "run_id": "pilot_v5_B200",
+          "B": 200,
+          "report": "results/preflight/PILOT_V5_FINAL_REPORT.md",
+          "formal_gate": true
+        },
+        {
+          "run_id": "pilot_v5_P07_B200",
+          "B": 200,
+          "report": "results/preflight/PILOT_V5_P07_B200_REPORT.md",
+          "formal_gate": false
+        },
+        {
+          "run_id": "papp_hd_srv3",
+          "B": 200,
+          "report": "results/preflight/PILOT_V6_PAPP_REPORT.md",
+          "formal_gate": false
+        },
+        {
+          "run_id": "papp_ld_B200",
+          "B": 200,
+          "report": "results/preflight/PILOT_V6_PAPP_REPORT.md",
+          "formal_gate": false
+        }
+      ],
+      "run_id": "pilot_v5_B200",
+      "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\pilot_v5_B200",
+      "evaluated_utc": "2026-09-01 00:27:58 UTC",
+      "convergence_pass": true,
+      "identity_pass": true,
+      "dantzig_pass": true,
+      "inverse_defect_diagnostic": {
+        "D_k_median": 5.75892567111054,
+        "D_k_q90": 13.5410633305853,
+        "A_k_median": 0.477428261598074,
+        "A_k_q90": 1.8427599233232
+      },
+      "p06_scaling": {
+        "se_sd_ratio": [0.776594275167177, 0.661285526957666, 0.718795398645723, 0.756970642254107],
+        "coverage": [0.885, 0.79, 0.835, 0.845]
+      },
+      "calibration_baseline": "P05",
+      "se_ratio_pass": false,
+      "coverage_pass": false,
+      "no_runner_failures": true,
+      "no_missing_methods": true,
+      "thresholds": {
+        "convergence": 0.98,
+        "identity_median": 1e-08,
+        "identity_max": 1e-06,
+        "dantzig_feasible": 0.95,
+        "se_sd_ratio": [0.8, 1.2],
+        "baseline_coverage": [0.88, 0.98]
+      }
+    }
+  },
+  "hardware": {
+    "sysname": "Windows",
+    "release": "10 x64",
+    "machine": "x86-64",
+    "nodename": "HOUJIAN",
+    "logical_cores": 8,
+    "physical_cores": 8,
+    "r_version": "R version 4.6.1 (2026-06-24 ucrt)",
+    "platform": "x86_64-w64-mingw32"
+  }
+}

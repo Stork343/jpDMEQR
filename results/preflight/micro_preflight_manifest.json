@@ -1,10 +1,10 @@
 {
   "pass": true,
-  "commit_sha": "2102be943fdedf2ed521facc6540faf694d13f48",
-  "config_sha256": "fc77cfcf5ae52265caa6d63e4813458bf54bce0fe94876def0aed1bc427ecc3c",
-  "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\preflight_dev_003",
+  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "config_sha256": "ec2e45ba1896c07bc2d7e272231fbdecc126f37a9f30ebc20bda47e1e103f4c6",
+  "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\micro_preflight_08",
   "method_rows": 34,
   "coordinate_rows": 112,
   "runner_failure_count": 0,
-  "created_utc": "2026-08-17 21:28:28 UTC"
+  "created_utc": "2026-09-01 01:58:33 UTC"
 }

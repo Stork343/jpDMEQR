@@ -1,7 +1,7 @@
 {
   "pass": true,
   "strict": true,
-  "commit_sha": "2102be943fdedf2ed521facc6540faf694d13f48",
+  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
   "branch": "gpt/simulation-freeze-resolution",
   "seed_count": 20,
   "case_count": 760,
@@ -13,7 +13,7 @@
   "non_diagonal_lambda_checked": true,
   "dantzig_checked": true,
   "dantzig_pass": true,
-  "dantzig_residual": 0.050000003816879,
+  "dantzig_residual": 0.050000000133404,
   "dantzig_mu": 0.05,
   "thresholds": {
     "gradient": 0.0002,
@@ -23,10 +23,10 @@
     "dantzig": 1e-06
   },
   "maxima": {
-    "gradient": 1.41624639468131e-09,
-    "hessian": 0.000122510700421408,
+    "gradient": 1.5004392173168e-09,
+    "hessian": 9.97268143565488e-05,
     "identity": 3.33066907387547e-16,
-    "nuisance": 1.15999232441766e-08
+    "nuisance": 9.99355637132382e-09
   },
-  "created_utc": "2026-08-17 21:31:53 UTC"
+  "created_utc": "2026-09-01 01:53:56 UTC"
 }
