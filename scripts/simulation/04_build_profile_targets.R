@@ -174,22 +174,35 @@ if (build_pop_h) {
       head(target_names[target_columns > cfg$s], floor(cfg$target_coordinate_count / 2))
     ))
     direction_fits <- vector("list", direction_repeats)
-    for (rr in seq_len(direction_repeats)) {
+    dir_repeat_cores <- getOption("jpDMEQR.direction_cores",
+                                  getOption("jpDMEQR.repeat_cores", 1L))
+    direction_run_one <- function(rr) {
       seed <- seed_from_id_v2(base_seed + 100000L, paste0(cfg$experiment_id, "_popH"),
                               rr, "population-direction")
-      message(sprintf(
-        "population direction %s repeat %d/%d with %d clusters",
-        cfg$experiment_id, rr, direction_repeats, n_population
-      ))
-      direction_fits[[rr]] <- approximate_population_direction_v2(
-        config = cfg,
-        beta_target = beta_target,
-        target_columns = target_columns,
-        requested_coordinates = requested,
-        n_population = n_population,
-        seed = seed
+      list(
+        rr = rr,
+        message = sprintf(
+          "population direction %s repeat %d/%d with %d clusters",
+          cfg$experiment_id, rr, direction_repeats, n_population
+        ),
+        fit = approximate_population_direction_v2(
+          config = cfg,
+          beta_target = beta_target,
+          target_columns = target_columns,
+          requested_coordinates = requested,
+          n_population = n_population,
+          seed = seed
+        )
       )
     }
+    if (dir_repeat_cores > 1L && .Platform$OS.type != "windows") {
+      dir_out <- parallel::mclapply(seq_len(direction_repeats), direction_run_one,
+                                    mc.cores = min(dir_repeat_cores, direction_repeats))
+    } else {
+      dir_out <- lapply(seq_len(direction_repeats), direction_run_one)
+    }
+    for (z in dir_out) message(z$message)
+    direction_fits <- lapply(dir_out, `[[`, "fit")
     H_mean <- Reduce(`+`, lapply(direction_fits, `[[`, "H_population")) /
       length(direction_fits)
     inv <- stable_inverse_symmetric_v2(H_mean)
