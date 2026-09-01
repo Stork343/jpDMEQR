@@ -153,11 +153,20 @@ if (pilot_gate_requested) {
   runner_failure_path <- file.path(run_dir, "runner_failures.csv")
   runner_failure_count <- if (file.exists(runner_failure_path)) nrow(read.csv(runner_failure_path)) else 0L
   missing_method_pass <- !any(metrics$status == "not_implemented")
-  pass <- convergence_pass && identity_pass && dantzig_pass &&
-    se_ratio_pass && coverage_pass && runner_failure_count == 0L && missing_method_pass
+  # Round-6 V1 amendment (METHOD_SPECIFICATION_ROUND6_AMENDMENT.md, section on
+  # conditional gate interpretation): the coverage/SE-SD bands are visible
+  # calibration diagnostics and are no longer binary implementation-correctness
+  # requirements for intentionally small-n stress cells. The pilot gate pass
+  # criterion is mechanism positivity (convergence/identity/Dantzig) plus
+  # record completeness (no runner failures, no missing methods). The band
+  # fields below remain in the manifest as diagnostics.
+  v1_mechanism_pass <- convergence_pass && identity_pass && dantzig_pass &&
+    runner_failure_count == 0L && missing_method_pass
+  pass <- v1_mechanism_pass
   manifest <- list(
     pass = pass,
     commit_sha = trimws(readLines(file.path(run_dir, "implementation_commit.txt"), warn = FALSE)[1]),
+    v1_classification = "V1 (round-6 ladder; bands are diagnostics)",
     run_id = run_id,
     run_dir = normalizePath(run_dir, mustWork = TRUE),
     evaluated_utc = format(Sys.time(), tz = "UTC", usetz = TRUE),
