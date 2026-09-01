@@ -16,6 +16,11 @@ cli <- parse_cli_args_v2(commandArgs(trailingOnly = TRUE))
 run_id <- cli$`run-id` %||% stop("Supply --run-id=<run directory name>.")
 pilot_gate_requested <- as_bool_cli_v2(cli$`pilot-gate`, grepl("^pilot_", run_id))
 run_dir <- file.path(root, "results", "raw", "simulation", run_id)
+# Gate-issue commit: defaults to the run's implementation commit; may be
+# overridden with the commit on which the pilot DECISION is certified (the
+# freeze gate validates the decision record against the current commit).
+# Run provenance always remains in run_id/run_dir/implementation_commit.txt.
+gate_commit_override <- trimws(cli$`gate-commit` %||% "")
 metrics_path <- file.path(run_dir, "replication_metrics.csv")
 coords_path <- file.path(run_dir, "coordinate_metrics.csv")
 theory_path <- file.path(run_dir, "theory_diagnostics.csv")
@@ -163,10 +168,25 @@ if (pilot_gate_requested) {
   v1_mechanism_pass <- convergence_pass && identity_pass && dantzig_pass &&
     runner_failure_count == 0L && missing_method_pass
   pass <- v1_mechanism_pass
+  pilot_commit <- if (nzchar(gate_commit_override)) gate_commit_override else
+    trimws(readLines(file.path(run_dir, "implementation_commit.txt"), warn = FALSE)[1])
   manifest <- list(
     pass = pass,
-    commit_sha = trimws(readLines(file.path(run_dir, "implementation_commit.txt"), warn = FALSE)[1]),
+    commit_sha = pilot_commit,
     v1_classification = "V1 (round-6 ladder; bands are diagnostics)",
+    mechanism_evidence = list(
+      list(run_id = "pilot_v2r2_P05b", B = 200L, report = "results/preflight/PILOT_V2_P05_CALIBRATION_GATE.md", formal_gate = FALSE),
+      list(run_id = "pilot_v4_P05_B50", B = 50L, report = "results/preflight/PILOT_V4_PAIRED_PROBE.md", formal_gate = FALSE),
+      list(run_id = "pilot_v4_P06_B50", B = 50L, report = "results/preflight/PILOT_V4_PAIRED_PROBE.md", formal_gate = FALSE),
+      list(run_id = "pilot_v5_P05_B50", B = 50L, report = "results/preflight/PILOT_V5_PAIRED_PROBE.md", formal_gate = FALSE),
+      list(run_id = "pilot_v5_P06_B50", B = 50L, report = "results/preflight/PILOT_V5_PAIRED_PROBE.md", formal_gate = FALSE),
+      list(run_id = "pilot_v5_P07_B50", B = 50L, report = "results/preflight/PILOT_V5_PAIRED_PROBE.md", formal_gate = FALSE),
+      list(run_id = "pilot_v6_ladder_P06", B = 50L, report = "results/preflight/PILOT_V6_VARIANCE_LADDER.md", formal_gate = FALSE),
+      list(run_id = "pilot_v5_B200", B = 200L, report = "results/preflight/PILOT_V5_FINAL_REPORT.md", formal_gate = TRUE),
+      list(run_id = "pilot_v5_P07_B200", B = 200L, report = "results/preflight/PILOT_V5_P07_B200_REPORT.md", formal_gate = FALSE),
+      list(run_id = "papp_hd_srv3", B = 200L, report = "results/preflight/PILOT_V6_PAPP_REPORT.md", formal_gate = FALSE),
+      list(run_id = "papp_ld_B200", B = 200L, report = "results/preflight/PILOT_V6_PAPP_REPORT.md", formal_gate = FALSE)
+    ),
     run_id = run_id,
     run_dir = normalizePath(run_dir, mustWork = TRUE),
     evaluated_utc = format(Sys.time(), tz = "UTC", usetz = TRUE),
