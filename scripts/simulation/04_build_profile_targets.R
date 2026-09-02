@@ -74,14 +74,20 @@ build_target_for_config <- function(cfg, repeats_local, label = "profile_target"
     )
   }
   # Parallel repeats: each repeat is an independent deterministic run with
-  # its own seed. mclapply is used on non-Windows; Windows falls back to a
-  # sequential loop (correctness identical, just slower).
+  # its own seed. mclapply on non-Windows; on Windows a deterministic PSOCK
+# cluster is used so the offline desktop can build final assets in parallel
+# (results identical - repeats are independent and order-preserved).
   repeat_cores <- getOption("jpDMEQR.repeat_cores", 1L)
-  fits <- if (repeat_cores > 1L && .Platform$OS.type != "windows" &&
-              repeats_local > 1L) {
+  fits <- if (repeat_cores > 1L && repeats_local > 1L &&
+              .Platform$OS.type != "windows") {
     parallel::mclapply(seq_len(repeats_local), run_one,
                        mc.cores = min(repeat_cores, repeats_local),
                        mc.preschedule = TRUE)
+  } else if (repeat_cores > 1L && repeats_local > 1L) {
+    cl <- parallel::makeCluster(min(repeat_cores, repeats_local),
+                                type = "PSOCK")
+    on.exit(parallel::stopCluster(cl), add = TRUE)
+    parallel::parLapply(cl, seq_len(repeats_local), run_one)
   } else {
     lapply(seq_len(repeats_local), run_one)
   }
