@@ -593,6 +593,17 @@ solve_dantzig_row_v2 <- function(H,
                                  mu_grid,
                                  solver_preference = c("CLARABEL", "ECOS", "SCS"),
                                  solver_opts = list()) {
+  # Implementation-layer dispatcher (frozen program unchanged): env
+  # JPDMEQR_DANTZIG_SOLVER=osqp selects the warm-start chained OSQP path
+  # (Lever 1; one sparse KKT factorisation reused across the mu grid);
+  # parity with the CLARABEL reference is enforced by the solver parity test
+  # and the strict geometry Dantzig validation.
+  mode <- Sys.getenv("JPDMEQR_DANTZIG_SOLVER",
+                     unset = getOption("jpDMEQR.dantzig_solver", "cvxr"))
+  if (identical(mode, "osqp") &&
+      exists("solve_dantzig_row_osqp_contract_v2", mode = "function")) {
+    return(solve_dantzig_row_osqp_contract_v2(H, coordinate, mu_grid))
+  }
   if (!requireNamespace("CVXR", quietly = TRUE)) {
     stop("Package 'CVXR' is required for the Dantzig program.")
   }
