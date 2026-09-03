@@ -32,6 +32,14 @@ seed_exp <- if (length(args) > 6 && nzchar(args[7])) args[7] else NULL
 # set independently via JPDMEQR_CLUSTER_CORES (Linux mclapply; results are
 # deterministic - cluster contributions are order-preserved and additive).
 options(jpDMEQR.cluster_cores = as.integer(Sys.getenv("JPDMEQR_CLUSTER_CORES", unset = as.character(jobs))))
+# mu-CV Dantzig parallelism inside each task (the ~75-80% cost term): default
+# 1 (serial, bit-identical to the frozen reference). May be raised via
+# JPDMEQR_CV_CORES. Each (fold, mu) solve is independent; results are
+# aggregated in fold order so wall-clock parallelism does not change the
+# selected mu. On Linux this uses mclapply inside the task process, so keep
+# `jobs` at 1 (use shards for task-level parallelism) to avoid nested-fork
+# memory blowup; on Windows it uses a deterministic PSOCK cluster.
+options(jpDMEQR.cv_cores = as.integer(Sys.getenv("JPDMEQR_CV_CORES", unset = "1")))
 
 rep_subset <- NULL
 if (n_shards > 1L) {

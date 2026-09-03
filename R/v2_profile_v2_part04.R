@@ -113,42 +113,62 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
       )
     })
   } else {
-    lapply(mu_grid, function(mu) {
-    defects <- numeric(n_folds)
-    quads <- numeric(n_folds)
-    infeasible_folds <- 0L
-    for (f in seq_len(n_folds)) {
-      n_f <- fold_n[f]
-      if (n_f <= 0L || n_f >= n) next
-      H_val_f <- H_folds[[f]]
-      if (is.null(H_val_f)) next
-      # H_train = (n H - n_f H_val)/(n - n_f)
-      H_train_f <- (n * H - n_f * H_val_f) / (n - n_f)
-      H_train_f <- (H_train_f + t(H_train_f)) / 2
-      sol <- tryCatch(
-        solve_dantzig_row_v2(
-          H = H_train_f, coordinate = coordinate, mu_grid = c(mu),
-          solver_preference = solver_preference, solver_opts = solver_opts
-        ),
-        error = function(e) list(feasible = FALSE, omega = NULL)
+    # CLARABEL reference path (frozen solver). Each (fold, mu) solve is
+    # independent; when jpDMEQR.cv_cores > 1 the fold x mu grid is solved in
+    # parallel (Linux: fork-based mclapply - keep `jobs` at 1 and use shards to
+    # avoid nested-fork memory blowup; Windows: deterministic PSOCK) and
+    # aggregated in the original fold order, so the selected mu and defect
+    # statistics are bit-identical to the serial reference.
+    # Bit-identity guarantee: every (fold, mu) CLARABEL solve is a pure
+    # function of its inputs; the defects/quads arrays are refilled fold by
+    # fold in the same order, so mean/sd and the argmin-tie rule see exactly
+    # the same numbers as the serial path.
+    cv_cores <- max(1L, as.integer(getOption("jpDMEQR.cv_cores", 1L)))
+    if (cv_cores <= 1L || n_folds * length(mu_grid) <= 1L) {
+      results <- lapply(mu_grid, function(mu) {
+        defects <- numeric(n_folds)
+        quads <- numeric(n_folds)
+        infeasible_folds <- 0L
+        for (f in seq_len(n_folds)) {
+          n_f <- fold_n[f]
+          if (n_f <= 0L || n_f >= n) next
+          H_val_f <- H_folds[[f]]
+          if (is.null(H_val_f)) next
+          # H_train = (n H - n_f H_val)/(n - n_f)
+          H_train_f <- (n * H - n_f * H_val_f) / (n - n_f)
+          H_train_f <- (H_train_f + t(H_train_f)) / 2
+          sol <- tryCatch(
+            solve_dantzig_row_v2(
+              H = H_train_f, coordinate = coordinate, mu_grid = c(mu),
+              solver_preference = solver_preference, solver_opts = solver_opts
+            ),
+            error = function(e) list(feasible = FALSE, omega = NULL)
+          )
+          if (!isTRUE(sol$feasible) || is.null(sol$omega)) { infeasible_folds <- infeasible_folds + 1L; next }
+          omega <- as.numeric(sol$omega)
+          r <- as.numeric(H_val_f %*% omega) - e
+          defects[f] <- max(abs(r))
+          quads[f] <- 0.5 * drop(crossprod(omega, H_val_f %*% omega)) - drop(crossprod(e, omega))
+        }
+        if (infeasible_folds > 0L && n_folds - infeasible_folds < ceiling(n_folds / 2)) {
+          return(NULL)
+        }
+        list(
+          mu = mu,
+          defect_mean = mean(defects[is.finite(defects)]),
+          defect_se = stats::sd(defects[is.finite(defects)]) / sqrt(sum(is.finite(defects))),
+          quad_mean = mean(quads[is.finite(quads)]),
+          infeasible_folds = infeasible_folds
+        )
+      })
+    } else {
+      results <- dantzig_cv_clarabel_parallel_v2(
+        H = H, n = n, n_folds = n_folds, fold_n = fold_n, H_folds = H_folds,
+        mu_grid = mu_grid, coordinate = coordinate, e = e,
+        solver_preference = solver_preference, solver_opts = solver_opts,
+        cv_cores = cv_cores
       )
-      if (!isTRUE(sol$feasible) || is.null(sol$omega)) { infeasible_folds <- infeasible_folds + 1L; next }
-      omega <- as.numeric(sol$omega)
-      r <- as.numeric(H_val_f %*% omega) - e
-      defects[f] <- max(abs(r))
-      quads[f] <- 0.5 * drop(crossprod(omega, H_val_f %*% omega)) - drop(crossprod(e, omega))
     }
-    if (infeasible_folds > 0L && n_folds - infeasible_folds < ceiling(n_folds / 2)) {
-      return(NULL)
-    }
-    list(
-      mu = mu,
-      defect_mean = mean(defects[is.finite(defects)]),
-      defect_se = stats::sd(defects[is.finite(defects)]) / sqrt(sum(is.finite(defects))),
-      quad_mean = mean(quads[is.finite(quads)]),
-      infeasible_folds = infeasible_folds
-    )
-  })
   }
   ok <- results[!vapply(results, is.null, logical(1))]
   if (!length(ok)) {
@@ -173,6 +193,144 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
       stringsAsFactors = FALSE
     )
   )
+}
+
+# ---------------------------------------------------------------------------
+# Parallel CLARABEL mu-CV (the ~75-80% cost term).
+#
+# Bit-identity contract: every (fold, mu) CLARABEL solve is a pure function of
+# its inputs, so executing the fold x mu grid in any order and then refilling
+# the defects/quads vectors fold by fold reproduces the serial reference path
+# bit-for-bit (same mean/sd inputs, same argmin-tie rule, same
+# infeasible-fold drop rule). cv_cores == 1 never enters this path.
+#
+# Worker environment: the solver chain (solve_dantzig_row_v2 and its two
+# helpers %||% and assert_numeric_matrix_v2) is exported to PSOCK workers as
+# function objects - this is the smallest self-contained unit that actually
+# runs the frozen CLARABEL program; no module re-source is needed on workers.
+# Linux uses fork-based mclapply (no serialisation, inherits everything), but
+# keep `jobs` at 1 and use shards for task-level parallelism to avoid
+# nested-fork memory blowup (see launch_sharded_pilot.R).
+# ---------------------------------------------------------------------------
+
+# Top-level worker for one (mu_idx, fold) cell: a pure function of its
+# inputs, so the exact same call runs in serial, forked, and PSOCK contexts
+# and the result is independent of execution order.
+dantzig_cv_solve_task_v2 <- function(j, ctx, tasks) {
+  mu_idx <- tasks$mu_idx[j]
+  fold <- tasks$fold[j]
+  mu <- ctx$mu_grid[mu_idx]
+  n <- ctx$n
+  n_f <- ctx$fold_n[fold]
+  if (n_f <= 0L || n_f >= n) return(list(mu_idx = mu_idx, fold = fold, skipped = TRUE))
+  H_val_f <- ctx$H_folds[[fold]]
+  if (is.null(H_val_f)) return(list(mu_idx = mu_idx, fold = fold, skipped = TRUE))
+  # H_train = (n H - n_f H_val)/(n - n_f)
+  H_train_f <- (n * ctx$H - n_f * H_val_f) / (n - n_f)
+  H_train_f <- (H_train_f + t(H_train_f)) / 2
+  sol <- tryCatch(
+    solve_dantzig_row_v2(
+      H = H_train_f, coordinate = ctx$coordinate, mu_grid = c(mu),
+      solver_preference = ctx$solver_preference, solver_opts = ctx$solver_opts
+    ),
+    error = function(e) list(feasible = FALSE, omega = NULL)
+  )
+  if (!isTRUE(sol$feasible) || is.null(sol$omega)) {
+    return(list(mu_idx = mu_idx, fold = fold, infeasible = TRUE))
+  }
+  omega <- as.numeric(sol$omega)
+  r <- as.numeric(H_val_f %*% omega) - ctx$e
+  list(
+    mu_idx = mu_idx, fold = fold, feasible = TRUE,
+    defect = max(abs(r)),
+    quad = 0.5 * drop(crossprod(omega, H_val_f %*% omega)) - drop(crossprod(ctx$e, omega))
+  )
+}
+
+dantzig_cv_clarabel_parallel_v2 <- function(H, n, n_folds, fold_n, H_folds,
+                                            mu_grid, coordinate, e,
+                                            solver_preference, solver_opts,
+                                            cv_cores) {
+  tasks <- expand.grid(
+    mu_idx = seq_along(mu_grid),
+    fold = seq_len(n_folds)
+  )
+  tasks <- tasks[order(tasks$mu_idx, tasks$fold), , drop = FALSE]
+  n_tasks <- nrow(tasks)
+  ctx <- list(
+    H = H, n = n, fold_n = fold_n, H_folds = H_folds, mu_grid = mu_grid,
+    coordinate = coordinate, e = e,
+    solver_preference = solver_preference, solver_opts = solver_opts
+  )
+  out <- if (.Platform$OS.type != "windows") {
+    # Forked children inherit the full process image: plain closure over the
+    # local ctx/tasks (no serialisation); mclapply returns results in input
+    # order regardless of execution order.
+    parallel::mclapply(seq_len(n_tasks),
+                       function(j) dantzig_cv_solve_task_v2(j, ctx, tasks),
+                       mc.cores = min(cv_cores, n_tasks),
+                       mc.preschedule = FALSE)
+  } else {
+    cl <- parallel::makeCluster(min(cv_cores, n_tasks), type = "PSOCK")
+    on.exit(parallel::stopCluster(cl), add = TRUE)
+    # Shared data + the solver chain are exported by value into each worker's
+    # globalenv. The worker closure is DEFINED in .GlobalEnv (eval - not
+    # assign - so the function's environment is globalenv, which PSOCK
+    # serialises as an id reference rather than expanding the enclosing
+    # environment with the large H matrices); it resolves the ctx/tasks/solver
+    # symbols from the worker globalenv where they were exported. One
+    # serialisation per worker, not per task.
+    fn_env <- new.env(parent = .GlobalEnv)
+    for (nm in c("dantzig_cv_solve_task_v2", "solve_dantzig_row_v2",
+                 "assert_numeric_matrix_v2", "%||%")) {
+      if (exists(nm, envir = environment(), inherits = TRUE)) {
+        assign(nm, get(nm, envir = environment(), inherits = TRUE), envir = fn_env)
+      } else if (exists(nm, envir = .GlobalEnv, inherits = TRUE)) {
+        assign(nm, get(nm, envir = .GlobalEnv, inherits = TRUE), envir = fn_env)
+      }
+    }
+    fn_env$dantzig_cv_ctx_v2 <- ctx
+    fn_env$dantzig_cv_tasks_v2 <- tasks
+    parallel::clusterExport(cl, ls(fn_env), envir = fn_env)
+    eval(quote(dantzig_cv_worker_v2 <- function(j) {
+      dantzig_cv_solve_task_v2(j,
+                               get0("dantzig_cv_ctx_v2", envir = .GlobalEnv,
+                                    inherits = FALSE),
+                               get0("dantzig_cv_tasks_v2", envir = .GlobalEnv,
+                                    inherits = FALSE))
+    }), envir = .GlobalEnv)
+    on.exit(rm("dantzig_cv_worker_v2", envir = .GlobalEnv), add = TRUE)
+    # parLapplyLB: dynamic load balancing. CLARABEL wall time varies widely
+    # across (fold, mu) cells (observed 2.9-7.4s at p=500 for fixed inputs);
+    # static round-robin (parLapply) assigns each fold's whole mu chain to one
+    # worker and waits for the slowest worker. LB hands out tasks on demand;
+    # results are still returned in input order.
+    parallel::parLapplyLB(cl, seq_len(n_tasks), dantzig_cv_worker_v2)
+  }
+  # Aggregate in the original (mu outer, fold inner) order - bit-identical to
+  # the serial reference path.
+  lapply(seq_along(mu_grid), function(mi) {
+    defects <- numeric(n_folds)
+    quads <- numeric(n_folds)
+    infeasible_folds <- 0L
+    for (f in seq_len(n_folds)) {
+      r <- out[[(mi - 1L) * n_folds + f]]
+      if (is.null(r) || isTRUE(r$skipped)) next
+      if (isTRUE(r$infeasible)) { infeasible_folds <- infeasible_folds + 1L; next }
+      defects[f] <- r$defect
+      quads[f] <- r$quad
+    }
+    if (infeasible_folds > 0L && n_folds - infeasible_folds < ceiling(n_folds / 2)) {
+      return(NULL)
+    }
+    list(
+      mu = mu_grid[mi],
+      defect_mean = mean(defects[is.finite(defects)]),
+      defect_se = stats::sd(defects[is.finite(defects)]) / sqrt(sum(is.finite(defects))),
+      quad_mean = mean(quads[is.finite(quads)]),
+      infeasible_folds = infeasible_folds
+    )
+  })
 }
 
 debias_profile_coordinates_v2 <- function(fit,

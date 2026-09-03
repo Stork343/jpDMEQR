@@ -24,6 +24,9 @@ experiment_ids <- cli$`experiment-id` %||% ""
 experiment_ids <- if (nzchar(experiment_ids)) {
   trimws(strsplit(experiment_ids, ",", fixed = TRUE)[[1]])
 } else character()
+# mu-CV Dantzig parallelism inside each task (default 1 = serial, bit-identical
+# to the frozen reference; see launch_sharded_pilot.R for the nested-fork note).
+options(jpDMEQR.cv_cores = as.integer(Sys.getenv("JPDMEQR_CV_CORES", unset = "1")))
 
 if (!file.exists(config)) stop("Configuration file is missing: ", config)
 registry_type <- if (identical(basename(config), "simulation_main.csv")) "main" else "preflight"
