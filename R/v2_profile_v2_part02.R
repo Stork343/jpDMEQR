@@ -63,7 +63,7 @@ profile_components_v2 <- function(y,
     m_i <- length(idx)
     g0 <- resolve_gamma_init_v2(gamma_init, cname, ii, q)
 
-    ng <- profile_cluster_gamma_v2(
+    ng <- cluster_gamma_dispatch_v2(
       y_i = y_i, X_i = X_i, Z_i = Z_i, beta = beta,
       tau = tau, h = h, Lambda = Lambda,
       gamma_init = g0, control = nuisance_control

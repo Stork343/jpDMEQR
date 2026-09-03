@@ -36,7 +36,7 @@ target_residual_scores_v2 <- function(dat, beta_target, tau, lambda_gamma,
     X_i <- X[idx, , drop = FALSE]
     Z_i <- Z[idx, , drop = FALSE]
     m_i <- length(idx)
-    gam <- profile_cluster_gamma_v2(
+    gam <- cluster_gamma_dispatch_v2(
       y = y[idx], X_i = X_i, Z_i = Z_i, beta = as.numeric(beta_target),
       tau = tau, h = h, Lambda = Lambda, gamma_init = NULL,
       control = modifyList(list(reltol = 1e-8, maxit = 100L, grad_tol = 1e-6),
