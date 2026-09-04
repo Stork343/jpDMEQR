@@ -32,6 +32,7 @@ Suggests:
     digest,
     dplyr,
     future.apply,
+    geeVerse,
     GEOquery,
     ggplot2,
     glmmLasso,
@@ -42,6 +43,7 @@ Suggests:
     peakRAM,
     purrr,
     readr,
+    rqPen,
     testthat (>= 3.0.0),
     tidyr,
     yaml

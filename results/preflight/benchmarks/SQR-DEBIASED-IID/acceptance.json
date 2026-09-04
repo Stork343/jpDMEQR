@@ -1,0 +1,15 @@
+{
+  "method_id": "SQR-DEBIASED-IID",
+  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "reference_identifier": "Yan-Wang-Zhang-2023-JMLR-22-1217",
+  "unit_test_pass": true,
+  "limiting_case_pass": true,
+  "fidelity_check_pass": true,
+  "schema_check_pass": true,
+  "deterministic_seed_pass": true,
+  "reproduction_cell_pass": null,
+  "reproduction_note": "diagnostic B=200 cell (n=500,p=500,tau=0.7,rho=0.1,N(0,1)): compatible with published Table 1 coverage 0.925 within MCSE",
+  "allowed_metrics": "estimation|selection|prediction|coverage_naive_iid",
+  "created_utc": "2026-09-01 01:57:53 UTC",
+  "notes": "Formula-level fidelity implementation of JMLR 22-1217."
+}

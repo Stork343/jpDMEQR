@@ -1,0 +1,13 @@
+{
+  "method_id": "PROFILE-DQR-TRUE-NUISANCE",
+  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "reference_identifier": "docs/BENCHMARK_IMPLEMENTATION_ACCEPTANCE.md#profile-dqr-true-nuisance",
+  "unit_test_pass": true,
+  "limiting_case_pass": true,
+  "fidelity_check_pass": true,
+  "schema_check_pass": true,
+  "deterministic_seed_pass": true,
+  "allowed_metrics": "estimation|prediction|coverage|oracle_gap",
+  "created_utc": "2026-09-01 01:52:27 UTC",
+  "notes": "Patch-provided oracle adapter; oracle property verified in tests."
+}

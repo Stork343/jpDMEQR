@@ -264,3 +264,144 @@ resolve_gamma_init_v2 <- function(gamma_init, cluster_name, index, q) {
   }
   stop("Unsupported gamma_init representation.")
 }
+
+# -----------------------------------------------------------------------------
+# Fast cluster-nuisance path (Lever 4): damped Newton from the warm start with
+# the SAME stationarity tolerance (grad_tol) and Armijo rule as the reference
+# path. The reference runs stats::optim(BFGS) then Newton; the acceptance
+# criterion of the reference IS the Newton grad_tol, so a pure guarded Newton
+# converges to the same points (within tolerance). Robustness contract: on any
+# Newton stall or non-finite iterate the fast path FALLS BACK to the reference
+# solver, which makes pathological clusters bit-identical to the old path.
+# Selected by option jpDMEQR.cluster_solver = "newton" (default "bfgs" keeps
+# the reference path).
+# -----------------------------------------------------------------------------
+
+profile_cluster_gamma_fast_v2 <- function(y_i,
+                                          X_i,
+                                          Z_i,
+                                          beta,
+                                          tau,
+                                          h,
+                                          Lambda,
+                                          gamma_init = NULL,
+                                          control = list()) {
+  y_i <- as.numeric(y_i)
+  X_i <- assert_numeric_matrix_v2(X_i, "X_i")
+  Z_i <- assert_numeric_matrix_v2(Z_i, "Z_i")
+  beta <- as.numeric(beta)
+  m_i <- length(y_i)
+  q <- ncol(Z_i)
+  if (nrow(X_i) != m_i || nrow(Z_i) != m_i) stop("Cluster dimensions do not match.")
+  if (ncol(X_i) != length(beta)) stop("beta has wrong length.")
+  if (!all(dim(Lambda) == c(q, q))) stop("Lambda has wrong dimension.")
+
+  gamma_init <- gamma_init %||% rep(0, q)
+  gamma_init <- as.numeric(gamma_init)
+  if (length(gamma_init) != q) stop("gamma_init has wrong length.")
+
+  grad_tol <- control$grad_tol %||% 1e-8
+  newton_maxit <- control$newton_maxit %||% 100L
+  armijo <- control$armijo %||% 1e-4
+  backtrack_factor <- control$backtrack_factor %||% 0.5
+  max_backtrack <- control$max_backtrack %||% 50L
+  min_step <- control$min_step %||% 1e-14
+  fallback_cutoff <- control$fallback_gradient %||% 1.0  # huge gradient -> fall back
+
+  objective <- function(gamma) {
+    r <- y_i - as.numeric(X_i %*% beta) - as.numeric(Z_i %*% gamma)
+    mean(rho_smooth_v2(r, tau, h)) +
+      0.5 * drop(crossprod(gamma, Lambda %*% gamma))
+  }
+  gradient <- function(gamma) {
+    r <- y_i - as.numeric(X_i %*% beta) - as.numeric(Z_i %*% gamma)
+    as.numeric(-crossprod(Z_i, psi_smooth_v2(r, tau, h)) / m_i + Lambda %*% gamma)
+  }
+  hessian <- function(gamma) {
+    r <- y_i - as.numeric(X_i %*% beta) - as.numeric(Z_i %*% gamma)
+    w <- phi_smooth_v2(r, tau, h) / m_i
+    crossprod(Z_i, Z_i * w) + Lambda
+  }
+
+  gamma <- gamma_init
+  value <- objective(gamma)
+  grad <- gradient(gamma)
+  iterations <- 0L
+  backtracks <- 0L
+  last_step <- NA_real_
+  line_search_failed <- FALSE
+  stalled <- FALSE
+
+  if (all(is.finite(gamma)) && is.finite(value) && all(is.finite(grad))) {
+    for (iteration in seq_len(newton_maxit)) {
+      if (max(abs(grad)) <= grad_tol) break
+      if (max(abs(grad)) > fallback_cutoff) { stalled <- TRUE; break }
+      H <- hessian(gamma)
+      direction <- tryCatch(
+        -as.numeric(solve_linear_pd_v2(H, grad, name = "nuisance Hessian (fast)")),
+        error = function(e) rep(NA_real_, q)
+      )
+      slope <- sum(grad * direction)
+      if (any(!is.finite(direction)) || !is.finite(slope) || slope >= 0) {
+        direction <- -grad
+        slope <- -sum(grad^2)
+      }
+      step <- 1
+      accepted <- FALSE
+      for (bt in 0:max_backtrack) {
+        candidate <- gamma + step * direction
+        candidate_value <- objective(candidate)
+        if (is.finite(candidate_value) &&
+            candidate_value <= value + armijo * step * slope) {
+          accepted <- TRUE
+          break
+        }
+        step <- step * backtrack_factor
+        if (step < min_step) break
+      }
+      backtracks <- backtracks + bt
+      if (!accepted) { line_search_failed <- TRUE; break }
+      gamma <- candidate
+      value <- candidate_value
+      grad <- gradient(gamma)
+      iterations <- iteration
+      last_step <- step
+      if (any(!is.finite(grad))) { stalled <- TRUE; break }
+    }
+  } else {
+    stalled <- TRUE
+  }
+
+  gradient_max <- max(abs(grad))
+  converged <- all(is.finite(gamma)) && is.finite(value) &&
+    all(is.finite(grad)) && gradient_max <= grad_tol
+
+  list(
+    gamma = gamma,
+    objective = as.numeric(value),
+    gradient = grad,
+    gradient_max = gradient_max,
+    converged = converged,
+    optim_convergence = NA_integer_,
+    optim_message = "fast-newton",
+    function_evaluations = iterations + 1L,
+    gradient_evaluations = iterations + 1L,
+    newton_iterations = iterations,
+    newton_backtracks = backtracks,
+    newton_last_step = last_step,
+    newton_line_search_failed = line_search_failed,
+    stalled = isTRUE(stalled)
+  )
+}
+
+# Dispatcher: keep the reference call sites untouched.
+cluster_gamma_dispatch_v2 <- function(...) {
+  if (identical(Sys.getenv("JPDMEQR_CLUSTER_SOLVER",
+                           unset = getOption("jpDMEQR.cluster_solver", "bfgs")),
+                "newton")) {
+    out <- tryCatch(profile_cluster_gamma_fast_v2(...),
+                    error = function(e) NULL)
+    if (!is.null(out) && !isTRUE(out$stalled)) return(out)
+  }
+  profile_cluster_gamma_v2(...)
+}

@@ -284,38 +284,67 @@ The sign is irrelevant for variance but must be consistent in any reported Bahad
 
 ## 8. Cluster sandwich variance
 
-At the fitted value define cluster score vectors
+### 8.1 Primary meat: unsmoothed quantile score
+
+The inferential target is the **unsmoothed** regularised profile parameter, so the
+primary Wald meat is built from the ordinary quantile score at the fitted profile
+residuals (authoritative: `docs/PILOT_GATE_THEORY_DECISIONS.md`; the previous
+smoothed-meat primary variance is superseded):
 
 \[
-\widehat g_i
+\widehat g_i^{(0)}
 =-\frac{1}{m_i}X_i^{\mathsf T}
-\psi_{\tau,h}(\widehat r_i),
+\psi_\tau(\widehat r_i),
 \qquad
-\overline g=n^{-1}\sum_i\widehat g_i.
+\psi_\tau(u)=\tau-I(u<0),
+\qquad
+\overline g^{(0)}=n^{-1}\sum_i\widehat g_i^{(0)}.
 \]
 
 For coordinate `k`, compute
 
 \[
-\widehat\sigma_k^2
+\widehat\sigma_{0,k}^2
 =\frac{1}{n}\sum_{i=1}^n
 \left[\widehat\omega_k^{\mathsf T}
-(\widehat g_i-\overline g)\right]^2.
+(\widehat g_i^{(0)}-\overline g^{(0)})\right]^2.
 \]
 
 The estimated finite-sample standard error is
 
 \[
 \widehat{\operatorname{se}}(\widetilde\beta_k)
-=\widehat\sigma_k/\sqrt n.
+=\widehat\sigma_{0,k}/\sqrt n.
 \]
 
 A nominal `(1-alpha)` Wald interval is
 
 \[
 \widetilde\beta_k
-\pm z_{1-\alpha/2}\widehat\sigma_k/\sqrt n.
+\pm z_{1-\alpha/2}\widehat\sigma_{0,k}/\sqrt n.
 \]
+
+The **bread remains the corrected smoothed effective Hessian** (via the
+precision row). No scalar smoothing-deficit correction and no empirical SE
+multiplier is permitted; the finite-`h` smoothing deficit is not a universal
+additive correction in the clustered/profile model.
+
+### 8.2 Diagnostic meat: smoothed score
+
+The smoothed-score sandwich
+
+\[
+\widehat g_i^{(h)}
+=-\frac{1}{m_i}X_i^{\mathsf T}\psi_{\tau,h}(\widehat r_i),
+\qquad
+\widehat\sigma_{h,k}^2
+=\frac{1}{n}\sum_{i=1}^n
+\left[\widehat\omega_k^{\mathsf T}
+(\widehat g_i^{(h)}-\overline g^{(h)})\right]^2
+\]
+
+is retained **only as a diagnostic/sensitivity** (`se_smoothed`). Both meats
+are reported side by side in the pilot and final outputs.
 
 A degrees-of-freedom multiplier `n/(n-1)` may be reported as a prespecified sensitivity analysis; it cannot be chosen by coverage.
 
@@ -323,13 +352,21 @@ A degrees-of-freedom multiplier `n/(n-1)` may be reported as a prespecified sens
 
 ### 9.1 Smoothing bandwidth
 
-Primary grid:
+Primary inferential grid:
 
 \[
-h=c_h n^{-1/3},\qquad c_h\in\{0.75,1,1.25\}.
+h=c_h n^{-3/10},\qquad c_h\in\{0.75,1,1.25\}.
 \]
 
-The main specification uses `c_h=1`. The full grid is used in the bandwidth module. Bandwidth selection by validation loss is allowed for prediction analyses, but inferential simulations report each prespecified bandwidth rather than choosing one by coverage.
+The main specification uses `c_h=1`. This exponent satisfies both
+`sqrt(n) h^2 -> 0` and `n h^3 -> infinity`; the former `n^{-1/3}` rule sits on
+the boundary `n h^3 = 1` and is no longer admissible as the primary inferential
+bandwidth. The full grid is used in the bandwidth module. Bandwidth selection
+by validation loss is allowed for prediction analyses, but inferential
+simulations report each prespecified bandwidth rather than choosing one by
+coverage. The population-target approximation may continue to use its own
+separately named small target-approximation bandwidth, which must be
+independent of the analysis Dantzig tolerance.
 
 ### 9.2 Fixed-effect penalty
 
@@ -350,10 +387,28 @@ The main setting is `Lambda=I_q`. Sensitivity values are `0.25 I_q`, `0.5 I_q`, 
 A theory-motivated starting value is
 
 \[
-\mu=c_\mu\left\{\sqrt{\log(p)/(nh)}+h^2\right\}.
+\mu=c_\mu\left\{\sqrt{\log(p)/(nh)}+h^2\right\},
+\qquad h=c_h n^{-3/10}.
 \]
 
-Use a deterministic multiplier grid such as `c_mu in {0.5,1,2,4}` and select the smallest feasible value. Report sensitivity to the multiplier in the precision module.
+The frozen candidate multiplier grid is
+
+\[
+c_\mu\in\{0.10,0.25,0.50,1,2,4\}.
+\]
+
+Feasibility of the constraint alone is not an adequate precision-direction
+gate. The constant is selected **without simulation truth, bias or coverage**
+by the frozen cluster-level inverse-Hessian cross-validation rule: partition
+the independent clusters into four deterministic folds; solve the Dantzig row
+on each training-fold Hessian at every candidate; score it on the held-out
+fold with the inverse quadratic loss
+`L(mu) = 0.5 omega' H_val omega - e_k' omega`; take the largest feasible
+candidate within one standard error of the minimum mean loss; re-estimate the
+row once on the full Hessian. Row-accuracy diagnostics (relative l1/l2 error
+to the POP-H direction, cosine similarity, and the inverse-defect bound
+`D_k = sqrt(n) delta_k ||beta_hat - beta_star||_1 / sigma_{0,k}^{pop}`) are
+recorded as gates, never as tuning criteria.
 
 ## 10. Theory diagnostics required in simulations
 

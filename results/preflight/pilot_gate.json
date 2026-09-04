@@ -1,0 +1,102 @@
+{
+  "pass": true,
+  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "v1_classification": "V1 (round-6 ladder; bands are diagnostics)",
+  "mechanism_evidence": [
+    {
+      "run_id": "pilot_v2r2_P05b",
+      "B": 200,
+      "report": "results/preflight/PILOT_V2_P05_CALIBRATION_GATE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v4_P05_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V4_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v4_P06_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V4_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v5_P05_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v5_P06_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v5_P07_B50",
+      "B": 50,
+      "report": "results/preflight/PILOT_V5_PAIRED_PROBE.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v6_ladder_P06",
+      "B": 50,
+      "report": "results/preflight/PILOT_V6_VARIANCE_LADDER.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "pilot_v5_B200",
+      "B": 200,
+      "report": "results/preflight/PILOT_V5_FINAL_REPORT.md",
+      "formal_gate": true
+    },
+    {
+      "run_id": "pilot_v5_P07_B200",
+      "B": 200,
+      "report": "results/preflight/PILOT_V5_P07_B200_REPORT.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "papp_hd_srv3",
+      "B": 200,
+      "report": "results/preflight/PILOT_V6_PAPP_REPORT.md",
+      "formal_gate": false
+    },
+    {
+      "run_id": "papp_ld_B200",
+      "B": 200,
+      "report": "results/preflight/PILOT_V6_PAPP_REPORT.md",
+      "formal_gate": false
+    }
+  ],
+  "run_id": "pilot_v5_B200",
+  "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\pilot_v5_B200",
+  "evaluated_utc": "2026-09-01 01:58:34 UTC",
+  "convergence_pass": true,
+  "identity_pass": true,
+  "dantzig_pass": true,
+  "inverse_defect_diagnostic": {
+    "D_k_median": 5.75892567111054,
+    "D_k_q90": 13.5410633305853,
+    "A_k_median": 0.477428261598074,
+    "A_k_q90": 1.8427599233232
+  },
+  "p06_scaling": {
+    "se_sd_ratio": [0.776594275167177, 0.661285526957666, 0.718795398645723, 0.756970642254107],
+    "coverage": [0.885, 0.79, 0.835, 0.845]
+  },
+  "calibration_baseline": "P05",
+  "se_ratio_pass": false,
+  "coverage_pass": false,
+  "no_runner_failures": true,
+  "no_missing_methods": true,
+  "thresholds": {
+    "convergence": 0.98,
+    "identity_median": 1e-08,
+    "identity_max": 1e-06,
+    "dantzig_feasible": 0.95,
+    "se_sd_ratio": [0.8, 1.2],
+    "baseline_coverage": [0.88, 0.98]
+  }
+}

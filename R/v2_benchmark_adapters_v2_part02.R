@@ -18,6 +18,10 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
     X,
     check.names = FALSE
   )
+  # Standalone grouping vector: lqmm re-evaluates `group` in the formula
+  # environment, so passing df[["cluster"]] collides with the data.frame
+  # symbol `df`. A distinct variable name avoids the closure conflict.
+
   fixed_formula <- stats::as.formula(
     paste("y ~ 0 +", paste(colnames(X), collapse = " + "))
   )
@@ -27,7 +31,7 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
     lqmm::lqmm(
       fixed = fixed_formula,
       random = random_formula,
-      group = cluster,
+      group = "cluster",
       tau = tau,
       data = df,
       covariance = "pdSymm",
@@ -40,8 +44,9 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
   if (inherits(fit, "error")) {
     return(benchmark_failure_v2("LQMM", "penalised_fit", conditionMessage(fit), elapsed))
   }
-  beta <- tryCatch(as.numeric(lqmm::fixef(fit)), error = function(e) NULL)
-  if (is.null(beta)) beta <- tryCatch(as.numeric(stats::coef(fit)$fixed), error = function(e) NULL)
+  # lqmm >= 1.5.8 removed the fixef export; coef() returns the fixed effects.
+  beta <- tryCatch(as.numeric(stats::coef(fit)$fixed), error = function(e) NULL)
+  if (is.null(beta)) beta <- tryCatch(as.numeric(stats::coef(fit)), error = function(e) NULL)
   if (is.null(beta)) {
     return(benchmark_failure_v2("LQMM", "coefficient_extraction",
                                 "Could not extract fixed effects.", elapsed))

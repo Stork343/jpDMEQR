@@ -1,0 +1,13 @@
+{
+  "method_id": "PROFILE-DQR",
+  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "reference_identifier": "docs/METHOD_SPECIFICATION.md",
+  "unit_test_pass": true,
+  "limiting_case_pass": true,
+  "fidelity_check_pass": true,
+  "schema_check_pass": true,
+  "deterministic_seed_pass": true,
+  "allowed_metrics": "estimation|selection|prediction|coverage|theory|computation",
+  "created_utc": "2026-09-01 01:55:45 UTC",
+  "notes": "Reference implementation; strict geometry gate passed on this commit."
+}

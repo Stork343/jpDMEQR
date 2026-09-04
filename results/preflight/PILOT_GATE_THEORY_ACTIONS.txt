@@ -1,0 +1,43 @@
+AUTHORITATIVE NEXT ACTIONS AFTER PILOT V5 THEORY REVIEW — ROUND 6
+
+1. Read, in order:
+   - results/preflight/PILOT_V5_THEORY_DECISION_ROUND6.md
+   - docs/METHOD_SPECIFICATION_ROUND6_AMENDMENT.md
+   - results/preflight/PILOT_V5_PAIRED_PROBE.md
+   - docs/METHOD_SPECIFICATION_ROUND5_AMENDMENT.md
+   - prior amendments for non-conflicting lambda/bandwidth/mu rules.
+2. Do NOT run the final B=500/1000 registry, the full P01-P06 B=200 pilot, P07-B=200, or confirmatory GSE65391 high-dimensional Wald inference yet.
+3. Keep the round-five estimator unchanged during the round-six diagnostic: score-loaded L1 at h_est -> post-L1 profile refit at h_inf -> full-design reprofile -> existing Dantzig selector -> one-step -> unsmoothed fitted cluster-score meat.
+4. Implement the P06-v5 T=L+Q+R decomposition using the existing POP-H asset:
+   - T = sqrt(n)(beta_tilde-beta_star);
+   - L = -omega_pop' G_star;
+   - Q = -(omega_hat-omega_pop)' G_star;
+   - R = T-L-Q;
+   - report Var(T), Var(L), Var(Q), Var(R) and all covariance terms;
+   - verify the complete variance identity to numerical tolerance <1e-10.
+5. Implement/store four root-n variance ladder levels:
+   - V_fit_fit: fitted direction + fitted ordinary cluster scores (current primary);
+   - V_fit_target: fitted direction + target-level ordinary cluster scores;
+   - V_pop_fit: population direction + fitted ordinary cluster scores;
+   - V_pop_target: population direction + target-level ordinary cluster scores.
+6. Compare those with empirical Var(L), Var(L+Q), Var(T). Compute M_fit, M_pop_fit, M_pop_target, M_T exactly as specified in the round-six amendment.
+7. Quantify Monte Carlo uncertainty with 5,000 paired nonparametric bootstrap resamples over the replication index, seed 20260825. This bootstrap is diagnostic only and never changes a model confidence interval.
+8. Classify the variance mechanism:
+   - V1: M_fit compatible with 1 but Var(T)>Var(L+Q) due R/covariance -> retain current sandwich;
+   - V2: fitted meat underestimates Var(L+Q) while population-direction meat is calibrated -> stop for direction-aware variance theory;
+   - V3: population-direction fitted-score meat low while target-score meat is calibrated -> stop for profile-score/leverage variance theory;
+   - V4: mixed/inconclusive -> add 50 P06-v5 diagnostic replications only (total B=100) and repeat the same ladder.
+9. Do not add any empirical SE multiplier, mu-slack variance term, generic CR2/CR3/KC/MD production correction, or selected-model df factor during this diagnostic.
+10. If and only if branch V1 is supported with no production variance change:
+    - run P07-v5 at B=200 first;
+    - report coverage, SE/SD, bias, A_k, Bahadur and MCSE without changing thresholds;
+    - if no new numerical/mechanistic anomaly appears, the full versioned P01-P06 B=200 pilot is automatically authorised under the same frozen method/variance.
+11. Under V1, calibration bands remain reported finite-sample diagnostics but are no longer binary implementation-correctness blockers for intentionally small-n stress cells. Under V2-V4 the full pilot remains blocked.
+12. Authorise application-scope simulations, but they need not run before the variance ladder:
+    - PAPP-HD: n=129,p=500,s=5,tau=.5,q=1,B=200, frozen empirical GSE visit-count design;
+    - PAPP-LD25/50/75: n=129,d=20,s=5,q=1,B=200 each, same cluster-size design, direct unpenalised profile fit.
+13. GSE65391 high-dimensional analysis may proceed only as exploratory prediction/stability/ranking work after ordinary data gates. No confirmatory gene-level Wald/FDR claim is authorised at n≈129.
+14. The prespecified low-dimensional GSE layer may be fitted only after its covariates/modules are frozen. Use direct unpenalised profile estimation with d_app<=floor(n/log(max(n,3))); report ordinary cluster-sandwich and full delete-one-subject jackknife intervals side by side. Final confirmatory claim strength waits for PAPP-LD review.
+15. In the eventual pilot_gate.json (or equivalent), include P05/P06-v4 B=50, P05/P06-v5 B=50, P07-v5 B=50, the round-six variance ladder and any P06 extension under mechanism_evidence with formal_gate=false, including run IDs, commits, config hashes and report checksums.
+16. After the variance mechanism is closed and any necessary method amendment is complete: freeze final code/config -> unit/package tests -> strict geometry -> micro-preflight -> authorised B=200 formal pilot/scaling runs -> final pilot manifest -> freeze-preflight -> final B=500/1000 registry.
+17. Final main simulation remains blocked until the production variance rule is frozen, required benchmarks/assets pass, the final pilot record is complete, manuscript/application scope matches the observed inferential regime, and the freeze manifest matches the final commit/config checksum.

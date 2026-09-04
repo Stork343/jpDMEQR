@@ -80,19 +80,40 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
                                          tuning, seed, control = list()) {
   set.seed(seed)
   start <- proc.time()[[3]]
+  calibrate <- isTRUE(control$calibrate_first_stage %||% TRUE)
   fit <- tryCatch(
-    fit_profile_lasso_v2(
-      y = train$y,
-      X = train$X,
-      Z = train$Z,
-      cluster_id = train$cluster_id,
-      tau = tau,
-      h = tuning$h,
-      lambda_beta = tuning$lambda_beta,
-      lambda_gamma = tuning$lambda_gamma,
-      penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
-      control = control$fit_control %||% list()
-    ),
+    if (calibrate && exists("fit_profile_lasso_calibrated_v2", mode = "function")) {
+      fit_profile_lasso_calibrated_v2(
+        y = train$y,
+        X = train$X,
+        Z = train$Z,
+        cluster_id = train$cluster_id,
+        tau = tau,
+        h_est = tuning$h_est,
+        h_inf = tuning$h,
+        lambda_0_n = tuning$lambda_0_n,
+        lambda_gamma = tuning$lambda_gamma,
+        base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
+        target_coordinates = target_coords,
+        control = list(
+          fit_control = control$fit_control %||% list(),
+          nuisance_control = control$fit_control$nuisance_control %||% list()
+        )
+      )
+    } else {
+      fit_profile_lasso_v2(
+        y = train$y,
+        X = train$X,
+        Z = train$Z,
+        cluster_id = train$cluster_id,
+        tau = tau,
+        h = tuning$h,
+        lambda_beta = tuning$lambda_beta,
+        lambda_gamma = tuning$lambda_gamma,
+        penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
+        control = control$fit_control %||% list()
+      )
+    },
     error = function(e) e
   )
   elapsed_fit <- proc.time()[[3]] - start
@@ -100,6 +121,23 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
     return(benchmark_failure_v2("PROFILE-DQR", "penalised_fit",
                                 conditionMessage(fit), elapsed_fit))
   }
+  # Round-3 numerical acceptance: a calibrated first stage that fails the
+  # KKT/nuisance/beta-change contract is a penalised_fit FAILURE, never a
+  # successful non-converged estimate (amendment section 3).
+  if (isTRUE(fit$first_stage_calibrated) && !isTRUE(fit$converged)) {
+    return(benchmark_failure_v2(
+      "PROFILE-DQR", fit$failure_stage %||% "penalised_fit",
+      "Round-3 first-stage acceptance failed", elapsed_fit
+    ))
+  }
+  # Round-4 hard separation: inferential precision runs on h_inf components.
+  tryCatch(
+    assert_inferential_components_v2(fit, tuning$h),
+    error = function(e) benchmark_failure_v2(
+      "PROFILE-DQR", "inference_bandwidth_mismatch", conditionMessage(e), elapsed_fit
+    )
+  ) -> guard_ans
+  if (is.list(guard_ans) && identical(guard_ans$status, "failed")) return(guard_ans)
 
   inf <- tryCatch(
     debias_profile_coordinates_v2(
@@ -117,13 +155,30 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
                                 conditionMessage(inf), elapsed))
   }
 
-  selected <- which(abs(fit$beta) > (control$selection_tol %||% 1e-8))
+  # Selection record uses the L1 selection support (round-5: beta_l1 is the
+  # selection estimator; the refit support is recorded separately).
+  selected <- which(abs(fit$beta_l1 %||% fit$beta) > (control$selection_tol %||% 1e-8))
   status <- if (fit$converged && all(inf$table$feasible)) "ok" else "warning"
   warnings <- c(
     if (!fit$converged) "Penalised profile fit did not meet all stopping rules.",
     if (!all(inf$table$feasible)) "One or more Dantzig rows were infeasible."
   )
-  list(
+  audit_names <- c(
+    "lambda_rule", "lambda_alpha", "lambda_normal_quantile",
+    "lambda_safety_constant", "lambda_base",
+    "lambda_loading_pass0_min", "lambda_loading_pass0_median", "lambda_loading_pass0_max",
+    "lambda_loading_pass1_min", "lambda_loading_pass1_median", "lambda_loading_pass1_max",
+    "lambda_coordinate_min", "lambda_coordinate_median", "lambda_coordinate_max",
+    "zero_profile_score_max", "zero_kkt_ratio_max",
+    "preliminary_kkt_normalized", "final_kkt_normalized", "final_kkt_absolute",
+    "first_stage_iterations", "first_stage_beta_change", "first_stage_nonzero_count",
+    "selected_support_size", "refit_set_size", "refit_contains_targets",
+    "post_refit_status", "post_refit_iterations", "post_refit_gradient_max",
+    "post_refit_nuisance_gradient_max", "post_refit_beta_change",
+    "post_refit_hessian_min_eigenvalue", "post_refit_hessian_condition_number"
+  )
+  audit <- setNames(lapply(audit_names, function(nm) fit[[nm]] %||% NA_real_), audit_names)
+  out <- list(
     method_id = "PROFILE-DQR",
     status = status,
     failure_stage = "",
@@ -142,8 +197,10 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
     profile_identity_error = fit$components$profile_identity_error,
     max_nuisance_gradient = fit$components$max_nuisance_gradient,
     warning_messages = warnings,
-    implementation_version = "reference-profile-v2"
+    implementation_version = "reference-profile-v2-round3"
   )
+  out[audit_names] <- audit
+  out
 }
 
 fit_benchmark_sqr_debiased_iid_v2 <- function(train, tau, target_coords,
@@ -152,6 +209,10 @@ fit_benchmark_sqr_debiased_iid_v2 <- function(train, tau, target_coords,
   iid$Z <- matrix(0, nrow = length(train$y), ncol = 1,
                   dimnames = list(NULL, "zero_nuisance"))
   iid$cluster_id <- seq_along(train$y)
+  # Benchmark comparator: keep the round-2 first-stage lambda rule unchanged
+  # (no cluster self-normalised loadings); the round-3 lambda change applies
+  # to the practical proposed methods only.
+  control$calibrate_first_stage <- FALSE
   ans <- fit_benchmark_profile_dqr_v2(iid, tau, target_coords, tuning, seed, control)
   ans$method_id <- "SQR-DEBIASED-IID"
   ans$implementation_version <- "profile-v2-iid-special-case"
