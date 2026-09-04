@@ -156,3 +156,42 @@ results.
   to change the code mid-run.
 - Performance knobs (jobs, cv_cores) change only wall-clock time, never the
   frozen statistical objects.
+
+## GitHub connectivity: environment-proxy gotcha (observed 2026-09-03)
+
+Symptom on the development machine:
+
+```text
+fatal: unable to access 'https://github.com/Stork343/jpDMEQR.git/':
+Failed to connect to github.com:443 over proxy 127.0.0.1 after ~2 s:
+Could not connect to server
+```
+
+Diagnosis: the machine's `HTTP_PROXY` / `HTTPS_PROXY` (and lowercase)
+environment variables point at `http://127.0.0.1:7897`, but **that proxy port
+does not actually serve** — while a direct TCP connection to
+`github.com:443` succeeds. Git honours the env proxy and fails; setting
+`git config http.proxy` or `git -c http.proxy=...` does not fix it because
+the env vars take precedence.
+
+Fix (clear the env proxies in the shell where git runs, then retry):
+
+```powershell
+$env:HTTP_PROXY=''; $env:HTTPS_PROXY=''; $env:http_proxy=''; $env:https_proxy=''
+git fetch origin
+git push origin gpt/simulation-freeze-resolution
+```
+
+Verification that the proxy (not the network) is the problem:
+
+```powershell
+Test-NetConnection github.com -Port 443   # True => network OK, proxy is the culprit
+curl.exe -x http://127.0.0.1:7897 -sI --connect-timeout 5 https://github.com  # fails => proxy dead
+git -c http.proxy= -c https.proxy= ls-remote origin HEAD   # works => direct route fine
+```
+
+This is a machine-environment issue, not a repository issue; if a server
+shell shows the same symptom, apply the same env-clear before any
+`git pull`/`git push`. After a successful push the branch
+`gpt/simulation-freeze-resolution` tracks the exact commit
+`745befd…` (runbook + 320bb43 parallelism + prior commits) on the remote.
