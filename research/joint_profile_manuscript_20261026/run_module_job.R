@@ -1,5 +1,6 @@
 source("research/score_validity_20261026/load_joint.R")
 source("research/joint_profile_manuscript_20261026/fixed_inference.R")
+source("research/submission_completion_20261027/dispatch_state.R")
 args <- commandArgs(trailingOnly = TRUE)
 job_id <- as.integer(args[1L])
 input <- "results/scratch/joint_profile_manuscript_20261026/module_inputs"
@@ -7,10 +8,24 @@ jobs <- read.csv(file.path(input, "jobs.csv"), stringsAsFactors = FALSE)
 if (!job_id %in% jobs$job_id) stop("Invalid module job.")
 job <- jobs[jobs$job_id == job_id, ]
 output <- file.path("results/raw/application/joint_profile_20261026", sprintf("job_%03d", job_id))
-if (dir.exists(output)) stop("This module job already exists.")
-dir.create(output, recursive = TRUE)
-saveRDS(list(job = job, input = input, method_version = "joint_profile_fixed_design_20261026",
-             started = Sys.time(), session = sessionInfo()), file.path(output, "request.rds"))
+dir.create(output, recursive = TRUE, showWarnings = FALSE)
+lock <- filelock::lock(file.path(output, "run.lock"), timeout = 0)
+if (is.null(lock)) stop("This module job is already running.")
+if (file.exists(file.path(output, "result.rds"))) {
+  finished <- readRDS(file.path(output, "result.rds"))
+  if (!identical(finished$job, job)) stop("The completed module definition differs.")
+  filelock::unlock(lock)
+  quit(status = 0L)
+}
+if (file.exists(file.path(output, "request.rds"))) {
+  previous <- readRDS(file.path(output, "request.rds"))
+  if (!identical(previous$job, job) || !identical(previous$input, input))
+    stop("The interrupted module definition differs.")
+} else {
+  submission_atomic_rds(list(job = job, input = input, method_version = "joint_profile_fixed_design_20261026",
+    implementation_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE),
+    started = Sys.time(), session = sessionInfo()), file.path(output, "request.rds"))
+}
 globalCallingHandlers(error = function(condition) saveRDS(list(job = job, condition = condition), file.path(output, "failure.rds")))
 stages <- readRDS(file.path(input, paste0("stages_", job$model, ".rds")))
 n <- length(stages) - 1L
@@ -21,9 +36,18 @@ full <- NULL
 for (i in seq_along(stages)) {
   stage <- stages[[i]]
   Z <- if (job$random_slope) cbind(intercept = 1, centered_time = stage$time) else stage$Z
-  result <- jp_fit_fixed(stage$y, stage$X, Z, stage$cluster_id, job$tau,
+  checkpoint <- file.path(output, "fits", sprintf("fit_%03d.rds", i))
+  if (file.exists(checkpoint)) {
+    stored <- readRDS(checkpoint)
+    if (!identical(stored$job, job) || !identical(stored$omitted_subject, stage$omitted_subject))
+      stop("The saved subject fit has a different definition.")
+    result <- stored$fit
+  } else {
+    result <- jp_fit_fixed(stage$y, stage$X, Z, stage$cluster_id, job$tau,
                           Lambda = diag(job$lambda_gamma, ncol(Z)), h = h,
                           initial = if (is.null(full)) NULL else full$beta)
+    submission_atomic_rds(list(job = job, omitted_subject = stage$omitted_subject, fit = result), checkpoint)
+  }
   if (i == 1L) full <- result else estimates[i - 1L, ] <- result$beta
   diagnostics[[i]] <- cbind(data.frame(omitted_subject = stage$omitted_subject), result$diagnostics)
 }
@@ -47,8 +71,9 @@ table$simultaneous_lower <- table$beta_hat - critical * table$se
 table$simultaneous_upper <- table$beta_hat + critical * table$se
 table$workflow_simultaneous_lower <- table$beta_hat - critical * table$workflow_se
 table$workflow_simultaneous_upper <- table$beta_hat + critical * table$workflow_se
-saveRDS(list(job = job, table = table, full = full, leave_one_estimates = estimates,
+submission_atomic_rds(list(job = job, table = table, full = full, leave_one_estimates = estimates,
              diagnostics = do.call(rbind, diagnostics), completed = Sys.time()), file.path(output, "result.rds"))
 write.csv(table, file.path(output, "estimates.csv"), row.names = FALSE)
 write.csv(do.call(rbind, diagnostics), file.path(output, "diagnostics.csv"), row.names = FALSE)
 cat("Completed module job", job_id, "\n")
+filelock::unlock(lock)

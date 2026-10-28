@@ -26,6 +26,7 @@ repeat {
     active[[as.character(i)]] <- processx::process$new(
       file.path(R.home("bin"), "Rscript"),
       c("research/joint_profile_manuscript_20261026/run_module_job.R", as.character(jobs$job_id[i])),
+      cleanup = FALSE,
       stdout = file.path(output, sprintf("job_%03d.log", jobs$job_id[i])), stderr = "2>&1")
     jobs$state[i] <- "running"
   }
