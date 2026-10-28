@@ -57,7 +57,9 @@ The scalar root is embedded as `beta0+delta e1` in every registered coordinate. 
 
 `validate_profile_pair_conditional_scale_target_v2()` verifies the complete scenario identity and source dependencies. It reconstructs target embeddings, MCSE and bandwidth movements from actual repeat records. It also checks the full score identity and the two curvature coefficients against their ridge-identity counterparts. The numerical limits are the existing profile population limits. Final scale requires at least four independent batches of at least 100000 clusters each.
 
-## The own marginal QR target
+## Centered slope marginal reference
+
+The registered SQR comparison includes an unpenalised intercept. Its population equation has an intercept and a scale-coordinate adjustment, calculated by `research/submission_completion_20261027/build_marginal_targets.R`. The scalar routines in this section describe the centered-slope formulation used by the conditional-target unit tests.
 
 SQR uses the pooled observation-level QR population projection of the supplied centered fixed-effect columns. Its target satisfies
 

@@ -1,3 +1,5 @@
+.libPaths(c(normalizePath("results/scratch/dependencies/library", mustWork = TRUE), .libPaths()))
+if (utils::packageVersion("highs") < "1.15.1-1") stop("Run the declared dependency installation before comparison fitting.")
 source("research/submission_completion_20261027/load.R")
 source("research/submission_completion_20261027/clime_primal.R")
 source("research/submission_completion_20261027/clime_parametric.R")

@@ -44,7 +44,7 @@ Suggests:
     ggplot2,
     glmmLasso,
     glmnet,
-    highs,
+    highs (>= 1.15.1-1),
     illuminaHumanv4.db,
     limma,
     lqmm,

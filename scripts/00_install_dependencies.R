@@ -17,11 +17,11 @@ cran_required <- c(
   "jsonlite", "ggplot2", "dplyr", "tidyr", "readr", "purrr",
   "matrixStats", "digest", "lqmm", "Matrix", "quadprog", "nloptr",
   "Rcpp", "RcppArmadillo", "RcppEigen", "glmnet", "filelock", "processx", "rcmdcheck", "statmod", "geeVerse",
-  "highs", "osqp", "igraph"
+  "osqp", "igraph"
 )
 cran_optional <- c(
   "pbapply", "future.apply", "qs", "arrow", "peakRAM", "foreach",
-  "doParallel", "ECOSolveR", "ncvreg", "osqp", "highs"
+  "doParallel", "ECOSolveR", "ncvreg", "osqp"
 )
 
 repos <- getOption("repos")
@@ -41,6 +41,22 @@ install_missing_cran <- function(pkgs) {
 }
 
 install_missing_cran(cran_required)
+install_highs_interface <- function() {
+  destination <- file.path("results", "scratch", "dependencies", "library")
+  dir.create(destination, recursive = TRUE, showWarnings = FALSE)
+  installed <- utils::installed.packages(lib.loc = destination)
+  if (!"highs" %in% rownames(installed) ||
+      package_version(installed["highs", "Version"]) < "1.15.1-1") {
+    old_timeout <- getOption("timeout")
+    options(timeout = max(600, old_timeout))
+    on.exit(options(timeout = old_timeout), add = TRUE)
+    install.packages("highs", lib = destination, type = "source")
+  }
+  if (utils::packageVersion("highs", lib.loc = destination) < "1.15.1-1")
+    stop("The required HiGHS basis interface is unavailable.")
+  .libPaths(c(normalizePath(destination, mustWork = TRUE), .libPaths()))
+}
+install_highs_interface()
 install_parametric_clime <- function() {
   if (requireNamespace("fastclime", quietly = TRUE)) {
     if (packageVersion("fastclime") != "1.4.1.1") stop("The parametric CLIME interface requires fastclime 1.4.1.1.")

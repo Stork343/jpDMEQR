@@ -21,7 +21,7 @@ checks <- read.csv("results/scratch/submission_completion_20261027/comparator_co
 if (any(checks$difference > 1e-6)) stop("Comparator numerical control verification failed.")
 if (family == "pooled" && !file.exists("results/scratch/submission_completion_20261027/pooled_procedure_check/checks.csv"))
   stop("The complete pooled numerical comparison is missing.")
-if (family == "sqr" && !file.exists("results/scratch/submission_comparator_probes_20261027/SQR_A01_parametric_warm/comparison.csv"))
+if (family == "sqr" && !file.exists("results/scratch/submission_completion_20261027/sqr_procedure_check/checks.csv"))
   stop("The complete SQR numerical comparison is missing.")
 registry <- submission_registry("main")
 registry <- registry[registry$module != "G_computation", ]
@@ -54,6 +54,7 @@ repeat {
   for (index in head(which(batches$state == "pending"), max(0L, workers - length(active)))) {
     active[[as.character(index)]] <- processx::process$new(file.path(R.home("bin"), "Rscript"),
       c("research/submission_completion_20261027/run_comparator_batch.R", destination, as.character(batches$batch[index])),
+      cleanup = FALSE,
       stdout = file.path(destination, sprintf("batch_%03d.log", index)), stderr = "2>&1")
     batches$state[index] <- "running"
   }
