@@ -68,6 +68,8 @@ Rscript research/submission_completion_20261027/launch_simulation.R main joint 8
 
 每次重复完成后，通过临时文件写入并改名的方式保存完整 RDS。计算进程每完成100次重复，以及完成批次时，将完整结果复制到 `~/jpDMEQR-backups`。`JPDMEQR_BACKUP_DIR` 可以指定备份位置。
 
+`research/submission_completion_20261027/backup_live_results.R` 每60秒检查进度并复制新增的完整结果，直至全部登记队列完成。
+
 源码和手稿通过 Git 提交并推送。研究数据与大型计算对象保存在本地，源码中的结果生成程序负责构建表格和图。运行与保存说明见 [LOCAL_EXECUTION_20261028.md](docs/LOCAL_EXECUTION_20261028.md)。
 
 ## 手稿与数据

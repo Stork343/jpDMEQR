@@ -85,7 +85,9 @@ submission_backup_run <- function(root, force = FALSE) {
   }
   on.exit(filelock::unlock(lock), add = TRUE)
   outputs <- list.files(root, "^(result|fit_[0-9]+)[.]rds$", recursive = TRUE)
-  metadata <- c("request.rds", "dispatcher.rds", "config_snapshot.csv", "scheduled_replications.csv")
+  completed_path <- file.path(root, "completed.rds")
+  if (file.exists(completed_path)) invisible(readRDS(completed_path))
+  metadata <- c("request.rds", "dispatcher.rds", "config_snapshot.csv", "scheduled_replications.csv", "completed.rds")
   metadata <- metadata[file.exists(file.path(root, metadata))]
   files <- sort(unique(c(outputs, metadata)))
   if (!length(files)) stop("No completed files are available for backup.")
