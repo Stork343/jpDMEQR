@@ -2,7 +2,7 @@ qif_see_stop_v2 <- function(stage, message, diagnostics, partial_fit = NULL) {
   condition <- simpleError(message)
   condition$failure_stage <- stage
   condition$diagnostics <- diagnostics
-  condition$partial_fit <- partial_fit
+  condition$fit <- partial_fit
   class(condition) <- c("qif_see_source_error", class(condition))
   stop(condition)
 }
@@ -79,7 +79,7 @@ qif_see_source_step_v2 <- function(component, beta, context = list()) {
     if (inherits(condition, "qif_see_source_error")) return(invisible(NULL))
     condition$failure_stage <- "qif_ordinary_inverse"
     condition$diagnostics <- diagnostics
-    condition$partial_fit <- list(beta = beta, component = component)
+    condition$fit <- list(beta = beta, component = component)
     stop(condition)
   })
 }
@@ -167,7 +167,10 @@ fit_benchmark_qif_see_v2 <- function(train, tau, target_coords, tuning, seed,
   if (length(density) != length(y) || any(!is.finite(density)) || any(density < 0)) {
     stop("QIF conditional density weights must be nonnegative finite values for every observation.")
   }
+  folds <- make_subject_folds_v2(cluster, k = 10L, seed = seed)
+  fold_id <- folds$fold[match(cluster, folds$cluster_id)]
   init <- rqPen::rq.pen.cv(x = X, y = y, tau = tau, penalty = "LASSO", nfolds = 10L,
+                           foldid = fold_id,
                            printProgress = FALSE)
   coefficients <- as.numeric(stats::coef(init))
   if (length(coefficients) != p + 1L || any(!is.finite(coefficients))) {
@@ -196,7 +199,8 @@ fit_benchmark_qif_see_v2 <- function(train, tau, target_coords, tuning, seed,
   beta <- setNames(best$beta, colnames(X))
   ans <- list(method_id = "QIF-SEE", status = "ok", failure_stage = "", failure_message = "",
               beta_hat = beta, beta_tilde = NULL, se = NULL, selected = which(abs(beta) > 1e-6),
-              fit_object = list(initial = init, beta_tilde_init = beta_init,
+              fit_object = list(initial = init, initial_subject_folds = folds,
+                                beta_tilde_init = beta_init,
                                 tuning_grid = grid, candidates = candidates, selected_candidate = chosen,
                                 density_weights = density, basis = corstr, best = best),
               inference_object = list(table = data.frame(), target_scope = "longitudinal_qif_selection"),

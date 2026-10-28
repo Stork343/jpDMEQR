@@ -1,125 +1,79 @@
-# jpDMEQR: Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression
+# Joint Profile Inference for High Dimensional Mixed Effects Quantile Regression
 
-This repository is the working research repository for the manuscript
+本项目保存混合效应分位数回归手稿及其研究程序，目标期刊为 Scandinavian Journal of Statistics。
 
-> **Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression with Many Small Clusters**
+当前估计方法为 `JOINT-PROFILE`。训练受试者用于选择预测变量和条件调整变量，独立的估计受试者用于拟合所选模型。两个带宽下的系数估计共同消除一阶平滑项，区间计算保留同一受试者的成对协方差。总体目标为完整 ridge-profile check loss 的最小化参数。
 
-currently being reconstructed for the *Scandinavian Journal of Statistics* (SJS).
+方法定义见 [METHOD_SPECIFICATION.md](docs/METHOD_SPECIFICATION.md)，程序入口见 [研究程序说明](research/score_validity_20261026/README_zh.md)。
 
-## Current status
+## 文件位置
 
-The repository contains a complete SJS/Wiley working manuscript, a corrected mathematical specification of the profile score and Schur-complement Hessian, a preregistered simulation protocol, a reference R implementation, and a reproducible data-ingestion/audit pipeline for GEO series **GSE65391**.
+| 目录 | 内容 |
+| --- | --- |
+| `research/score_validity_20261026` | 估计方法和推断程序 |
+| `research/submission_completion_20261027` | 登记实验、比较方法、结果汇总与检查 |
+| `research/joint_profile_manuscript_20261026` | GSE65391 分析和手稿材料生成 |
+| `R` | 数据生成、数值计算及比较方法接口 |
+| `config` | 实验设计、随机种子和数值设置 |
+| `manuscript` | 手稿和 Supporting Information |
+| `data` | 研究数据及其来源记录 |
+| `results` | 逐次计算结果、检查记录和汇总材料 |
 
-The project is **not submission-ready**. Numerical results in the working manuscript remain intentionally blank until the corrected implementation passes the geometry tests, the pilot simulations pass the prespecified acceptance rules, and the GSE65391 outcome audit is complete. No coverage-calibration constants or truth-dependent tuning are permitted.
+本地工作目录为 `/Users/houjian/Projects/jpDMEQR`。GitHub 计算分支为 `recovery/research-20261028`。
 
-The previous implementation and manuscript logic are preserved on branch:
+## 环境准备
 
-```text
-legacy-pre-sjs-reconstruction
-```
-
-Do not use that branch for new inferential results. It is retained only for auditability and regression testing.
-
-## Start here
-
-Codex and other coding agents should read these files in order:
-
-1. [`AGENTS.md`](AGENTS.md)
-2. [`PROJECT_STATUS.md`](PROJECT_STATUS.md)
-3. [`docs/METHOD_SPECIFICATION.md`](docs/METHOD_SPECIFICATION.md)
-4. [`docs/SIMULATION_PROTOCOL.md`](docs/SIMULATION_PROTOCOL.md)
-5. [`docs/EMPIRICAL_PROTOCOL_GSE65391.md`](docs/EMPIRICAL_PROTOCOL_GSE65391.md)
-6. [`docs/RESULTS_CONTRACT.md`](docs/RESULTS_CONTRACT.md)
-
-The mathematical specification in `docs/METHOD_SPECIFICATION.md` is authoritative when the legacy package code and the new manuscript differ.
-
-## Repository layout
-
-```text
-AGENTS.md                          Codex/agent operating rules
-PROJECT_STATUS.md                  completed work, open gates, next tasks
-config/                            frozen experiment and application settings
-docs/                              method, simulation, benchmark, data and output contracts
-manuscript/                        SJS main paper, supplement and support scripts
-R/profile_v2.R                     corrected reference estimator and inference
-R/simulation_v2.R                  data-generating mechanisms and target utilities
-R/benchmark_adapters_v2.R          competitor/oracle adapter interface
-R/metrics_v2.R                     finite-sample and Monte Carlo diagnostics
-R/application_v2.R                 GEO metadata, QC and subject-split helpers
-scripts/simulation/                geometry, target, pilot, main and summary runners
-scripts/application/               download, build, audit, fit and summarize GSE65391
-data/README.md                     data provenance and non-commit rules
-results/README.md                  output schema and directory rules
-```
-
-## Minimal setup
-
-R 4.4 or newer is recommended. Install the declared dependencies with:
+在项目目录执行：
 
 ```bash
+mkdir -p results/scratch/runtime
+export TMPDIR="$PWD/results/scratch/runtime"
 Rscript scripts/00_install_dependencies.R
+Rscript research/score_validity_20261026/setup.R
 ```
 
-Run the non-negotiable profile-geometry checks before any Monte Carlo work:
+比较程序使用项目目录中的 HiGHS 源代码安装版本，最低版本为1.15.1-1。依赖安装程序同时检查 fastclime 1.4.1.1。
+
+## 数值检查
 
 ```bash
-Rscript scripts/simulation/00_validate_profile_geometry.R
+Rscript research/score_validity_20261026/validate_joint.R
+Rscript research/score_validity_20261026/validate_weighted_profile.R
+Rscript research/submission_completion_20261027/check_profile_charts.R
+Rscript research/joint_profile_manuscript_20261026/validate_fixed.R
 ```
 
-Run the pilot registry:
+总体目标文件按 `config/joint_profile_submission_20261027.yml` 定位。正式使用前，运行 `research/submission_completion_20261027/validate_assets.R`，检查各文件的实验身份、独立重复数量和数值精度。
+
+## 登记计算
+
+实验设置和重复次数由 `config/simulation_main.csv` 给出。方法映射与随机种子来自 `config/joint_profile_submission_20261027.yml`，比较方法的数值设置保存在 `config/submission_comparator_numerics_20261028.yml`。
+
+准备好总体目标后，执行预实验并读取其检查结果：
 
 ```bash
-Rscript scripts/simulation/01_run_pilot.R \
-  --config=config/simulation_pilot.csv \
-  --jobs=4
+Rscript research/submission_completion_20261027/launch_simulation.R pilot joint 8
+Rscript research/submission_completion_20261027/summarise_pilot.R
 ```
 
-The pilot is a gate, not a source of final paper tables. Main experiments must not start until the acceptance rules in `docs/SIMULATION_PROTOCOL.md` are met. Before any registry row with `target_mode=profile_mc` is run, build its target files:
+预实验和总体目标检查通过后运行正式计算：
 
 ```bash
-Rscript scripts/simulation/04_build_profile_targets.R \
-  --config=config/simulation_main.csv \
-  --n-population=10000 --repeats=2
+Rscript research/submission_completion_20261027/launch_simulation.R main joint 8
 ```
 
-The command above is a development run. Frozen paper targets require at least 100,000 population clusters and four independent repeats after the target routine has been optimized.
+已有计算目录使用 `resume_simulation.R` 继续处理尚未完成的重复。完整队列通过 `collect_simulation.R` 读取全部登记编号，核对方法记录后生成汇总输入。
 
-## GSE65391 application
+## 保存与备份
 
-The official GEO accession page is:
+每次重复完成后，通过临时文件写入并改名的方式保存完整 RDS。计算进程每完成100次重复，以及完成批次时，将完整结果复制到 `~/jpDMEQR-backups`。`JPDMEQR_BACKUP_DIR` 可以指定备份位置。
 
-```text
-https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65391
-```
+源码和手稿通过 Git 提交并推送。研究数据与大型计算对象保存在本地，源码中的结果生成程序负责构建表格和图。运行与保存说明见 [LOCAL_EXECUTION_20261028.md](docs/LOCAL_EXECUTION_20261028.md)。
 
-Processed Series Matrix data and optional raw/non-normalized files can be downloaded by:
+## 手稿与数据
 
-```bash
-Rscript scripts/application/00_download_GSE65391.R --processed=true --raw=false
-Rscript scripts/application/01_build_GSE65391.R
-Rscript scripts/application/02_audit_GSE65391.R
-Rscript scripts/application/03_fit_GSE65391.R --mode=smoke --fold=1 --repetition=1
-Rscript scripts/application/04_summarise_GSE65391.R
-```
+手稿入口为 `manuscript/sjs_profile_quantile_main.tex`，Supporting Information 入口为 `manuscript/sjs_profile_quantile_supplement.tex`。图表生成程序读取已经保存的计算结果。
 
-The primary outcome is provisionally `log(C3)` at the same visit. It is used only if the preregistered missingness, sample-size and variation gates pass. The script must stop rather than silently substitute another outcome.
+GSE65391 的数据准备和受试者划分见 [数据说明](data/README.md)及 [研究方案](docs/EMPIRICAL_PROTOCOL_GSE65391.md)。比较方法的原始参考程序保存在 `data/raw/public_methods`，其来源说明位于 `docs/benchmark_notes`。
 
-## Manuscript
-
-The SJS manuscript source and Supporting Information are under `manuscript/`. The source follows the Wiley NJDv5 layout. Font files are intentionally not stored in this repository. Retrieve the non-font support files with `manuscript/fetch_wiley_template_files.sh`, obtain the current `Fonts/` directory from Wiley locally, and then run `manuscript/compile.sh`.
-
-## Reproducibility principles
-
-- Independent sampling unit: subject/cluster, not observation.
-- Primary asymptotic scale: number of independent clusters `n`.
-- Primary target: the unsmoothed regularised profile parameter `beta_star`.
-- The profile score uses the original fixed-effect design `X`, not the residualised design.
-- The effective Hessian includes the ridge-curvature term.
-- All cross-validation and sample splitting are performed at the subject level.
-- No empirical coverage tuning, post hoc standard-error inflation, or truth-dependent method selection.
-- Every failure is retained and classified; no failed replication is silently dropped.
-- Raw GEO data and large derived matrices are not committed.
-
-## Historical code
-
-The original package functions (`JP_DME_QR`, `Debias_Inference`, `CA_IQR_SIS`) remain in the repository so earlier work can be reproduced. They are **legacy interfaces** until they are reconciled with `R/profile_v2.R` and the new test suite. New experiments must call the `*_v2` functions or source the v2 files explicitly.
+软件许可为 GPL version 3 或更高版本，引用信息见 `inst/CITATION`。

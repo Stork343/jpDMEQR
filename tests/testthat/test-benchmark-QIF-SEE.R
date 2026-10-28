@@ -22,9 +22,9 @@ testthat::test_that("QIF-SEE source domain failure is deterministic and schema c
 
 testthat::test_that("QIF-SEE modified extended score matches Eq3 Eq5 and frozen delta derivatives", {
   dat <- generate_profile_qr_data_v2(n_clusters = 40L, p = 3L, s = 2L, q = 1L,
-                                      tau = .35, sigma_b0 = 0, seed = 700771L)
+                                      tau = .35, sigma_b0 = 1, seed = 700771L)
   beta <- as.numeric(quantreg::rq.fit(dat$X, dat$y, tau = .35)$coefficients)
-  weights <- rep(stats::dnorm(stats::qnorm(.35)), length(dat$y))
+  weights <- rep(stats::dnorm(stats::qnorm(.35) / sqrt(2)) / sqrt(2), length(dat$y))
   delta <- c(.1, .2, .3)
   h <- 40^(-1 / 2)
   component <- qif_see_extended_source_v2(dat$y, dat$X, dat$cluster_id, beta, .35,
@@ -51,9 +51,9 @@ testthat::test_that("QIF-SEE modified extended score matches Eq3 Eq5 and frozen 
 
 testthat::test_that("QIF-SEE source limiting case reproduces independent smoothed quantile equations", {
   dat <- generate_profile_qr_data_v2(n_clusters = 120L, p = 2L, s = 2L, q = 1L,
-                                      tau = .5, sigma_b0 = 0, seed = 700772L)
+                                      tau = .5, sigma_b0 = 1, seed = 700772L)
   beta <- as.numeric(quantreg::rq.fit(dat$X, dat$y, tau = .5)$coefficients)
-  density <- rep(stats::dnorm(0), length(dat$y))
+  density <- rep(stats::dnorm(0) / sqrt(2), length(dat$y))
   a <- fit_qif_see_source_v2(dat$y, dat$X, dat$cluster_id, .5, beta, density,
                               lambda = 1e-10, gamma = 1, corstr = "independence", max_iter = 100L)
   b <- fit_qif_see_source_v2(dat$y, dat$X, dat$cluster_id, .5, beta, density,
@@ -70,4 +70,16 @@ testthat::test_that("QIF-SEE source limiting case reproduces independent smoothe
   testthat::expect_error(fit_benchmark_qif_see_v2(dat, .5, colnames(dat$X), list(), 1L,
                                                  control = list(corstr = "independence")),
                          class = "qif_see_source_error")
+  adapter <- fit_benchmark_qif_see_v2(dat, .5, colnames(dat$X), list(), 700772L,
+                                      control = list(corstr = "independence", density_weights = density,
+                                                     lambda_grid = 1e-10, gamma_grid = 1,
+                                                     max_iter = 100L))
+  testthat::expect_identical(adapter$status, "ok")
+  testthat::expect_identical(names(adapter$beta_hat), colnames(dat$X))
+  testthat::expect_equal(as.numeric(adapter$beta_hat), as.numeric(reference$beta), tolerance = 1e-5)
+  testthat::expect_true(all(is.finite(adapter$prediction_function(dat$X))))
+  testthat::expect_null(adapter$beta_tilde)
+  testthat::expect_setequal(adapter$fit_object$initial_subject_folds$cluster_id, unique(dat$cluster_id))
+  testthat::expect_equal(nrow(adapter$fit_object$initial_subject_folds), 120L)
+  testthat::expect_setequal(adapter$fit_object$initial_subject_folds$fold, 1:10)
 })

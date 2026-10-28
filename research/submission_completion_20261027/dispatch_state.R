@@ -30,6 +30,41 @@ submission_worker_alive <- function(worker) {
     isTRUE(ps::ps_is_running(worker$handle))
 }
 
+submission_launchers_alive <- function(root) {
+  listing <- ps::ps()
+  listing <- listing[listing$name == "R" & listing$pid != Sys.getpid(), ]
+  found <- integer()
+  for (i in seq_len(nrow(listing))) {
+    handle <- listing$ps_handle[[i]]
+    if (is.null(handle) || !ps::ps_is_running(handle)) next
+    arguments <- ps::ps_cmdline(handle)
+    simulation <- "--file=research/submission_completion_20261027/launch_simulation.R" %in% arguments
+    comparator <- "--file=research/submission_completion_20261027/launch_comparators.R" %in% arguments
+    if (!simulation && !comparator) next
+    if (!identical(ps::ps_cwd(handle), normalizePath("."))) next
+    marker <- match("--args", arguments)
+    if (is.na(marker) || length(arguments) < marker + 2L) next
+    destination <- if (simulation) file.path("results/raw/simulation",
+      paste("submission_20261027", arguments[marker + 1L], arguments[marker + 2L], sep = "_")) else
+      file.path("results/raw/simulation", paste0("submission_20261028_main_", arguments[marker + 1L]))
+    if (identical(normalizePath(destination, mustWork = FALSE), normalizePath(root, mustWork = FALSE)))
+      found <- c(found, listing$pid[i])
+  }
+  found
+}
+
+submission_comparator_capacity <- function(family, workers) {
+  families <- c("mixed", "pooled", "sqr", "qgee", "bias_adjusted")
+  if (!family %in% families || !workers %in% 1:8) stop("Invalid comparator capacity request.")
+  if (!file.exists("results/raw/simulation/submission_20261027_main_joint/completed.rds"))
+    return(min(workers, 1L))
+  if (family != "sqr") return(min(workers, 2L))
+  other <- setdiff(families, "sqr")
+  remaining <- sum(!file.exists(file.path("results/raw/simulation",
+    paste0("submission_20261028_main_", other), "completed.rds")))
+  min(workers, 12L - 2L * remaining)
+}
+
 submission_atomic_rds <- function(value, path, compress = "xz") {
   if (file.exists(path)) stop("The completed output already exists: ", path)
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)

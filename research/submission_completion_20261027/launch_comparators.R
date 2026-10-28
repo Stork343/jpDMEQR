@@ -1,4 +1,5 @@
 source("research/submission_completion_20261027/load_comparators.R")
+source("research/submission_completion_20261027/dispatch_state.R")
 library(processx)
 args <- commandArgs(trailingOnly = TRUE)
 family <- args[1L]
@@ -32,7 +33,9 @@ jobs$batch <- (seq_len(nrow(jobs)) - 1L) %% (workers * 4L) + 1L
 destination <- file.path("results/raw/simulation", paste0("submission_20261028_main_", family))
 if (dir.exists(destination)) stop("The comparator queue already exists.")
 dir.create(destination, recursive = TRUE)
-saveRDS(list(registry = registry, jobs = jobs, methods = methods, workers = workers, base_seed = 20261027L,
+dispatch_lock <- filelock::lock(file.path(destination, "continuation.lock"), timeout = 0)
+if (is.null(dispatch_lock)) stop("This comparator queue already has a dispatcher.")
+saveRDS(list(registry = registry, jobs = jobs, family = family, methods = methods, workers = workers, base_seed = 20261027L,
   implementation_commit = current_commit_v2(), session = sessionInfo(), system = Sys.info(),
   numerical_specification = yaml::read_yaml("config/submission_comparator_numerics_20261028.yml"),
   reference_fidelity = reference, numerical_checks = checks, started = Sys.time()), file.path(destination, "request.rds"))
@@ -51,7 +54,8 @@ repeat {
     write.csv(batches, file.path(destination, "batch_status.csv"), row.names = FALSE)
   }
   if (all(batches$state == "completed")) break
-  for (index in head(which(batches$state == "pending"), max(0L, workers - length(active)))) {
+  capacity <- submission_comparator_capacity(family, workers)
+  for (index in head(which(batches$state == "pending"), max(0L, capacity - length(active)))) {
     active[[as.character(index)]] <- processx::process$new(file.path(R.home("bin"), "Rscript"),
       c("research/submission_completion_20261027/run_comparator_batch.R", destination, as.character(batches$batch[index])),
       cleanup = FALSE,

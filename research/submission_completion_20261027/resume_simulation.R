@@ -7,6 +7,7 @@ root <- args[1L]
 workers <- as.integer(args[2L])
 if (!workers %in% 1:8 || !file.exists(file.path(root, "request.rds"))) stop("Invalid simulation continuation.")
 run <- function() {
+  if (length(submission_launchers_alive(root))) stop("A live dispatcher already owns this simulation queue.")
   lock <- filelock::lock(file.path(root, "continuation.lock"), timeout = 0)
   if (is.null(lock)) stop("This simulation continuation is already running.")
   on.exit(filelock::unlock(lock), add = TRUE)
@@ -44,8 +45,7 @@ run <- function() {
       written_status <- batches
     }
     if (all(batches$state == "completed")) break
-    joint_complete <- file.exists("results/raw/simulation/submission_20261027_main_joint/completed.rds")
-    capacity <- if (!identical(request$family, "joint") && !joint_complete) min(workers, 2L) else workers
+    capacity <- if (identical(request$family, "joint")) workers else submission_comparator_capacity(request$family, workers)
     for (i in head(which(batches$state == "pending"), max(0L, capacity - length(active)))) {
       key <- as.character(batches$batch[i])
       process <- processx::process$new(file.path(R.home("bin"), "Rscript"),

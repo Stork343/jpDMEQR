@@ -19,6 +19,8 @@ jobs$batch <- (seq_len(nrow(jobs)) - 1L) %% (workers * 4L) + 1L
 destination <- file.path("results/raw/simulation", paste("submission_20261027", phase, family, sep = "_"))
 if (dir.exists(destination)) stop("The simulation dispatch already exists.")
 dir.create(destination, recursive = TRUE)
+dispatch_lock <- filelock::lock(file.path(destination, "continuation.lock"), timeout = 0)
+if (is.null(dispatch_lock)) stop("This simulation queue already has a dispatcher.")
 saveRDS(list(registry = registry, jobs = jobs, phase = phase, family = family, workers = workers,
   base_seed = if (phase == "pilot") 202610271L else if (phase == "preflight") 202610272L else 20261027L,
   implementation_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE),
