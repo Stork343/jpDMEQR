@@ -77,7 +77,7 @@ testthat::test_that("BIAS-ADJ-LQMM two-step estimate matches manual pipeline", {
   u_est <- u_est_cluster[match(df$cluster, levels_c)]
   df2 <- df
   df2$y <- train$y - as.numeric(train$Z[, 1] * u_est)
-  step2 <- quantreg::rq(y ~ 0 + ., data = df2, tau = 0.5)
+  step2 <- quantreg::rq(ff, data = df2, tau = 0.5)
   manual <- stats::coef(step2)[colnames(train$X)]
   testthat::expect_equal(as.numeric(ans$beta_hat),
                          as.numeric(manual), tolerance = 1e-6)

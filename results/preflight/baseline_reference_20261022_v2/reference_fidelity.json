@@ -1,0 +1,79 @@
+{
+  "commit_sha": "5c47a620f376198bfe564a3737cd77655aa04613",
+  "created_utc": "2026-10-22 12:14:21 UTC",
+  "checks": [
+    {
+      "method_id": "POOLED-QR-LASSO",
+      "calculation": "independent_LP_coefficients",
+      "discrepancy": 1.6653e-09,
+      "tolerance": 1e-05,
+      "passed": true,
+      "source": "CVXR quantile LP"
+    },
+    {
+      "method_id": "LQMM",
+      "calculation": "maintained_package_coefficients",
+      "discrepancy": 0,
+      "tolerance": 1e-10,
+      "passed": true,
+      "source": "lqmm 1.5.8 direct call"
+    },
+    {
+      "method_id": "BIAS-ADJ-LQMM",
+      "calculation": "official_two_step_coefficients",
+      "discrepancy": 0,
+      "tolerance": 1e-08,
+      "passed": true,
+      "source": "official ran_int_bias_adj.R"
+    },
+    {
+      "method_id": "BIAS-ADJ-LQMM",
+      "calculation": "official_adjusted_coefficients",
+      "discrepancy": 0,
+      "tolerance": 1e-08,
+      "passed": true,
+      "source": "official ran_int_bias_adj.R B100"
+    },
+    {
+      "method_id": "BIAS-ADJ-LQMM",
+      "calculation": "official_interval",
+      "discrepancy": 0,
+      "tolerance": 1e-08,
+      "passed": true,
+      "source": "official ran_int_bias_adj.R B100"
+    },
+    {
+      "method_id": "DOUBLE-PEN-QLMM",
+      "calculation": "independent_block_algorithm",
+      "discrepancy": 2.0404e-07,
+      "tolerance": 0.0001,
+      "passed": true,
+      "source": "Li Liu Luo Section 3.1 with independent CVXR block LPs"
+    },
+    {
+      "method_id": "QGEE-SCAD",
+      "calculation": "maintained_package_complete_HBIC_grid",
+      "discrepancy": 0,
+      "tolerance": 1e-10,
+      "passed": true,
+      "source": "geeVerse 0.3.1 qpgee"
+    },
+    {
+      "method_id": "SQR-DEBIASED-IID",
+      "calculation": "independent_convolution_L1_optimizer",
+      "discrepancy": 9.6986e-11,
+      "tolerance": 1e-05,
+      "passed": true,
+      "source": "conquer 1.3.3 Gaussian lasso"
+    },
+    {
+      "method_id": "SQR-DEBIASED-IID",
+      "calculation": "independent_complete_one_step_and_variance",
+      "discrepancy": 2.2324e-11,
+      "tolerance": 1e-05,
+      "passed": true,
+      "source": "conquer optimizer plus separate native CLARABEL LP and printed iid variance"
+    }
+  ],
+  "QIF_SEE_source_fidelity": "complete_source_specification_required"
+}

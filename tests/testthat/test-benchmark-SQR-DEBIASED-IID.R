@@ -138,3 +138,43 @@ testthat::test_that("SQR-DEBIASED-IID ignores clustering and is labelled naive_i
   testthat::expect_equal(ans$variance_scope, "naive_iid")
   testthat::expect_equal(ans$target_scope, "iid_smoothed_quantile")
 })
+
+testthat::test_that("SQR-DEBIASED-IID complete CLIME matrix and symmetrisation match independent solvers", {
+  train <- make_iid_train(n = 80L, p = 6L, s = 2L, seed = 722L)
+  beta <- fit_sqr_iid_lasso_v2(train$y, train$X, .35, .45, .05)
+  grid <- c(.05, .15, .4, 1.1)
+  dual <- solve_clime_matrix_iid_v2(beta$hessian, grid, solver_opts = list(backend = "dual_warm"))
+  reference <- solve_clime_matrix_iid_v2(beta$hessian, grid, solver_opts = list(backend = "cvxr"))
+  testthat::expect_true(dual$feasible && reference$feasible)
+  testthat::expect_equal(dual$gamma, reference$gamma, tolerance = 1e-12)
+  testthat::expect_equal(dual$omega_raw, reference$omega_raw, tolerance = 1e-5)
+  testthat::expect_equal(dual$omega_symmetric, reference$omega_symmetric, tolerance = 1e-5)
+  testthat::expect_equal(dual$omega_symmetric, t(dual$omega_symmetric), tolerance = 0)
+  testthat::expect_true(all(abs(dual$omega_symmetric) <= abs(dual$omega_raw) + 1e-14))
+  testthat::expect_lte(max(abs(beta$hessian %*% t(dual$omega_raw) - diag(6L))), dual$gamma + 1e-6)
+  testthat::expect_identical(dual$excluded_zero_direction$status, "excluded_zero_direction")
+  testthat::expect_length(dual$raw_grid_records, 6L)
+  testthat::expect_true(any(dual$omega_raw == 0))
+  testthat::expect_equal(dual$matrix_grid_record$model_constructions, 1L)
+  certificate <- dual$matrix_grid_record$feasibility_certificate
+  testthat::expect_true(certificate$verified)
+  testthat::expect_lte(max(abs(beta$hessian %*% certificate$direction_matrix - diag(6L))), min(grid))
+  testthat::expect_equal(nrow(dual$matrix_grid_record$attempts), 6L)
+  testthat::expect_true(all(dual$raw_grid_records[[1L]]$status[-1L] ==
+                            "feasible_by_same_full_matrix_certificate"))
+})
+
+testthat::test_that("SQR-DEBIASED-IID common grid preserves genuine rank deficient matrix failures", {
+  train <- make_iid_train(n = 8L, p = 18L, s = 2L, seed = 723L)
+  H <- sqr_iid_hessian_fn_v2(train$y, train$X, rep(0, 18L), .5, .4)
+  grid <- c(.05, .2, .6, .9)
+  dual <- solve_clime_matrix_iid_v2(H, grid, solver_opts = list(backend = "dual_warm"))
+  reference <- solve_clime_matrix_iid_v2(H, grid, solver_opts = list(backend = "cvxr"))
+  testthat::expect_identical(dual$feasible, reference$feasible)
+  if (dual$feasible) testthat::expect_equal(dual$gamma, reference$gamma, tolerance = 1e-12)
+  testthat::expect_equal(dual$matrix_grid_record$model_constructions, 1L)
+  testthat::expect_true(any(!dual$matrix_grid_record$attempts$feasible))
+  cutoff <- dual$matrix_grid_record$global_infeasible_at
+  testthat::expect_true(is.finite(cutoff))
+  testthat::expect_true(all(dual$matrix_grid_record$attempts$gamma >= cutoff))
+})

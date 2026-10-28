@@ -54,20 +54,35 @@ testthat::test_that("DOUBLE-PEN-QLMM objective matches paper equation (12)", {
   testthat::expect_equal(fit$objective, expected, tolerance = 1e-8)
 })
 
-testthat::test_that("DOUBLE-PEN-QLMM zero-penalty limit matches unpenalised blocks", {
+testthat::test_that("DOUBLE-PEN-QLMM tiny penalties preserve the numerical iteration limit", {
   train <- make_train(seed = 404)
   y <- train$y; X <- train$X; Z <- train$Z; cl <- train$cluster_id
-  # Tiny penalties: the objective is close to the unpenalised check loss
-  # minimisation, and the fitted beta should be finite and close to the
-  # pooled QR solution in a low-dimensional setting.
   fit <- fit_double_pen_qlmm_v2(
     y, X, Z, cl, 0.5,
     lambda_beta = 1e-6, lambda_alpha = 1e-6,
     control = list(max_iter = 30L)
   )
-  testthat::expect_true(fit$converged)
+  testthat::expect_false(fit$converged)
+  testthat::expect_identical(fit$failure_stage, "iteration_limit")
+  testthat::expect_equal(fit$iterations, 30L)
+  testthat::expect_gt(tail(fit$beta_change_history, 1L), 1e-6)
   testthat::expect_true(all(is.finite(fit$beta)))
   testthat::expect_equal(sum(abs(fit$beta)) > 0, TRUE)
+})
+
+testthat::test_that("DOUBLE-PEN-QLMM zero fixed penalty and suppressed nuisance match pooled QR", {
+  train <- make_train(seed = 406)
+  penalty <- max(table(train$cluster_id)) + 1
+  fit <- fit_double_pen_qlmm_v2(
+    train$y, train$X, train$Z, train$cluster_id, 0.5,
+    lambda_beta = 0, lambda_alpha = penalty,
+    control = list(max_iter = 30L)
+  )
+  reference <- quantreg::rq.fit.fnb(train$X, train$y, tau = 0.5, eps = 1e-9)
+  testthat::expect_true(fit$converged)
+  testthat::expect_lt(max(abs(fit$alpha)), 1e-6)
+  testthat::expect_equal(as.numeric(fit$beta),
+                         as.numeric(reference$coefficients), tolerance = 1e-6)
 })
 
 testthat::test_that("DOUBLE-PEN-QLMM recovers active signs on deterministic data", {

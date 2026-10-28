@@ -12,13 +12,16 @@ install_bioc <- as_bool(get_arg("bioc", "true"))
 install_optional <- as_bool(get_arg("optional", "true"))
 
 cran_required <- c(
-  "quantreg", "CVXR", "clarabel", "testthat", "data.table", "yaml",
+  "quantreg", "CVXR", "clarabel", "testthat", "pkgload", "withr",
+  "data.table", "yaml", "ps",
   "jsonlite", "ggplot2", "dplyr", "tidyr", "readr", "purrr",
-  "matrixStats", "digest", "lqmm", "Matrix", "quadprog", "nloptr"
+  "matrixStats", "digest", "lqmm", "Matrix", "quadprog", "nloptr",
+  "Rcpp", "RcppArmadillo", "RcppEigen", "glmnet", "filelock", "processx", "rcmdcheck", "statmod", "geeVerse",
+  "highs", "osqp", "igraph"
 )
 cran_optional <- c(
   "pbapply", "future.apply", "qs", "arrow", "peakRAM", "foreach",
-  "doParallel", "ECOSolveR", "ncvreg"
+  "doParallel", "ECOSolveR", "ncvreg", "osqp", "highs"
 )
 
 repos <- getOption("repos")
@@ -38,6 +41,25 @@ install_missing_cran <- function(pkgs) {
 }
 
 install_missing_cran(cran_required)
+install_parametric_clime <- function() {
+  if (requireNamespace("fastclime", quietly = TRUE)) {
+    if (packageVersion("fastclime") != "1.4.1.1") stop("The parametric CLIME interface requires fastclime 1.4.1.1.")
+    return(invisible(NULL))
+  }
+  scratch <- file.path("results", "scratch", "dependencies")
+  dir.create(scratch, recursive = TRUE, showWarnings = FALSE)
+  scratch <- normalizePath(scratch, mustWork = TRUE)
+  archive <- file.path(scratch, "fastclime_1.4.1.1.tar.gz")
+  old_timeout <- getOption("timeout")
+  options(timeout = max(600, old_timeout))
+  on.exit(options(timeout = old_timeout), add = TRUE)
+  download.file("https://cran.r-project.org/src/contrib/Archive/fastclime/fastclime_1.4.1.1.tar.gz",
+    archive, mode = "wb")
+  install.packages(archive, repos = NULL, type = "source")
+  if (!requireNamespace("fastclime", quietly = TRUE) || packageVersion("fastclime") != "1.4.1.1")
+    stop("The required archived CLIME dependency was not installed.")
+}
+install_parametric_clime()
 if (install_optional) {
   optional_missing <- cran_optional[!vapply(cran_optional, requireNamespace, logical(1), quietly = TRUE)]
   if (length(optional_missing)) {

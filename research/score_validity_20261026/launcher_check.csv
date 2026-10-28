@@ -1,0 +1,3 @@
+case_id,n_clusters,p,s,tau,q,error_dist,replications,signal,rho_x
+CHECK_Q1,100,100,5,0.25,1,gaussian,4,0.75,0.5
+CHECK_Q2,100,100,5,0.75,2,t3,4,0.75,0.5

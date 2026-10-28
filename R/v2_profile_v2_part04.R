@@ -73,21 +73,31 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
   results <- if (identical(mode, "osqp")) {
     # Lever 1: one OSQP model per fold, warm-start chained across the mu grid
     # (the constraint matrix is mu-invariant; each subsequent solve is O((n+m)^2)).
-    chain_output <- vector("list", length(mu_grid))
+    chain_output <- lapply(seq_along(mu_grid), function(ii) {
+      list(mu = mu_grid[ii], defects = rep(NA_real_, n_folds),
+           quads = rep(NA_real_, n_folds), infeasible_folds = 0L,
+           skipped_folds = 0L)
+    })
     for (f in seq_len(n_folds)) {
       n_f <- fold_n[f]
-      if (n_f <= 0L || n_f >= n) next
+      if (n_f <= 0L || n_f >= n) {
+        for (ii in seq_along(mu_grid)) {
+          chain_output[[ii]]$skipped_folds <- chain_output[[ii]]$skipped_folds + 1L
+        }
+        next
+      }
       H_val_f <- H_folds[[f]]
-      if (is.null(H_val_f)) next
+      if (is.null(H_val_f)) {
+        for (ii in seq_along(mu_grid)) {
+          chain_output[[ii]]$skipped_folds <- chain_output[[ii]]$skipped_folds + 1L
+        }
+        next
+      }
       H_train_f <- (n * H - n_f * H_val_f) / (n - n_f)
       H_train_f <- (H_train_f + t(H_train_f)) / 2
       parts <- dantzig_build_osqp_model_v2(H_train_f, p)
       sols <- dantzig_osqp_solve_chain_v2(parts, e, mu_grid)
       for (ii in seq_along(sols)) {
-        if (is.null(chain_output[[ii]])) {
-          chain_output[[ii]] <- list(mu = mu_grid[ii], defects = numeric(n_folds),
-                                     quads = numeric(n_folds), infeasible_folds = 0L)
-        }
         s <- sols[[ii]]
         if (isTRUE(s$feasible) && !is.null(s$omega)) {
           omega <- s$omega
@@ -101,15 +111,70 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
       }
     }
     lapply(chain_output, function(co) {
-      nf <- n_folds
-      if (co$infeasible_folds > 0L && nf - co$infeasible_folds < ceiling(nf / 2)) return(NULL)
+      # Same rule as the CLARABEL reference path: only folds that returned a
+      # held-out defect enter the mean and the fold count.
+      folds_used <- sum(is.finite(co$defects))
+      if (folds_used < ceiling(n_folds / 2)) return(NULL)
       list(
         mu = co$mu,
-        defect_mean = mean(co$defects[is.finite(co$defects)]),
-        defect_se = stats::sd(co$defects[is.finite(co$defects)]) /
-          sqrt(sum(is.finite(co$defects))),
-        quad_mean = mean(co$quads[is.finite(co$quads)]),
-        infeasible_folds = co$infeasible_folds
+        defect_mean = mean(co$defects, na.rm = TRUE),
+        defect_se = if (folds_used > 1L) {
+          stats::sd(co$defects, na.rm = TRUE) / sqrt(folds_used)
+        } else {
+          NA_real_
+        },
+        quad_mean = mean(co$quads, na.rm = TRUE),
+        infeasible_folds = co$infeasible_folds,
+        skipped_folds = co$skipped_folds,
+        folds_used = as.integer(folds_used)
+      )
+    })
+  } else if (identical(mode, "dual_warm")) {
+    # 对偶形式：每个折只建一个持久模型，整条 mu 网格在一次调用里降序走完，
+    # 候选之间共用基；某个候选报无界时，比它小的候选由单调性直接判定。
+    # 折与折相互独立，因此按折分给多个进程；折与候选的记账规则与参考路径
+    # 相同：只有返回了留出缺陷的折进入均值。
+    train_folds <- lapply(seq_len(n_folds), function(f) {
+      n_f <- fold_n[f]
+      if (n_f <= 0L || n_f >= n) return(NULL)
+      H_val_f <- H_folds[[f]]
+      if (is.null(H_val_f)) return(NULL)
+      H_train_f <- (n * H - n_f * H_val_f) / (n - n_f)
+      (H_train_f + t(H_train_f)) / 2
+    })
+    grids <- dantzig_dual_solve_grids_v2(
+      train_folds, coordinate, mu_grid, solver_opts,
+      cv_cores = getOption("jpDMEQR.cv_cores", 1L)
+    )
+    results <- lapply(seq_along(mu_grid), function(ii) {
+      defects <- rep(NA_real_, n_folds)
+      quads <- rep(NA_real_, n_folds)
+      skipped_folds <- 0L
+      infeasible_folds <- 0L
+      for (f in seq_len(n_folds)) {
+        g <- grids[[f]]
+        if (is.null(g)) { skipped_folds <- skipped_folds + 1L; next }
+        if (!isTRUE(g$feasible[ii])) { infeasible_folds <- infeasible_folds + 1L; next }
+        omega <- g$omega[[ii]]
+        H_val_f <- H_folds[[f]]
+        r <- as.numeric(H_val_f %*% omega) - e
+        defects[f] <- max(abs(r))
+        quads[f] <- 0.5 * drop(crossprod(omega, H_val_f %*% omega)) - drop(crossprod(e, omega))
+      }
+      folds_used <- sum(is.finite(defects))
+      if (folds_used < ceiling(n_folds / 2)) return(NULL)
+      list(
+        mu = mu_grid[ii],
+        defect_mean = mean(defects, na.rm = TRUE),
+        defect_se = if (folds_used > 1L) {
+          stats::sd(defects, na.rm = TRUE) / sqrt(folds_used)
+        } else {
+          NA_real_
+        },
+        quad_mean = mean(quads, na.rm = TRUE),
+        infeasible_folds = infeasible_folds,
+        skipped_folds = skipped_folds,
+        folds_used = as.integer(folds_used)
       )
     })
   } else {
@@ -126,14 +191,20 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
     cv_cores <- max(1L, as.integer(getOption("jpDMEQR.cv_cores", 1L)))
     if (cv_cores <= 1L || n_folds * length(mu_grid) <= 1L) {
       results <- lapply(mu_grid, function(mu) {
-        defects <- numeric(n_folds)
-        quads <- numeric(n_folds)
+        # A fold that produced no held-out defect (no held-out clusters, or a
+        # failed row solve) must not enter the mean as a zero. Zero is finite and
+        # would count as a perfect held-out defect, which biases the candidate
+        # downward and can change the argmin. Only folds that returned a defect
+        # participate in the mean and in the fold count.
+        defects <- rep(NA_real_, n_folds)
+        quads <- rep(NA_real_, n_folds)
+        skipped_folds <- 0L
         infeasible_folds <- 0L
         for (f in seq_len(n_folds)) {
           n_f <- fold_n[f]
-          if (n_f <= 0L || n_f >= n) next
+          if (n_f <= 0L || n_f >= n) { skipped_folds <- skipped_folds + 1L; next }
           H_val_f <- H_folds[[f]]
-          if (is.null(H_val_f)) next
+          if (is.null(H_val_f)) { skipped_folds <- skipped_folds + 1L; next }
           # H_train = (n H - n_f H_val)/(n - n_f)
           H_train_f <- (n * H - n_f * H_val_f) / (n - n_f)
           H_train_f <- (H_train_f + t(H_train_f)) / 2
@@ -150,15 +221,23 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
           defects[f] <- max(abs(r))
           quads[f] <- 0.5 * drop(crossprod(omega, H_val_f %*% omega)) - drop(crossprod(e, omega))
         }
-        if (infeasible_folds > 0L && n_folds - infeasible_folds < ceiling(n_folds / 2)) {
-          return(NULL)
-        }
+        folds_used <- sum(is.finite(defects))
+        # Candidate eligibility: at least half of the folds must have returned a
+        # held-out defect. This is the round-2 cross-validation definition
+        # (minimise the mean held-out defect, no one-standard-error enlargement).
+        if (folds_used < ceiling(n_folds / 2)) return(NULL)
         list(
           mu = mu,
-          defect_mean = mean(defects[is.finite(defects)]),
-          defect_se = stats::sd(defects[is.finite(defects)]) / sqrt(sum(is.finite(defects))),
-          quad_mean = mean(quads[is.finite(quads)]),
-          infeasible_folds = infeasible_folds
+          defect_mean = mean(defects, na.rm = TRUE),
+          defect_se = if (folds_used > 1L) {
+            stats::sd(defects, na.rm = TRUE) / sqrt(folds_used)
+          } else {
+            NA_real_
+          },
+          quad_mean = mean(quads, na.rm = TRUE),
+          infeasible_folds = infeasible_folds,
+          skipped_folds = skipped_folds,
+          folds_used = as.integer(folds_used)
         )
       })
     } else {
@@ -173,11 +252,16 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
   ok <- results[!vapply(results, is.null, logical(1))]
   if (!length(ok)) {
     return(list(mu = NA_real_, defect_mean = NA_real_, defect_se = NA_real_,
-                quad_mean = NA_real_, selected = FALSE, candidates = data.frame()))
+                quad_mean = NA_real_, folds_used = NA_integer_, selected = FALSE,
+                candidates = data.frame()))
   }
   defect_means <- vapply(ok, `[[`, numeric(1), "defect_mean")
+  defect_ses <- vapply(ok, `[[`, numeric(1), "defect_se")
   quad_means <- vapply(ok, `[[`, numeric(1), "quad_mean")
   mus <- vapply(ok, `[[`, numeric(1), "mu")
+  folds_used <- vapply(ok, `[[`, integer(1), "folds_used")
+  infeasible_folds <- vapply(ok, `[[`, integer(1), "infeasible_folds")
+  skipped_folds <- vapply(ok, `[[`, integer(1), "skipped_folds")
   # argmin of the held-out defect; ties choose the SMALLER mu (round-2).
   loss_min <- min(defect_means, na.rm = TRUE)
   cand <- which(abs(defect_means - loss_min) <= 1e-12 * pmax(1, abs(loss_min)))
@@ -185,11 +269,15 @@ select_mu_inverse_hessian_cv_v2 <- function(H,
   list(
     mu = mus[selected_idx],
     defect_mean = defect_means[selected_idx],
+    defect_se = defect_ses[selected_idx],
     quad_mean = quad_means[selected_idx],
     min_defect = loss_min,
     selected = TRUE,
+    folds_used = folds_used[selected_idx],
     candidates = data.frame(
-      mu = mus, defect_mean = defect_means, quad_mean = quad_means,
+      mu = mus, defect_mean = defect_means, defect_se = defect_ses,
+      quad_mean = quad_means, folds_used = folds_used,
+      infeasible_folds = infeasible_folds, skipped_folds = skipped_folds,
       stringsAsFactors = FALSE
     )
   )
@@ -282,7 +370,17 @@ dantzig_cv_clarabel_parallel_v2 <- function(H, n, n_folds, fold_n, H_folds,
     # serialisation per worker, not per task.
     fn_env <- new.env(parent = .GlobalEnv)
     for (nm in c("dantzig_cv_solve_task_v2", "solve_dantzig_row_v2",
-                 "assert_numeric_matrix_v2", "%||%")) {
+                 "assert_numeric_matrix_v2", "%||%",
+                 # Layer-1 native CLARABEL path: the worker calls
+                 # solve_dantzig_row_v2, which dispatches on
+                 # JPDMEQR_DANTZIG_SOLVER=clarabel_native, so the whole native
+                 # chain must be exported too. Both helpers use explicit
+                 # namespacing (Matrix::, clarabel::), so no package attach is
+                 # needed on the worker.
+                 "solve_dantzig_row_native_v2", "dantzig_lp_compact_build_v2",
+                 "dantzig_lp_compact_rhs_v2", "clarabel_status_label_v2",
+                 # HiGHS path: same exported chain, namespaced (highs::).
+                 "solve_dantzig_row_highs_v2", "highs_model_status_label_v2")) {
       if (exists(nm, envir = environment(), inherits = TRUE)) {
         assign(nm, get(nm, envir = environment(), inherits = TRUE), envir = fn_env)
       } else if (exists(nm, envir = .GlobalEnv, inherits = TRUE)) {
@@ -308,27 +406,36 @@ dantzig_cv_clarabel_parallel_v2 <- function(H, n, n_folds, fold_n, H_folds,
     parallel::parLapplyLB(cl, seq_len(n_tasks), dantzig_cv_worker_v2)
   }
   # Aggregate in the original (mu outer, fold inner) order - bit-identical to
-  # the serial reference path.
+  # the serial reference path, including the rule that a fold which returned no
+  # held-out defect contributes neither a zero nor a fold count.
   lapply(seq_along(mu_grid), function(mi) {
-    defects <- numeric(n_folds)
-    quads <- numeric(n_folds)
+    defects <- rep(NA_real_, n_folds)
+    quads <- rep(NA_real_, n_folds)
+    skipped_folds <- 0L
     infeasible_folds <- 0L
     for (f in seq_len(n_folds)) {
       r <- out[[(mi - 1L) * n_folds + f]]
-      if (is.null(r) || isTRUE(r$skipped)) next
+      if (is.null(r) || isTRUE(r$skipped)) { skipped_folds <- skipped_folds + 1L; next }
       if (isTRUE(r$infeasible)) { infeasible_folds <- infeasible_folds + 1L; next }
       defects[f] <- r$defect
       quads[f] <- r$quad
     }
-    if (infeasible_folds > 0L && n_folds - infeasible_folds < ceiling(n_folds / 2)) {
+    folds_used <- sum(is.finite(defects))
+    if (folds_used < ceiling(n_folds / 2)) {
       return(NULL)
     }
     list(
       mu = mu_grid[mi],
-      defect_mean = mean(defects[is.finite(defects)]),
-      defect_se = stats::sd(defects[is.finite(defects)]) / sqrt(sum(is.finite(defects))),
-      quad_mean = mean(quads[is.finite(quads)]),
-      infeasible_folds = infeasible_folds
+      defect_mean = mean(defects, na.rm = TRUE),
+      defect_se = if (folds_used > 1L) {
+        stats::sd(defects, na.rm = TRUE) / sqrt(folds_used)
+      } else {
+        NA_real_
+      },
+      quad_mean = mean(quads, na.rm = TRUE),
+      infeasible_folds = infeasible_folds,
+      skipped_folds = skipped_folds,
+      folds_used = as.integer(folds_used)
     )
   })
 }
@@ -372,19 +479,37 @@ debias_profile_coordinates_v2 <- function(fit,
         solver_preference = solver_preference, solver_opts = solver_opts
       )
     } else {
-      list(mu = NA_real_, selected = FALSE,
-           candidates = data.frame(mu = NA_real_, loss_mean = NA_real_,
-                                   loss_se = NA_real_, in_one_se = NA,
+      # No held-out fold information is available for this fit. The row then
+      # uses the smallest feasible value on the frozen grid; the source is
+      # recorded so such a row cannot be read as a cross-validated selection.
+      list(mu = NA_real_, selected = FALSE, min_defect = NA_real_,
+           defect_mean = NA_real_, quad_mean = NA_real_,
+           folds_used = NA_integer_,
+           candidates = data.frame(mu = NA_real_, defect_mean = NA_real_,
+                                   quad_mean = NA_real_, folds_used = NA_integer_,
+                                   infeasible_folds = NA_integer_,
+                                   skipped_folds = NA_integer_,
                                    stringsAsFactors = FALSE))
+    }
+    mu_source <- if (isTRUE(cv$selected)) "fold_cv" else "smallest_feasible"
+
+    # Full-sample rows are solved once per candidate mu and reused by the
+    # reported row and by the adjacent-grid stability diagnostic.
+    direction_cache <- new.env(parent = emptyenv())
+    solve_full_sample <- function(mu) {
+      key <- formatC(mu, digits = 17, format = "fg")
+      if (!exists(key, envir = direction_cache, inherits = FALSE)) {
+        assign(key, solve_dantzig_row_v2(
+          H = H, coordinate = k, mu_grid = c(mu),
+          solver_preference = solver_preference, solver_opts = solver_opts
+        ), envir = direction_cache)
+      }
+      get(key, envir = direction_cache, inherits = FALSE)
     }
 
     direction <- if (isTRUE(cv$selected)) {
-      solve_dantzig_row_v2(
-        H = H, coordinate = k, mu_grid = c(cv$mu),
-        solver_preference = solver_preference, solver_opts = solver_opts
-      )
+      solve_full_sample(cv$mu)
     } else {
-      # backward-compatible fallback: smallest feasible value on the grid
       solve_dantzig_row_v2(
         H = H, coordinate = k, mu_grid = mu_grid,
         solver_preference = solver_preference, solver_opts = solver_opts
@@ -396,8 +521,10 @@ debias_profile_coordinates_v2 <- function(fit,
         coordinate = names(fit$beta)[k], index = k, feasible = FALSE,
         beta_hat = fit$beta[k], beta_tilde = NA_real_, se = NA_real_,
         se_smoothed = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
-        mu = NA_real_, mu_cv_min_defect = cv$min_defect,
+        mu = NA_real_, mu_source = mu_source,
+        mu_cv_min_defect = cv$min_defect,
         mu_cv_defect = cv$defect_mean, mu_cv_quad = cv$quad_mean,
+        mu_cv_folds_used = cv$folds_used,
         dantzig_residual = NA_real_,
         omega_l1 = NA_real_, omega_l2 = NA_real_, adjacent_stability = NA_real_,
         stringsAsFactors = FALSE
@@ -423,18 +550,17 @@ debias_profile_coordinates_v2 <- function(fit,
     seh <- sandh$se
     se <- if (is.finite(se0)) se0 else seh
     # adjacent-grid direction stability: relative change between consecutive
-    # feasible candidate rows (diagnostic only).
+    # feasible candidate rows on the full-sample Hessian (diagnostic only). The
+    # feasible candidates are those with a finite held-out defect, which is the
+    # column the cross-validation selector actually returns.
     adj <- NA_real_
     cand <- cv$candidates
-    if (isTRUE(cv$selected) && nrow(cand) >= 2L) {
-      feas_mus <- cand$mu[is.finite(cand$loss_mean)]
+    if (isTRUE(cv$selected) && nrow(cand) >= 2L && "defect_mean" %in% names(cand)) {
+      feas_mus <- cand$mu[is.finite(cand$defect_mean)]
       if (length(feas_mus) >= 2L) {
         sols <- lapply(feas_mus, function(mu) {
-          s <- tryCatch(
-            solve_dantzig_row_v2(H, k, c(mu), solver_preference, solver_opts),
-            error = function(e) list(feasible = FALSE)
-          )
-          if (isTRUE(s$feasible)) as.numeric(s$omega) else NULL
+          s <- tryCatch(solve_full_sample(mu), error = function(e) list(feasible = FALSE))
+          if (isTRUE(s$feasible) && !is.null(s$omega)) as.numeric(s$omega) else NULL
         })
         sols <- sols[!vapply(sols, is.null, logical(1))]
         if (length(sols) >= 2L) {
@@ -456,9 +582,11 @@ debias_profile_coordinates_v2 <- function(fit,
       ci_lower = beta_tilde - zcrit * se,
       ci_upper = beta_tilde + zcrit * se,
       mu = direction$mu,
+      mu_source = mu_source,
       mu_cv_min_defect = cv$min_defect,
       mu_cv_defect = cv$defect_mean,
       mu_cv_quad = cv$quad_mean,
+      mu_cv_folds_used = cv$folds_used,
       dantzig_residual = direction$residual,
       omega_l1 = direction$l1_norm,
       omega_l2 = direction$l2_norm,
@@ -517,7 +645,7 @@ validate_profile_geometry_v2 <- function(y,
                                          )) {
   analytic <- profile_components_v2(
     y, X, Z, cluster_id, beta, tau, h, lambda_gamma,
-    gamma_init = NULL, need_hessian = TRUE,
+    gamma_init = NULL, need_hessian = TRUE, identity_check = TRUE,
     nuisance_control = nuisance_control
   )
   obj_fn <- function(b) profile_objective_v2(
@@ -583,7 +711,7 @@ dantzig_osqp_solve_chain_v2 <- function(model_parts, e, mu_values,
   osqpWarmStart <- getFromNamespace("osqpWarmStart", "osqp")
   osqpSettings0 <- getFromNamespace("osqpSettings", "osqp")
   p <- length(e)
-  pars <- osqpSettings0(verbose = FALSE, polishing = FALSE,
+  pars <- osqpSettings0(verbose = FALSE, polish = FALSE,
                         eps_abs = 1e-7, eps_rel = 1e-7, max_iter = max_iter)
   mdl <- osqpSetup(P = model_parts$P, q = model_parts$q, A = model_parts$A,
                    l = c(e - mu_values[1], rep(-Inf, 3L * p)),

@@ -1,460 +1,110 @@
-# Authoritative method specification
+# Joint profile estimation and inference
 
-## 1. Scope and asymptotic unit
+The current manuscript method is `JOINT-PROFILE`, implemented by the research estimator `joint_profile_design_20261026`. Its implementation guide is `research/score_validity_20261026/README_zh.md`. The population and selection arguments are stated in the manuscript and its Supporting Information.
 
-We observe independent clusters
+## Observations and target
 
-\[
-D_i=\{(Y_{ij},X_{ij},Z_{ij}):j=1,\ldots,m_i\},\qquad i=1,\ldots,n,
-\]
-
-where `n` is the number of independent clusters, `m_i` is uniformly bounded in the primary asymptotic regime, `X_ij in R^p` is the fixed-effect design, and `Z_ij in R^q` is a low-dimensional cluster-effect design. The fixed-effect vector may be sparse with `p >> n`; `q` is fixed.
-
-All empirical averages, stochastic rates and standard errors are indexed by `n`, not by the total row count treated as if all observations were independent. Within-cluster loss averaging is used so clusters do not receive accidental weight solely because they contain more observed visits.
-
-## 2. Unsmoothed regularised profile target
-
-For quantile level `tau in (0,1)`, define the check loss
-
-\[
-\rho_\tau(u)=u\{\tau-I(u<0)\}.
-\]
-
-Let `Lambda` be a fixed positive-definite `q x q` working penalty matrix. For a realised cluster define
-
-\[
-q_i(\beta,\gamma;D_i)
-=\frac{1}{m_i}\sum_{j=1}^{m_i}
-\rho_\tau(Y_{ij}-X_{ij}^{\mathsf T}\beta-Z_{ij}^{\mathsf T}\gamma)
-+\frac{1}{2}\gamma^{\mathsf T}\Lambda\gamma.
-\]
-
-The cluster-specific profile map is
-
-\[
-\gamma_i^\dagger(\beta;D_i)
-\in\arg\min_{\gamma\in\mathbb R^q}q_i(\beta,\gamma;D_i),
-\]
-
-and the unsmoothed population profile risk is
-
-\[
-Q(\beta)=E\left[q_i\{\beta,\gamma_i^\dagger(\beta;D_i);D_i\}\right].
-\]
-
-The primary inferential target is
-
-\[
-\beta^\star\in\arg\min_{\beta\in\mathbb R^p}Q(\beta).
-\]
-
-This is a regularised profile parameter. It depends on the working nuisance penalty `Lambda`, but it does not depend on the smoothing bandwidth. It need not equal a structural conditional-quantile coefficient under random-slope misspecification, informative cluster size, endogenous regressors, or other departures from the ideal location-shift model.
-
-### 2.1 Structural coefficient versus profile target
-
-When a simulation reports error or coverage relative to `beta0`, the scenario definition must justify `beta_star = beta0` for the coordinates being evaluated. A sufficient baseline design used in the simulations is:
-
-- centred fixed-effect covariates independent of cluster effects and the random-effect design;
-- no penalised fixed intercept;
-- a correctly centred error distribution with conditional `tau`-quantile zero;
-- a working nuisance design containing the generated random-effect directions;
-- cluster size independent of covariates and outcomes.
-
-Under misspecification, use a high-accuracy population Monte Carlo approximation to `beta_star` and propagate its numerical error into the coverage audit. Never silently substitute `beta0`.
-
-## 3. Convolution smoothing
-
-Let `K` be a symmetric probability density with zero first moment, finite second moment and bounded derivative. With `K_h(u)=K(u/h)/h`, define
-
-\[
-\rho_{\tau,h}(u)=(\rho_\tau*K_h)(u),\qquad
-\psi_{\tau,h}(u)=\frac{\partial}{\partial u}\rho_{\tau,h}(u),\qquad
-\phi_{\tau,h}(u)=\frac{\partial^2}{\partial u^2}\rho_{\tau,h}(u).
-\]
-
-The reference implementation uses the Epanechnikov kernel. Smoothing serves two roles: it makes the optimisation differentiable and provides an empirical local-curvature estimator. The paper targets `beta_star`, not the minimiser of a fixed-bandwidth smoothed risk.
-
-For each cluster define
-
-\[
-q_{i,h}(\beta,\gamma)
-=\frac{1}{m_i}\sum_{j=1}^{m_i}
-\rho_{\tau,h}(Y_{ij}-X_{ij}^{\mathsf T}\beta-Z_{ij}^{\mathsf T}\gamma)
-+\frac{1}{2}\gamma^{\mathsf T}\Lambda\gamma.
-\]
-
-The empirical profile objective is
-
-\[
-\widehat Q_h(\beta)
-=\frac{1}{n}\sum_{i=1}^n
-q_{i,h}\{\beta,\widehat\gamma_i(\beta)\},
-\qquad
-\widehat\gamma_i(\beta)=\arg\min_\gamma q_{i,h}(\beta,\gamma).
-\]
-
-The penalised estimator is
-
-\[
-\widehat\beta
-\in\arg\min_\beta
-\left\{
-\widehat Q_h(\beta)
-+\lambda_\beta\sum_{k=1}^p w_k|\beta_k|
-\right\},
-\]
-
-where `w_k=0` for always-included covariates and `w_k=1` for penalised high-dimensional predictors unless adaptive weights are explicitly prespecified.
-
-## 4. Exact profile calculus
-
-For cluster `i`, write matrices `X_i` (`m_i x p`) and `Z_i` (`m_i x q`) and residual vector
-
-\[
-r_i(\beta)=Y_i-X_i\beta-Z_i\widehat\gamma_i(\beta).
-\]
+Independent clusters are `D_i=(Y_i,X_i,Z_i,m_i)`, for `i=1,...,n`. Cluster sizes are bounded in the asymptotic model, the fixed effect dimension may exceed `n`, and the nuisance dimension is fixed. The working nuisance matrix `Lambda` is positive definite and fixed during coordinate inference.
 
 Define
 
 \[
-\Psi_i(\beta)=\psi_{\tau,h}\{r_i(\beta)\},
-\qquad
-W_i(\beta)=\frac{1}{m_i}\operatorname{diag}
-\left[\phi_{\tau,h}\{r_{ij}(\beta)\}\right].
+ \ell_{i,b}(\beta,\gamma)=m_i^{-1}\sum_j
+ \rho_{\tau,b}(Y_{ij}-X_{ij}^T\beta-Z_{ij}^T\gamma)
+ +\tfrac12\gamma^T\Lambda\gamma,
+ \qquad \ell_{i,b}^{prof}(\beta)=\min_\gamma\ell_{i,b}(\beta,\gamma).
 \]
 
-### 4.1 Profile score
+The target is `beta_star=argmin E ell_i,0^prof(beta)`. It is defined at bandwidth zero. Structural slopes are valid simulation targets only under the corresponding population orthogonality condition; other settings use a separately computed profile target.
 
-Because the nuisance minimiser solves the stationarity equation for the **complete** ridge-regularised cluster criterion, the envelope theorem gives
+## Complete profile geometry
+
+At the nuisance minimiser, write `r_i=Y_i-X_i beta-Z_i gamma_i,b(beta)`,
+`W_i=diag(K_b(r_i))/m_i`, and `B_i=Z_i^T W_i Z_i+Lambda`. Then
 
 \[
-\widehat g_h(\beta)
-=\nabla\widehat Q_h(\beta)
-=-\frac{1}{n}\sum_{i=1}^n
-\frac{1}{m_i}X_i^{\mathsf T}\Psi_i(\beta).
+ g_{i,b}(\beta)=-X_i^T\psi_{\tau,b}(r_i)/m_i,
+ \qquad H_{i,b}(\beta)=X_i^TW_iX_i-X_i^TW_iZ_iB_i^{-1}Z_i^TW_iX_i.
 \]
 
-This score uses the original fixed-effect design `X_i`.
+The equivalent residualised-design expression contains `A_i^T Lambda A_i`. This term remains part of every curvature calculation. Each constituent Hessian is positive semidefinite. The reference kernel is Epanechnikov.
 
-**Forbidden legacy formula:**
+## Selection on independent clusters
+
+For data dependent selection, use two outer folds of whole clusters. The complementary sample selects the model for an estimation fold. Three inner folds choose the outcome search size by exact heldout unsmoothed profile risk. Search steps use a weighted orthogonal basis and the complete profile dual score. Each selected joint convex fit uses prediction ridge `1/n_training` and a primal dual gap certificate.
+
+For an inner sample with `r` clusters and `d_0` always included coordinates, the largest number of additions is
 
 \[
--n^{-1}\sum_i m_i^{-1}\widetilde X_i^{\mathsf T}\Psi_i
+ \min\{p-d_0,[\min\{\lfloor r/\log r\rfloor,
+             \lceil(\log r)^3\rceil\}-d_0]_+\}.
 \]
 
-is not the profile score of the complete ridge criterion. Do not use it in the KKT expansion, one-step update, influence function, or sandwich variance.
+The selected supports from the three inner fits are combined. Target-specific profile graphs are learned from positive curvature factors at `h` and `h/2`, using geometric L1 penalty ratios and heldout quadratic loss. Their graph union uses capacity `B(r)=min(p,floor(r/log(r)),ceil(log(r)^3))`, before subtracting always-included coordinates. A separate nodewise regression uses the cluster weighted design without outcome weights. Its five cluster fold prediction loss selects a ratio from 24 values between one and `min(0.05,n_selection^(-1/2))`. Its retained support is bounded by the smallest inner `B(r)` and ordered by absolute standardised coefficients. The final model contains the outcome and profile graph supports, the design regression support and the requested target.
 
-### 4.2 Nuisance derivative
+The theoretical target approximation is controlled by comparison coefficients and contrasts supported on this union. Extra design-selected variables preserve those comparison vectors. Target identities are fixed before observing the corresponding estimation outcomes.
 
-Define
+## Paired coefficient estimation
+
+On estimation fold `f`, with selected set `A_fk`, fit the complete criterion at both bandwidths `b=h,h/2` with the same selected set:
 
 \[
-B_i(\beta)=Z_i^{\mathsf T}W_i(\beta)Z_i+\Lambda,
+ \widehat\beta_{f,b,A}\in\arg\min_{\beta_A}
+ \left\{n_f^{-1}\sum_{i\in I_f}\ell_{i,b}^{prof}(\beta_A)
+       +\frac{1}{2n_f^2}\beta_A^T\widehat\Sigma_{f,A}\beta_A\right\},
+ \quad\widehat\Sigma_{f,A}=n_f^{-1}\sum_{i\in I_f}X_{i,A}^TX_{i,A}/m_i.
 \]
+
+The numerical prediction ridge is included in the objective and its derivative. The point estimate is
 
 \[
-A_i(\beta)=B_i(\beta)^{-1}Z_i^{\mathsf T}W_i(\beta)X_i.
+ \widehat\theta_k=\sum_f(n_f/n)
+            (2\widehat\beta_{f,h/2,A_{fk},k}-\widehat\beta_{f,h,A_{fk},k}).
 \]
 
-Differentiating the nuisance stationarity equation gives
+The default bandwidth is `h=n^(-3/10)`. Prespecified bandwidth sensitivity multipliers remain explicit. The complete profile population gradient can have a first order bandwidth term, and the paired coefficient construction leaves a target approximation of order `h^2` under the density and local curvature conditions.
+
+If a design is fixed independently of its estimation outcomes, use one estimation sample with `A` fixed. This is the one-fold form of the same definition. It applies to the prespecified clinical and immune module model, and to a selected gene model evaluated on a separate group of subjects.
+
+## Coordinate uncertainty
+
+Let `omega_f,b` be the target row of the inverse selected Hessian, including its numerical ridge. Using the complete cluster score at the corresponding fitted coefficient, form
 
 \[
-\frac{\partial\widehat\gamma_i(\beta)}{\partial\beta^{\mathsf T}}
-=-A_i(\beta).
+ V_{ik}=-2\widehat\omega_{f,h/2}^Tg_{i,h/2}
+           +\widehat\omega_{f,h}^Tg_{i,h},
+ \qquad \widehat s_k^2=n^{-2}\sum_f\sum_{i\in I_f}(V_{ik}-\bar V_{fk})^2.
 \]
 
-The sign convention follows residual `Y-X beta-Z gamma`; verify it numerically after any code change.
+The normal interval is `theta_hat +/- z_(1-alpha/2)*se`. Each cluster combines both bandwidth contributions before variance calculation. The numerical ridge has an asymptotically negligible influence contribution. For a prespecified finite family, Bonferroni allocation uses the declared family size.
 
-### 4.3 Effective profile Hessian
+Full workflow subject deletion repeats feature construction and fitting at the fixed original bandwidth. Its standard error is computed from the resulting coefficient vectors. Profile and full workflow intervals retain their distinct sampling definitions.
 
-The exact Hessian is
+Exploratory gene designs use the frozen independent subject roles. Three forward additions to the clinical basis select the three genes, with `Lambda=I`. The separate estimation subjects fit the complete clinical and selected-gene design at two bandwidths. The interval target is that role's selected profile parameter. The role-specific intervals remain separate when the covariates or their measurement transformations differ.
+
+## Population curvature
+
+The curvature moment argument uses the active dual charts for any fixed nuisance dimension. On a chart with interior dual coordinates `A`, let `C_A=Z_A Lambda^{-1} Z_A^T/m`, `D_A=diag(k'(s_A))` and `Q_A=C_A+hD_A`. Its Jacobian is `det(Q_A)`, and its complete profile Hessian is `X_A^T Q_A^{-1} X_A/m`. If the kernel height is bounded by `K_max`, then
 
 \[
-\widehat H_{\mathrm{eff}}(\beta)
-=\frac{1}{n}\sum_{i=1}^n
-\left[
-X_i^{\mathsf T}W_iX_i
--X_i^{\mathsf T}W_iZ_i
-B_i^{-1}
-Z_i^{\mathsf T}W_iX_i
-\right].
+ \det(Q_A)\|Q_A^{-1}\|_{op}^{r}
+ \leq (K_{max}/h)^{r-1}\operatorname{tr}\{\operatorname{adj}(Q_A)\}.
 \]
 
-Equivalently, with
+Each cofactor is a finite sum of bounded principal minors of `C_A` multiplied by products of `h k'(s_j)`. For `h<=1` these are dominated by an integrable product `C product_j(1+k'(s_j))`. The conditional density section bounds and the design contrast moments therefore give `E|H_{i,h,kl}(beta)|^r <= r! C^r h^(1-r)`. The bound is uniform over bounded nuisance designs with a fixed positive-definite `Lambda`, including repeated design rows and rank-deficient nuisance designs. The corresponding sparse directional bound supplies the learning and variance arguments.
 
-\[
-\widetilde X_i=X_i-Z_iA_i,
-\]
+The executable chart check covers nuisance dimensions one through four, repeated and close design rows, non-diagonal working penalties and mixed interior/endpoint dual patterns. A complete three-dimensional nuisance fit checks the same inference interface.
 
-we have the exact identity
+## Prediction for new subjects
 
-\[
-\widehat H_{\mathrm{eff}}(\beta)
-=\frac{1}{n}\sum_{i=1}^n
-\left[
-\widetilde X_i^{\mathsf T}W_i\widetilde X_i
-+A_i^{\mathsf T}\Lambda A_i
-\right].
-\]
+Prediction uses fixed effects estimated without any test-subject nuisance adjustment. An outer training sample determines all probe choices and scaling. Its inner subject folds choose an unsmoothed joint profile search model by fixed-part pinball loss. The candidate working penalties are `Lambda=0.5I,I,2I`, as declared in the application configuration. The search budget counts additional covariates, `min(p-d_0,floor(r/log r))`, while all prespecified clinical and module covariates remain included. The selected penalty and model size are fitted on the complete outer training sample. Prediction at a new design row is `X_new^T beta_prediction`.
 
-The second term is positive semidefinite and is required. A unit test must confirm the maximum absolute difference between the two expressions is below `1e-8` in small deterministic examples and below a documented numerical tolerance in larger examples.
+This prediction rule has its own validation loss and does not alter the fixed working matrix used for coordinate intervals. Clinical and module scores retain the declared public membership and fold-local transformations.
 
-## 5. Penalised optimisation
+The random-intercept predictor uses the joint primal-dual solver. The random-slope predictor uses Clarabel on the equivalent sparse quadratic programme in the selected weighted QR basis. Nuisance RMS scaling transforms both `Z` and `Lambda`, preserving the complete criterion. Both solvers return a box-feasible dual score and are checked by the same recomputed normalised primal-dual gap.
 
-The reference implementation uses a correctness-first profiled proximal-gradient algorithm:
+## Numerical and output requirements
 
-1. Given `beta`, solve every low-dimensional nuisance subproblem to a strict gradient tolerance.
-2. Compute the exact profile score.
-3. Use the largest eigenvalue of the effective Hessian as an initial local Lipschitz estimate.
-4. Apply a penalty-factor-aware proximal step.
-5. Backtrack on the exact profiled composite objective.
-6. Stop only when both parameter change and KKT residual meet tolerance.
+The nuisance equations, coefficient gradients and primal dual gaps must meet their declared tolerances. Numerical failure terminates the attempted unit and preserves its failure record. Results retain selection subjects, estimation subjects, selected variables and the covariance contributions at both bandwidths. No adjustment is selected using simulation truth or empirical coverage.
 
-A faster joint BCD implementation is permitted only after it is shown to return the same profiled solution and the same score/Hessian objects within tolerance.
-
-### 5.1 KKT residual
-
-For unpenalised coordinate `k`, the residual is `|g_k|`. For an active penalised coordinate it is
-
-\[
-|g_k+\lambda_\beta w_k\operatorname{sign}(\widehat\beta_k)|,
-\]
-
-and for an inactive coordinate it is
-
-\[
-\max\{0,|g_k|-\lambda_\beta w_k\}.
-\]
-
-The maximum coordinate residual must be recorded for every fit.
-
-## 6. Row-wise precision estimation
-
-For a prespecified target coordinate `k`, let `e_k` be the canonical vector. Estimate only the needed row/direction:
-
-\[
-\widehat\omega_k
-\in\arg\min_{\omega\in\mathbb R^p}\|\omega\|_1
-\quad\text{subject to}\quad
-\|\widehat H_{\mathrm{eff}}\omega-e_k\|_\infty\leq\mu.
-\]
-
-The implementation must report:
-
-- requested `mu`;
-- achieved infinity-norm residual;
-- solver and solver status;
-- `||omega||_1` and `||omega||_2`;
-- whether `mu` was enlarged for numerical feasibility.
-
-If a feasibility grid is used, it must be deterministic and independent of the true coefficient and empirical coverage. The smallest feasible value in the frozen grid is used.
-
-Full-matrix CLIME may be used for diagnostics, but coordinate-wise inference should not require estimating rows that are never used.
-
-## 7. Debiased coordinate and influence representation
-
-The one-step coordinate estimator is
-
-\[
-\widetilde\beta_k
-=\widehat\beta_k
--\widehat\omega_k^{\mathsf T}
-\widehat g_h(\widehat\beta).
-\]
-
-The intended expansion is
-
-\[
-\sqrt n(\widetilde\beta_k-\beta_k^\star)
-=\frac{1}{\sqrt n}\sum_{i=1}^n
-\xi_{ik}+o_p(1),
-\]
-
-where a sign-equivalent influence contribution is
-
-\[
-\xi_{ik}
-=-\omega_k^{\star\mathsf T}g_i^\star,
-\qquad
-g_i^\star
-=-m_i^{-1}X_i^{\mathsf T}\psi_\tau(r_i^\star).
-\]
-
-The sign is irrelevant for variance but must be consistent in any reported Bahadur remainder.
-
-## 8. Cluster sandwich variance
-
-### 8.1 Primary meat: unsmoothed quantile score
-
-The inferential target is the **unsmoothed** regularised profile parameter, so the
-primary Wald meat is built from the ordinary quantile score at the fitted profile
-residuals (authoritative: `docs/PILOT_GATE_THEORY_DECISIONS.md`; the previous
-smoothed-meat primary variance is superseded):
-
-\[
-\widehat g_i^{(0)}
-=-\frac{1}{m_i}X_i^{\mathsf T}
-\psi_\tau(\widehat r_i),
-\qquad
-\psi_\tau(u)=\tau-I(u<0),
-\qquad
-\overline g^{(0)}=n^{-1}\sum_i\widehat g_i^{(0)}.
-\]
-
-For coordinate `k`, compute
-
-\[
-\widehat\sigma_{0,k}^2
-=\frac{1}{n}\sum_{i=1}^n
-\left[\widehat\omega_k^{\mathsf T}
-(\widehat g_i^{(0)}-\overline g^{(0)})\right]^2.
-\]
-
-The estimated finite-sample standard error is
-
-\[
-\widehat{\operatorname{se}}(\widetilde\beta_k)
-=\widehat\sigma_{0,k}/\sqrt n.
-\]
-
-A nominal `(1-alpha)` Wald interval is
-
-\[
-\widetilde\beta_k
-\pm z_{1-\alpha/2}\widehat\sigma_{0,k}/\sqrt n.
-\]
-
-The **bread remains the corrected smoothed effective Hessian** (via the
-precision row). No scalar smoothing-deficit correction and no empirical SE
-multiplier is permitted; the finite-`h` smoothing deficit is not a universal
-additive correction in the clustered/profile model.
-
-### 8.2 Diagnostic meat: smoothed score
-
-The smoothed-score sandwich
-
-\[
-\widehat g_i^{(h)}
-=-\frac{1}{m_i}X_i^{\mathsf T}\psi_{\tau,h}(\widehat r_i),
-\qquad
-\widehat\sigma_{h,k}^2
-=\frac{1}{n}\sum_{i=1}^n
-\left[\widehat\omega_k^{\mathsf T}
-(\widehat g_i^{(h)}-\overline g^{(h)})\right]^2
-\]
-
-is retained **only as a diagnostic/sensitivity** (`se_smoothed`). Both meats
-are reported side by side in the pilot and final outputs.
-
-A degrees-of-freedom multiplier `n/(n-1)` may be reported as a prespecified sensitivity analysis; it cannot be chosen by coverage.
-
-## 9. Tuning rules
-
-### 9.1 Smoothing bandwidth
-
-Primary inferential grid:
-
-\[
-h=c_h n^{-3/10},\qquad c_h\in\{0.75,1,1.25\}.
-\]
-
-The main specification uses `c_h=1`. This exponent satisfies both
-`sqrt(n) h^2 -> 0` and `n h^3 -> infinity`; the former `n^{-1/3}` rule sits on
-the boundary `n h^3 = 1` and is no longer admissible as the primary inferential
-bandwidth. The full grid is used in the bandwidth module. Bandwidth selection
-by validation loss is allowed for prediction analyses, but inferential
-simulations report each prespecified bandwidth rather than choosing one by
-coverage. The population-target approximation may continue to use its own
-separately named small target-approximation bandwidth, which must be
-independent of the analysis Dantzig tolerance.
-
-### 9.2 Fixed-effect penalty
-
-Use
-
-\[
-\lambda_\beta=c_\lambda\sqrt{\log(p)/n}
-\]
-
-with a frozen multiplier grid, for example `c_lambda in {0.25,0.5,1,2}`. The multiplier may be selected by cluster-level cross-validation on training clusters. The grid and tie rule must be frozen before simulations.
-
-### 9.3 Nuisance penalty
-
-The main setting is `Lambda=I_q`. Sensitivity values are `0.25 I_q`, `0.5 I_q`, `2 I_q` and `4 I_q`. In the paper, inference is conditional on the chosen working penalty. Estimating `Lambda` from the same data requires theory and code not yet included in the primary result.
-
-### 9.4 Dantzig tolerance
-
-A theory-motivated starting value is
-
-\[
-\mu=c_\mu\left\{\sqrt{\log(p)/(nh)}+h^2\right\},
-\qquad h=c_h n^{-3/10}.
-\]
-
-The frozen candidate multiplier grid is
-
-\[
-c_\mu\in\{0.10,0.25,0.50,1,2,4\}.
-\]
-
-Feasibility of the constraint alone is not an adequate precision-direction
-gate. The constant is selected **without simulation truth, bias or coverage**
-by the frozen cluster-level inverse-Hessian cross-validation rule: partition
-the independent clusters into four deterministic folds; solve the Dantzig row
-on each training-fold Hessian at every candidate; score it on the held-out
-fold with the inverse quadratic loss
-`L(mu) = 0.5 omega' H_val omega - e_k' omega`; take the largest feasible
-candidate within one standard error of the minimum mean loss; re-estimate the
-row once on the full Hessian. Row-accuracy diagnostics (relative l1/l2 error
-to the POP-H direction, cosine similarity, and the inverse-defect bound
-`D_k = sqrt(n) delta_k ||beta_hat - beta_star||_1 / sigma_{0,k}^{pop}`) are
-recorded as gates, never as tuning criteria.
-
-## 10. Theory diagnostics required in simulations
-
-For small/moderate dimensions where an oracle approximation can be computed, record:
-
-1. target approximation `||beta_h_star-beta_star||`;
-2. penalised estimation error;
-3. `||H_hat-H_star||_max`;
-4. Dantzig row error and constraint residual;
-5. standard-error ratio `mean(SE)/empirical SD`;
-6. scaled Bahadur remainder;
-7. cluster-score normal-QQ diagnostics;
-8. log-log slopes against `n` for principal error terms.
-
-These quantities link the finite-sample experiment to the proof architecture. Prediction loss alone is insufficient.
-
-## 11. Numerical identity tests
-
-The geometry validation script must test all of the following over multiple seeds:
-
-- `tau` in `{0.25,0.5,0.75}`;
-- `q` in `{1,2}`;
-- balanced and unbalanced cluster sizes;
-- `h` multipliers `{0.75,1,1.25}`;
-- non-diagonal positive-definite `Lambda`;
-- finite-difference steps around `1e-5` with a sensitivity check.
-
-Default acceptance thresholds:
-
-- profile gradient maximum absolute error `< 2e-4`;
-- profile Hessian maximum absolute error `< 3e-3`;
-- Schur/identity maximum absolute error `< 1e-8`;
-- nuisance gradient maximum absolute error `< 1e-7`;
-- Dantzig residual `<= mu + 1e-6`.
-
-Any threshold relaxation must be justified in a committed note and cannot be used to conceal a systematic sign or scaling error.
-
-## 12. Interpretation boundary
-
-The method provides coordinate-wise inference for the chosen regularised profile target. It does not automatically provide:
-
-- causal effects;
-- inference for an unregularised random-effect distribution;
-- simultaneous inference over thousands of post-selected genes;
-- FDR control after same-sample screening;
-- validity under informative cluster size or cross-cluster dependence;
-- validity when `Lambda` is estimated without accounting for its uncertainty.
-
-These are explicit limitations, not implementation details to be hidden.
+The complete profile geometry and conditional target definitions are shared with `reference_profile_pair_20261022.md`. That file defines the separately versioned paired-score reference estimator used in archived comparisons. Current manuscript estimation and uncertainty follow the paired coefficient equations above.

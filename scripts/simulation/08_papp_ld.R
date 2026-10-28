@@ -1,8 +1,6 @@
 #!/usr/bin/env Rscript
-# PAPP-LD runner v2 (optimised): full delete-one-cluster jackknife computed ONCE
-# per replication (all coordinates from the same leave-out fits), warm-started
-# from the full-data fit, parallelised over leave-out clusters on Linux.
-# Usage: Rscript scripts/simulation/08_papp_ld.R [shard_index] [n_shards]
+# 每次replication完成全部leave-one-subject拟合后计算jackknife。
+# 使用方式 Rscript scripts/simulation/08_papp_ld.R [shard_index] [n_shards] [run_id]
 args <- commandArgs(trailingOnly = FALSE)
 file_arg <- grep("^--file=", args, value = TRUE)
 script_path <- if (length(file_arg)) sub("^--file=", "", file_arg[1]) else
@@ -26,21 +24,33 @@ n_shards <- as.integer(argv[2] %||% "1")
 B <- 200L
 taus <- c(0.25, 0.50, 0.75)
 multiset <- read.csv(file.path(root, "config", "gse65391_visit_multiset.csv"))$cluster_size
-out_dir <- file.path(root, "results", "raw", "simulation", "papp_ld_B200")
+run_id <- if (length(argv) >= 3L) argv[3] else
+  paste0("papp_ld_full_jackknife_", format(Sys.time(), "%Y%m%dT%H%M%S"))
+out_dir <- file.path(root, "results", "raw", "simulation", run_id)
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_file <- file.path(out_dir, sprintf("papp_ld_s%d.csv", shard))
 jack_cores <- as.integer(Sys.getenv("JPDMEQR_LD_CORES", unset = "2"))
 
-rows <- list()
-k <- 0L
+blocks <- list()
 for (tau in taus) {
-  # Resume support: a per-tau checkpoint already written (previous interrupted
-  # run) means this tau block is complete; skip it.
+  rows <- list()
+  k <- 0L
+  # 每个tau保存独立检查点，恢复时验证所有预定replication。
   ck_file <- sub("\\.csv$", sprintf("_tau%.0f.csv", tau * 100), out_file)
   if (file.exists(ck_file)) {
     cat(sprintf("shard %d: tau=%.2f checkpoint exists, skipping\n", shard, tau),
         file = stderr())
-    rows[[length(rows) + 1L]] <- read.csv(ck_file, stringsAsFactors = FALSE)
+    checkpoint <- read.csv(ck_file, stringsAsFactors = FALSE)
+    expected_reps <- seq.int(from = shard, to = B, by = n_shards)
+    if (!all(checkpoint$tau == tau) || nrow(checkpoint) != 4L * length(expected_reps) ||
+        !setequal(checkpoint$replicate, expected_reps) ||
+        anyDuplicated(checkpoint[c("tau", "replicate", "coordinate")]) ||
+        !"jackknife_completed" %in% names(checkpoint) ||
+        !all(checkpoint$jackknife_completed == 129L |
+               (grepl("^error:", checkpoint$status) & checkpoint$jackknife_completed == 0L))) {
+      stop("PAPP_CHECKPOINT_INVALID: checkpoint does not contain the complete frozen tau block.")
+    }
+    blocks[[length(blocks) + 1L]] <- checkpoint
     next
   }
   reps <- seq.int(from = shard, to = B, by = n_shards)
@@ -69,45 +79,56 @@ for (tau in taus) {
         k <- k + 1L
         rows[[k]] <- data.frame(tau = tau, replicate = r, seed = seed, coordinate = coord,
                                 beta_hat = NA_real_, sandwich_se = NA_real_, jackknife_se = NA_real_,
-                                sand_cov = NA, jack_cov = NA, status = paste("error:", conditionMessage(fit)),
+                                sand_cov = NA, jack_cov = NA, jackknife_completed = 0L,
+                                score_source = "smoothed", h = h_inf,
+                                target_type = "structural",
+                                score_definition = "gradient_of_complete_smoothed_ridge_profile_criterion",
+                                status = paste("error:", conditionMessage(fit)),
                                 stringsAsFactors = FALSE)
       }
       cat(sprintf("shard %d: tau=%.2f rep %d ERROR %s\n", shard, tau, r,
                   conditionMessage(fit)), file = stderr())
       next
     }
-    # ONE jackknife pass over leave-out clusters, warm-started from the full fit.
+    if (!isTRUE(fit$converged) || any(!is.finite(fit$beta))) {
+      stop("PAPP_FIT_FAILED: full-data unpenalised fit did not converge.")
+    }
+    # 每次删除一个完整subject，所有leave-one拟合都必须收敛。
     rows_by_cluster <- split(seq_along(cid), cid)
     jack_fun <- function(ix) {
-      f <- tryCatch(fit_profile_lasso_v2(
+      f <- fit_profile_lasso_v2(
         y[-ix], X[-ix, , drop = FALSE], Z[-ix, , drop = FALSE], cid[-ix],
         tau, h_inf, lambda_beta = 0, lambda_gamma = 1, penalty_factor = rep(0, 20L),
         beta_init = fit$beta,
-        control = list(max_iter = 300L, beta_tol = 1e-7, kkt_normalized_tol = 1e-5)
-      ), error = function(e) NULL)
-      if (is.null(f)) rep(NA_real_, 20L) else f$beta
+        control = list(max_iter = 1000L, max_backtrack = 50L,
+                       beta_tol = 1e-8, kkt_normalized_tol = 1e-6,
+                       nuisance_control = nc)
+      )
+      if (!isTRUE(f$converged) || any(!is.finite(f$beta)) ||
+          f$components$max_nuisance_gradient > 1e-7) {
+        stop("JACKKNIFE_FIT_FAILED: leave-one-subject profile fit did not converge.")
+      }
+      f$beta
     }
     jack_beta <- if (jack_cores > 1L && .Platform$OS.type != "windows") {
       do.call(rbind, parallel::mclapply(rows_by_cluster, jack_fun, mc.cores = jack_cores))
     } else {
       do.call(rbind, lapply(rows_by_cluster, jack_fun))
     }
-    G0 <- fit$components$unsmoothed_cluster_scores
+    if (nrow(jack_beta) != 129L || ncol(jack_beta) != 20L ||
+        any(!is.finite(jack_beta))) {
+      stop("JACKKNIFE_INCOMPLETE: all 129 leave-one-subject fits are required.")
+    }
+    G0 <- fit$components$cluster_scores
     Hf <- fit$components$hessian
     for (coord in colnames(X)[1:4]) {
       kk <- match(coord, colnames(X))
       e <- numeric(20L); e[kk] <- 1
-      omega <- tryCatch(as.numeric(solve((Hf + t(Hf)) / 2, e)), error = function(e) NULL)
+      omega <- as.numeric(solve((Hf + t(Hf)) / 2, e))
       jvals <- jack_beta[, kk]
-      jok <- sum(is.finite(jvals)) > 1L
-      jack_se <- if (jok) {
-        j <- jvals[is.finite(jvals)]
-        sqrt((length(j) - 1) / length(j) * sum((j - mean(j))^2))
-      } else NA_real_
-      sand_se <- if (!is.null(omega)) {
-        proj <- as.numeric(G0 %*% omega)
-        sqrt(mean((proj - mean(proj))^2) / 129L)
-      } else NA_real_
+      jack_se <- sqrt(128 / 129 * sum((jvals - mean(jvals))^2))
+      proj <- as.numeric(G0 %*% omega)
+      sand_se <- sqrt(mean((proj - mean(proj))^2) / 129L)
       beta_hat <- fit$beta[kk]
       tgt <- as.numeric(beta0[kk])
       sand_cov <- if (is.finite(sand_se)) abs(beta_hat - tgt) <= 1.96 * sand_se else NA
@@ -115,17 +136,24 @@ for (tau in taus) {
       k <- k + 1L
       rows[[k]] <- data.frame(tau = tau, replicate = r, seed = seed, coordinate = coord,
                               beta_hat = beta_hat, sandwich_se = sand_se, jackknife_se = jack_se,
-                              sand_cov = sand_cov, jack_cov = jack_cov, status = "ok",
+                              sand_cov = sand_cov, jack_cov = jack_cov,
+                              jackknife_completed = nrow(jack_beta),
+                              score_source = "smoothed", h = h_inf,
+                              target_type = "structural",
+                              score_definition = "gradient_of_complete_smoothed_ridge_profile_criterion",
+                              status = "ok",
                               stringsAsFactors = FALSE)
     }
     cat(sprintf("shard %d: tau=%.2f rep %d done\n", shard, tau, r), file = stderr())
   }
-  # Checkpoint after each tau block: an interrupted run loses at most the
-  # current tau block, and a re-run resumes from the next tau.
-  write.csv(do.call(rbind, rows), ck_file, row.names = FALSE)
+  # 当前tau完成后保存检查点，既有结果文件保持原状。
+  block <- do.call(rbind, rows)
+  write.csv(block, ck_file, row.names = FALSE)
+  blocks[[length(blocks) + 1L]] <- block
   cat(sprintf("shard %d: tau=%.2f checkpoint written (%d rows)\n", shard, tau,
               length(rows)), file = stderr())
 }
-tab <- do.call(rbind, rows)
+tab <- do.call(rbind, blocks)
+if (file.exists(out_file)) stop("PAPP_OUTPUT_EXISTS: completed shard cannot be overwritten.")
 write.csv(tab, out_file, row.names = FALSE)
 cat("PAPP-LD shard", shard, "written:", nrow(tab), "rows\n", file = stderr())

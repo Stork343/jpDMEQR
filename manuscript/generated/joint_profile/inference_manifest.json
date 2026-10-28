@@ -1,0 +1,19 @@
+{
+  "method": "joint_profile_design_20261026",
+  "fixed_design": "joint_profile_fixed_design_20261026",
+  "generated": "2026-10-26 23:40:47.245214",
+  "independent_settings": 24,
+  "independent_datasets": 1440,
+  "independent_intervals": 5760,
+  "paired_ablation_datasets": 1440,
+  "module_workflows": 52,
+  "module_fits_including_deletions": 6760,
+  "module_intervals": 260,
+  "exploratory_fits": 360,
+  "exploratory_intervals": 1080,
+  "full_registered_simulation": "pending",
+  "source_tables": "results/tables/joint_profile_manuscript_20261026",
+  "fixed_interface_checks": "results/scratch/joint_profile_manuscript_20261026/fixed_checks.csv",
+  "conic_solver_checks": "results/scratch/joint_profile_manuscript_20261026/conic_checks.csv",
+  "reproduction_checks": "results/scratch/score_validity_20261026/reproduction_checks.csv"
+}

@@ -1,0 +1,6 @@
+"method_id","calculation","discrepancy","tolerance","passed","source"
+"POOLED-QR-LASSO","independent_LP_coefficients",1.6653329826255e-09,1e-05,TRUE,"CVXR quantile LP"
+"LQMM","maintained_package_coefficients",0,1e-10,TRUE,"lqmm 1.5.8 direct call"
+"BIAS-ADJ-LQMM","official_two_step_coefficients",0,1e-08,TRUE,"official ran_int_bias_adj.R"
+"BIAS-ADJ-LQMM","official_adjusted_coefficients",0,1e-08,TRUE,"official ran_int_bias_adj.R B100"
+"BIAS-ADJ-LQMM","official_interval",0,1e-08,TRUE,"official ran_int_bias_adj.R B100"

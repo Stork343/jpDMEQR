@@ -1,13 +1,29 @@
 {
   "method_id": "QGEE-SCAD",
-  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "commit_sha": "458b83799e577adef18c7343818ce1a0c8a5dfad",
   "reference_identifier": "Zu-Lian-Green-Yu-2023-10.1080/01621459.2022.2128806",
+  "method_version": null,
   "unit_test_pass": true,
   "limiting_case_pass": true,
   "fidelity_check_pass": true,
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|selection|prediction|coverage_own_target",
-  "created_utc": "2026-09-01 01:57:40 UTC",
-  "notes": "Official geeVerse 0.3.1 reference implementation; status ok/warning:TRUE"
+  "source_checks": [
+    {
+      "method_id": "QGEE-SCAD",
+      "calculation": "maintained_package_complete_HBIC_grid",
+      "discrepancy": 0,
+      "tolerance": 1e-10,
+      "passed": true,
+      "source": "geeVerse 0.3.1 qpgee"
+    }
+  ],
+  "reference_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/reference_fidelity",
+  "test_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/test_results.rds",
+  "test_names": ["QGEE-SCAD adapter is deterministic and schema-conformant", "QGEE-SCAD recovers active support on deterministic data", "QGEE-SCAD independence working correlation matches exchangeable on weak dependence"],
+  "assertion_count": 16,
+  "warning_count": 0,
+  "source_specification_status": "complete_source_or_maintained_package_checked",
+  "created_utc": "2026-10-22 17:15:18 UTC"
 }

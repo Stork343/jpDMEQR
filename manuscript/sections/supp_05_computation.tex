@@ -1,27 +1,234 @@
-\section{Computational specification}\label{supp:computation}
+\section{Computation and numerical verification}\label{supp:computation}
 
-\subsection{Optimisation}\label{supp:optimization}
+\subsection{Exact unsmoothed cluster profiles}
 
-The fixed-effect step uses accelerated proximal gradient with backtracking. The gradient of the smooth part is
+For an intercept, nuisance stationarity is a monotone piecewise
+linear equation. Its slope between residual knots is the positive
+ridge coefficient. Sorting the knots determines either the interval
+containing its zero or the knot at which the subgradient contains
+zero. A box-feasible dual vector is recovered at the zero residuals,
+and the complete primal-dual gap is checked.
+
+For an intercept and slope, whiten the nuisance penalty by
+$\theta=\Lambda^{1/2}\gamma$ and $V=Z\Lambda^{-1/2}$. The cluster
+objective becomes
+\begin{equation}\label{eq:supp-finite-profile}
+ \tfrac12\|\theta\|_2^2+
+            m^{-1}\sum_j\rho_\tau(u_j-v_j^T\theta).
+\end{equation}
+Residual-zero lines partition the plane into cells. Within a cell,
+the optimum is the stationary point of a quadratic with fixed
+residual signs. On any residual-zero line, an orthogonal
+parameterisation reduces the restricted objective to the scalar
+problem just described.
+
+The finite candidate construction consists of those line minimisers
+and the stationary points of their adjacent cells. A global minimum
+on a residual-zero line is its restricted minimum. If the global
+minimum is inside a cell, project it onto a nearest supporting line.
+Choosing a line with smallest distance keeps this projection in the
+cell closure. Its tangential derivative is zero, so it is the
+minimiser on that line. The original cell is adjacent to this point
+and its stationary point is examined. Under the distinct-time
+design, active rows span the required nuisance directions. Box
+feasibility and the complete gap verify every accepted candidate,
+including active residual ties.
+
+Bounded cluster size makes this a bounded-dimensional calculation.
+The implementation retains its exact gap and terminates an attempt
+if no candidate satisfies the numerical certificate.
+
+\subsection{Joint convex optimisation in an orthogonal basis}
+
+On a training sample with $r$ clusters, let
+$w_{ij}=1/(r m_i)$ and write
+$\operatorname{diag}(\sqrt w)X_S=Q_SR_S$. Put
+$B_S=\operatorname{diag}(w^{-1/2})Q_S$ and $a=R_S\beta_S$.
+Multiplying the selected criterion by $r$ gives a saddle problem
+with primal quadratic
 \[
- -n^{-1}\sum_i m_i^{-1}X_i^{\mathsf T}\psi_{\tau,h}(Y_i-X_i\beta-Z_i\gamma_i).
+ G(a,\gamma)=\tfrac12\|a\|_2^2
+                       +\tfrac12\sum_i\gamma_i^T\Lambda\gamma_i
 \]
-Coordinates with penalty weight zero are updated by an ordinary gradient step. Each cluster-effect step uses a damped Newton direction
+and dual box
+$\mathcal C=\prod_{ij}[(\tau-1)/m_i,\tau/m_i]$.
+For a feasible dual vector $u$, its value is
+\begin{equation}\label{eq:supp-joint-dual}
+ D_S(u)=Y^Tu-\tfrac12\|B_S^Tu\|_2^2
+       -\tfrac12\sum_i(Z_i^Tu_i)^T\Lambda^{-1}(Z_i^Tu_i).
+\end{equation}
+The proximal maps are a scalar ridge update for $a$, small positive
+linear systems for the nuisance vectors, and projection onto
+$\mathcal C$ for the dual variables. The linesearch of
+\citeA{malitsky2018} is applied to the combined fixed and nuisance
+operator. Its accepted steps and the gap in
+\eqref{eq:supp-joint-dual} are recorded.
+
+If a new weighted orthogonal column $b_j$ is added, the feasible dual
+value changes by $-(b_j^Tu)^2/2$. Thus a current normalised gap
+$\epsilon_S$ bounds the possible improvement by
 \[
- d_i=-\{Z_i^{\mathsf T}W_iZ_i+\Lambda\}^{-1}
- \{-m_i^{-1}Z_i^{\mathsf T}\psi_{\tau,h}(r_i)+\Lambda\gamma_i\}.
+ \epsilon_S+(b_j^Tu)^2/(2r).
 \]
-A line search enforces objective decrease. The implementation stores the objective, KKT residual, minimum eigenvalue of every $B_i$, and the number of backtracking steps.
+The search orders these conditional dual correlations. Reorthogonalised
+Gram--Schmidt updates preserve the existing basis and allow warm
+initialisation of the enlarged convex problem.
 
-\subsection{Mandatory identity tests}\label{supp:identity-tests}
+A change of nuisance coordinates can balance observed units.
+For a positive diagonal matrix $S$, replace $Z$ by $ZS^{-1}$,
+$\gamma$ by $S\gamma$ and $\Lambda$ by $S^{-1}\Lambda S^{-1}$.
+Both the predictor and the nuisance penalty are unchanged. The
+application prediction solver uses cluster-weighted RMS scales for
+this numerical transformation, which is useful when time is recorded
+in days.
 
-For randomly generated small problems, the following tests are run before large-scale computation.
-\begin{enumerate}
-\item Compare the analytic profile gradient with a central finite difference of $L_{n,h}^{\mathrm{prof}}(\beta)$.
-\item Compare the analytic Schur-complement Hessian with a central finite difference of the analytic profile gradient.
-\item Compare the two Hessian formulas in Proposition~\ref{prop:supp-profile}.
-\item Verify the KKT equation $g_{n,h}(\widehat\beta)+\lambda_{\beta}\widehat z=0$ to the requested tolerance.
-\item Verify that the Dantzig constraints hold for every reported coordinate.
-\end{enumerate}
-Relative errors, not only pass/fail indicators, are written to the simulation log.
+For the random-slope prediction calculation, we use a sparse
+quadratic programme on the same selected orthogonal basis. Introduce
+nonnegative residual parts $r^+,r^-$ with
+$B_Sa+Z\gamma+r^+-r^-=Y$. The objective is
+\[
+ \tfrac12\|a\|_2^2+\tfrac12\sum_i\gamma_i^T\Lambda\gamma_i
+       +\sum_{ij}\{\tau r_{ij}^++(1-\tau)r_{ij}^-\}/m_i.
+\]
+The Clarabel implementation \cite{goulart2026} solves its equality and nonnegativity
+constraints. Its equality dual variables supply a feasible box
+score after projection. We recompute the check-loss primal and
+\eqref{eq:supp-joint-dual} directly and require the same normalised
+gap tolerance. This solver is specified for every random-slope
+prediction fit. Eighteen deterministic comparisons against the
+primal-dual solver check the common objective and the prediction
+distance implied by their gap certificates.
 
+\subsection{Positive curvature estimation fits}
+
+Final coefficient fitting uses the complete smooth profile at each
+bandwidth. The Newton matrix is its selected Schur Hessian plus the
+declared numerical prediction ridge. Backtracking evaluates the
+complete objective. The two fits retain separate nuisance solutions
+and inverse rows; their cluster contributions are combined before
+forming the covariance matrix.
+
+The initial search gap is at most
+$\min(10^{-8},r^{-3})$ times the objective scale. The final selected
+gradient tolerance is $\min(10^{-8},n_f^{-2})$, accompanied by a
+coefficient-step tolerance of $\min(10^{-7},n_f^{-3/2})$.
+The nuisance gradient tolerance is
+$\min(10^{-10},n_f^{-3})$. Tolerances specify numerical accuracy and
+are not selected from interval coverage. Numerical budgets are
+separate from these accuracy requirements.
+
+The verification suite checks profile derivatives and the Schur
+identity on deterministic generated data. Weighted fits are compared
+with explicitly duplicated cluster records. Further checks cover the
+two-bandwidth covariance, changes of coefficient units and observation
+order. The fixed-design interface is compared coordinate by coordinate
+with the same selected convex problems. Each simulated or empirical
+attempt preserves its outcome and diagnostics.
+
+\subsection{Prediction on independent subjects}
+
+All adaptive expression transformations are fitted on the relevant
+training subjects. The predictive learner uses the same unsmoothed
+joint profile search with a budget for additional variables of
+$\min\{p-|\mathcal U|,\lfloor r/\log r\rfloor\}$.
+Prespecified clinical and module coordinates remain included.
+Five inner subject folds select the search size and working nuisance
+penalty from $\{0.5I,I,2I\}$. Their loss is the average heldout
+pinball loss of the fixed-part prediction, averaged within subjects.
+The chosen size and penalty are fitted on the complete outer training
+sample. Predictions use $X_{new}^T\widehat\beta^{pred}$.
+
+The predictive tuning task is distinct from coordinate inference
+with a fixed working matrix. In both tasks the complete criterion
+and declared subject roles determine which observations enter each
+fit. The observed outcomes of heldout subjects do not enter variable
+search, probe selection or tuning.
+
+\subsection{Published comparison procedures}
+
+The simulation comparisons use pooled quantile Lasso, the smoothed
+quantile estimator of \citeA{yan2023}, linear quantile mixed models
+\cite{geraci2014,geraci2014jss}, the resampling-adjusted estimator of
+\citeA{battagliola2022}, the double-penalised criterion of
+\citeA{li2020}, longitudinal SCAD estimating equations
+\cite{zu2023}, and the quadratic inference function of
+\citeA{bhattacharya2026}. Each procedure retains its own objective
+and uncertainty calculation. The registry specifies the settings
+in which each is evaluated.
+
+Pooled quantile Lasso uses an unpenalised intercept and the raw-sum
+check-loss objective. Five subject folds select a penalty multiplier
+from $\{0.25,0.5,1,2\}$ applied to
+$\{\tau(1-\tau)N\log p\}^{1/2}$, where $N$ is the observation
+count in that training role. Its dual linear programme constrains
+each observation score to $[\tau-1,\tau]$ and each penalised
+coordinate of $X^Tu$ to the corresponding penalty interval.
+The returned coefficients are checked through the complete primal
+and dual objectives and all coordinate inequalities.
+
+The smoothed quantile comparison uses Gaussian convolution,
+bandwidth $\max\{\sqrt{\tau(1-\tau)\log p}\,N^{-3/10},0.05\}$,
+and the source one-step correction and iid variance. Its initial
+L1 penalty is selected by five subject folds. Precision tuning
+uses five additional subject folds; each training fold repeats
+the initial penalty selection. For every precision candidate,
+the complete CLIME matrix solves the source rowwise L1 programmes
+and applies its pairwise minimum symmetrisation. Validation loss
+is $p^{-1}\|H_{\mathrm{validation}}W-I\|_F^2$. The source leaves
+this validation criterion and fold count unspecified; these are
+the fixed choices used here. The multiplier grid is
+$\{0.02,0.05,0.10,0.25,0.50,1,2,4\}$, with tolerances restricted
+to $(0,1)$. In a role containing $r$ clusters, these multipliers
+scale $\{\log(p)/(r b_r)\}^{1/2}+b_r^2$, where $b_r=r^{-3/10}$.
+This grid anchor is recalculated within each training role.
+
+Precision computation uses sparse candidate solutions from a
+parametric simplex path or a quadratic working problem. A candidate
+is accepted only after satisfying the original complete CLIME
+inequalities and a primal-dual optimality check. Linear-programme
+refinement retains all coefficient variables. Because fold losses
+are nonnegative, their accumulated sum divided by five is a lower
+bound on the complete validation loss. This bound permits exact
+elimination of a candidate once it exceeds the best complete
+candidate, including the tie tolerance. The selected candidate
+has all five fold losses. Numerical failures and their affected
+candidates remain recorded.
+
+LQMM and the resampling-adjusted procedure use the maintained
+\texttt{lqmm} implementation. Their simulation designs retain at
+most 20 predictors, including the requested coordinates, through
+a common independent subject-screening step. The double-penalised
+comparison uses the same reduced design. Its raw-sum penalty scales
+are $\{\tau(1-\tau)N\log p\}^{1/2}$ for fixed coefficients and
+$\{\tau(1-\tau)(N/n)\log(nq)\}^{1/2}$ for nuisance coefficients.
+The respective multiplier sets are $\{0.25,0.5,1,2\}$ and
+$\{0.5,1\}$, and the source SIC selects their pair. The
+resampling-adjusted random-intercept method uses 100 resamples,
+15 quadrature nodes, its source two-step correction and adjusted
+standard error. A numerical qualification requires convergence of
+the observed fit and every resampled LQMM component. Returned source
+calculations and their optimisation messages are retained alongside
+that qualification.
+
+Longitudinal SCAD uses the complete HBIC penalty path from
+\texttt{geeVerse} version 0.3.1, exchangeable working correlation,
+an unpenalised intercept, tolerance $10^{-4}$ and at most 1000
+iterations. Matrix products are grouped by cluster size and the
+generalised inverse is applied through a LAPACK singular-value
+decomposition with the source relative threshold
+$1.490116\times10^{-8}$. Each failed penalty has infinite HBIC;
+the minimum finite HBIC selects the fit, whose convergence is then
+checked. Clinical variables in the application retain their
+training-defined units and receive zero penalty factors. Its
+screening dimensions are 100, 200 and 400, selected by five inner
+subject folds.
+
+The quadratic inference function retains the ordinary inverse
+specified in its covariance formula. With $B$ basis matrices and
+$p$ fitted coordinates, its empirical moment covariance has rank
+at most $n$. Configurations with deficient covariance are reported
+as outside that numerical domain. Source-reference checks cover
+its moment equations and Newton update, the complete SCAD path,
+the mixed-model coefficients and resampling intervals, and the
+smoothed quantile correction and variance. These checks also compare
+the convex quantile programmes with independent implementations.

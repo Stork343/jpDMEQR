@@ -67,28 +67,36 @@ testthat::test_that("TRUE-NUISANCE fails cleanly without oracle context", {
 # ---------------------------------------------------------------------------
 
 make_pop_asset <- function(train, coords, seed = 91L) {
-  target_names <- coords
-  p_sub <- length(target_names)
-  H_pop <- diag(2, p_sub)
-  directions <- lapply(target_names, function(nm) {
-    k <- match(nm, target_names)
-    omega <- rep(0, p_sub)
-    omega[k] <- 1 / 2
-    e <- numeric(p_sub); e[k] <- 1
-    list(omega = setNames(omega, target_names),
+  population <- generate_profile_qr_data_v2(
+    n_clusters = 120L, p = ncol(train$X), s = train$s, tau = train$tau,
+    q = ncol(train$Z), m_values = 3:5, m_rule = "uniform", sigma_b0 = 1,
+    error_dist = "gaussian", seed = seed
+  )
+  component <- profile_components_v2(
+    population$y, population$X, population$Z, population$cluster_id,
+    population$beta0, population$tau, h = 0.5, lambda_gamma = 1,
+    need_hessian = TRUE
+  )
+  H_pop <- component$hessian
+  chol(H_pop)
+  directions <- lapply(coords, function(nm) {
+    k <- match(nm, colnames(population$X))
+    e <- numeric(ncol(population$X)); e[k] <- 1
+    omega <- as.numeric(solve(H_pop, e))
+    list(omega = setNames(omega, colnames(population$X)),
          residual = max(abs(H_pop %*% omega - e)),
          l1_norm = sum(abs(omega)),
          l2_norm = sqrt(sum(omega^2)))
   })
-  names(directions) <- target_names
+  names(directions) <- coords
   list(experiment_id = "TEST",
        H_population = H_pop,
        directions = directions,
-       n_population = 100000L,
-       repeats = 4L,
-       implementation_commit = "test",
-       config_sha256 = "test",
-       nuisance_converged = TRUE)
+       n_population = population$n_clusters,
+       repeats = 1L, development = TRUE, seed = seed,
+       implementation_commit = system2("git", c("-C", shQuote(root), "rev-parse", "HEAD"),
+                                        stdout = TRUE),
+       nuisance_converged = component$nuisance_converged)
 }
 
 testthat::test_that("POP-H uses population direction and reports the gap", {
@@ -101,7 +109,7 @@ testthat::test_that("POP-H uses population direction and reports the gap", {
   testthat::expect_equal(ans$status, "ok")
   testthat::expect_true(all(is.finite(ans$beta_tilde)))
   testthat::expect_true(all(is.finite(ans$se)))
-  # The population residual from the synthetic asset is reproduced.
+  # 人口方向来自独立生成的 cluster，并直接核验其 inverse residual。
   testthat::expect_equal(max(vapply(ans$inference_object$directions,
                                     function(d) d$population_residual,
                                     numeric(1))),

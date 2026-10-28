@@ -29,7 +29,7 @@ target_dependency_hash_v2 <- function(config, n_population, repeats,
   if (!requireNamespace("digest", quietly = TRUE)) stop("digest is required.")
   digest::digest(list(
     kind = kind,
-    version = "target-construction-v1",
+    version = "target-construction-v2-smoothing-distance",
     n_population = as.integer(n_population),
     repeats = as.integer(repeats),
     fields = config[target_dependency_fields_v2]
@@ -64,10 +64,11 @@ approximate_profile_target_v2 <- function(config,
                                           target_columns = population_target_columns_v2(config),
                                           n_population = 100000L,
                                           seed = 87001L,
+                                          bandwidth_rule = "population",
                                           fit_control = list(
                                             max_iter = 500L,
                                             beta_tol = 1e-8,
-                                            kkt_tol = 1e-7
+                                            kkt_normalized_tol = 1e-7
                                           ),
                                           retain_fit = FALSE) {
   if (!exists("fit_profile_lasso_v2", mode = "function")) {
@@ -87,9 +88,13 @@ approximate_profile_target_v2 <- function(config,
   dat <- simulate_from_config_v2(cfg, seed = seed)
   dat <- fit_working_nuisance_design_v2(dat, cfg$fit_random_effects)
   X_target <- dat$X[, target_columns, drop = FALSE]
-  h_target <- min(
-    config$h_multiplier * config$n_clusters^(-1 / 3),
-    as.integer(n_population)^(-1 / 3)
+  h_analysis_rule <- config$h_multiplier * config$n_clusters^(-3 / 10)
+  h_population_rule <- as.integer(n_population)^(-1 / 3)
+  h_target <- switch(
+    bandwidth_rule,
+    population = min(h_analysis_rule, h_population_rule),
+    analysis = h_analysis_rule,
+    stop("Unknown bandwidth_rule: ", bandwidth_rule)
   )
 
   fit <- fit_profile_lasso_v2(
@@ -114,6 +119,9 @@ approximate_profile_target_v2 <- function(config,
     seed = as.integer(seed),
     target_columns = target_columns,
     h_target = h_target,
+    bandwidth_rule = bandwidth_rule,
+    h_analysis_rule = h_analysis_rule,
+    h_population_rule = h_population_rule,
     fit_random_effects = cfg$fit_random_effects,
     profile_identity_error = fit$components$profile_identity_error,
     max_nuisance_gradient = fit$components$max_nuisance_gradient,
@@ -122,20 +130,65 @@ approximate_profile_target_v2 <- function(config,
   )
 }
 
+# 目标近似诊断：分析带宽与总体带宽下的总体极小值之差的范数，即
+# ||beta_h_star - beta_star||（METHOD_SPECIFICATION 第 10 节第 1 项）。
+smoothing_target_displacement_v2 <- function(estimates, analysis_fits,
+                                             target_names) {
+  if (is.null(analysis_fits) || !length(analysis_fits)) {
+    return(list(
+      distance_l1 = NA_real_,
+      distance_l2 = NA_real_,
+      distance_l2_by_repeat = rep(NA_real_, nrow(estimates)),
+      beta_analysis = setNames(rep(NA_real_, length(target_names)), target_names),
+      h_analysis_rule = NA_real_,
+      h_population_rule = NA_real_
+    ))
+  }
+  if (length(analysis_fits) != nrow(estimates)) {
+    stop("analysis_fits must match the number of population repeats.")
+  }
+  rules <- unique(vapply(analysis_fits, function(x) x$bandwidth_rule, character(1)))
+  if (!identical(rules, "analysis")) {
+    stop("Analysis-bandwidth target fits must use bandwidth_rule = 'analysis'.")
+  }
+  analysis <- do.call(rbind, lapply(analysis_fits, function(x) {
+    row <- setNames(rep(NA_real_, length(target_names)), target_names)
+    row[names(x$beta_star_mc)] <- x$beta_star_mc
+    row
+  }))
+  if (any(!is.finite(analysis))) stop("Non-finite analysis-bandwidth target estimate.")
+  displacement <- analysis - estimates
+  distance_l2_by_repeat <- apply(displacement, 1, function(x) sqrt(sum(x^2)))
+  list(
+    distance_l1 = mean(apply(displacement, 1, function(x) sum(abs(x)))),
+    distance_l2 = mean(distance_l2_by_repeat),
+    distance_l2_by_repeat = unname(distance_l2_by_repeat),
+    beta_analysis = colMeans(analysis),
+    h_analysis_rule = unique(vapply(analysis_fits, function(x) x$h_analysis_rule, numeric(1))),
+    h_population_rule = unique(vapply(analysis_fits, function(x) x$h_population_rule, numeric(1)))
+  )
+}
+
 summarise_profile_target_repeats_v2 <- function(fits, config, target_columns,
-                                                implementation_commit = "unknown") {
+                                                implementation_commit = "unknown",
+                                                analysis_fits = NULL) {
   if (length(fits) < 2L) stop("At least two target repeats are required.")
   target_names <- sprintf("x%05d", target_columns)
-  estimates <- do.call(rbind, lapply(fits, function(x) {
-    out <- setNames(rep(NA_real_, length(target_names)), target_names)
-    out[names(x$beta_star_mc)] <- x$beta_star_mc
+  estimate_matrix <- function(collection, label) {
+    out <- do.call(rbind, lapply(collection, function(x) {
+      row <- setNames(rep(NA_real_, length(target_names)), target_names)
+      row[names(x$beta_star_mc)] <- x$beta_star_mc
+      row
+    }))
+    if (any(!is.finite(out))) stop("Non-finite ", label, " estimate.")
     out
-  }))
-  if (any(!is.finite(estimates))) stop("Non-finite population target estimate.")
+  }
+  estimates <- estimate_matrix(fits, "population target")
   mean_target <- colMeans(estimates)
   sd_by_coordinate <- apply(estimates, 2, stats::sd)
   se_by_coordinate <- sd_by_coordinate / sqrt(nrow(estimates))
   range_by_coordinate <- apply(estimates, 2, function(x) diff(range(x)))
+  smoothing <- smoothing_target_displacement_v2(estimates, analysis_fits, target_names)
   list(
     experiment_id = config$experiment_id,
     beta_star_mc = mean_target,
@@ -148,8 +201,15 @@ summarise_profile_target_repeats_v2 <- function(fits, config, target_columns,
     repeats = length(fits),
     between_run_max_difference = max(range_by_coordinate),
     between_run_range_by_coordinate = range_by_coordinate,
+    smoothing_target_distance = smoothing$distance_l2,
+    smoothing_target_distance_l1 = smoothing$distance_l1,
+    smoothing_target_distance_by_repeat = smoothing$distance_l2_by_repeat,
+    beta_analysis_bandwidth_mc = smoothing$beta_analysis,
+    h_analysis_rule = smoothing$h_analysis_rule,
+    h_population_rule = smoothing$h_population_rule,
     all_converged = all(vapply(fits, `[[`, logical(1), "converged")),
     max_kkt_residual = max(vapply(fits, `[[`, numeric(1), "kkt_residual")),
+    max_nuisance_gradient = max(vapply(fits, `[[`, numeric(1), "max_nuisance_gradient")),
     config = config,
     fits = fits,
     dependency_hash = target_dependency_hash_v2(
@@ -213,6 +273,7 @@ approximate_population_direction_v2 <- function(config,
     h = h_analysis,
     lambda_gamma = config$lambda_gamma,
     need_hessian = TRUE,
+    identity_check = TRUE,
     nuisance_control = nuisance_control
   )
   H <- comp$hessian
@@ -308,6 +369,9 @@ validate_profile_target_asset_v2 <- function(obj,
   }
   if (isTRUE(final) && (is.null(obj$repeats) || obj$repeats < min_repeats)) {
     problems <- c(problems, "independent repeat count is below the final minimum")
+  }
+  if (isTRUE(final) && !is.finite(obj$smoothing_target_distance %||% NA_real_)) {
+    problems <- c(problems, "target-approximation diagnostic is missing")
   }
   if (!isTRUE(obj$all_converged)) problems <- c(problems, "one or more target fits did not converge")
   # Dependency-specific identity (theory decision section 4.1): the target is

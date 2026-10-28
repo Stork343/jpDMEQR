@@ -116,7 +116,7 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
   df_step2 <- df
   df_step2$y <- y - as.numeric(Z[, 1] * u_est)
   step2 <- tryCatch(
-    quantreg::rq(y ~ 0 + ., data = df_step2, tau = tau),
+    quantreg::rq(fixed_formula, data = df_step2, tau = tau),
     error = function(e) e
   )
   if (inherits(step2, "error")) {
@@ -134,9 +134,18 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
   beta_two_step <- beta_two_step[fixed_names]
   se_obs <- tryCatch(
     stats::coef(summary(step2, se = control$se_method %||% "nid"))[, 2],
-    error = function(e) rep(NA_real_, length(fixed_names))
+    error = function(e) e
   )
+  if (inherits(se_obs, "error")) {
+    return(benchmark_failure_v2("BIAS-ADJ-LQMM", "variance_estimation",
+                                conditionMessage(se_obs), proc.time()[[3]] - start))
+  }
   se_obs <- se_obs[fixed_names]
+  if (any(!is.finite(se_obs)) || any(se_obs <= 0)) {
+    return(benchmark_failure_v2("BIAS-ADJ-LQMM", "variance_estimation",
+                                "Observed quantile-regression standard errors must be positive and finite.",
+                                proc.time()[[3]] - start))
+  }
 
   # Residuals from the two-step fit (with centred response).
   res <- as.numeric(stats::residuals(step2))
@@ -149,13 +158,26 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
   N <- length(cluster_levels)
   nobs <- length(y)
   ok_boot <- 0L
+  observed_converged <- lqmm_convergence_v2(step1)
+  component_convergence <- list(observed = step1$opt, bootstrap = vector("list", B))
+  bootstrap_converged <- rep(FALSE, B)
+  bootstrap_failure <- function(index, message) {
+    answer <- benchmark_failure_v2("BIAS-ADJ-LQMM", "resampling",
+                                    sprintf("Bootstrap %d: %s", index, message),
+                                    proc.time()[[3]] - start)
+    answer$fit_object <- list(two_step = step2, lqmm = step1,
+                              bootstrap_oracle = boot_oracle,
+                              bootstrap_two_step = boot_two_step,
+                              failed_index = index, B = B, component_convergence = component_convergence)
+    answer
+  }
 
   for (b in seq_len(B)) {
     w <- sample(
       c(2 * (1 - tau), -2 * tau), size = nobs, replace = TRUE,
       prob = c(1 - tau, tau)
     )
-    u_boot_cluster <- sample(u_est_cluster, size = N, replace = TRUE)
+    u_boot_cluster <- sample(u_est, size = N, replace = TRUE)
     u_boot <- u_boot_cluster[match(df$cluster, cluster_levels)]
     y_boot <- fitted_val + as.numeric(Z[, 1] * u_boot) + w * abs(res)
 
@@ -163,12 +185,14 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
     df_oracle <- df
     df_oracle$y <- y_boot - as.numeric(Z[, 1] * u_boot)
     fit_oracle <- tryCatch(
-      quantreg::rq(y ~ 0 + ., data = df_oracle, tau = tau),
-      error = function(e) NULL
+      quantreg::rq(fixed_formula, data = df_oracle, tau = tau),
+      error = function(e) e
     )
-    if (is.null(fit_oracle)) next
+    if (inherits(fit_oracle, "error")) return(bootstrap_failure(b, conditionMessage(fit_oracle)))
     co <- stats::coef(fit_oracle)
-    if (is.null(names(co)) || !all(fixed_names %in% names(co))) next
+    if (is.null(names(co)) || !all(fixed_names %in% names(co))) {
+      return(bootstrap_failure(b, "Oracle coefficient names are inconsistent."))
+    }
     boot_oracle[b, ] <- co[fixed_names]
 
     # Two-step replicate: re-run LQMM then rq on y_boot.
@@ -183,30 +207,36 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
           method = "df", LP_max_iter = 1000, verbose = FALSE
         )
       ),
-      error = function(e) NULL
+      error = function(e) e
     )
-    if (is.null(step1b)) next
-    ranb <- tryCatch(lqmm::ranef(step1b), error = function(e) NULL)
-    if (is.null(ranb) || !"(Intercept)" %in% colnames(ranb)) next
+    if (inherits(step1b, "error")) return(bootstrap_failure(b, conditionMessage(step1b)))
+    component_convergence$bootstrap[[b]] <- step1b$opt
+    bootstrap_converged[b] <- lqmm_convergence_v2(step1b)
+    ranb <- tryCatch(lqmm::ranef(step1b), error = function(e) e)
+    if (inherits(ranb, "error")) return(bootstrap_failure(b, conditionMessage(ranb)))
+    if (!"(Intercept)" %in% colnames(ranb)) {
+      return(bootstrap_failure(b, "A bootstrap random-intercept prediction is unavailable."))
+    }
     u_estb_cluster <- as.numeric(ranb[, "(Intercept)"]) -
       mean(as.numeric(ranb[, "(Intercept)"]))
-    if (length(u_estb_cluster) != N) next
+    if (length(u_estb_cluster) != N) return(bootstrap_failure(b, "Bootstrap cluster dimensions differ."))
     u_estb <- u_estb_cluster[match(df_boot$cluster, cluster_levels)]
     df_step2b <- df_boot
     df_step2b$y <- y_boot - as.numeric(Z[, 1] * u_estb)
     step2b <- tryCatch(
-      quantreg::rq(y ~ 0 + ., data = df_step2b, tau = tau),
-      error = function(e) NULL
+      quantreg::rq(fixed_formula, data = df_step2b, tau = tau),
+      error = function(e) e
     )
-    if (is.null(step2b)) next
+    if (inherits(step2b, "error")) return(bootstrap_failure(b, conditionMessage(step2b)))
     cob <- stats::coef(step2b)
-    if (is.null(names(cob)) || !all(fixed_names %in% names(cob))) next
+    if (is.null(names(cob)) || !all(fixed_names %in% names(cob))) {
+      return(bootstrap_failure(b, "Two-step bootstrap coefficient names are inconsistent."))
+    }
     boot_two_step[b, ] <- cob[fixed_names]
     ok_boot <- ok_boot + 1L
   }
 
-  min_ok <- control$min_bootstrap_fraction %||% 0.5
-  if (ok_boot < B * min_ok) {
+  if (ok_boot != B) {
     return(benchmark_failure_v2(
       "BIAS-ADJ-LQMM", "resampling",
       sprintf("Only %d/%d bootstrap replications succeeded.", ok_boot, B),
@@ -215,15 +245,18 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
   }
 
   # Bias adjustment (Efron & Tibshirani bootstrap bias correction).
-  beta_adj <- 2 * beta_two_step - colMeans(boot_two_step, na.rm = TRUE)
+  beta_adj <- 2 * beta_two_step - colMeans(boot_two_step)
 
   # SE adjustment: SE_adj = SE_obs * SD(two-step*)/SD(oracle*).
-  sd_two <- apply(boot_two_step, 2, stats::sd, na.rm = TRUE)
-  sd_oracle <- apply(boot_oracle, 2, stats::sd, na.rm = TRUE)
+  sd_two <- apply(boot_two_step, 2, stats::sd)
+  sd_oracle <- apply(boot_oracle, 2, stats::sd)
   ratio <- sd_two / sd_oracle
-  ratio[!is.finite(ratio) | ratio <= 0] <- 1
+  if (any(!is.finite(ratio)) || any(ratio <= 0)) {
+    return(benchmark_failure_v2("BIAS-ADJ-LQMM", "variance_estimation",
+                                "The bootstrap standard-deviation ratio must be positive and finite.",
+                                proc.time()[[3]] - start))
+  }
   se_adj <- se_obs * ratio
-  se_adj[!is.finite(se_adj)] <- NA_real_
 
   # SE-adjusted CI (recommended) and basic bootstrap CI.
   ci_lower <- beta_adj - zcrit * se_adj
@@ -266,9 +299,10 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
     basic_ci_upper = as.numeric(basic_upper[keep]),
     stringsAsFactors = FALSE
   )
+  converged <- observed_converged && all(bootstrap_converged) && ok_boot == B
   ans <- list(
     method_id = "BIAS-ADJ-LQMM",
-    status = if (all(is.finite(beta_adj))) "ok" else "warning",
+    status = if (converged && all(is.finite(beta_adj))) "ok" else "warning",
     failure_stage = "",
     failure_message = "",
     beta_hat = beta_two_step,
@@ -282,7 +316,12 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
       lqmm = step1,
       u_blp = u_est_cluster,
       bootstrap_success = ok_boot,
+      component_convergence = component_convergence,
       B = B,
+      working_random_effects = "random_intercept",
+      bootstrap_resampling = "expanded_centered_BLP_reference_code",
+      bootstrap_oracle = boot_oracle,
+      bootstrap_two_step = boot_two_step,
       beta_adj = beta_adj,
       se_obs = se_obs,
       sd_two_step = sd_two,
@@ -294,11 +333,11 @@ fit_benchmark_bias_adj_lqmm_v2 <- function(train,
       interval_type = "se_adjusted_and_basic_bootstrap"
     ),
     runtime_sec = elapsed,
-    converged = ok_boot >= B * 0.9,
+    converged = converged,
     kkt_residual = NA_real_,
     warning_messages = if (ok_boot < B) {
       sprintf("Bootstrap completion %d/%d.", ok_boot, B)
-    } else character(),
+    } else if (!converged) "An LQMM component reported non-convergence." else character(),
     implementation_version = "battagliola-rw-bootstrap",
     target_scope = "source_defined_clustered_quantile"
   )

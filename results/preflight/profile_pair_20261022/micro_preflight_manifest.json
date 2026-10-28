@@ -1,0 +1,44 @@
+{
+  "pass": true,
+  "final": true,
+  "method_version": "profile_pair_20261022",
+  "score_definition": "profile_bandwidth_pair_2_half_minus_full",
+  "scope": "registered_dgp_dispatch_and_record_accounting",
+  "commit_sha": "458b83799e577adef18c7343818ce1a0c8a5dfad",
+  "config_sha256": "e313eadf45e742c47d0decd3a31b058b2b75cf9ae34c4070dd6f433b92e9ae60",
+  "run_dir": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/raw/simulation/profile_pair_458b837_20261023_v1_preflight",
+  "registry_rows": 10,
+  "method_rows": 34,
+  "coordinate_rows": 112,
+  "runner_failure_count": 0,
+  "execution_validation": {
+    "pass": true,
+    "method_complete": true,
+    "theory_complete": true,
+    "coordinate_complete": true,
+    "schema_complete": true,
+    "known_failure_stages": true,
+    "failed_coordinate_accounting": true,
+    "seeds_complete": true,
+    "expected_method_rows": 34,
+    "expected_coordinate_rows": 112,
+    "all_methods_successful": true,
+    "method_status_counts": {
+      "ok": 34
+    },
+    "runner_failure_count": 0
+  },
+  "solver_configuration": {
+    "dantzig_solver": "dual_warm",
+    "cluster_solver": "compiled",
+    "assembly": "batch",
+    "cv_workers": 1,
+    "hessian_refresh": 20,
+    "unpenalised_optimizer": "newton_armijo",
+    "proximal_scaling": "cluster_rms",
+    "shared_first_stage": true,
+    "matrix_backend": "Eigen_single_thread",
+    "identity_detail": "aggregate"
+  },
+  "created_utc": "2026-10-22 17:18:08 UTC"
+}

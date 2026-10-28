@@ -1,0 +1,23 @@
+# 配对profile方法修订进展
+
+当前方法使用两个bandwidth的完整nuisance profile，组合score为2*g_(h/2)-g_h，Jacobian使用相同权重。一般有限cluster的平滑profile score含有一阶bandwidth项；配对后该项抵消，总体score的剩余量为O(h²)。完整推导保存在../../research/profile-score-theory-20261022/main.tex，方法定义见METHOD_SPECIFICATION.md。
+
+初始凸L1拟合使用h_est，penalty同时包含随机score项与正比于h_est的项。选取的坐标、未惩罚坐标及预定推断坐标共同进入reduced refit。后续配对score在该refit处重新计算，precision方向、one-step修正与sandwich均使用相同定义。两个bandwidth的score在同一cluster上组合，因此sandwich保留其协方差。
+
+完整拟合及推断已经接入版本化注册入口，package版本为0.3.0。实际安装后的公开API及帮助示例运行通过。数值检查覆盖20个随机种子，81项geometry计算与20次完整八倍率CV拟合推断均通过。注册检查完成两个设置的四次重复，包含18次方法计算及64条坐标记录，结果字段与数量检查通过。其中一个设置使用p=40,n=30及随机截距加时间斜率。
+
+整合测试共302项检查通过，没有失败、错误或跳过。真实失败对象的坐标记录保留NA估计与失败状态；覆盖率汇总同时报告完整请求数量和可计算数量。零系数检验使用beta_tilde/se，按目标中心化的studentised误差单独记录。
+
+总体目标和方向对象具有配对方法专用的构建函数与读取检查，当前路径使用construction_v2子目录。structural设置的方向在生成的beta0处计算，profile_mc设置使用对应总体目标；MC根研究结果另外保留。开发规模对象已经完成真实构建和读取。正式规模要求每次至少100000个cluster、四次独立重复，并与对应设计和score定义相符。正式运行入口检查方法版本。
+
+GSE65391的C3队列包含129名患者与867次就诊，十项队列和outcome条件通过。完整subject bootstrap完成10000次重抽样，三个既定quantile与三个bandwidth倍率组成的九个组合均通过局部信息检查。实际设计的reduced Jacobian仍在各次拟合中单独检查。
+
+五个固定immune module均使用完整测量。M1.2、M3.4、M4.11、M5.12分别采用27、53、18、59个gene；M5.15采用24个原始ILMN probe。source名称、官方Gene ID及当前symbol保存在独立字段中。评分成员与权重已经固定，clinical与module设计的Model A为16维，Model B为17维。
+
+低维配对推断与完整subject jackknife已经实现。全流程检查使用12名真实患者，每次删除一名患者后重新计算clinical处理、probe选择及全部五个module的标准化，并重新拟合。全部leave-one计算完成，各次preprocessing与fit分别保存。给定完整样本preprocessing的sandwich和全流程jackknife具有独立的scope字段；后者作为预先指定的敏感性区间。
+
+当前手稿接入配对方法的数学定义及定理，队列和module表格从保存的检查结果直接生成。数值验证表报告已完成的微分关系与计算检查。正式Monte Carlo表格需要相同score定义的总体对象和完整模拟结果。
+
+正文PDF为16页，补充稿为13页。两份文件编译完成，引用无缺项。纯文本和PDF对象检查确认全部页面可以提取文字，文字与表格处于页面范围内。作者信息保留，出版占位文字已清理，页码从1连续编号。
+
+下一项研究计算是建立正式规模总体对象并运行配对方法pilot，以其注册的收敛、precision和区间指标作出运行判定。完整SLE关联计算还需要application-matched区间评估和既定subject-level validation；数据自适应probe选择及sample standardisation属于该评估的计算流程。

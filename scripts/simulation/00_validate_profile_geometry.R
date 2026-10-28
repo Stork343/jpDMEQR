@@ -132,7 +132,68 @@ dantzig_pass <- isTRUE(dantzig$feasible) &&
   dantzig$residual <= dantzig$mu + thresholds$dantzig
 write_atomic_csv_v2(dantzig$attempts, file.path(out_dir, "dantzig_geometry_validation.csv"))
 
-pass <- !any(failed) && dantzig_pass
+# 装配模式的对照：逐簇累加与整块装配的求和次序不同，整 Hessian、四份折 Hessian
+# 与两式恒等矩阵都要落在冻结的恒等水平内
+# (docs/METHOD_SPECIFICATION.md 第 4.4 节)。环境选中的模式由身份文件记录，
+# 这里显式按两种模式各算一次。
+assembly_cases <- list(
+  list(n = 10L, p = 4L, s = 2L, tau = 0.5, q = 1L, m_values = 4L,
+       m_rule = "uniform", error_dist = "gaussian", seed = 909L, lambda = 1.3),
+  list(n = 10L, p = 4L, s = 2L, tau = 0.25, q = 2L, m_values = 2:8,
+       m_rule = "geometric_imbalance", error_dist = "t3", seed = 1010L,
+       lambda = matrix(c(1.4, 0.18, 0.18, 0.9), 2, 2)),
+  list(n = 24L, p = 40L, s = 5L, tau = 0.5, q = 1L, m_values = 3:6,
+       m_rule = "uniform", error_dist = "gaussian", seed = 1011L, lambda = 1.3),
+  list(n = 24L, p = 40L, s = 5L, tau = 0.75, q = 2L, m_values = 2:8,
+       m_rule = "geometric_imbalance", error_dist = "gaussian", seed = 1012L,
+       lambda = matrix(c(2.2, -0.3, -0.3, 0.8), 2, 2)),
+  list(n = 40L, p = 80L, s = 5L, tau = 0.5, q = 2L, m_values = 4L,
+       m_rule = "uniform", error_dist = "gaussian", seed = 1013L, lambda = 1.3),
+  list(n = 60L, p = 120L, s = 5L, tau = 0.25, q = 1L, m_values = 2:8,
+       m_rule = "geometric_imbalance", error_dist = "t3", seed = 1014L,
+       lambda = 1.3)
+)
+perturbation <- c(0.08, -0.04, 0.03, -0.02)
+assembly_rows <- list()
+for (ii in seq_along(assembly_cases)) {
+  cs <- assembly_cases[[ii]]
+  dat_a <- generate_profile_qr_data_v2(
+    n_clusters = cs$n, p = cs$p, s = cs$s, tau = cs$tau, q = cs$q,
+    m_values = cs$m_values, m_rule = cs$m_rule, error_dist = cs$error_dist,
+    seed = cs$seed
+  )
+  beta_a <- dat_a$beta0
+  beta_a[seq_along(perturbation)] <- beta_a[seq_along(perturbation)] + perturbation
+  comp <- lapply(c("sequential", "batch"), function(mode) {
+    profile_components_v2(
+      dat_a$y, dat_a$X, dat_a$Z, dat_a$cluster_id, beta_a, cs$tau,
+      cs$n^(-3 / 10), lambda_gamma = cs$lambda, need_hessian = TRUE,
+      identity_check = TRUE, need_fold_sums = TRUE, assembly = mode
+    )
+  })
+  hessian_difference <- max(abs(comp[[1]]$hessian - comp[[2]]$hessian))
+  fold_difference <- max(vapply(seq_len(4L), function(f) {
+    max(abs(comp[[1]]$hessian_fold_sums[[f]] - comp[[2]]$hessian_fold_sums[[f]]))
+  }, numeric(1)))
+  identity_difference <- max(abs(comp[[1]]$hessian_identity - comp[[2]]$hessian_identity))
+  identity_error <- max(comp[[1]]$profile_identity_error, comp[[2]]$profile_identity_error)
+  assembly_rows[[ii]] <- data.frame(
+    case = ii, n_clusters = cs$n, p = cs$p, q = cs$q, tau = cs$tau,
+    m_rule = cs$m_rule, error_dist = cs$error_dist,
+    hessian_max_difference = hessian_difference,
+    fold_hessian_max_difference = fold_difference,
+    identity_matrix_max_difference = identity_difference,
+    identity_error_max = identity_error,
+    pass = max(hessian_difference, fold_difference, identity_difference,
+               identity_error) <= thresholds$identity,
+    stringsAsFactors = FALSE
+  )
+}
+assembly <- do.call(rbind, assembly_rows)
+write_atomic_csv_v2(assembly, file.path(out_dir, "assembly_mode_validation.csv"))
+assembly_pass <- all(assembly$pass)
+
+pass <- !any(failed) && dantzig_pass && assembly_pass
 manifest <- list(
   pass = pass,
   strict = strict,
@@ -150,12 +211,20 @@ manifest <- list(
   dantzig_pass = dantzig_pass,
   dantzig_residual = dantzig$residual,
   dantzig_mu = dantzig$mu,
+  assembly_modes_checked = TRUE,
+  assembly_pass = assembly_pass,
+  assembly_case_count = nrow(assembly),
+  assembly_cases = assembly,
   thresholds = thresholds,
+  solver_configuration = solver_configuration_v2(),
   maxima = list(
     gradient = max(res$gradient_max_error),
     hessian = max(res$hessian_max_error),
     identity = max(res$profile_identity_error),
-    nuisance = max(res$max_nuisance_gradient)
+    nuisance = max(res$max_nuisance_gradient),
+    assembly_hessian = max(assembly$hessian_max_difference),
+    assembly_fold_hessian = max(assembly$fold_hessian_max_difference),
+    assembly_identity_matrix = max(assembly$identity_matrix_max_difference)
   ),
   created_utc = format(Sys.time(), tz = "UTC", usetz = TRUE)
 )
@@ -166,4 +235,8 @@ if (any(failed)) {
   stop("Profile geometry validation failed. See ", out_dir)
 }
 if (!dantzig_pass) stop("Dantzig geometry validation failed.")
+if (!assembly_pass) {
+  print(assembly[!assembly$pass, , drop = FALSE])
+  stop("Assembly-mode geometry validation failed. See ", out_dir)
+}
 message("Profile-geometry gate passed (strict=", strict, ").")

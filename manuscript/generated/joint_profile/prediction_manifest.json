@@ -1,0 +1,68 @@
+{
+  "method": "joint_profile_prediction_20261026",
+  "generated": "2026-10-26 23:33:56.7333",
+  "final_fits": 900,
+  "heldout_visit_records": 156060,
+  "settings": 36,
+  "subjects_per_setting": 129,
+  "repetitions_per_subject": 5,
+  "random_slope_solver": "clarabel_selected_qp",
+  "random_slope_source": "results/raw/application_prediction/joint_profile_20261026/reference_conic_slope",
+  "numerical_attempt_failure_records": 4,
+  "comparator_accounting": [
+    {
+      "method": "LQMM",
+      "status": "not_started",
+      "reported_fit_status": null,
+      "reported_converged": null,
+      "fits": 144
+    },
+    {
+      "method": "LQMM",
+      "status": "ok",
+      "reported_fit_status": "returned_package_fit",
+      "reported_converged": null,
+      "fits": 6
+    },
+    {
+      "method": "POOLED-QR-LASSO",
+      "status": "not_started",
+      "reported_fit_status": null,
+      "reported_converged": null,
+      "fits": 144
+    },
+    {
+      "method": "POOLED-QR-LASSO",
+      "status": "ok",
+      "reported_fit_status": "ok",
+      "reported_converged": true,
+      "fits": 6
+    },
+    {
+      "method": "QGEE-SCAD",
+      "status": "not_started",
+      "reported_fit_status": null,
+      "reported_converged": null,
+      "fits": 144
+    },
+    {
+      "method": "QGEE-SCAD",
+      "status": "ok",
+      "reported_fit_status": "ok",
+      "reported_converged": true,
+      "fits": 2
+    },
+    {
+      "method": "QGEE-SCAD",
+      "status": "ok",
+      "reported_fit_status": "warning",
+      "reported_converged": false,
+      "fits": 4
+    }
+  ],
+  "comparator_nonconverged": 4,
+  "source_tables": "results/tables/joint_profile_manuscript_20261026",
+  "resampling_seed": 20261026,
+  "resampling_replicates": 10000,
+  "fitted_models": "held_fixed"
+}

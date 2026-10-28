@@ -24,6 +24,30 @@ fit_profile_lasso_v2 <- function(y,
   beta <- as.numeric(beta_init %||% rep(0, p))
   if (length(beta) != p) stop("beta_init has wrong length.")
 
+  # Control fields are read by name; a misspelled or stale name would otherwise
+  # be ignored and the caller would silently obtain the default tolerance.
+  allowed_control <- c("max_iter", "beta_tol", "kkt_normalized_tol",
+                       "backtrack_factor", "max_backtrack", "min_step",
+                       "verbose", "nuisance_control", "accelerate",
+                       "hessian_refresh", "unpenalised_optimizer", "proximal_scaling")
+  unknown_control <- setdiff(names(control), allowed_control)
+  if (length(unknown_control)) {
+    stop("Unknown fit control field(s): ", paste(unknown_control, collapse = ", "),
+         ". Allowed fields: ", paste(allowed_control, collapse = ", "), ".")
+  }
+
+  optimizer <- control$unpenalised_optimizer %||% unpenalised_optimizer_v2()
+  if (length(optimizer) != 1L || is.na(optimizer) ||
+      !optimizer %in% c("proximal_gradient", "newton_armijo")) {
+    stop("Unknown unpenalised_optimizer.")
+  }
+  if (all(lambda_beta * penalty_factor == 0) && optimizer == "newton_armijo") {
+    return(fit_profile_unpenalised_newton_v2(
+      y, X, Z, cluster_id, tau, h, lambda_beta, lambda_gamma,
+      penalty_factor, beta, control
+    ))
+  }
+
   # Round-3 reference solver controls (METHOD_SPECIFICATION_ROUND3_AMENDMENT.md
   # section 3): max_iter >= 2000, max_backtrack >= 50, beta_tol = 1e-7.
   # The convergence beta-change rule is relative:
@@ -39,11 +63,26 @@ fit_profile_lasso_v2 <- function(y,
   verbose <- isTRUE(control$verbose)
   nuisance_control <- control$nuisance_control %||% list()
 
+  scaling <- control$proximal_scaling %||% proximal_scaling_v2()
+  if (length(scaling) != 1L || is.na(scaling) || !scaling %in% c("none", "cluster_rms")) {
+    stop("Unknown proximal_scaling.")
+  }
+  coordinate_scale <- rep(1, p)
+  if (scaling == "cluster_rms") {
+    clusters <- cluster_index_v2(cluster_id)
+    coordinate_scale <- sqrt(Reduce(`+`, lapply(clusters$rows, function(index) {
+      colMeans(X[index, , drop = FALSE]^2)
+    })) / clusters$n)
+    if (any(!is.finite(coordinate_scale)) || any(coordinate_scale <= 0)) {
+      stop("Cluster RMS proximal scaling requires positive finite coordinate scales.")
+    }
+  }
+
   effective_penalty <- lambda_beta * penalty_factor
 
   current <- profile_components_v2(
     y, X, Z, cluster_id, beta, tau, h, lambda_gamma,
-    gamma_init = NULL, need_hessian = TRUE,
+    gamma_init = NULL, need_hessian = TRUE, identity_check = TRUE,
     nuisance_control = nuisance_control
   )
   composite <- current$objective + lambda_beta * sum(penalty_factor * abs(beta))
@@ -57,7 +96,17 @@ fit_profile_lasso_v2 <- function(y,
   # curvature (Hessian) refresh: intermediate candidates need only the
   # objective/score, which cuts the per-iteration cost by ~5x.
   accelerate <- isTRUE(control$accelerate %||% TRUE)
-  refresh_every <- max(1L, as.integer(control$hessian_refresh %||% 5L))
+  # 刷新间隔由控制字段给出，缺省取冻结值 5。加长间隔会减少一次拟合里构造的
+  # p×p 装配次数，代价是动量步用到的曲率更旧,回退次数与迭代数随之增加。
+  # 这一取值只由调用方决定：求解加速开关在 fit_profile_lasso_calibrated_v2
+  # 里注入前两阶段的控制字段，round-5 重拟合、刀切与总体目标资产都保持冻结值。
+  refresh_every <- suppressWarnings(as.numeric(control$hessian_refresh %||% 5L))
+  if (length(refresh_every) != 1L || !is.finite(refresh_every) || refresh_every < 1L ||
+      refresh_every != trunc(refresh_every)) {
+    stop("hessian_refresh must be a positive integer, got: ",
+         paste(control$hessian_refresh, collapse = ", "))
+  }
+  refresh_every <- as.integer(refresh_every)
   t_mom <- 1
   beta_prev <- beta
   step <- NA_real_
@@ -68,12 +117,14 @@ fit_profile_lasso_v2 <- function(y,
     } else {
       beta
     }
-    refresh <- !accelerate || (iter %% refresh_every) == 1L
+    refresh <- !accelerate || ((iter - 1L) %% refresh_every) == 0L
+    # 刷新出的 Hessian 只用于步长；该次调用的折 Hessian 随后即被丢弃，因此不再
+    # 逐次构造四个折内交叉乘积（大 p 下这是每次刷新里最重的 BLAS 项）。
     comp_prox <- tryCatch(
       profile_components_v2(
         y, X, Z, cluster_id, beta_prox, tau, h, lambda_gamma,
         gamma_init = current$gamma, need_hessian = refresh,
-        nuisance_control = nuisance_control
+        need_fold_sums = FALSE, nuisance_control = nuisance_control
       ),
       error = function(e) e
     )
@@ -82,7 +133,10 @@ fit_profile_lasso_v2 <- function(y,
       break
     }
     if (refresh) {
-      eigmax <- largest_eigenvalue_power_v2(comp_prox$hessian)
+      scaled_hessian <- if (scaling == "cluster_rms") {
+        comp_prox$hessian / outer(coordinate_scale, coordinate_scale)
+      } else comp_prox$hessian
+      eigmax <- largest_eigenvalue_power_v2(scaled_hessian)
       step <- 1 / max(eigmax, 1e-6)
     }
     score <- comp_prox$score
@@ -91,8 +145,8 @@ fit_profile_lasso_v2 <- function(y,
 
     for (bt in 0:max_backtrack) {
       beta_new <- soft_threshold_weighted_v2(
-        beta_prox - step * score,
-        step * lambda_beta * penalty_factor
+        beta_prox - step * score / coordinate_scale^2,
+        step * lambda_beta * penalty_factor / coordinate_scale^2
       )
       delta <- beta_new - beta_prox
       candidate <- tryCatch(
@@ -105,7 +159,7 @@ fit_profile_lasso_v2 <- function(y,
       )
       if (!inherits(candidate, "error")) {
         upper <- comp_prox$objective + sum(score * delta) +
-          sum(delta^2) / (2 * step) + 1e-12
+          sum((delta * coordinate_scale)^2) / (2 * step) + 1e-12
         composite_new <- candidate$objective +
           lambda_beta * sum(penalty_factor * abs(beta_new))
         if (candidate$objective <= upper && composite_new <= composite + 1e-12) {
@@ -175,13 +229,13 @@ fit_profile_lasso_v2 <- function(y,
   }
 
   # The returned components must carry the Hessian (used by the precision and
-  # variance stages); recompute once if the last accepted iterate was a
-  # no-Hessian candidate.
-  if (is.null(current$hessian)) {
+  # variance stages) and, for audit, the two-formula identity at the accepted
+  # iterate; recompute once if the last accepted candidate lacks either.
+  if (is.null(current$hessian) || !isTRUE(current$identity_checked)) {
     current <- tryCatch(
       profile_components_v2(
         y, X, Z, cluster_id, beta, tau, h, lambda_gamma,
-        gamma_init = current$gamma, need_hessian = TRUE,
+        gamma_init = current$gamma, need_hessian = TRUE, identity_check = TRUE,
         nuisance_control = nuisance_control
       ),
       error = function(e) current
@@ -209,10 +263,14 @@ fit_profile_lasso_v2 <- function(y,
     failure_stage = failure_stage,
     kkt_residual = final_kkt,
     kkt_normalized = final_kkt_norm,
+    kkt_normalized_tol = kkt_normalized_tol,
+    beta_tol = beta_tol,
     first_stage_beta_change = if (nrow(history)) tail(history$beta_change, 1) else NA_real_,
     first_stage_nonzero_count = sum(abs(beta) > 1e-10),
     iterations = nrow(history),
     history = history,
+    proximal_scaling = scaling,
+    coordinate_scale = setNames(coordinate_scale, colnames(X)),
     call = match.call()
   )
 }
@@ -257,6 +315,7 @@ fit_profile_lasso_calibrated_v2 <- function(y,
     h_est <- (log(max(n_pen, 2)) / n_clusters_fit)^(1 / 4)
   }
   validate_tau_h_v2(tau, h_est)
+  t_stage_start <- proc.time()[[3]]
 
   # No penalised coordinates: plain (unpenalised) fit, no loading machinery.
   # Such fits are inference-focused refits (e.g. TRUE-SUPPORT), so use h_inf.
@@ -273,6 +332,9 @@ fit_profile_lasso_calibrated_v2 <- function(y,
       )
     )
     fit$first_stage_calibrated <- FALSE
+    fit$first_stage_sec <- proc.time()[[3]] - t_stage_start
+    fit$refit_sec <- NA_real_
+    fit$nuisance_iterations <- fit$components$nuisance_iterations %||% NA_integer_
     return(fit)
   }
   if (is.null(h_inf) || !is.finite(h_inf) || h_inf <= 0) {
@@ -293,7 +355,7 @@ fit_profile_lasso_calibrated_v2 <- function(y,
 
   fit_control <- modifyList(
     list(max_iter = 2000L, max_backtrack = 50L, beta_tol = 1e-7,
-         kkt_normalized_tol = 1e-3),
+         kkt_normalized_tol = 1e-3, hessian_refresh = hessian_refresh_v2()),
     control$fit_control %||% list()
   )
   nuisance_control <- control$nuisance_control %||%
@@ -427,6 +489,9 @@ fit_profile_lasso_calibrated_v2 <- function(y,
   # components are diagnostics only; the inferential objects are recomputed at
   # h_inf at the accepted beta_hat.
   fit$components_first_stage <- fit$components  # h_est, diagnostics only
+  nuis_first_stage <- fit$components$nuisance_iterations %||% NA_integer_
+  fit$first_stage_sec <- proc.time()[[3]] - t_stage_start
+  t_refit_start <- proc.time()[[3]]
 
   # ---------------------------------------------------------------------------
   # Round-5 post-L1 profile refit (METHOD_SPECIFICATION_ROUND5_AMENDMENT.md
@@ -510,7 +575,7 @@ fit_profile_lasso_calibrated_v2 <- function(y,
           comp_final <- tryCatch(
             profile_components_v2(
               y, X, Z, cluster_id, beta_refit, tau, h_inf, lambda_gamma,
-              gamma_init = NULL, need_hessian = TRUE,
+              gamma_init = NULL, need_hessian = TRUE, identity_check = TRUE,
               nuisance_control = nuisance_control
             ),
             error = function(e) e
@@ -518,11 +583,15 @@ fit_profile_lasso_calibrated_v2 <- function(y,
           if (!inherits(comp_final, "error")) {
             fit$components <- comp_final
             fit$gamma <- comp_final$gamma
+            fit$nuisance_iterations <- (nuis_first_stage %||% 0L) +
+              (comp_final$nuisance_iterations %||% 0L)
           }
         }
       }
     }
   }
+
+  fit$refit_sec <- proc.time()[[3]] - t_refit_start
 
   p_final <- lambda_0_n * ell_final
   fit$first_stage_calibrated <- TRUE
@@ -561,6 +630,9 @@ fit_profile_lasso_calibrated_v2 <- function(y,
   fit$post_refit_beta_change <- fit$post_refit_beta_change %||% NA_real_
   fit$post_refit_hessian_min_eigenvalue <- fit$post_refit_hessian_min_eigenvalue %||% NA_real_
   fit$post_refit_hessian_condition_number <- fit$post_refit_hessian_condition_number %||% NA_real_
+  fit$nuisance_iterations <- fit$nuisance_iterations %||% nuis_first_stage
+  fit$first_stage_sec <- fit$first_stage_sec %||% NA_real_
+  fit$refit_sec <- fit$refit_sec %||% NA_real_
   fit
 }
 
@@ -594,15 +666,48 @@ solve_dantzig_row_v2 <- function(H,
                                  solver_preference = c("CLARABEL", "ECOS", "SCS"),
                                  solver_opts = list()) {
   # Implementation-layer dispatcher (frozen program unchanged): env
-  # JPDMEQR_DANTZIG_SOLVER=osqp selects the warm-start chained OSQP path
-  # (Lever 1; one sparse KKT factorisation reused across the mu grid);
-  # parity with the CLARABEL reference is enforced by the solver parity test
-  # and the strict geometry Dantzig validation.
+  # JPDMEQR_DANTZIG_SOLVER selects an alternative solver path for the SAME
+  # frozen L1 program.
+  #   "cvxr" (default)  : frozen CVXR/CLARABEL reference path.
+  #   "osqp"            : warm-start chained OSQP (Lever 1). ADJUDICATED
+  #                       DECISION-INCOMPATIBLE at p >= 200 (see
+  #                       COMPUTATIONAL_OPTIMISATION_LEVER1_ADJUDICATION.md);
+  #                       kept default-off as instrumented evidence only.
+  #   "clarabel_native" : compact native CLARABEL cone form (layer-1). Same
+  #                       solver, same LP, 4p instead of 5p constraints;
+  #                       measured 1.28-1.6x with max|domega| = 2.2e-16 vs the
+  #                       reference. Parity: test-dantzig-native-parity.R.
+  #   "highs"           : the same compact form C solved by HiGHS with its
+  #                       default solver choice. ADJUDICATED INADVISABLE:
+  #                       2.37-3.12x faster on well-conditioned constructions,
+  #                       about 11.5x slower on the real profile Hessian at the
+  #                       registered cell (see
+  #                       COMPUTATIONAL_OPTIMISATION_HIGHS_PATH_REPORT.md
+  #                       section 5); kept default-off as instrumented evidence
+  #                       only. Parity: test-dantzig-highs-parity.R.
+  #   "dual_warm"       : the dual program min e_k'w + mu||w||_1 subject to
+  #                       ||H'w||_inf <= 1 on a persistent HiGHS simplex model,
+  #                       with the basis carried down the descending mu grid.
+  #                       One model per fold replaces one solve per (fold, mu),
+  #                       and an unbounded candidate settles every smaller
+  #                       candidate. Parity: test-dantzig-dual-warm-parity.R.
   mode <- Sys.getenv("JPDMEQR_DANTZIG_SOLVER",
                      unset = getOption("jpDMEQR.dantzig_solver", "cvxr"))
   if (identical(mode, "osqp") &&
       exists("solve_dantzig_row_osqp_contract_v2", mode = "function")) {
     return(solve_dantzig_row_osqp_contract_v2(H, coordinate, mu_grid))
+  }
+  if (identical(mode, "clarabel_native") &&
+      exists("solve_dantzig_row_native_v2", mode = "function")) {
+    return(solve_dantzig_row_native_v2(H, coordinate, mu_grid, solver_opts))
+  }
+  if (identical(mode, "highs") &&
+      exists("solve_dantzig_row_highs_v2", mode = "function")) {
+    return(solve_dantzig_row_highs_v2(H, coordinate, mu_grid, solver_opts))
+  }
+  if (identical(mode, "dual_warm") &&
+      exists("solve_dantzig_row_dual_warm_v2", mode = "function")) {
+    return(solve_dantzig_row_dual_warm_v2(H, coordinate, mu_grid, solver_opts))
   }
   if (!requireNamespace("CVXR", quietly = TRUE)) {
     stop("Package 'CVXR' is required for the Dantzig program.")
@@ -646,17 +751,14 @@ solve_dantzig_row_v2 <- function(H,
       CVXR::Minimize(CVXR::p_norm(omega_var, 1)),
       constraints
     )
-    # CVXR >= 1.9 renamed the exported solver entry point from solve to
-    # psolve and changed the return contract: psolve returns the optimal
-    # objective value, with the solution/status obtained via value() and
-    # status(). Older CVXR returned a result object with $status/$getValue.
+    # Problem 使用第一个位置参数，解与状态按实际返回结构读取。
     cvxr_solve <- if ("psolve" %in% getNamespaceExports("CVXR")) {
       getExportedValue("CVXR", "psolve")
     } else {
       getExportedValue("CVXR", "solve")
     }
     solved <- tryCatch(
-      do.call(cvxr_solve, c(list(problem = problem, solver = solver), solver_opts)),
+      do.call(cvxr_solve, c(list(problem, solver = solver), solver_opts)),
       error = function(e) e
     )
     if (inherits(solved, "error")) {
@@ -667,8 +769,9 @@ solve_dantzig_row_v2 <- function(H,
     if (is.numeric(solved) && length(solved) == 1L &&
         "value" %in% getNamespaceExports("CVXR") &&
         "status" %in% getNamespaceExports("CVXR")) {
-      # CVXR >= 1.9 contract: solved is the objective value.
-      status <- tryCatch(CVXR::status(problem), error = function(e) "unknown")
+      # 数值返回值对应目标函数，变量取值与状态由 Problem 对象读取。
+      status <- tryCatch(getExportedValue("CVXR", "status")(problem),
+                          error = function(e) "unknown")
       omega <- tryCatch(as.numeric(CVXR::value(omega_var)), error = function(e) NULL)
     } else {
       status <- solved$status %||% "unknown"

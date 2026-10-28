@@ -1,83 +1,171 @@
-\section{Simulation studies}\label{sec:simulation}
+\section{Numerical studies}\label{sec:simulation}
 
-The numerical study is organised around the inferential claims of Sections~\ref{sec:inference} and \ref{sec:theory}. It has five purposes: to show when profiling is needed; to audit the finite-sample behaviour of each term in the theoretical expansion; to compare the method with classical, recent, and oracle procedures; to assess robustness across quantile levels and error distributions; and to identify the settings in which sparse effective-inverse or nuisance-structure assumptions fail. The earlier simulation output is not retained because it used a largely low-dimensional design and truth-based coverage calibration. The corrected study is generated only from an implementation that passes the profile-gradient, profile-Hessian, and Schur-identity tests.
+\subsection{Population movement under smoothing}\label{subsec:smoothing-example}
 
-\subsection{Core design and modular registry}\label{subsec:sim-design}
+The repeated observation model permits a direct calculation of the
+coefficient pairing. A cluster contains two identical observations
+$Y\sim N(0,1)$, with $X=Z=1$ and $\Lambda=\lambda$.
+Deterministic integration gives the unsmoothed population minimiser,
+the minimiser at each positive bandwidth, and the coefficient
+combination $2\beta_{h/2}-\beta_h$. Figure~\ref{fig:joint-smoothing}
+shows their displacement from the unsmoothed target at $\tau=0.25$.
+Across $\lambda\in\{0.5,1,2\}$, the final local log-log slopes range
+from \JointSingleMinimumOrder{} to \JointSingleMaximumOrder{} for
+one bandwidth and from \JointPairMinimumOrder{} to
+\JointPairMaximumOrder{} for paired coefficients. The upper quartile
+has the same absolute displacement by reflection. Median roots are
+zero. The calculation isolates the linear term produced by profiling
+and its cancellation in the coefficient estimator.
 
-Independent clusters are generated from
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{generated/figures/fig_joint_smoothing.pdf}
+\caption{Population coefficient displacement in the repeated observation
+model at the lower quartile. Both axes use logarithmic scales. Circles
+show a single bandwidth and triangles show the paired coefficient
+$2\beta_{h/2}-\beta_h$. Each panel fixes the nuisance penalty. The
+points are deterministic integral calculations; an independent
+Gauss--Legendre quadrature checks the population score.
+The R plotting code was developed with OpenAI Codex.}
+\label{fig:joint-smoothing}
+\end{figure}
+
+\subsection{Independent simulation design}\label{subsec:sim-design}
+
+Independent clusters follow
 \[
- Y_{ij}=X_{ij}^{\mathsf T}\beta^0+Z_{ij}^{\mathsf T}b_i+\varepsilon_{ij},
- \qquad i=1,\ldots,n,
+ Y_{ij}=X_{ij}^T\beta^0+Z_{ij}^Tb_i+\varepsilon_{ij}.
 \]
-with
-\[
- n\in\{100,200,400\},\qquad
- m_i\in\{3,4,5,6,7,8\},\qquad
- p\in\{500,1000,2000\},\qquad
- s\in\{5,8,10\}.
-\]
-The baseline fixed-effect design is Gaussian AR(1) with correlation $0.5$ and alternating nonzero coefficients of magnitude $0.75$. Independent, strongly correlated AR(1), block, factor, sparse-precision, and dense-precision designs form a separate effective-inverse stress module. The random-effect design is either $Z_{ij}=1$ or $Z_{ij}=(1,t_{ij})^{\mathsf T}$, where $t_{ij}$ is centred visit time. In the random-intercept--slope design, the two cluster effects have correlation $0.4$. Gaussian, heavy-tailed $t_5$, mixture, and centred log-normal random effects are considered.
+The evaluation contains 24 settings, each with 60 independent datasets.
+Cluster sizes are sampled uniformly from three through eight.
+Covariate rows are centred Gaussian with
+$\Sigma_{kl}=\rho_X^{|k-l|}$, independent of the cluster effects and
+innovations. Five nonzero coefficients alternate in sign. Their
+reference magnitude is $0.75$, with $0.40$ in the weak-signal settings.
+The random-intercept standard deviation is one. For $q=2$, the
+random-slope standard deviation is $0.5$ and the two effects have
+correlation $0.4$.
 
-Every error innovation is shifted so that its conditional $\tau$-quantile is exactly zero. The required families are Gaussian, rescaled $t_3$, Laplace, standardised $\chi^2_3$, contaminated normal, asymmetric Laplace, heteroscedastic Gaussian, and heteroscedastic $t_3$. Target quantiles are $\tau\in\{0.25,0.50,0.75\}$. A copula-dependence sensitivity setting retains the selected marginal distribution while adding within-cluster serial dependence.
+The reference settings cross $n\in\{200,400\}$,
+$q\in\{1,2\}$ and $\tau\in\{0.25,0.50,0.75\}$ at $p=500$.
+Additional settings use standardised $t_3$ innovations, smaller
+signals, covariate correlation $0.8$, and $p=1000$ or $2000$.
+Every innovation is centred at its specified quantile. The complete
+configuration table appears in Supporting Information. Centred
+Gaussian designs satisfy the profile orthogonality identity, so the
+full population slope target equals $\beta^0$ in these settings.
+Coordinates 1 and 2 assess nonzero coefficients; coordinates 6 and 7
+assess zero coefficients.
 
-The experiment registry is modular rather than a prohibitively large full factorial. Module A studies finite-sample scaling in $n$, $p$, and $s$ and records all theorem diagnostics. Module B studies quantile and error robustness. Module C varies random-effect strength, distribution, dimension, cluster size, working penalty, and omitted random slopes. Module D stresses design correlation and sparse precision recovery. Module E varies the smoothing, fixed-effect penalty, nuisance penalty, and Dantzig tolerance one component at a time. Module F studies independent-cluster screening when $p\in\{5000,10000\}$. Module G records runtime, memory, iteration counts, and numerical failures. The complete frozen registry is supplied with the replication code.
+All tuning uses training data and the rules in
+Section~\ref{sec:inference}, with $\Lambda=I$ and $h=n^{-3/10}$.
+The procedure was fixed before this independent evaluation. The
+resulting \JointDatasets{} datasets provide \JointIntervals{}
+requested intervals, all of which were computed. Each replication
+contributes its mean coverage within the active or null coordinate
+group. Monte Carlo standard errors use these replication averages
+and retain the scenario strata. Coordinatewise exact binomial
+intervals are reported separately in Supporting Information.
 
-In correctly specified centred slope designs, performance is reported relative to the structural coefficient. Under nuisance misspecification or other settings in which structural and regularised profile targets need not coincide, $\beta^{\star}$ is approximated by population optimisation over at least $10^5$ independently generated clusters. The approximation is repeated with at least four independent seeds, and its between-run error must be negligible relative to the Monte Carlo standard error before coverage is evaluated.
+\subsection{Conditional adjustment and interval coverage}\label{subsec:sim-comparators}
 
-\begin{table}[t]
-\caption{Primary simulation modules and their role in validating the method.}\label{tab:simulation-grid}
-\begin{tabularx}{\textwidth}{@{}lX@{}}
-\toprule
-Module & Principal factors and inferential purpose \\
-\midrule
-A: theory scaling & $n=100,200,400$; $p=500,1000,2000$; estimation, Hessian, precision-row, and Bahadur rates \\
-B: error robustness & Gaussian, $t_3$, Laplace, skewed, contaminated, asymmetric, and heteroscedastic errors at three quantiles \\
-C: nuisance structure & Random intercept/slope, non-Gaussian effects, variance strength, cluster size, omitted slopes, and working-$\Lambda$ sensitivity \\
-D: precision stress & Independent, AR(1), block, factor, sparse-inverse, and dense-inverse fixed-effect designs \\
-E: tuning sensitivity & Prespecified grids for $h$, $\lambda_{\beta}$, $\Lambda$, and the Dantzig tolerance \\
-F: screening & $p=5000,10000$ with independent subject screening, heuristic screening, and oracle support \\
-G: computation & Runtime, memory, iterations, KKT residuals, Dantzig feasibility, and failure classification \\
-\bottomrule
-\end{tabularx}
-\end{table}
+A paired ablation removes $S_{fk}^X$ from
+\eqref{eq:selected-set}. It retains the outcome search, profile
+adjustment, bandwidths, coefficient fits and variance formula. Both
+procedures use the same generated datasets and subject partitions.
+This comparison tests whether conditional covariates recover
+adjustments that the outcome and profile searches omit.
 
-\subsection{Comparators and tuning}\label{subsec:sim-comparators}
+Table~\ref{tab:joint-simulation} reports coverage together with interval
+length. Across all settings, active-coordinate coverage is
+\JointActiveCoverage{} with Monte Carlo standard error
+\JointActiveMCSE{}. Null-coordinate coverage is
+\JointNullCoverage{} with standard error \JointNullMCSE{}.
+The corresponding ablation coverages are
+\JointActiveAblationCoverage{} and \JointNullAblationCoverage{}.
+For active coordinates, the paired coverage difference is
+\JointActiveCoverageDifference{} with Monte Carlo standard error
+\JointActiveDifferenceMCSE{}.
 
-The practical proposed estimator is compared with four method classes. Classical procedures include pooled quantile Lasso and low-dimensional linear quantile mixed models \cite{geraci2014,geraci2014jss}. Direct mixed-quantile competitors include double-penalised quantile mixed modelling \cite{li2020} and the many-small-cluster bias-adjusted estimator of \citeA{battagliola2022}. Recent high-dimensional procedures include independent-observation debiased smoothed quantile regression \cite{yan2023}, penalised longitudinal quantile estimating equations \cite{zu2023}, and quadratic-inference-function variable selection \cite{bhattacharya2026}. Oracle procedures use the true support, generated nuisance effects, or population effective direction to isolate the costs of selection, nuisance estimation, and precision estimation.
+The effect is concentrated in the smaller-signal settings. Their
+active-coordinate coverage is \JointWeakCoverage{} for the complete
+procedure and \JointWeakAblationCoverage{} for the ablation, a paired
+difference of \JointWeakDifference{} with standard error
+\JointWeakDifferenceMCSE{}. The exact Gaussian projection formula
+also identifies \JointAblationShiftCount{} ablated coordinate fits
+whose fold-averaged population target differs from the full target by
+more than $10^{-8}$. The largest absolute shift is
+\JointAblationMaxShift{}. Every selected coordinate target of the
+complete procedure agrees with the full target at that tolerance.
 
-These procedures do not always target the same population quantity. Estimation, selection, prediction, and coverage comparisons are therefore separated. Low-dimensional methods receive either the oracle support or the same independently selected support, and the distinction is explicit. Marginal longitudinal methods are compared on their own target unless the data-generating design makes the marginal and profile targets coincide.
+\input{generated/joint_profile/simulation_groups}
 
-All non-oracle tuning is nested within cluster-level folds. The reference grids satisfy $h=c_hn^{-1/3}$, $\lambda_{\beta}=c_{\lambda}\{\log(p)/n\}^{1/2}$, and
-\[
- \mu=c_{\mu}\left[\left\{\frac{\log p}{nh}\right\}^{1/2}+h^2\right],
-\]
-with multipliers fixed before the experiment. The smallest feasible Dantzig tolerance on the frozen grid is used. Failed optimisation, infeasible precision programs, and warning fits are retained and classified. No tuning value, correction multiplier, or standard-error factor may depend on the known simulation truth, empirical bias, or empirical coverage.
+The adjustment has a precision cost. Mean active-coordinate interval
+length increases from \JointActiveAblationLength{} to
+\JointActiveLength{}, and the corresponding null-coordinate lengths
+are \JointNullAblationLength{} and \JointNullLength{}. The complete
+procedure therefore spends precision to retain the desired coordinate
+when selection omits part of the outcome model. The correlation and
+larger-dimension settings in Table~\ref{tab:joint-simulation} also
+show that the coverage difference varies across configurations.
 
-\subsection{Performance measures and finite-sample theory audit}\label{subsec:sim-metrics}
+\subsection{Growing sample size and influence approximation}\label{subsec:sim-influence}
+\input{generated/submission/gaussian_values}
 
-For estimation we report $\ell_1$ and $\ell_2$ error, maximum active-coordinate error, true-positive rate, false-discovery proportion, exact support recovery, and selected model size. Prediction is evaluated on new clusters by pinball loss, skill relative to pooled and intercept-only quantile predictions, and empirical quantile calibration.
+A separate scaling study varies $n\in\{100,200,400\}$ and
+$p\in\{500,1000,2000\}$ with five active coefficients. An additional
+sequence has ten active coefficients at $p=1000$. These twelve
+settings use Gaussian innovations, a random intercept, covariate
+correlation $0.5$ and the median quantile. Each setting has 1000
+independent replications, except those at $p=2000$, which have 500.
+All \GaussianDiagnosticDatasets{} datasets complete the proposed fit.
 
-For inference we report bias of $\widetilde\beta_k$, empirical standard deviation, mean estimated standard error, their ratio, 90\% and 95\% coverage, interval length, null type-I error, signal power, studentised quantile--quantile diagnostics, and null $p$-value uniformity. The proof architecture is assessed directly through smoothing-target error, effective-Hessian max-norm error, Schur-identity discrepancy, Dantzig residual, precision-row error, and the scaled Bahadur remainder. Computational reporting includes wall time, peak memory, outer and nuisance iterations, maximum nuisance gradient, KKT residual, Hessian condition number, solver status, and failure stage.
+The Gaussian design permits a direct evaluation of the population
+inverse row through the Stein calculation in Supporting Information.
+We use it to evaluate the cluster contribution in
+\eqref{eq:influence} at the generating coefficient. The scaled
+remainder subtracts its sample average from the coefficient error
+and multiplies the difference by $\sqrt n$.
+Figure~\ref{fig:gaussian-influence} shows the root mean squared
+remainder together with Hessian and inverse-row errors. At $p=1000$
+and $s=5$, the remainder decreases from
+\GaussianRemainderFiveSmall{} at 100 clusters to
+\GaussianRemainderFiveLarge{} at 400. The corresponding values
+with ten active coefficients are \GaussianRemainderTenSmall{}
+and \GaussianRemainderTenLarge{}. The selected Gaussian targets
+agree with the requested full-design coordinates within $10^{-8}$
+in every estimation fold. The remaining approximation error thus
+comes from estimation of the selected coefficients and their
+influence representation in these settings.
 
-The pilot registry uses 200 replications per configuration and is a debugging gate. Core inferential settings use 1000 replications; secondary robustness settings use 500. Every summary reports Monte Carlo standard errors and, for coverage and type-I error, a binomial interval. Method differences use common random numbers and paired Monte Carlo uncertainty.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{generated/figures/fig_gaussian_influence_diagnostics.pdf}
+\caption{Gaussian scaling diagnostics for the proposed estimator.
+The left panel gives the mean maximum-entry error of the selected
+Hessian evaluated at the full target. The middle panel gives the
+mean Euclidean error of each fitted inverse row relative to its
+unsmoothed population row. Both averages include the two bandwidths,
+estimation folds and requested coordinates. The right panel gives
+the root mean squared scaled influence remainder. Colours and
+symbols identify the dimension and sparsity settings. Bars show
+1.96 Monte Carlo standard errors on either side of each estimate;
+both axes use logarithmic scales. The R plotting code was developed
+with OpenAI Codex.}
+\label{fig:gaussian-influence}
+\end{figure}
 
-\subsection{Results structure and acceptance rules}\label{subsec:sim-results}
+\subsection{Computational scaling}\label{subsec:sim-metrics}
 
-Table~\ref{tab:simulation-results-shell} fixes the minimum inferential reporting structure before computation. The main experiment begins only after the reference implementation passes the numerical geometry tests and the pilot shows no systematic score sign, scaling, or variance error. A configuration is not declared successful merely because prediction improves. The empirical standard deviation and average estimated standard error must be commensurate, coverage should approach nominal as $n$ increases, the profile identity must remain at numerical precision, and all failure rates must be reported.
+Twenty timed repetitions at each dimension use $n=200$, $q=1$,
+$\tau=0.50$ and four requested coordinates. Table~\ref{tab:joint-runtime}
+reports single-process elapsed fitting time on an ARM64 macOS
+computer with R 4.3.2, excluding data generation. The median
+is \JointRuntimeFiveHundred{} seconds at $p=500$ and
+\JointRuntimeTenThousand{} seconds at $p=10000$. Most computation
+occurs in the selection samples; the final two-bandwidth fits involve
+only their selected coordinate sets. These measurements include
+profile and conditional covariate selection, so they measure the
+implemented statistical procedure.
 
-\begin{table}[t]
-\caption{Principal inferential outputs to be populated from the frozen simulation registry. Dashes are deliberate placeholders.}\label{tab:simulation-results-shell}
-\small
-\begin{tabularx}{\textwidth}{@{}Xccccc@{}}
-\toprule
-Scenario & Bias & Emp. SD & Avg. SE & Coverage & Avg. length \\
-\midrule
-Random intercept, Gaussian & -- & -- & -- & -- & -- \\
-Random intercept--slope, $t_3$ & -- & -- & -- & -- & -- \\
-Contaminated and heteroscedastic errors & -- & -- & -- & -- & -- \\
-Omitted random slope, profile target & -- & -- & -- & -- & -- \\
-Dense effective inverse stress test & -- & -- & -- & -- & -- \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
+\input{generated/joint_profile/runtime}

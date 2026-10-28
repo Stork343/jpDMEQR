@@ -1,0 +1,18 @@
+{
+  "method_id": "PROFILE-DQR-POP-H",
+  "method_version": "profile_pair_20261022",
+  "score_definition": "profile_bandwidth_pair_2_half_minus_full",
+  "commit_sha": "0b4023b1f3f472709283d4aa563f88847b9de82b",
+  "reference_identifier": "docs/METHOD_SPECIFICATION.md",
+  "unit_test_pass": true,
+  "limiting_case_pass": true,
+  "fidelity_check_pass": true,
+  "schema_check_pass": true,
+  "deterministic_seed_pass": true,
+  "allowed_metrics": "coverage|precision_gap",
+  "test_names": "PROFILE-DQR-POP-H paired deterministic schema limiting case and fidelity",
+  "assertion_count": 30,
+  "population_fixture": "independent genuine DGP development assets from the paired population builders",
+  "final_population_assets_accepted": false,
+  "created_utc": "2026-10-22 11:11:31 UTC"
+}

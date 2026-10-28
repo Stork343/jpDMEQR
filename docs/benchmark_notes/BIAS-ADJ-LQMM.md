@@ -29,8 +29,8 @@ or oracle support only.
 3. **Bootstrap** (B=100 by default, as in the paper):
    - wild weights `w ~ {2(1-tau) w.p. 1-tau; -2tau w.p. tau}` (zero
      tau-quantile);
-   - cluster random effects resampled with replacement from the centred BLP
-     distribution `{u_est_i}`;
+   - random intercepts sampled with replacement from the centred BLP vector
+     expanded to observation rows, as in the official `ran_int_bias_adj.R`;
    - bootstrap response `Y* = X'beta_hat + Z' u* + w|residual|`;
    - *oracle replicate*: rq of `Y* - Z'u*` on X (no LQMM);
    - *two-step replicate*: re-run the full LQMM+rq pipeline on `Y*`.
@@ -43,15 +43,19 @@ or oracle support only.
 
 ## Deviations / decisions
 
-- Random-intercept-only support (q=1 nuisance column), matching the source
-  `ran_int_bias_adj.R`. A random-slope extension is explicitly refused with
-  a `failed` status rather than silently approximated.
+- The working random effect is an intercept, matching the official
+  `ran_int_bias_adj.R`. On a generated random-slope design this remains an
+  intercept working model. Its output records that working structure.
 - The fixed-effect formula is `y ~ 0 + X` (no forced intercept) so the
   coefficient names align with the supplied design; the source code's
   intercept handling is reproduced when the design contains one.
-- Bootstrap count is B=100 unless overridden by `control$B`; a run with fewer
-  than 50% successful bootstrap replications returns `failed` (faithful
-  failure reporting rather than a degraded estimate).
+- Bootstrap count is B=100 unless a calculation explicitly supplies another
+  count. All requested resamples must complete. A failed fit terminates the
+  method attempt with the partial bootstrap objects and failure index.
+- The second-stage and bootstrap quantile regressions use the explicit
+  fixed-effect formula. Cluster identifiers serve as grouping labels.
+- Observed standard errors and bootstrap standard-deviation ratios must
+  be positive and finite for the source interval to be reported.
 - Tuning uses training clusters only; seeds are deterministic.
 
 ## Allowed metrics
@@ -66,9 +70,10 @@ only through the faithful SE-adjusted/basic-bootstrap interval procedure.
 
 ## Acceptance evidence
 
-`results/preflight/benchmarks/BIAS-ADJ-LQMM/acceptance.json` from
-`scripts/benchmarks/accept_bias_adj_lqmm.R` and unit test
-`tests/testthat/test-benchmark-BIAS-ADJ-LQMM.R`.
+The unit tests are in `tests/testthat/test-benchmark-BIAS-ADJ-LQMM.R`.
+Source fidelity also compares the complete estimator and interval with
+the locally archived official function, with plotting disabled and the
+same observations, seed, quadrature rule and resample count.
 
 Fidelity checks:
 
@@ -77,5 +82,5 @@ Fidelity checks:
    effect (limits to ordinary QR with a small cluster correction).
 3. Zero-quantile property of the wild weights is verified empirically.
 4. Deterministic seed reproduces identical output.
-5. Failure is returned (not a degraded estimate) when bootstrap success
-   fraction is too low.
+5. Incomplete resampling and invalid variance inputs produce a recorded
+   method failure.

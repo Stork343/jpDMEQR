@@ -1,143 +1,147 @@
-\section{Model, profile target and penalised estimation}\label{sec:model}
+\section{The complete quantile profile and its target}\label{sec:model}
 
-\subsection{Clustered quantile model and asymptotic regime}\label{subsec:model}
+\subsection{Clustered observations}\label{subsec:model}
 
-Let $D_i=\{(Y_{ij},X_{ij},Z_{ij}):j=1,\ldots,m_i\}$ denote cluster $i$, where $i=1,\ldots,n$. The clusters are independent, while observations within a cluster may be arbitrarily dependent subject to the moment conditions stated later. Here $Y_{ij}\in\R$ is the response, $X_{ij}\in\R^p$ is the fixed-effect design, and $Z_{ij}\in\R^q$ is the design for cluster-specific effects. We consider
+Let $D_i=\{(Y_{ij},X_{ij},Z_{ij}):j=1,\ldots,m_i\}$ denote cluster
+$i$, for $i=1,\ldots,n$. The response is scalar,
+$X_{ij}\in\mathbb R^p$ is the fixed-effect design, and
+$Z_{ij}\in\mathbb R^q$ describes an intercept or a small collection of
+cluster effects. Clusters are independent. Their sizes satisfy
+$2\leq m_i\leq m_{\max}<\infty$ in the asymptotic regime, while
+$p=p_n$ can exceed $n$ and $q$ remains fixed. A structural model
+motivating the criterion is
 \begin{equation}\label{eq:structural-model}
- Q_{\tau}(Y_{ij}\mid X_i,Z_i,b_i)
- =X_{ij}^{\mathsf T}\beta^0+Z_{ij}^{\mathsf T}b_i,
- \qquad \tau\in(0,1),
+ Q_\tau(Y_{ij}\mid X_i,Z_i,b_i)
+       =X_{ij}^T\beta^0+Z_{ij}^Tb_i,\qquad \tau\in(0,1).
 \end{equation}
-where $X_i=(X_{i1},\ldots,X_{im_i})^{\mathsf T}$ and $Z_i=(Z_{i1},\ldots,Z_{im_i})^{\mathsf T}$. The dimension $q$ is fixed. The number of clusters $n$ tends to infinity, the cluster sizes satisfy $m_i\leq m_{\max}<\infty$, and $p=p_n$ may exceed $n$. The structural representation in \eqref{eq:structural-model} motivates the working criterion, but the primary inferential target is the regularised profile parameter defined below.
+The working nuisance design can also approximate cluster
+heterogeneity. Every empirical average uses the number of independent
+clusters. Averaging the loss within a cluster gives each subject unit
+weight, including when visit counts vary.
 
-We use the number of independent clusters, rather than the total number of observations, as the asymptotic sample size. Each cluster receives equal weight by averaging its within-cluster loss. This convention avoids changing the population target when cluster sizes vary. Observation-weighted versions are obtained by replacing $m_i^{-1}$ by prespecified bounded weights; their profile calculus is identical after carrying the weights through the definitions.
+The fixed-effect design may contain a prespecified set $\mathcal U$
+of always-included covariates. The remaining coordinates are eligible
+for selection. Target coordinates are specified before their
+estimation outcomes are used.
 
-The fixed-effect vector may include a fixed number of always-included coefficients, such as an intercept, time, treatment, or demographic covariates. In computation these coordinates receive penalty weight zero. To keep notation concise, the theoretical statements write a single vector $\beta$ and impose sparsity on its high-dimensional component.
+\subsection{An unsmoothed population parameter}\label{subsec:target}
 
-\subsection{An unsmoothed regularised profile target}\label{subsec:target}
-
-For a positive-definite $q\times q$ working penalty matrix $\Lambda$, define the cluster criterion
+Fix a positive-definite working matrix $\Lambda\in\mathbb R^{q\times q}$.
+With $\rho_\tau(u)=u\{\tau-I(u<0)\}$, define
 \begin{equation}\label{eq:cluster-unsmoothed}
- \ell_i(\beta,\gamma;D_i)
- =\frac{1}{m_i}\sum_{j=1}^{m_i}
- \rho_{\tau}\!\left(Y_{ij}-X_{ij}^{\mathsf T}\beta-Z_{ij}^{\mathsf T}\gamma\right)
- +\frac{1}{2}\gamma^{\mathsf T}\Lambda\gamma,
+ \ell_i(\beta,\gamma)=\frac1{m_i}\sum_j
+       \rho_\tau(Y_{ij}-X_{ij}^T\beta-Z_{ij}^T\gamma)
+                    +\tfrac12\gamma^T\Lambda\gamma.
 \end{equation}
-where $\rho_{\tau}(u)=u\{\tau-I(u<0)\}$. Since $\Lambda$ is positive definite, the nuisance minimiser
+The nuisance minimiser
 \begin{equation}\label{eq:gamma-target}
- \gamma_i^{\dagger}(\beta;D_i)
- =\argmin_{\gamma\in\R^q}\ell_i(\beta,\gamma;D_i)
+ \gamma_i^\dagger(\beta)=\argmin_{\gamma\in\mathbb R^q}
+                              \ell_i(\beta,\gamma)
 \end{equation}
-exists and is unique for every $\beta$ and realised cluster. The population profile risk is
+is unique. The population risk and target are
 \begin{equation}\label{eq:population-profile-risk}
- R(\beta)=\E\left[\ell_i\{\beta,\gamma_i^{\dagger}(\beta;D_i);D_i\}\right],
- \qquad
- \beta^{\star}=\argmin_{\beta\in\R^p}R(\beta).
+ R_0(\beta)=\E\ell_i\{\beta,\gamma_i^\dagger(\beta)\},
+ \qquad \beta^\star\in\argmin_{\beta\in\mathbb R^p}R_0(\beta).
 \end{equation}
-The expectation is over an independent generic cluster. The parameter $\beta^{\star}$ depends on $\Lambda$ but not on a smoothing bandwidth. We call it the regularised profile parameter.
+The expectation follows the actual distribution of independent
+clusters, including their visit counts. This regularised profile
+parameter depends on $\Lambda$ and is defined before introducing a
+smoothing bandwidth.
 
-The distinction between $\beta^{\star}$ and $\beta^0$ is substantive. When cluster sizes remain bounded, the data contain limited information about each $b_i$. The ridge subproblem replaces the unidentified or unstable cluster effect by a regularised cluster projection, and $\beta^{\star}$ records the fixed-effect component of the resulting population projection. Equality $\beta^{\star}=\beta^0$ requires an orthogonality condition,
+At the nuisance optimum, a dual vector
+$s_i\in[\tau-1,\tau]^{m_i}$ satisfies
+\[
+ \Lambda\gamma_i^\dagger=m_i^{-1}Z_i^Ts_i,\qquad
+ s_{ij}\in\partial\rho_\tau
+       (Y_{ij}-X_{ij}^T\beta-Z_{ij}^T\gamma_i^\dagger).
+\]
+It gives the cluster subgradient $-m_i^{-1}X_i^Ts_i$. A joint
+conditional outcome density makes the dual vector unique almost surely
+at a fixed $\beta$. Its coordinates at zero residuals are determined
+by the nuisance stationarity equation. The Supporting Information
+establishes this uniqueness and the corresponding smoothing limit.
+
+Under population differentiability and identification, the structural
+slope equals the profile target when
 \begin{equation}\label{eq:structural-orthogonality}
- \E\left[\partial_{\beta}
- \ell_i\{\beta^0,\gamma_i^{\dagger}(\beta^0;D_i);D_i\}\right]=0,
+ \E\{-m_i^{-1}X_i^Ts_i(\beta^0)\}=0.
 \end{equation}
-interpreted through a subgradient when needed. This condition can hold for within-cluster centred slope covariates in a random-intercept location-shift model, but it does not generally hold for the intercept, between-cluster covariates, random-slope misspecification, or arbitrary shrinkage. We therefore state all inferential results for $\beta^{\star}$ and discuss structural interpretation coordinate by coordinate.
+Centred fixed-effect covariates independent of the cluster nuisance
+design and location-shift errors give this equality for the relevant
+slopes. In general, inference concerns the projection in
+\eqref{eq:population-profile-risk}. Its definition continues to apply
+when the structural interpretation changes.
 
-The matrix $\Lambda$ may be written as $\lambda_{\gamma}G^{-1}$, where $G$ is a prespecified positive-definite working correlation matrix for the cluster effects. The main theory treats $\Lambda$ as fixed with bounded eigenvalues. Estimating a low-dimensional $G$ is a practically useful extension, but its uncertainty must be included in the profile linearisation before it is used in the main inferential theorem.
+\subsection{Population targets after dimension reduction}\label{subsec:selected-target}
 
-\subsection{Convolution smoothing and the penalised estimator}\label{subsec:estimation}
+For a set $A$ containing a target coordinate $k$, let
+\begin{equation}\label{eq:selected-population-target}
+ \beta_A^P\in\argmin_{\beta:\,\beta_{A^c}=0}R_0(\beta).
+\end{equation}
+The vector is embedded in $\mathbb R^p$. Its $k$th coordinate can
+differ from $\beta_k^\star$ even when the reduced model predicts well.
+For example, suppose two centred Gaussian covariates have unit
+variances and correlation $\rho$, and are independent of the cluster
+errors and nuisance effects. Fitting only the first covariate gives
+the profile coefficient $\beta_1^0+\rho\beta_2^0$. With coefficients
+$0.4$ and $-0.4$ and correlation $0.5$, that target is $0.2$.
+Retaining an adjustment variable can therefore matter before any
+standard error is calculated.
 
-Let $K$ be a symmetric second-order probability density supported on a compact interval, and set $K_h(u)=h^{-1}K(u/h)$. The convolution-smoothed check loss is
+Our selected sets approximate both the coefficient vector and the
+population contrast for the target. The first approximation controls
+profile risk; the second controls the effect of omitted covariates on
+the target coordinate. Section~\ref{sec:theory} bounds
+$|\beta_{A,k}^P-\beta_k^\star|$ using their product and gives an exact
+conditional-covariate result for Gaussian designs.
+
+\subsection{Smoothed profile geometry}\label{subsec:profile-calculus}
+
+Let $K$ be a symmetric density with compact support and define
 \begin{equation}\label{eq:smoothed-loss}
- \rho_{\tau,h}(u)=\int \rho_{\tau}(u-hv)K(v)\,dv.
+ \rho_{\tau,b}(u)=\int\rho_\tau(u-bv)K(v)\,dv,
+ \quad \psi_{\tau,b}=\rho_{\tau,b}',\quad
+ \phi_{\tau,b}=K_b,\qquad K_b(u)=K(u/b)/b.
 \end{equation}
-Write $\psi_{\tau,h}(u)=\rho_{\tau,h}'(u)$ and $\phi_{\tau,h}(u)=\rho_{\tau,h}''(u)=K_h(u)$. The smoothed cluster criterion is
+The computations use the Epanechnikov kernel. For $b>0$ put
 \begin{equation}\label{eq:cluster-smoothed}
- \ell_{i,h}(\beta,\gamma;D_i)
- =\frac{1}{m_i}\sum_{j=1}^{m_i}
- \rho_{\tau,h}\!\left(Y_{ij}-X_{ij}^{\mathsf T}\beta-Z_{ij}^{\mathsf T}\gamma\right)
- +\frac{1}{2}\gamma^{\mathsf T}\Lambda\gamma.
+ \ell_{i,b}(\beta,\gamma)=m_i^{-1}\sum_j
+ \rho_{\tau,b}(Y_{ij}-X_{ij}^T\beta-Z_{ij}^T\gamma)
+                  +\tfrac12\gamma^T\Lambda\gamma,
 \end{equation}
-Its population profile minimiser is denoted by $\beta_h^{\star}$. The estimator is
-\begin{equation}\label{eq:penalised-estimator}
- (\widehat\beta,\widehat\gamma)
- \in\argmin_{\beta\in\R^p,\,\gamma_i\in\R^q}
- \left[
- \frac{1}{n}\sum_{i=1}^n\ell_{i,h}(\beta,\gamma_i;D_i)
- +\lambda_{\beta}\sum_{k=1}^p w_k|\beta_k|
- \right],
-\end{equation}
-where $w_k=0$ for always-included coordinates and $w_k=1$ for penalised coordinates. The criterion is jointly convex. The $\gamma_i$ subproblems are strictly convex and separable across clusters.
-
-A block algorithm alternates between a proximal-gradient update for $\beta$ and low-dimensional Newton updates for the $\gamma_i$. Because the objective is convex, standard sufficient-decrease and vanishing-inner-error conditions are enough for convergence to a global minimiser \cite{tseng2009,razaviyayn2013,wright2015}. We do not require global strong convexity of the fixed-effect block. Algorithm~\ref{alg:estimation} records the implementation used for the corrected numerical study.
-
-\begin{algorithm}[t]
-\caption{Smoothed regularised profile estimation}\label{alg:estimation}
-\begin{algorithmic}[1]
-\State Initialise $\beta^{(0)}$ by pooled smoothed quantile Lasso and set $\gamma_i^{(0)}=0$.
-\For{$t=0,1,\ldots$}
-  \State Update $\beta$ by proximal gradient/FISTA for the criterion in \eqref{eq:penalised-estimator} with $\gamma=\gamma^{(t)}$.
-  \For{$i=1,\ldots,n$ in parallel}
-    \State Update $\gamma_i$ by damped Newton minimisation of $\ell_{i,h}(\beta^{(t+1)},\gamma_i;D_i)$.
-  \EndFor
-  \State Stop when the relative objective change and the maximum KKT residual are below tolerance.
-\EndFor
-\State Return $(\widehat\beta,\widehat\gamma)$ and retain the complete optimisation log.
-\end{algorithmic}
-\end{algorithm}
-
-The theoretical order $\lambda_{\beta}\asymp\sqrt{\log(p)/n}$ supplies a reference grid. In finite samples, $\lambda_{\beta}$ and a scalar $\lambda_{\gamma}$ are selected by subject-level cross-validation, never by splitting individual observations within a cluster. The bandwidth is parameterised as $h=c_h\widehat s_Yn^{-1/3}$, where $\widehat s_Y$ is a robust response scale estimated within the training clusters and $c_h$ is varied over a fixed sensitivity grid. This order is compatible with the explicit feasible regime in Section~\ref{subsec:feasible}.
-
-\subsection{Exact profile score and effective Hessian}\label{subsec:profile-calculus}
-
-For each $\beta$, let
-\begin{equation}\label{eq:empirical-gamma-profile}
- \widehat\gamma_i(\beta)
- =\argmin_{\gamma\in\R^q}\ell_{i,h}(\beta,\gamma;D_i)
-\end{equation}
-and define
-\begin{equation}\label{eq:empirical-profile-loss}
- L_{n,h}^{\mathrm{prof}}(\beta)
- =\frac{1}{n}\sum_{i=1}^n
- \ell_{i,h}\{\beta,\widehat\gamma_i(\beta);D_i\}.
-\end{equation}
-Let $r_i(\beta)=Y_i-X_i\beta-Z_i\widehat\gamma_i(\beta)$,
+and write
+\[
+ \widehat\gamma_{i,b}(\beta)=\argmin_\gamma\ell_{i,b}(\beta,\gamma),
+ \qquad \ell_{i,b}^{\mathrm{prof}}(\beta)
+          =\ell_{i,b}\{\beta,\widehat\gamma_{i,b}(\beta)\}.
+\]
+At residual $r_i=Y_i-X_i\beta-Z_i\widehat\gamma_{i,b}(\beta)$, define
 \begin{equation}\label{eq:WiBiAi}
- W_i(\beta)=\frac{1}{m_i}\diag\{\phi_{\tau,h}(r_{ij}(\beta))\}_{j=1}^{m_i},
- \quad
- B_i(\beta)=Z_i^{\mathsf T}W_i(\beta)Z_i+\Lambda,
-\end{equation}
-\begin{equation}\label{eq:Ai}
- A_i(\beta)=B_i(\beta)^{-1}Z_i^{\mathsf T}W_i(\beta)X_i,
- \qquad
- \widetilde X_i(\beta)=X_i-Z_iA_i(\beta).
+ W_i=m_i^{-1}\diag\{K_b(r_{ij})\},\quad
+ B_i=Z_i^TW_iZ_i+\Lambda,\quad A_i=B_i^{-1}Z_i^TW_iX_i.
 \end{equation}
 
-\begin{proposition}[Exact profile calculus]\label{prop:profile-calculus}
-For every $\beta$ at which the smoothed criterion is twice differentiable, the gradient of the complete ridge-profile loss is
-\begin{equation}\label{eq:profile-score}
- g_{n,h}(\beta)=\nabla L_{n,h}^{\mathrm{prof}}(\beta)
- =-\frac{1}{n}\sum_{i=1}^n\frac{1}{m_i}
- X_i^{\mathsf T}\psi_{\tau,h}\{r_i(\beta)\}.
-\end{equation}
-Its Hessian is
+\begin{proposition}[Complete profile calculus]\label{prop:profile-calculus}
+The cluster profile gradient and Hessian are
 \begin{align}
- \widehat H_{\mathrm{eff}}(\beta)
- &=\frac{1}{n}\sum_{i=1}^n
- \left[
- X_i^{\mathsf T}W_iX_i
- -X_i^{\mathsf T}W_iZ_iB_i^{-1}Z_i^{\mathsf T}W_iX_i
- \right] \label{eq:heff-schur}\\
- &=\frac{1}{n}\sum_{i=1}^n
- \left[
- \widetilde X_i^{\mathsf T}W_i\widetilde X_i
- +A_i^{\mathsf T}\Lambda A_i
- \right]. \label{eq:heff-ridge-identity}
+ g_{i,b}(\beta)&=-m_i^{-1}X_i^T\psi_{\tau,b}(r_i),
+                                  \label{eq:profile-score}\\
+ H_{i,b}(\beta)&=X_i^TW_iX_i-X_i^TW_iZ_iB_i^{-1}Z_i^TW_iX_i.
+                                  \label{eq:heff-schur}
 \end{align}
-All matrices on the right-hand sides are evaluated at $\beta$. The two expressions are identical.
+With $\widetilde X_i=X_i-Z_iA_i$, the same Hessian equals
+\begin{equation}\label{eq:heff-ridge-identity}
+ H_{i,b}=\widetilde X_i^TW_i\widetilde X_i+A_i^T\Lambda A_i.
+\end{equation}
+It is positive semidefinite and satisfies
+\begin{equation}\label{eq:schur-variational}
+ v^TH_{i,b}v=\min_a
+ \{\|W_i^{1/2}(X_iv-Z_ia)\|_2^2+a^T\Lambda a\}.
+\end{equation}
 \end{proposition}
 
-The proof follows from the envelope theorem, implicit differentiation of the $\gamma_i$ stationarity equations, and direct algebra; it is given in the \supp. Proposition~\ref{prop:profile-calculus} fixes the object used throughout the paper. The score in \eqref{eq:profile-score} uses $X_i$, not $\widetilde X_i$. Residualisation enters the Hessian through the derivative of the profile map. When the Schur complement is written as a weighted Gram matrix of $\widetilde X_i$, the positive term $A_i^{\mathsf T}\Lambda A_i$ is indispensable. It vanishes only when the nuisance penalty vanishes or the fixed and nuisance designs are locally orthogonal.
-
-The implementation evaluates three identities before any simulation or data analysis is accepted: a finite-difference check of \eqref{eq:profile-score}, a finite-difference check of \eqref{eq:heff-schur}, and a direct numerical comparison of \eqref{eq:heff-schur} with \eqref{eq:heff-ridge-identity}. These checks isolate algebraic errors from asymptotic approximation errors.
-
+The envelope theorem gives the gradient. Differentiating nuisance
+stationarity yields $\partial\widehat\gamma_{i,b}/\partial\beta^T=-A_i$,
+which gives the Schur complement. Completing the square proves
+\eqref{eq:schur-variational}. These identities determine the curvature
+used for both adjustment selection and the final coefficient fits.

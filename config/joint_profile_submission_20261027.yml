@@ -1,0 +1,35 @@
+version: joint_profile_submission_20261027
+population_target: unsmoothed_complete_ridge_profile
+generating_registry: config/simulation_main.csv
+pilot_registry: config/simulation_pilot.csv
+preflight_registry: config/simulation_preflight.csv
+base_seed: 20261027
+method_mapping:
+  PROFILE-DQR: JOINT-PROFILE
+  PROFILE-DQR-TRUE-SUPPORT: JOINT-PROFILE-TRUE-SUPPORT
+  PROFILE-DQR-TRUE-NUISANCE: JOINT-PROFILE-TRUE-NUISANCE
+  PROFILE-DQR-POP-H: JOINT-PROFILE-POP-H
+  PROFILE-DQR-SPLIT: JOINT-PROFILE-SPLIT
+target_mode_overrides:
+  B16: profile_mc
+  B19: profile_mc
+budget_multipliers:
+  E07: 0.5
+  E08: 2.0
+population_targets:
+  default: results/intermediate/profile_pair_20261022/construction_v3/targets
+  B16: results/intermediate/profile_pair_20261022/construction_v4/targets/B16.rds
+  B19: results/intermediate/profile_pair_20261022/construction_v4/targets/B19.rds
+population_directions: results/intermediate/profile_pair_20261022/construction_v3/directions
+population_minimum_clusters: 100000
+population_minimum_repetitions: 4
+comparison_controls:
+  B: 100
+  nK: 15
+  max_features: 20
+  lambda_alpha_grid: [0.5, 1.0]
+  qgee_maxit: 1000
+parallel_seed_family: G_parallel
+retained_replication_counts: true
+interval_levels: [0.90, 0.95]
+require_failure_accounting: true

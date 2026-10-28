@@ -1,83 +1,203 @@
-\section{Debiased profile inference}\label{sec:inference}
+\section{Joint profile estimation and inference}\label{sec:inference}
 
-\subsection{Effective information and row-wise inversion}\label{subsec:precision}
+\subsection{Independent selection and estimation}\label{subsec:roles}
 
-Let
-\begin{equation}\label{eq:population-heff}
- H_h=\E\{H_{i,h}(\beta_h^{\star})\},
- \qquad
- \Omega_h=H_h^{-1},
+Let $\mathcal K$ be a fixed set of target coordinates. Partition whole
+clusters into two estimation folds $I_1,I_2$, with $n_f=|I_f|$, and use
+$T_f=I_f^c$ to select the model for $I_f$. The folds are balanced,
+so their limiting proportions are positive. All visits of a subject retain
+the same role. The always-included set $\mathcal U$ is fixed before
+selection. For each $k\in\mathcal K$, the selected set $A_{fk}$ contains
+$\mathcal U$ and $k$. The two role assignments use every cluster once
+for estimation.
+
+Selection has an outcome component and an adjustment component. The
+outcome component approximates the full profile risk. The adjustment
+component retains variables needed to keep the target coefficient close
+to its full-model value. Section~\ref{sec:theory} states these two
+approximation requirements and derives them for the learners below.
+
+\subsection{Outcome search with a joint convex criterion}\label{subsec:search}
+
+On a training set $T$ of $r$ clusters, let
+$\widehat\Sigma_T=r^{-1}\sum_{i\in T}X_i^TX_i/m_i$. For a path set
+$S$ containing $\mathcal U$, jointly minimise
+\begin{equation}\label{eq:search-fit}
+ \frac1r\sum_{i\in T}\ell_i(\beta_S,\gamma_i)
+       +\frac{1}{2r}\beta_S^T\widehat\Sigma_{T,SS}\beta_S,
+ \qquad \beta_{S^c}=0.
 \end{equation}
-where $H_{i,h}$ is the cluster contribution in \eqref{eq:heff-schur}. For inference on coordinate $k$, write $\omega_{k,h}=\Omega_he_k$. Estimating the full inverse is unnecessary when only a moderate set $\mathcal K$ of coordinates is inferentially targeted. For each $k\in\mathcal K$, define
-\begin{equation}\label{eq:dantzig-row}
- \widehat\omega_k
- \in\argmin_{\omega\in\R^p}\|\omega\|_1
- \quad\text{subject to}\quad
- \|\widehat H_{\mathrm{eff}}(\widehat\beta)\omega-e_k\|_{\infty}
- \leq\mu_n.
+The small prediction ridge is invariant to a change of basis in the
+selected span. Weighted QR coordinates make its proximal map explicit.
+The complete quantile criterion has a box-constrained dual, and its
+primal-dual gap certifies each selected fit. We use the linesearch of
+\citeA{malitsky2018} with these proximal maps.
+
+The next variable maximises the absolute dual correlation with the
+part of its weighted column orthogonal to the selected span, divided
+by the norm of that residual column. This extends orthogonal greedy
+search \cite{ing2011} to the complete nonsmooth profile. Every step
+examines the full design. The preceding coefficients and dual vector
+initialise the enlarged convex problem.
+
+Three inner cluster folds within $T_f$ construct these paths. On a
+training subset of size $r$, set
+$M_0(r)=\min\{p,\lfloor r/\log r\rfloor,\lceil(\log r)^3\rceil\}$.
+The number of added outcome variables is bounded by
+\begin{equation}\label{eq:search-budget}
+ M_Y(r)=\min\!\left[p-|\mathcal U|,
+ \left\{\min\!\left(\left\lfloor\frac r{\log r}\right\rfloor,
+                  \left\lceil(\log r)^3\right\rceil\right)
+           -|\mathcal U|\right\}_+\right].
 \end{equation}
-This is the row-wise Dantzig form of CLIME \cite{cai2011}. It is computationally preferable to estimating a complete $p\times p$ matrix and aligns the amount of inversion with the scientific targets.
+Use the smallest inner training budget as the common path length.
+The selected size minimises the total exact heldout profile loss at
+bandwidth zero. The union $S_f^Y$ retains the selected path sets from
+all three inner fits. It therefore contains the comparison coefficient
+vectors that attain the heldout risk bound.
 
-The constraint tolerance $\mu_n$ must dominate the elementwise error in the effective Hessian. A theoretical order is developed in Section~\ref{sec:theory}. In practice, a grid begins at $c\{\log(p)/(nh)\}^{1/2}$ and is enlarged until feasibility is achieved. The selected value, feasibility margin, $\|\widehat\omega_k\|_1$, and residual $\|\widehat H_{\mathrm{eff}}\widehat\omega_k-e_k\|_{\infty}$ are retained as diagnostics.
+\subsection{Conditional covariates and profile adjustment}\label{subsec:graphs}
 
-\subsection{One-step correction and cluster influence scores}\label{subsec:onestep}
-
-The penalised joint minimiser is also a minimiser of
-$L_{n,h}^{\mathrm{prof}}(\beta)+\lambda_{\beta}\sum_kw_k|\beta_k|$.
-For $k\in\mathcal K$, define the one-step estimator
-\begin{equation}\label{eq:debiased-estimator}
- \widetilde\beta_k
- =\widehat\beta_k-\widehat\omega_k^{\mathsf T}g_{n,h}(\widehat\beta).
-\end{equation}
-The sign in \eqref{eq:debiased-estimator} follows from treating $g_{n,h}$ as the gradient of the profile loss. A first-order expansion gives
+Write $H_{i,b}=X_i^TL_{i,b}X_i$, where
 \[
- g_{n,h}(\widehat\beta)
- \approx g_{n,h}(\beta_h^{\star})
- +H_h(\widehat\beta-\beta_h^{\star}),
+ L_{i,b}=W_{i,b}-W_{i,b}Z_i
+          (Z_i^TW_{i,b}Z_i+\Lambda)^{-1}Z_i^TW_{i,b}.
 \]
-so that the leading penalisation error cancels after multiplication by $\omega_{k,h}^{\mathsf T}$.
-
-Define the cluster score at a generic parameter by
-\begin{equation}\label{eq:cluster-score}
- S_{i,h}(\beta)
- =\frac{1}{m_i}X_i^{\mathsf T}
- \psi_{\tau,h}\{Y_i-X_i\beta-Z_i\widehat\gamma_i(\beta)\}.
+The Schur identity makes $L_{i,b}$ positive semidefinite. On an inner
+training sample, evaluate its profile at the corresponding outcome
+fit and form the rectangular factor with blocks
+$F_{i,b}=L_{i,b}^{1/2}X_i$. Standardise each factor column to have unit
+cluster-averaged second moment. For target $k$, the nodewise path solves
+\begin{equation}\label{eq:nodewise-fit}
+ \min_a\left\{\frac{1}{2r}
+       \|F_{b,k}^{\circ}-F_{b,-k}^{\circ}a\|_2^2
+                   +\lambda\|a\|_1\right\},\qquad b\in\{h,h/2\}.
 \end{equation}
-Then $g_{n,h}(\beta)=-n^{-1}\sum_iS_{i,h}(\beta)$. At the smoothed population target, the first-order condition is $\E\{S_{i,h}(\beta_h^{\star})\}=0$. The leading influence contribution for coordinate $k$ is therefore
-\begin{equation}\label{eq:influence}
- \xi_{ik,h}=\omega_{k,h}^{\mathsf T}S_{i,h}(\beta_h^{\star}).
+Each path is anchored at its zero-solution penalty. Geometric ratios
+decrease by $2^{-1/4}$ from one to at most $r^{-1/2}$.
+
+For each ratio, combine the two graph supports with the inner outcome
+set and the target. Refit the two positive quadratic nodewise problems
+on that set, with ridge $1/r$ times their common reference diagonal.
+The sum of their heldout quadratic losses selects the ratio. A graph
+union exceeding $M_0(r)$ on its inner training sample is ineligible. The
+zero graph remains a candidate. Combining the selected inner sets
+gives $S_{fk}^H$.
+
+Conditional covariate regression provides an additional adjustment set.
+Its factor has blocks $X_i/\sqrt{m_i}$ and uses no outcome weights.
+Five cluster folds choose its nodewise L1 penalty by prediction loss.
+The grid has 24 log-spaced ratios from one to
+$\min\{0.05,|T_f|^{-1/2}\}$. Retain at most the smallest inner $M_0(r)$
+of selected variables, ordered by the absolute standardised regression
+coefficients, and call this set $S_{fk}^X$. The final model is
+\begin{equation}\label{eq:selected-set}
+ A_{fk}=\mathcal U\cup\{k\}\cup S_f^Y\cup S_{fk}^H\cup S_{fk}^X.
 \end{equation}
-Within-cluster dependence is retained inside $S_{i,h}$; the central limit theorem is applied across independent clusters.
+The conditional covariate set can retain a necessary adjustment when
+its outcome coefficient is too small to influence prediction-based
+selection. Its addition also retains every comparison vector supplied
+by the outcome and profile searches.
 
-\subsection{Sandwich variance and Wald inference}\label{subsec:variance}
+\subsection{Paired coefficient estimation}\label{subsec:paired-fit}
 
-Let
+On $I_f$, use the same set $A=A_{fk}$ at both bandwidths. With
+$\widehat\Sigma_{f,A}=n_f^{-1}\sum_{i\in I_f}X_{i,A}^TX_{i,A}/m_i$,
+fit
+\begin{equation}\label{eq:joint-selected-fit}
+ \widehat\beta_{f,b,A}\in\argmin_{\beta_A}
+ \left\{\frac1{n_f}\sum_{i\in I_f}\ell_{i,b}^{\mathrm{prof}}(\beta_A)
+             +\frac{1}{2n_f^2}\beta_A^T\widehat\Sigma_{f,A}\beta_A\right\},
+ \qquad b\in\{h,h/2\}.
+\end{equation}
+Coefficients outside $A$ are zero. The numerical ridge supplies
+positive systems and contributes a vanishing term on the inferential
+scale. Newton updates use the exact profile gradient and Schur
+curvature, with backtracking on the complete objective.
+
+Let $\beta_{A,b}^P$ minimise the corresponding population profile risk.
+The density expansion gives
+\begin{equation}\label{eq:coefficient-bandwidth-expansion}
+ \beta_{A,b}^P=\beta_A^P+b\,a_A+O(b^2).
+\end{equation}
+The same selected model at both bandwidths has the same first-order
+coefficient $a_A$. Its cancellation leads to
+\begin{equation}\label{eq:joint-estimator}
+ \widehat\theta_k=\sum_{f=1}^2\frac{n_f}{n}
+       \{2\widehat\beta_{f,h/2,A_{fk},k}
+                         -\widehat\beta_{f,h,A_{fk},k}\}.
+\end{equation}
+We use $h=n^{-3/10}$, with declared multipliers in sensitivity
+calculations. Both constituent fits minimise convex criteria.
+
+For a prespecified input design, one estimation sample suffices:
+take $I_1=\{1,\ldots,n\}$ and include its complete coordinate set.
+This case applies to the clinical and module models. An exploratory
+design selected on separate subjects uses the same one-fold
+calculation for its selected-model parameter $\beta_A^P$.
+
+\subsection{Cluster uncertainty}\label{subsec:variance}
+
+For $A=A_{fk}$ define
 \[
- \widehat S_i=S_{i,h}(\widehat\beta),
+ \widehat H_{f,b,A}=\frac1{n_f}\sum_{i\in I_f}
+          H_{i,b,AA}(\widehat\beta_{f,b,A})+n_f^{-2}\widehat\Sigma_{f,A},
  \qquad
- \overline S=n^{-1}\sum_{i=1}^n\widehat S_i,
- \qquad
- \widehat\xi_{ik}=\widehat\omega_k^{\mathsf T}(\widehat S_i-\overline S).
+ \widehat\omega_{f,b,k}=\widehat H_{f,b,A}^{-1}e_{k,A},
 \]
-The cluster-sandwich variance estimator is
+where $e_{k,A}$ selects coordinate $k$ within $A$. Each cluster contributes
+\begin{equation}\label{eq:joint-influence}
+ V_{ik}=-2\widehat\omega_{f,h/2,k}^T
+               g_{i,h/2,A}(\widehat\beta_{f,h/2,A})
+          +\widehat\omega_{f,h,k}^T
+               g_{i,h,A}(\widehat\beta_{f,h,A}),\qquad i\in I_f.
+\end{equation}
+The gradient uses $X_{i,A}$ from the original design. Combining both
+bandwidth contributions within the cluster retains their covariance.
+With $\bar V_{fk}=n_f^{-1}\sum_{i\in I_f}V_{ik}$, set
 \begin{equation}\label{eq:variance-estimator}
- \widehat\sigma_k^2=\frac{1}{n}\sum_{i=1}^n\widehat\xi_{ik}^2.
+ \widehat s_k^2=\frac1{n^2}\sum_f\sum_{i\in I_f}
+                        (V_{ik}-\bar V_{fk})^2.
 \end{equation}
-A pointwise $(1-\alpha)$ confidence interval for the unsmoothed target is
+The pointwise interval is
 \begin{equation}\label{eq:ci}
- \left[
- \widetilde\beta_k-z_{1-\alpha/2}\frac{\widehat\sigma_k}{\sqrt n},
- \quad
- \widetilde\beta_k+z_{1-\alpha/2}\frac{\widehat\sigma_k}{\sqrt n}
- \right].
+ \widehat\theta_k\ \pm\ z_{1-\alpha/2}\widehat s_k.
 \end{equation}
-No separate plug-in estimate of a scalar error density at zero is required; local density information is already contained in the smoothed effective Hessian.
+Section~\ref{sec:theory} establishes its validity for the full profile
+target. A prespecified finite family can use Bonferroni allocation.
 
-Equation~\eqref{eq:ci} is a pointwise statement for a prespecified coordinate. If a coordinate is selected from the same data because it appears large, the interval is not automatically post-selection valid. The application therefore separates confirmatory targets from exploratory gene discovery. Confirmatory module scores and clinical covariates are prespecified. Exploratory genes are selected on independent subject folds, followed by inference on held-out clusters; the roles of the folds are exchanged before aggregation. Simultaneous inference over a large selected set is left outside the main theorem unless a multiplier-bootstrap result is added.
+\subsection{Computational cost and reproducibility}\label{subsec:implementation}
 
-\subsection{Implementation and diagnostics}\label{subsec:implementation}
+With $N$ rows and $M$ search steps, the complete-design score and
+projection updates cost $O(MNp)$. At selected dimension $d$, a joint
+primal-dual iteration costs $O(Nd+Nq+nq^2)$. The profile factors are
+rectangular, and each final Newton system has dimension $|A_{fk}|$.
+The number of requested coordinates multiplies the corresponding
+nodewise and selected-fit calculations. The implementation records
+actual iterations and numerical residuals together with the sample
+roles and selected sets. An incomplete numerical solution remains a
+recorded failed attempt.
 
-Four groups of diagnostics are required. First, optimisation diagnostics include objective monotonicity, the maximum KKT residual, the number of outer iterations, and the distribution of Newton steps across clusters. Second, profile diagnostics include the three finite-difference checks following Proposition~\ref{prop:profile-calculus}. Third, curvature diagnostics include the smallest restricted eigenvalue on the active cone, condition numbers of the $B_i$ blocks, and Dantzig feasibility. Fourth, inferential diagnostics compare the empirical standard deviation of $\widetilde\beta_k$ with the average $\widehat\sigma_k/\sqrt n$ in simulation.
+The computational revision used OpenAI Codex from the GPT-6 family
+in October 2026 for assistance with mathematical development and
+implementation, following the authors' research objectives and
+revision requests. Numerical results are generated by the supplied R
+and C++ programs from the declared simulation designs or the public
+GSE65391 records. The application retains the study identifiers
+provided with that release.
 
-No multiplicative factor is applied to the one-step correction, and no standard-error inflation factor is chosen by inspecting empirical coverage. Any finite-sample modification must be specified before simulation and justified as part of the estimator. This restriction is essential because coverage calibrated against known simulation truth cannot validate an inferential procedure.
-
+\begin{algorithm}[t]
+\caption{Joint profile coordinate inference}\label{alg:estimation}
+\begin{algorithmic}[1]
+\State Fix $\Lambda$, $h$, $\mathcal U$, the target coordinates and the cluster folds.
+\For{each estimation fold $I_f$}
+\State Construct outcome search paths on the complementary subjects and select their size by inner profile risk.
+\State Learn the profile and conditional covariate adjustment sets on those complementary subjects.
+\For{each target $k$}
+\State Construct $A_{fk}$ in \eqref{eq:selected-set} and fit \eqref{eq:joint-selected-fit} on $I_f$ at $h$ and $h/2$.
+\State Retain the paired coefficient and the cluster contributions in \eqref{eq:joint-influence}.
+\EndFor
+\EndFor
+\State Combine folds using \eqref{eq:joint-estimator} and compute \eqref{eq:variance-estimator} and \eqref{eq:ci}.
+\end{algorithmic}
+\end{algorithm}

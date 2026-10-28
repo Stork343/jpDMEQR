@@ -1,81 +1,102 @@
-\section{High-level conditions used in the proofs}\label{supp:conditions}
+\section{Conditions and notation for selected profile models}\label{supp:conditions}
 
-Write $R_h(\beta)=\E[\min_{\gamma}\ell_{i,h}(\beta,\gamma)]$, let
-$\beta_h^{\star}=\argmin_{\beta}R_h(\beta)$, and let $H_h=\nabla^2R_h(\beta_h^{\star})$.
-For a targeted coordinate $k$, set $\omega_{k,h}=H_h^{-1}e_k$. The following conditions restate, in proof-ready form, the assumptions in the main paper.
-
-\begin{assumption}[Local target regularity]\label{ass:supp-target}
-The unsmoothed profile target $\beta^{\star}$ and smoothed target $\beta_h^{\star}$ are unique in a common neighbourhood. Along the line segment joining them, the averaged smoothed curvature
+Expectations refer to independent clusters within each row of a
+triangular array. The dimension and distribution may depend on $n$.
+For a cluster set $T$, $P_T$ denotes its empirical average. Define
 \[
- \overline H_h=\int_0^1\nabla^2R_h\{\beta^{\star}+t(\beta_h^{\star}-\beta^{\star})\}\,dt
+ R_b(\beta)=\E\ell_{i,b}^{\mathrm{prof}}(\beta),\quad
+ m_b(\beta)=\E g_{i,b}(\beta),\quad
+ \mathcal H_b(\beta)=\E H_{i,b}(\beta),\quad
+ H_0(\beta)=\nabla^2R_0(\beta).
 \]
-is nonsingular and $\norm{\overline H_h^{-1}}_{L_1}\leq C_H$. The local score perturbation obeys
-$\norm{\nabla R_h(\beta^{\star})}_{\infty}\leq C h^2$.
-\end{assumption}
+The target is $\beta^\star=\arg\min R_0(\beta)$. For a set $A$,
+$\beta_A^P$ minimises $R_0$ under $\beta_{A^c}=0$, and
+$\beta_{A,b}^P$ minimises $R_b$ under the same restriction. These
+vectors are embedded in the complete coefficient space.
 
-\begin{assumption}[Score and restricted curvature]\label{ass:supp-estimation}
-Let $S_h=\operatorname{supp}(\beta_h^{\star})$, $|S_h|\leq s$, and
-$\lambda_n=C\sqrt{\log(p)/n}$. With probability tending to one,
-\[
- \norm{g_{n,h}(\beta_h^{\star})}_{\infty}\leq\lambda_n/2.
-\]
-For every $\Delta$ in the cone
-$\mathcal C(S_h,3)=\{\Delta:\norm{\Delta_{S_h^c}}_1\leq3\norm{\Delta_{S_h}}_1\}$
-and every $t\in[0,1]$ for which $\beta_h^{\star}+t\Delta$ lies in the local parameter set,
-\[
- \Delta^{\mathsf T}\widehat H_{\mathrm{eff}}(\beta_h^{\star}+t\Delta)\Delta
- \geq\kappa\norm{\Delta}_2^2.
-\]
-\end{assumption}
+\subsection{Primitive distribution assumptions}
 
-\begin{assumption}[Effective-Hessian and inverse-row stability]\label{ass:supp-precision}
-For a deterministic sequence $\delta_{n,h}\to0$,
-\[
- \norm{\widehat H_{\mathrm{eff}}(\widehat\beta)-H_h}_{\max}=O_p(\delta_{n,h}).
-\]
-Moreover, $\norm{H_h^{-1}}_{L_1}\leq C_{\Omega}$,
-$\norm{\omega_{k,h}}_1\leq C_{\omega}$,
-$\norm{\omega_{k,h}}_0\leq s_{\omega,k}$, and
-$s_{\omega,k}\delta_{n,h}=o(1)$. The Dantzig tolerance satisfies
-$\mu_n\geq2C_{\omega}\delta_{n,h}$ with probability tending to one.
-\end{assumption}
+Cluster sizes are bounded, $\Lambda$ is fixed with eigenvalues in a
+positive compact interval, and $Z$ is bounded. The kernel assumptions
+and joint density section bounds are those in
+Section~\ref{supp:primitive}. The conditional density has integrated
+derivatives through order three. The nuisance dimension is fixed, and
+the nuisance design may have repeated rows or deficient rank.
 
-\begin{assumption}[Local score expansion]\label{ass:supp-expansion}
-For $\Delta=\widehat\beta-\beta_h^{\star}$,
-\begin{equation}\label{eq:supp-score-expansion}
- g_{n,h}(\widehat\beta)
- =g_{n,h}(\beta_h^{\star})+H_h\Delta+r_{n,h},
- \qquad
- \norm{r_{n,h}}_{\infty}=O_p(\mathfrak t_{n,h}).
+Let
+\[
+ \Theta_{D,R}^{(2)}=\{\beta:\|\beta\|_0\leq D,\ \|\beta\|_2\leq R\}.
+\]
+Conditional on $(Z,m)$, a contrast supported on the relevant sparse
+sets has sub-Gaussian norm bounded by $C\|v\|_2$. This condition also
+holds on fixed multiples of these sets used to compare coefficients
+and contrasts. Sparse design Gram eigenvalues lie between positive
+constants. The population profile Hessian satisfies
+\begin{equation}\label{eq:supp-pop-curvature}
+ \kappa\|v\|_2^2\leq v^TH_0(\beta)v\leq C\|v\|_2^2
 \end{equation}
-The sequences satisfy
-\[
- \sqrt n\,\mu_ns\lambda_n=o(1),\qquad
- s_{\omega,k}\mu_n\sqrt{\log p}=o(1),\qquad
- \sqrt n\,\mathfrak t_{n,h}=o(1).
-\]
-\end{assumption}
+on the stated sparse ball and enlarged supports. The corresponding
+third directional derivative is bounded by
+$C\|u\|_2\|v\|_2\|w\|_2$. The upper derivative bounds follow from
+the density sections and design contrast moments; the lower curvature
+bound is an identification condition.
 
-\begin{assumption}[Cluster central limit and score plug-in stability]\label{ass:supp-variance}
-Let $S_{i,h}^{\star}=S_{i,h}(\beta_h^{\star})$ and
-$\xi_{ik,h}=\omega_{k,h}^{\mathsf T}S_{i,h}^{\star}$. The clusters are independent,
-$\E(\xi_{ik,h})=0$, and $\sup_{i,n}\E|\xi_{ik,h}|^{2+\nu}<\infty$ for some $\nu>0$.
-Furthermore,
-\[
- \Var(\xi_{ik,h})\to\sigma_k^2\in(0,\infty),
- \qquad
- \frac1n\sum_{i=1}^n\norm{S_{i,h}^{\star}}_{\infty}^2=O_p(\log p),
- \qquad
- s_{\omega,k}^2\mu_n^2\log p=o(1),
-\]
-and, with $\widehat S_i=S_{i,h}(\widehat\beta)$,
-\begin{equation}\label{eq:supp-score-plugin}
- \frac1n\sum_{i=1}^n
- \left[\widehat\omega_k^{\mathsf T}
- \{\widehat S_i-S_{i,h}^{\star}\}\right]^2=o_p(1).
+The average absolute response has bounded expectation. A ball
+containing the sparse search fits can be obtained from this moment
+condition and sparse small-ball concentration, as shown below.
+All population minimisers used in a local expansion are in the
+interior of a ball on which \eqref{eq:supp-pop-curvature} holds.
+
+\subsection{Sparse comparison vectors}
+
+The target has at most $s$ nonzero coordinates and bounded Euclidean
+norm, with $s\geq1$. The always-included set $\mathcal U$ has fixed
+size. For a requested coordinate $k$, suppose
+\begin{equation}\label{eq:supp-contrast}
+ c_{0k,k}=1,\qquad H_0(\beta^\star)c_{0k}=J_{0k}e_k,
+ \qquad 0<c\leq J_{0k}\leq C.
 \end{equation}
-\end{assumption}
+The contrast has support size at most $s_c$ and bounded L1 norm.
+Write $\omega_{0k}=c_{0k}/J_{0k}$. For simplicity the proofs suppress
+the coordinate subscript when only one target is considered.
 
-Assumptions~\ref{ass:supp-precision}--\ref{ass:supp-variance} are the model-specific part of the analysis. For bounded cluster sizes, the oracle Hessian concentration rate is expected to be
-$\sqrt{\log(p)/(nh)}+h^2$. The additional term in the main paper, $\eta_{n,h}$, records evaluation at the estimated profile. The primitive proof must use local averaging over residuals near zero rather than applying the global bounds $\sup K_h=O(h^{-1})$ and $\sup|K_h'|=O(h^{-2})$ to every observation separately.
+Let $M$ bound the unadjusted inner capacities
+$\min\{p,\lfloor r/\log r\rfloor,\lceil(\log r)^3\rceil\}$.
+The smallest capacity has the same order. The final selected set has
+at most $d_n\leq|\mathcal U|+7M+1$ coordinates. In uniform learning
+bounds use $D=7M+s+s_c+|\mathcal U|+2$ and, when needed, a fixed
+multiple of $D$. The graph budget is large enough to contain the
+sparse Lasso comparison support. Sparse eigenvalue bounds on a
+sufficiently large fixed multiple of $s_c$ imply compatibility on
+the resulting Lasso cones.
 
+The learning rates are stated in the regime $a_n+\nu_n\to0$, with
+$a_n$ and $\nu_n$ defined in the article. This condition supplies
+uniform curvature and localisation of the empirical selected fits.
+
+The number of outer and inner folds is fixed and their sizes are
+proportional to $n$. Target identities are fixed independently of their
+estimation outcomes. All feature definitions and units are common to
+the fold estimates that are combined. Role-specific exploratory
+models are retained separately when their definitions differ.
+
+\subsection{Numerical accuracy and variance}
+
+An initial fit has a normalised primal-dual gap at most $\epsilon_n$.
+Nodewise numerical residuals and support thresholds are negligible
+relative to the stated contrast rate. The final selected fits solve
+their score equations with an error contributing $o_p(n^{-1/2})$ to
+the target coordinate. Their prediction ridge has order $n_f^{-2}$.
+The theoretical estimators are the certified minimisers; an exhausted
+numerical budget yields a recorded failed attempt.
+
+At $m_b=m_b(\beta^\star)$, define
+\begin{equation}\label{eq:supp-oracle-influence}
+ \xi_{i,h}=-\omega_0^T
+ [2\{g_{i,h/2}(\beta^\star)-m_{h/2}\}
+                    -\{g_{i,h}(\beta^\star)-m_h\}].
+\end{equation}
+Its variance $\sigma_h^2$ is bounded above and away from zero. Bounded
+dual scores and the design contrast condition give uniform moments
+above order two. No limit of the triangular-array variance is needed
+for the studentised conclusion.

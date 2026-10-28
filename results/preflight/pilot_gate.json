@@ -1,6 +1,6 @@
 {
   "pass": true,
-  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "commit_sha": "0b4023b1f3f472709283d4aa563f88847b9de82b",
   "v1_classification": "V1 (round-6 ladder; bands are diagnostics)",
   "mechanism_evidence": [
     {
@@ -70,20 +70,20 @@
       "formal_gate": false
     }
   ],
-  "run_id": "pilot_v5_B200",
-  "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\pilot_v5_B200",
-  "evaluated_utc": "2026-09-01 01:58:34 UTC",
+  "run_id": "pilot_v7_B200",
+  "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\pilot_v7_B200",
+  "evaluated_utc": "2026-10-03 11:13:01 UTC",
   "convergence_pass": true,
   "identity_pass": true,
   "dantzig_pass": true,
   "inverse_defect_diagnostic": {
-    "D_k_median": 5.75892567111054,
-    "D_k_q90": 13.5410633305853,
-    "A_k_median": 0.477428261598074,
-    "A_k_q90": 1.8427599233232
+    "D_k_median": 5.80308158745694,
+    "D_k_q90": 13.6056482222647,
+    "A_k_median": 0.473579245243342,
+    "A_k_q90": 1.84019872264911
   },
   "p06_scaling": {
-    "se_sd_ratio": [0.776594275167177, 0.661285526957666, 0.718795398645723, 0.756970642254107],
+    "se_sd_ratio": [0.776594254235691, 0.65923224545315, 0.719454687322681, 0.756970640860563],
     "coverage": [0.885, 0.79, 0.835, 0.845]
   },
   "calibration_baseline": "P05",

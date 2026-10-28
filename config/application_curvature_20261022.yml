@@ -1,0 +1,16 @@
+version: GSE65391_curvature_20261022
+method: subject_bootstrap_percentile
+source: docs/EMPIRICAL_AUDIT_RULE_20261022.md
+primary_quantiles: [0.25, 0.50, 0.75]
+sensitivity_quantiles: [0.10]
+h_multipliers: [0.75, 1.00, 1.25]
+family_confidence: 0.95
+bootstrap_replicates: 10000
+bootstrap_seed: 20261022
+quantile_type: 7
+dimension_rule: floor_n_over_log_n
+minimum_subject_rule: d_max_plus_one
+minimum_curvature_rule: simultaneous_lower_bound_positive
+sampling_unit: subject
+recompute_quantiles: true
+cluster_weighting: equal_subject

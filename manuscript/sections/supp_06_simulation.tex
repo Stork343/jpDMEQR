@@ -1,8 +1,146 @@
-\section{Full simulation protocol}\label{supp:simulation}
+\section{Simulation construction and complete results}\label{supp:simulation}
+\input{generated/joint_profile/inference_values}
 
-For each replication, an independent training sample and a large test sample are generated at the cluster level. Random seeds are deterministic functions of scenario and replication identifiers. Tuning folds are common across methods. The population profile target in misspecified scenarios is computed once per scenario from a separate large Monte Carlo sample and is not reused for tuning.
+\subsection{Generating distributions and independent replication}
 
-The primary result tables report each method's mean, Monte Carlo standard error, and number of successful replications. Coverage Monte Carlo uncertainty is displayed; for 500 replications, the standard error near 95\% coverage is approximately 0.010. A method with fewer than 95\% successful replications in a scenario is flagged, and both conditional-on-success and failure-inclusive summaries are reported.
+Table~\ref{tab:joint-registry} specifies every setting in the independent
+evaluation. In each setting, 60 datasets are generated with cluster
+sizes sampled uniformly from $\{3,\ldots,8\}$. Rows of $X$ are
+independent Gaussian with AR(1) covariance. The first five
+coefficients are nonzero and alternate in sign. For a random
+intercept, $b_i\sim N(0,1)$. With a time slope, the random-effects
+covariance has diagonal $(1,0.25)$ and correlation $0.4$.
+Innovations are independent Gaussian or $t_3/\sqrt3$, shifted by
+their distribution's $\tau$th quantile. Covariates are independent
+of the entire cluster nuisance and innovation vectors.
 
-Sensitivity analyses vary $c_h$, $\lambda_{\gamma}$, the Dantzig tolerance multiplier, cluster-size imbalance, and design correlation. Screening, if examined, is treated as a computational supplement and is performed on an independent set of clusters. No sure-screening theorem is used as a premise of the main inferential result.
+The random seed is $1800000000+10000a+r$, where $a$ is the
+one-based configuration row and $r$ is the replication number.
+The full method and paired ablation use the identical generated
+sample and deterministic cluster partitions. The ablation removes
+only the outcome-free conditional covariate support. Both use
+$\Lambda=I$, $h=n^{-3/10}$ and normal 95\% intervals from their
+paired cluster contributions. Two active and two null coordinates
+are requested in every dataset.
 
+\input{generated/joint_profile/simulation_registry}
+
+\subsection{Monte Carlo uncertainty and selected targets}
+
+For coordinate group $G$ in setting $a$, let
+$C_{ar}=|G|^{-1}\sum_{k\in G}1\{\beta_k^\star\in I_{ark}\}$.
+The setting's coverage is $B^{-1}\sum_r C_{ar}$ and its Monte Carlo
+standard error is $\operatorname{sd}(C_{ar})/\sqrt B$.
+A mean over $A$ settings has standard error
+$A^{-1}\{\sum_a\widehat{\operatorname{se}}_a^2\}^{1/2}$.
+The paired coverage difference applies this calculation to
+$C_{ar}^{full}-C_{ar}^{ablated}$. It retains dependence between
+coordinates and between procedures on the same dataset.
+
+For an individual coordinate, exact binomial intervals use its
+success count among 60 independent datasets.
+Table~\ref{tab:joint-coordinate} also reports the mean estimated
+standard error divided by the empirical standard deviation of that
+coordinate's estimates. Empirical standard deviations are calculated
+before combining different target coordinates.
+
+Every selected Gaussian model has the population projection
+\[
+ \beta_{A,A}^P=\beta_A^0+
+                    \Sigma_{AA}^{-1}\Sigma_{A,A^c}\beta_{A^c}^0.
+\]
+The saved selected sets and generating covariance determine its
+coordinate displacement without additional Monte Carlo sampling.
+The target comparison is performed separately in each estimation
+fold and then combined with the estimator's fold weights. All
+full-method fold targets agree with their full-design coordinate
+at tolerance $10^{-8}$. The paired ablation has
+\JointAblationShiftCount{} coordinate estimates with a larger
+fold-averaged displacement, whose maximum absolute value is
+\JointAblationMaxShift{}.
+
+\begingroup\small
+\input{generated/joint_profile/simulation_scenarios}
+\input{generated/joint_profile/simulation_coordinates}
+\endgroup
+
+\subsection{Profile targets under predictor dependent scale}
+
+The complete profile parameter can differ from both a generating
+slope and a marginal quantile projection. A separate population
+calculation uses innovation scale
+$\exp\{0.35\operatorname{clip}(X_1,-3,3)\}$ in a Gaussian AR(1)
+design with 1000 coordinates and eight nonzero coefficients.
+Writing $X=aX_1+\eta$, where $a_k=\rho_X^{k-1}$ and $\eta$ is
+independent of $X_1$, gives
+\[
+ E g_{i,h,k}(\beta^0+\delta e_1)
+       =a_k E g_{i,h,1}(\beta^0+\delta e_1).
+\]
+The scalar population score therefore determines the full slope
+adjustment. Four independent populations of $10^5$ clusters estimate
+the complete profile target, with a small-bandwidth calculation and
+a half-bandwidth refinement. The stored construction solves the
+paired population score to approximate the common unsmoothed target.
+Its role is target calculation; the sample estimator in this article
+pairs fitted coefficients.
+
+For the marginal projection
+$(\alpha^{QR},\beta^{QR})\in\argmin_{\alpha,\beta}
+E\rho_\tau(Y-\alpha-X^T\beta)$,
+deterministic quadrature solves the intercept and first-slope
+equations jointly. The other slopes equal their generating
+coefficients by conditional Gaussian projection.
+Table~\ref{tab:conditional-scale-targets} reports the two targets at
+the Gaussian lower quartile and the $t_3$ upper quartile. Variation
+between population repetitions gives the profile target's Monte Carlo
+error. The target records retain the complete design, working
+nuisance matrix and numerical residuals.
+
+\input{generated/tab_conditional_scale_targets}
+
+\subsection{Gaussian influence diagnostics}
+\input{generated/submission/gaussian_values}
+
+The twelve Gaussian scaling settings retain all 10500 registered
+datasets. The covariance is AR(1) with correlation $0.5$, cluster
+sizes are uniform on three through eight, and the random-intercept
+standard deviation is one. The median-quantile model has alternating
+coefficients of magnitude $0.75$. Its population curvature is
+given by \eqref{eq:supp-exact-gaussian-curvature}. Gaussian
+quadrature gives $\kappa_0=\GaussianCurvatureIntegral$; an independent
+population of \GaussianCurvatureClusters{} clusters gives
+\GaussianCurvaturePopulation{} with Monte Carlo standard error
+\GaussianCurvatureMCSE{}.
+
+Each coordinate's remainder is
+$\sqrt n\{\widehat\beta_k-\beta_k^0-n^{-1}\sum_i\xi_{ik,h}\}$.
+Table~\ref{tab:gaussian-remainder} gives its root mean square and
+Monte Carlo standard error. Within an active or null group, squared
+remainders are averaged within each replication before aggregation.
+The standard error uses the delta method at their square root.
+The relative column replaces $\sqrt n$ by the inverse of that
+replication's reported standard error before taking the root mean
+square. The numerical records also retain fold-specific target
+displacements and both bandwidth-specific Hessian errors.
+
+\begingroup\small
+\input{generated/submission/gaussian_remainder}
+\endgroup
+
+\subsection{Runtime and numerical records}
+
+The scaling experiment uses 20 timed fits at each of
+$p=500,1000,2000,10000$, with $n=200$, $q=1$, $\tau=0.50$ and
+four requested coordinates. Data generation is excluded from the
+fitting clock. Selection and inference times are retained separately,
+together with the largest selected model and final score residual.
+The executable source and saved session information identify the
+machine and numerical environment for these measurements.
+
+The independent evaluation and its ablation each retain a result
+for every registered dataset and coordinate. The final result
+builder requires complete paired keys before calculating summaries.
+It generates the tables from saved numerical records, including
+interval lengths and Monte Carlo errors, without manual insertion
+of result values.

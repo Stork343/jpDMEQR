@@ -60,7 +60,7 @@ prepare_clinical_design_split_v2 <- function(metadata,
   for (v in numeric_vars) {
     x <- suppressWarnings(as.numeric(md[[v]]))
     med <- stats::median(x[train], na.rm = TRUE)
-    if (!is.finite(med)) med <- 0
+    if (!is.finite(med)) stop("Training clinical field has no finite values: ", v)
     x[!is.finite(x)] <- med
     md[[v]] <- x
     numeric_imputation[v] <- med
@@ -74,10 +74,13 @@ prepare_clinical_design_split_v2 <- function(metadata,
     x[is.na(x)] <- "Missing"
     train_tab <- table(x[train])
     retained <- names(train_tab)[train_tab >= rare_level_min]
-    retained <- union(retained, "Missing")
-    # Levels absent or rare in training are pooled before model.matrix is formed.
+    # 根据训练subject合并低频类别，并检查其余subject是否具有可估计的类别。
     x[!x %in% retained] <- "Other"
-    levels_v <- sort(unique(c(retained, "Other")))
+    levels_v <- sort(unique(x[train]))
+    if (length(levels_v) < 2L) stop("Clinical category has no training variation: ", v)
+    if (any(!x %in% levels_v)) {
+      stop("Clinical category is absent from the frozen training encoding: ", v)
+    }
     md[[v]] <- factor(x, levels = levels_v)
     factor_levels[[v]] <- levels_v
   }

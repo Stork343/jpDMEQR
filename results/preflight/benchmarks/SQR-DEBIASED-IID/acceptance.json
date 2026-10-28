@@ -1,15 +1,37 @@
 {
   "method_id": "SQR-DEBIASED-IID",
-  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "commit_sha": "458b83799e577adef18c7343818ce1a0c8a5dfad",
   "reference_identifier": "Yan-Wang-Zhang-2023-JMLR-22-1217",
+  "method_version": "source_20261023_CV",
   "unit_test_pass": true,
   "limiting_case_pass": true,
   "fidelity_check_pass": true,
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
-  "reproduction_cell_pass": null,
-  "reproduction_note": "diagnostic B=200 cell (n=500,p=500,tau=0.7,rho=0.1,N(0,1)): compatible with published Table 1 coverage 0.925 within MCSE",
   "allowed_metrics": "estimation|selection|prediction|coverage_naive_iid",
-  "created_utc": "2026-09-01 01:57:53 UTC",
-  "notes": "Formula-level fidelity implementation of JMLR 22-1217."
+  "source_checks": [
+    {
+      "method_id": "SQR-DEBIASED-IID",
+      "calculation": "independent_convolution_L1_optimizer",
+      "discrepancy": 9.69859609289969e-11,
+      "tolerance": 1e-05,
+      "passed": true,
+      "source": "conquer 1.3.3 Gaussian lasso"
+    },
+    {
+      "method_id": "SQR-DEBIASED-IID",
+      "calculation": "independent_complete_one_step_and_variance",
+      "discrepancy": 3.13622738890018e-11,
+      "tolerance": 1e-05,
+      "passed": true,
+      "source": "conquer optimizer plus all native CLARABEL rows Eq12 symmetrisation and iid variance"
+    }
+  ],
+  "reference_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/reference_fidelity",
+  "test_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/test_results.rds",
+  "test_names": ["SQR-DEBIASED-IID adapter is deterministic and schema-conformant", "SQR-DEBIASED-IID uses observation-level sample size and iid variance", "SQR-DEBIASED-IID limiting case: no penalty approaches smoothed QR", "SQR-DEBIASED-IID smooth loss matches analytic derivatives", "SQR-DEBIASED-IID score and Hessian match finite differences", "SQR-DEBIASED-IID ignores clustering and is labelled naive_iid", "SQR-DEBIASED-IID complete CLIME matrix and symmetrisation match independent solvers", "SQR-DEBIASED-IID common grid preserves genuine rank deficient matrix failures", "SQR-DEBIASED-IID source CV uses the complete grids within independent subjects", "SQR-DEBIASED-IID source CV is deterministic and independent of generated truth"],
+  "assertion_count": 79,
+  "warning_count": 0,
+  "source_specification_status": "complete_source_or_maintained_package_checked",
+  "created_utc": "2026-10-22 17:15:18 UTC"
 }

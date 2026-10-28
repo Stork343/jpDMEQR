@@ -25,7 +25,14 @@
 target_residual_scores_v2 <- function(dat, beta_target, tau, lambda_gamma,
                                       h = 0, nuisance_control = list(reltol = 1e-10,
                                                                       maxit = 300L,
-                                                                      grad_tol = 1e-7)) {
+                                                                      grad_tol = 1e-7),
+                                      score_definition = NULL) {
+  if (identical(score_definition, "profile_bandwidth_pair_2_half_minus_full")) {
+    return(profile_bandwidth_pair_scores_v2(
+      dat$y, dat$X, dat$Z, dat$cluster_id, beta_target, tau, h,
+      lambda_gamma, nuisance_control
+    ))
+  }
   X <- dat$X; Z <- dat$Z; y <- dat$y; cid <- dat$cluster_id
   ci <- cluster_index_v2(cid)
   Lambda <- make_lambda_matrix_v2(lambda_gamma, ncol(Z))
@@ -64,7 +71,7 @@ variance_ladder_one_v2 <- function(dat, fit, beta_target, population_asset,
   k <- match(coordinate, fit_names)
   e <- numeric(length(fit_names)); e[k] <- 1
   Hf <- fit$fit_object$components$hessian
-  G0 <- fit$fit_object$components$unsmoothed_cluster_scores
+  G0 <- inferential_cluster_scores_v2(fit$fit_object$components)
   n <- nrow(G0)
   out <- list(L_k = NA_real_, meat1 = NA_real_, meat2 = NA_real_,
               meat3 = NA_real_, meat4 = NA_real_)
@@ -75,7 +82,10 @@ variance_ladder_one_v2 <- function(dat, fit, beta_target, population_asset,
   pop_full <- setNames(rep(0, length(fit_names)), fit_names)
   common <- intersect(names(pop), fit_names)
   pop_full[common] <- pop[common]
-  Sigma_pop <- population_asset$Sigma0_population
+  Sigma_pop <- if (identical(fit$score_definition,
+                              "profile_bandwidth_pair_2_half_minus_full")) {
+    population_asset$Sigma_population
+  } else population_asset$Sigma0_population
   if (!is.null(Sigma_pop)) {
     sn <- intersect(colnames(Sigma_pop), names(pop_full))
     out$meat1 <- as.numeric(crossprod(pop_full[sn], Sigma_pop[sn, sn] %*% pop_full[sn]))
@@ -84,7 +94,8 @@ variance_ladder_one_v2 <- function(dat, fit, beta_target, population_asset,
   if (is.null(Gs)) {
     Gs <- tryCatch(
       target_residual_scores_v2(dat, beta_target, tau, lambda_gamma, h = h,
-                                nuisance_control = nuisance_control %||% list()),
+                                nuisance_control = nuisance_control %||% list(),
+                                score_definition = fit$score_definition),
       error = function(e) NULL
     )
   }
@@ -171,7 +182,8 @@ oracle_jackknife_v2 <- function(dat, active, target_coords, tau, h, lambda_gamma
         Z = dat$Z[rows, , drop = FALSE], cluster_id = dat$cluster_id[rows],
         tau = tau, h = h, lambda_beta = 0, lambda_gamma = lambda_gamma,
         penalty_factor = rep(0, ncol(subX)),
-        control = modifyList(list(max_iter = 100L, beta_tol = 1e-6, kkt_tol = 1e-5),
+        control = modifyList(list(max_iter = 100L, beta_tol = 1e-6,
+                                  kkt_normalized_tol = 1e-5),
                              coords_fit_control)
       ),
       error = function(e) NULL
@@ -231,10 +243,11 @@ variance_ladder_v6_one_v2 <- function(fit, dat, beta_target, omega_pop,
 
   # Target ordinary quantile cluster scores at beta* (unsmoothed psi).
   g_star <- target_residual_scores_v2(
-    dat, beta_target, tau, lambda_gamma, h = h_inf, nuisance_control = nuisance_control
+    dat, beta_target, tau, lambda_gamma, h = h_inf, nuisance_control = nuisance_control,
+    score_definition = fit$score_definition
   )
   # Fitted ordinary (unsmoothed) cluster scores at beta_refit (h_inf reprofile).
-  g_fit <- fit$fit_object$components$unsmoothed_cluster_scores
+  g_fit <- inferential_cluster_scores_v2(fit$fit_object$components)
   # The inference-object directions are indexed by position in the coordinate
   # table (NOT by the column index k).
   pos <- match(coordinate, fit$inference_object$table$coordinate)

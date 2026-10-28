@@ -1,13 +1,29 @@
 {
   "method_id": "LQMM",
-  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "commit_sha": "458b83799e577adef18c7343818ce1a0c8a5dfad",
   "reference_identifier": "Geraci-Bottai-2014-10.1007/s11222-013-9381-9",
+  "method_version": null,
   "unit_test_pass": true,
   "limiting_case_pass": true,
   "fidelity_check_pass": true,
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|prediction|coverage_source_supported",
-  "created_utc": "2026-09-01 01:55:45 UTC",
-  "notes": "lqmm package adapter on common screened/oracle low-dimensional sets."
+  "source_checks": [
+    {
+      "method_id": "LQMM",
+      "calculation": "maintained_package_coefficients",
+      "discrepancy": 0,
+      "tolerance": 1e-10,
+      "passed": true,
+      "source": "lqmm 1.5.8 direct call"
+    }
+  ],
+  "reference_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/reference_fidelity",
+  "test_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/test_results.rds",
+  "test_names": ["LQMM adapter is deterministic on a low-dimensional set", "LQMM limiting case: negligible random-effect variance approaches pooled QR"],
+  "assertion_count": 7,
+  "warning_count": 0,
+  "source_specification_status": "complete_source_or_maintained_package_checked",
+  "created_utc": "2026-10-22 17:15:18 UTC"
 }

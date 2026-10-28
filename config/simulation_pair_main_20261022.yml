@@ -1,0 +1,6 @@
+registry_kind: profile_pair_registry
+registry_source: simulation_main.csv
+phase: main
+method_version: profile_pair_20261022
+mean_score_multiplier: 1
+prospective_date: 2026-10-22

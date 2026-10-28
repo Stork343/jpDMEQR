@@ -1,0 +1,33 @@
+version: submission_comparator_numerics_20261028
+source_registry: config/joint_profile_submission_20261027.yml
+POOLED-QR-LASSO:
+  optimizer: HiGHS_dual_linear_programme
+  certificate: full_primal_dual_gap
+SQR-DEBIASED-IID:
+  initial_optimizer: matrix_free_fista
+  precision_optimizer: hybrid_certified
+  quadratic_initializer_minimum_gamma: 0.25
+  native_path_maximum_pivots: 4p
+  precision_certificate: primal_dual
+  complete_precision_matrix: true
+  complete_gamma_grid: true
+  lambda_subject_folds: 5
+  gamma_subject_folds: 5
+  inner_lambda_subject_folds: 5
+  exact_nonnegative_fold_loss_pruning: true
+  inner_prediction_hessians: false
+DOUBLE-PEN-QLMM:
+  criterion: SIC
+  beta_penalty_scale: sqrt(tau*(1-tau)*N*log(p))
+  alpha_penalty_scale: sqrt(tau*(1-tau)*(N/n)*log(n*q))
+  beta_multipliers: [0.25, 0.5, 1, 2]
+  alpha_multipliers: [0.5, 1]
+QGEE-SCAD:
+  numerical_backend: cluster_batched_products_LAPACK_SVD
+  singular_value_relative_threshold: 0.00000001490116
+  shared_path_initial_estimator: true
+  standardize: false
+  fixed_intercept: true
+  penalty_path: geeVerse_0.3.1_HBIC
+  maxit: 1000
+  epsilon: 0.0001

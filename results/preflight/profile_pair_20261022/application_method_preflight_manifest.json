@@ -1,0 +1,51 @@
+{
+  "pass": true,
+  "final": true,
+  "scope": "application_paired_method_software_preflight",
+  "commit_sha": "458b83799e577adef18c7343818ce1a0c8a5dfad",
+  "method_version": "profile_pair_20261022",
+  "score_definition": "profile_bandwidth_pair_2_half_minus_full",
+  "config_path": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/scratch/application_method_composition_458b837/registry.yml",
+  "config_source": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/config/simulation_application_method_preflight_pair_20261022.csv",
+  "composition_preserves_all_source_values": true,
+  "run_dir": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/raw/simulation/application_method_458b837_20261023_02",
+  "execution_validation": {
+    "pass": true,
+    "method_complete": true,
+    "theory_complete": true,
+    "coordinate_complete": true,
+    "schema_complete": true,
+    "known_failure_stages": true,
+    "failed_coordinate_accounting": true,
+    "seeds_complete": true,
+    "expected_method_rows": 16,
+    "expected_coordinate_rows": 64,
+    "all_methods_successful": true,
+    "method_status_counts": {
+      "ok": 16
+    },
+    "runner_failure_count": 0
+  },
+  "method_rows": 16,
+  "coordinate_rows": 64,
+  "expected_method_rows": 16,
+  "expected_coordinate_rows": 64,
+  "runner_failure_count": 0,
+  "solver_configuration": {
+    "dantzig_solver": "dual_warm",
+    "cluster_solver": "compiled",
+    "assembly": "batch",
+    "cv_workers": 1,
+    "hessian_refresh": 20,
+    "unpenalised_optimizer": "newton_armijo",
+    "proximal_scaling": "cluster_rms",
+    "shared_first_stage": true,
+    "matrix_backend": "Eigen_single_thread",
+    "identity_detail": "aggregate"
+  },
+  "initial_configuration": {
+    "clinical_acceleration": "clinical_kkt"
+  },
+  "driver_path": "results/scratch/application_method_composition_458b837/run.R",
+  "completed_utc": "2026-10-22 17:23:07 UTC"
+}

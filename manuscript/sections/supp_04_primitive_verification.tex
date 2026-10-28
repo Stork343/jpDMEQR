@@ -1,24 +1,456 @@
-\section{Primitive verification still required}\label{supp:primitive}
+\section{Primitive population and empirical bounds}\label{supp:primitive}
 
-The preceding proofs establish the theorem chain once the high-level cluster-profile rates hold. Before submission, those rates must be derived from primitive conditions. The verification is divided into four lemmas.
+\subsection{A scalar profile with repeated observations}
 
-First, a profile-smoothing lemma must condition on the complete cluster design and differentiate the expected minimised cluster loss. The profiled residual depends on the full outcome vector, so it cannot be treated as an ordinary observation-level structural error. The required conclusion is the $O(h^2)$ score perturbation in Assumption~\ref{ass:supp-target}.
+Let a cluster contain identical copies of a scalar $Y$, let $X=Z=1$,
+and let $\Lambda=\lambda>0$. Define $a=\tau-1$, $b=\tau$ and
+$k(t)=F_K^{-1}(t+1-\tau)$ for $a<t<b$. The nuisance stationarity
+equation gives $s_h=\lambda\gamma_h$, with
+$s_h=\psi_{\tau,h}(Y-\beta-\gamma_h)$.
 
-Second, an oracle effective-Hessian lemma must establish
+\begin{theorem}[Bandwidth expansion in the repeated observation model]\label{thm:supp-repeated}
+Suppose $Y$ has distribution function $F$ and continuously
+differentiable density $f$ with bounded derivative. Then
+\begin{equation}\label{eq:supp-layercake}
+ M_h(\beta)=\E s_h(Y-\beta)
+ =a+\int_a^b\{1-F(\beta+t/\lambda+h k(t))\}\,dt.
+\end{equation}
+Uniformly in $\beta$,
 \[
- \norm{\widehat H_{\mathrm{eff}}(\beta_h^{\star})-H_h}_{\max}
- =O_p\!\left\{\sqrt{\frac{\log p}{nh}}+h^2\right\}.
+ M_h(\beta)=M_0(\beta)-hB(\beta)+O(h^2),\qquad
+ B(\beta)=\int_a^bf(\beta+t/\lambda)k(t)\,dt.
 \]
-With bounded cluster sizes, this follows from cluster Bernstein inequalities after controlling the kernel-weighted summands.
+If $M_0(\beta^\star)=0$ and
+$H_0(\beta^\star)=\int_a^bf(\beta^\star+t/\lambda)dt>0$, the
+nearby ordinary smoothed root satisfies
+$\beta_h-\beta^\star=-hB(\beta^\star)/H_0(\beta^\star)+O(h^2)$.
+The paired coefficient satisfies
+$2\beta_{h/2}-\beta_h=\beta^\star+O(h^2)$.
+\end{theorem}
 
-Third, a profile plug-in lemma must bound
+\begin{proof}
+For $t\in(a,b)$ the monotone inverse of the score map is
+$u=t/\lambda+h k(t)$. Hence
+$\Pr\{s_h(Y-\beta)>t\}=1-F(\beta+t/\lambda+h k(t))$.
+The layer-cake identity for a variable in $[a,b]$ gives
+\eqref{eq:supp-layercake}. Taylor's formula for $F$ has an integrated
+remainder at most $h^2\|f'\|_\infty\int_a^bk(t)^2dt/2$.
+This proves the expansion, including its uniformity.
+Since $M_0'(\beta)=-H_0(\beta)$ and $B$ is locally Lipschitz,
+the implicit root equation gives the stated target movement.
+Taking twice the coefficient expansion at $h/2$ and subtracting the
+one at $h$ cancels the linear term. The criterion derivative is $-M_h$, so the
+same conclusions hold with the gradient sign convention used in the
+paper.
+\end{proof}
+
+The coefficient $B$ weights the inverse kernel quantile by the density
+at $\beta+t/\lambda$. Symmetry of the kernel alone does not set this
+weighted integral to zero.
+
+\subsection{Joint density sections and active dual charts}
+
+For every conditional design $(X,Z,m)$ assume $f\in C^L(\R^m)$ and
+the section bound
+\begin{equation}\label{eq:supp-density-sections}
+ \sup_{y_A}\int_{\R^{|B|}}|\partial^\alpha f(y_A,y_B)|dy_B\leq C_f,
+ \qquad B=A^c,\quad |\alpha|\leq L.
+\end{equation}
+It applies to all coordinate subsets, including the empty set. The
+constant is uniform over the conditional designs. Cluster sizes and
+$Z$ are bounded, the eigenvalues of $\Lambda$ are bounded above and
+away from zero, and the coordinate envelopes
+$M_k=\max_j|X_{jk}|$ have uniformly bounded first, second and third
+product moments. The symmetric continuous kernel is positive on
+$(-c_K,c_K)$, has support $[-c_K,c_K]$, and its inverse distribution
+function $k$ is absolutely continuous. Thus
+$\int_a^bk'(t)dt=2c_K$.
+
+\begin{theorem}[Population expansion from joint density sections]\label{thm:supp-target}
+Under these conditions with $L=2$, and with $R_0$ finite at one
+parameter, $R_0$ is twice continuously differentiable. Uniformly in
+$\beta$,
+\begin{align}
+ m_h(\beta)&=\nabla R_0(\beta)+hb_1(\beta)+O(h^2),
+       \quad m_h(\beta)=\E g_{i,h}(\beta),\label{eq:supp-pop-expansion}\\
+ \|\mathcal H_h(\beta)-H_0(\beta)\|_{\max}&\leq Ch,
+       \quad\mathcal H_h=\E H_{i,h},\quad H_0=\nabla^2R_0,\nonumber\\
+ \|\mathcal H_h(\beta)-\mathcal H_h(\beta')\|_{\max}
+       &\leq C\|\beta-\beta'\|_1.\label{eq:supp-pop-Lipschitz}
+\end{align}
+For $L=3$ there is a matrix function $B_1$ such that
+$\mathcal H_h(\beta)=H_0(\beta)+hB_1(\beta)+O(h^2)$ uniformly
+elementwise. Under the uniform directional moment condition, the
+gradient remainder is $O(h^2)$ in sparse Euclidean norm and the
+Hessian remainder is $O(h^2)$ in restricted operator norm.
+\end{theorem}
+
+\begin{proof}
+Condition on $(X,Z,m)$ and use the dual in
+\eqref{eq:supp-profile-dual}. Partition its maximiser by the set $A$
+of interior coordinates and endpoint signs $\sigma_B\in\{-1,1\}^{|B|}$.
+Set $s_j=b$ when $\sigma_j=1$ and $s_j=a$ when $\sigma_j=-1$.
+For $s_A\in(a,b)^{|A|}$ and $v_B\in(0,\infty)^{|B|}$ define
+\begin{equation}\label{eq:supp-chart}
+ \gamma(s)=\Lambda^{-1}Z^{\mathsf T}s/m,\qquad
+ (u_h)_A=Z_A\gamma(s)+hk(s_A),\qquad
+ (u_h)_B=Z_B\gamma(s)+\sigma_B(c_Kh+v_B).
+\end{equation}
+These equations satisfy the primal and dual optimality conditions,
+and the gradient coordinate on this chart is
+$z_k(s)=-X_k^{\mathsf T}s/m$, independent of $h$.
+For $h>0$ the dual maximiser is unique. Thus the chart is injective:
+$u_h$ determines $s$, and its residuals determine $v_B$.
+Conversely every $u$ with residuals different from $\pm c_Kh$ lies
+in exactly one chart. Each excluded boundary has Lebesgue measure
+zero. Fix $u_{-j}$ and set $s_j$ to the corresponding endpoint.
+The remaining strongly convex ridge problem has a unique nuisance
+solution continuous in $u_{-j}$; the boundary specifies the single
+value $u_j=Z_j^{\mathsf T}\gamma(u_{-j})\pm c_Kh$.
+There are finitely many such graphs.
+
+Let $C_A=Z_A\Lambda^{-1}Z_A^{\mathsf T}/m$ and
+$D_A=\diag\{k'(s_j):j\in A\}$. The derivative of the chart has
+upper right block zero, upper left block $C_A+hD_A$, and lower
+right block $\diag(\sigma_B)$. Its absolute determinant is
+\begin{equation}\label{eq:supp-chart-det}
+ d_A(h,s)=\det(C_A+hD_A)
+ =\sum_{J\subseteq A}h^{|J|}
+       \det(C_{A\setminus J,A\setminus J})\prod_{j\in J}k'(s_j).
+\end{equation}
+Empty minors equal one. The factor $m^{-1}$ in $C_A$ follows by
+differentiating $Z_A\gamma(s)$. For $h>0$ the matrix is positive
+definite, so the injective chart admits change of variables on its
+open domain. The inverse kernel map is continuously differentiable
+on the interior, and exhaustion by compact subintervals justifies the
+formula when its derivative is unbounded at endpoints.
+
+All principal minors in \eqref{eq:supp-chart-det} are uniformly
+bounded and nonnegative. Put $W_A(s)=\prod_{j\in A}(1+k'(s_j))$.
+Its integral is $(1+2c_K)^{|A|}$. Write $d_{A,0}=\det(C_A)$ and
+$d_{A,1}=\sum_{j\in A}\det(C_{A\setminus\{j\},A\setminus\{j\}})k'(s_j)$.
+The determinant, its difference from $d_{A,0}$, and its difference
+from $d_{A,0}+hd_{A,1}$ are bounded respectively by
+$CW_A$, $ChW_A$, and $Ch^2W_A$ for $0<h\leq1$.
+These bounds require no inverse of $C_A$.
+
+Let $\ell(s)$ equal $k(s_j)$ on $A$ and $\sigma_jc_K$ on $B$.
+Then $u_h=u_0+h\ell(s)$ with bounded $\ell$. The conditional
+gradient is the sum over at most $3^{m_{\max}}$ integrals
+\begin{equation}\label{eq:supp-chart-integral}
+ \int_{(a,b)^{|A|}}\int_{(0,\infty)^{|B|}}
+ z_k(s)f\{X\beta+u_0+h\ell(s)\}d_A(h,s)\,dv_B\,ds_A.
+\end{equation}
+For fixed $s_A$ the $A$ density coordinates are fixed, and the
+$B$ coordinates are a translation and reflection of $v_B$.
+The section bound therefore controls the absolute integral of every
+required density derivative uniformly in $\beta$ and $s_A$.
+Taylor's identity
 \[
- \sup_{\beta\in\mathcal N_n}
- \norm{\widehat H_{\mathrm{eff}}(\beta)-\widehat H_{\mathrm{eff}}(\beta_h^{\star})}_{\max}
+ f(y+h\ell)=f(y)+h\ell^{\mathsf T}\nabla f(y)
+ +\int_0^h(h-t)\ell^{\mathsf T}\nabla^2f(y+t\ell)\ell\,dt
 \]
-by $\eta_{n,h}$. The proof should exploit the fraction of residuals lying within the kernel window. A pointwise global derivative bound of order $h^{-2}$ is deliberately excluded.
+and Fubini's theorem bound the integrated remainder by $Ch^2M_k$.
+Together with the determinant expansion this proves a constant plus
+a linear term with uniform $O(h^2M_k)$ remainder. The linear
+integrand is
+\[
+ z_k(s)\{d_{A,0}\ell(s)^{\mathsf T}\nabla f(X\beta+u_0)
+                   +d_{A,1}f(X\beta+u_0)\}.
+\]
+Take expectation over designs. Proposition~\ref{prop:supp-dual-profile}
+identifies the constant term as the nonsmooth profile score expectation.
+Since the risk is finite at one point and its sample gradients have
+an integrable design envelope, dominated difference quotients identify
+this expectation with $\nabla R_0$; the density formula makes it
+continuous.
 
-Fourth, a score-expansion and mean-square plug-in lemma must yield
-$\norm{r_{n,h}}_{\infty}=O_p(\mathfrak t_{n,h})$ and
-\eqref{eq:supp-score-plugin}. Separate verification is required for random-intercept and random-intercept--slope designs because the derivative of the nuisance profile map changes with $Z_i$.
+Differentiation with respect to $\beta_l$ replaces the density by
+$\sum_jX_{jl}\partial_jf$. First-order Taylor remainders and the
+second-order section bound give $\mathcal H_h-H_0=O(h)$.
+A further parameter increment uses second density derivatives and
+third design moments, giving \eqref{eq:supp-pop-Lipschitz} and
+continuity of $H_0$. With third density derivatives, a second-order
+Taylor remainder for the differentiated integral proves the Hessian
+expansion.
 
+For the directional statements, replace the coordinate multiplier
+$X_{jk}$ by $X_j^Tv$. Differentiation along $w$ and $z$ introduces
+at most the products of their corresponding design contrasts.
+The conditional sub-Gaussian bound controls the expectations of
+these products uniformly for sparse unit vectors $v,w,z$.
+The section constants are independent of the coefficient and its
+support. Taking suprema over unit directions after integration
+therefore gives the Euclidean gradient and restricted operator
+Hessian bounds with constants independent of the selected dimension.
+The implicit equation on a positive-curvature selected model then
+gives its uniform coefficient expansion through order $h^2$.
+\end{proof}
+
+When $|A|>q$, leading determinants in
+\eqref{eq:supp-chart-det} vanish according to their rank. Their
+contributions are retained at the displayed powers of $h$. The proof
+therefore allows arbitrarily close distinct visit times and active
+sets larger than the nuisance dimension.
+
+\begin{proposition}[Smooth independent errors with latent locations]\label{prop:supp-density-example}
+Conditional on a cluster variable $\eta$ and $(X,Z,m)$, suppose
+$Y_j=\mu_j(\eta,X,Z)+\sigma_j(\eta,X,Z)\varepsilon_j$, where the
+errors are independent, their density derivatives through order $L$
+are bounded and integrable, and $0<c_\sigma\leq\sigma_j\leq C_\sigma$.
+Then \eqref{eq:supp-density-sections} holds through order $L$ for
+every conditional distribution of $\eta$. Independent Gaussian and
+standardised Student $t_3$ errors satisfy these requirements for any
+fixed finite $L$.
+\end{proposition}
+
+\begin{proof}
+Conditional density derivatives are products of
+$\sigma_j^{-1-\alpha_j}f_\varepsilon^{(\alpha_j)}
+\{(y_j-\mu_j)/\sigma_j\}$.
+Take supremum norms on $A$ and integrate absolute values on $B$.
+The product of these bounds is uniform in locations and scales.
+Differentiation under the latent mixture and Tonelli's theorem retain
+the same bound. Gaussian derivatives are polynomials times the
+Gaussian density. Student $t_3$ derivatives are bounded rational
+functions with integrable tails. These verify the required univariate
+bounds. Cluster-specific intercepts, slopes and nonlinear locations
+may all be included in $\eta$.
+\end{proof}
+
+\subsection{Profile curvature moments}
+
+Assume for every integer $r\geq2$,
+\begin{equation}\label{eq:supp-design-moments}
+ \max_{k,l}\E\{(M_kM_l)^r\mid Z,m\}\leq r!C_X^r.
+\end{equation}
+The conditional density obeys the section bound
+\eqref{eq:supp-density-sections} with $L=0$. The nuisance design is
+bounded and has a fixed number of columns; its rows and columns may
+be linearly dependent.
+
+\begin{theorem}[Oracle Hessian concentration]\label{thm:supp-oracle}
+Under these conditions and the compact kernel assumptions above, for
+every deterministic $\beta$ and $0<h\leq1$,
+\begin{equation}\label{eq:supp-H-moments}
+ \max_{k,l}\E|H_{i,h,kl}(\beta)|^r\leq r!C^rh^{1-r},\qquad r\geq2.
+\end{equation}
+Consequently the centred sample Hessian has maximum norm
+$O_p\{\sqrt{\log(2p)/(nh)}+\log(2p)/(nh)\}$.
+The bounds also apply to any fixed sparse design contrasts under the
+corresponding directional moment condition.
+\end{theorem}
+
+\begin{proof}
+Write $w_j=K_h(r_j)/m$.
+The Schur variational identity is
+\begin{equation}\label{eq:supp-H-variational}
+ v^{\mathsf T}H_{i,h}v=
+ \min_c\left\{\sum_jw_j(X_j^{\mathsf T}v-Z_j^{\mathsf T}c)^2
+                                      +c^{\mathsf T}\Lambda c\right\}.
+\end{equation}
+This identity gives positive semidefiniteness. On the dual chart
+\eqref{eq:supp-chart}, put $Q_{A,h}=C_A+hD_A$. Interior dual
+coordinates have positive kernel weight, and endpoint coordinates
+have zero weight. Differentiating the interior chart equations at
+fixed $Y$ therefore gives the exact identity
+\begin{equation}\label{eq:supp-chart-Hessian}
+ H_{i,h}=m^{-1}X_A^TQ_{A,h}^{-1}X_A.
+\end{equation}
+An empty $A$ gives a zero Hessian. Let $K_{\max}=\sup K$.
+Since $D_{A,jj}=k'(s_j)\geq K_{\max}^{-1}$,
+$\|Q_{A,h}^{-1}\|_{op}\leq K_{\max}/h$.
+The chart Jacobian is $\det(Q_{A,h})$, so for $r\geq2$,
+\begin{align}
+ \det(Q_{A,h})\|Q_{A,h}^{-1}\|_{op}^{r}
+ &\leq (K_{\max}/h)^{r-1}
+          \det(Q_{A,h})\operatorname{tr}(Q_{A,h}^{-1})\nonumber\\
+ &= (K_{\max}/h)^{r-1}
+          \operatorname{tr}\{\operatorname{adj}(Q_{A,h})\}.
+ \label{eq:supp-cofactor-bound}
+\end{align}
+
+The trace of the adjugate is the sum of the principal minors of
+order $|A|-1$. Expanding each minor as in
+\eqref{eq:supp-chart-det} and using bounded $Z$ and
+$\Lambda^{-1}$ gives
+\[
+ \operatorname{tr}\{\operatorname{adj}(Q_{A,h})\}
+       \leq C\prod_{j\in A}\{1+k'(s_j)\},\qquad 0<h\leq1.
+\]
+For $|A|=1$ the adjugate equals one. The product integrates to
+$(1+2c_K)^{|A|}$ on the dual box. By
+\eqref{eq:supp-chart-Hessian},
+$|H_{i,h,kl}|\leq CM_kM_l\|Q_{A,h}^{-1}\|_{op}$.
+Integrating its $r$th power on each chart, the density section bound
+controls the integral over $v_B$ uniformly in $s_A$. Equation
+\eqref{eq:supp-cofactor-bound} then yields
+\[
+ \E\{|H_{i,h,kl}(\beta)|^r\mid X,Z,m\}
+       \leq C^r h^{1-r}(M_kM_l)^r.
+\]
+There are at most $3^{m_{\max}}$ charts. Taking expectation over
+the design and applying \eqref{eq:supp-design-moments} proves
+\eqref{eq:supp-H-moments}.
+
+After centring, \eqref{eq:supp-H-moments} gives a scalar Bernstein
+moment bound with variance and scale bounded by $C/h$.
+Bernstein's inequality and a union over the $p^2$ matrix entries
+prove the concentration result. Replacing design columns by linear
+contrasts proves the stated directional form.
+\end{proof}
+
+The density classes in Proposition~\ref{prop:supp-density-example}
+supply the required section bounds. Gaussian covariate columns with
+uniformly bounded conditional covariance satisfy
+\eqref{eq:supp-design-moments}; the sub-Gaussian contrast condition
+gives its directional version. The cofactor calculation is uniform
+over bounded nuisance designs, including repeated or arbitrarily
+close visit times and higher-order time effects.
+
+\subsection{Uniform sparse neighbourhoods and fitted score substitution}
+
+Let $\Theta_{D,R}=\{\beta:\|\beta\|_0\leq D,\|\beta\|_1\leq R\}$,
+$R\leq n^{C_R}$, $n^{-C_h}\leq h\leq1$ and $L_n=\log(2np)$.
+Suppose additionally that the design coordinates are uniformly
+sub-Gaussian and $K$ is globally Lipschitz.
+
+\begin{theorem}[Uniform empirical curvature and squared curvature]\label{thm:supp-uniform}
+Under Theorem~\ref{thm:supp-oracle},
+\begin{align}
+ \sup_{\beta\in\Theta_{D,R}}
+ \|P_nH_{i,h}(\beta)-\E H_{i,h}(\beta)\|_{\max}
+ &=O_p\left\{\sqrt{\frac{D L_n}{nh}}+\frac{D L_n}{nh}\right\},
+ \label{eq:supp-uniform-H}\\
+ \sup_{\beta\in\Theta_{D,R},kl}P_nH_{i,h,kl}(\beta)^2
+ &=O_p\left\{h^{-1}+\sqrt{\frac{D L_n}{nh^3}}
+                         +\frac{D L_n^3}{nh^2}\right\}.
+ \label{eq:supp-uniform-H2}
+\end{align}
+They hold at both $h$ and $h/2$ with their respective expectations.
+\end{theorem}
+
+\begin{proof}
+For a realised cluster put $M_X=\max\{1,\max_{jk}|X_{jk}|\}$.
+Strong monotonicity of the nuisance gradient and its parameter
+increment bound imply
+$\|\gamma_h(\beta)-\gamma_h(\beta')\|_2
+\leq CM_Xh^{-1}\|\beta-\beta'\|_1$.
+Consequently the residual increment is at most
+$CM_Xh^{-1}\|\beta-\beta'\|_1$, and
+$\|W_h(\beta)-W_h(\beta')\|_{\max}
+\leq CM_Xh^{-3}\|\beta-\beta'\|_1$.
+Since $\|B^{-1}\|\leq c_\Lambda^{-1}$ and
+$B^{-1}-(B')^{-1}=B^{-1}(B'-B)(B')^{-1}$, direct substitution
+in the Schur formula gives the deterministic bounds
+\begin{align}
+ |H_{h,kl}(\beta)-H_{h,kl}(\beta')|
+   &\leq CM_X^3h^{-5}\|\beta-\beta'\|_1,\nonumber\\
+ |H_{h,kl}(\beta)^2-H_{h,kl}(\beta')^2|
+   &\leq CM_X^5h^{-6}\|\beta-\beta'\|_1.
+ \label{eq:supp-net-Lipschitz}
+\end{align}
+The second inequality also uses $|H_{h,kl}|\leq CM_X^2/h$.
+
+Cover each support-specific $\ell_1$ ball by a deterministic grid
+with mesh $\varepsilon=n^{-2}h^6/L_n^3$. There are at most $p^D$
+supports and $(1+CR/\varepsilon)^D$ points per support, giving
+logarithm of total cardinality $O(D L_n)$.
+The sub-Gaussian tail bound gives
+$\max_{i\leq n}M_{X,i}\leq C\sqrt{L_n}$ with probability tending
+to one. Apply the untruncated oracle Bernstein inequality at all grid
+points and matrix entries. Extend the empirical matrices by the first
+bound in \eqref{eq:supp-net-Lipschitz}. Its extension error is at most
+$CL_n^{3/2}h^{-5}\varepsilon=o(n^{-1})$.
+For the expectation use
+$\E M_X^3\leq C\{\log(2p)\}^{3/2}$ in the same bound.
+This proves \eqref{eq:supp-uniform-H}.
+
+For the squared matrices, apply Bernstein to the independent original
+summands
+\[
+ Q_{i,kl}(\beta)=H_{i,h,kl}(\beta)^2
+                    I\{M_{X,i}\leq C\sqrt{L_n}\}.
+\]
+These are the computed Hessian entries multiplied by a cluster-level
+indicator. Their envelope is $CL_n^2/h^2$ and their variance is at
+most $\E H_{i,h,kl}^4\leq C/h^3$ by
+\eqref{eq:supp-H-moments}. Bernstein and the same grid union give
+fluctuation order
+$\sqrt{D L_n/(nh^3)}+D L_n^3/(nh^2)$.
+Their expectations are at most $C/h$ by the second moment bound.
+On the high probability maximum-design event all $Q$ equal their
+untruncated squared entries. The second bound in
+\eqref{eq:supp-net-Lipschitz} extends this assertion off the grid
+with error at most $CL_n^{5/2}h^{-6}\varepsilon=o(n^{-1})$.
+This proves \eqref{eq:supp-uniform-H2}. The same argument applies at
+$h/2$.
+\end{proof}
+
+\begin{proposition}[Fitted score substitution]\label{prop:supp-plugin}
+Suppose the line from $\beta^\star$ to $\bar\beta$ lies in
+$\Theta_{D,R}$ with probability tending to one,
+$\|\bar\beta-\beta^\star\|_1=O_p(e_n)$ and $\|v_n\|_1=O_p(1)$.
+If $D L_n^3/(nh)\to0$, then
+\[
+ P_n[v_n^{\mathsf T}\{g_{i,h}(\bar\beta)-g_{i,h}(\beta^\star)\}]^2
+ =O_p(e_n^2/h).
+\]
+\end{proposition}
+
+\begin{proof}
+Put $\Delta=\bar\beta-\beta^\star$. The fundamental theorem of
+calculus gives the score increment as
+$\int_0^1H_{i,h}(\beta^\star+t\Delta)\Delta\,dt$.
+Weighted Cauchy--Schwarz over coordinates and integration yields
+\[
+ P_n[v_n^{\mathsf T}\{g_{i,h}(\bar\beta)-g_{i,h}(\beta^\star)\}]^2
+ \leq\|v_n\|_1^2\|\Delta\|_1^2
+       \sup_{\beta\in\Theta_{D,R},kl}P_nH_{i,h,kl}(\beta)^2.
+\]
+Theorem~\ref{thm:supp-uniform} makes the last supremum $O_p(1/h)$
+under the displayed growth condition. This proves the result.
+\end{proof}
+
+The linear-contrast moment condition permits the same calculations
+with projected design columns. Coefficient nets and unit-sphere nets
+on a selected support give the restricted operator and projected
+second-moment bounds used in Section~\ref{supp:proofs}. This retains
+Euclidean coefficient errors in the selected-model expansion.
+
+\subsection{Exact curvature for the Gaussian intercept design}
+
+The Gaussian scaling study admits a deterministic calculation of
+$H_0(\beta^0)$. Let $Z=1$, $\Lambda=\lambda$, and write
+$r_j=b+\varepsilon_j-\Phi^{-1}(\tau)$, where the innovations are
+independent standard Gaussian. The covariate rows are independent
+$N(0,\Sigma)$ and independent of the complete residual vector.
+Let $u(r)$ be the optimised unsmoothed dual vector, including its
+$1/m$ normalisation. A perturbation $\Delta$ of the coefficient adds
+independent Gaussian noise of variance $\Delta^T\Sigma\Delta$ to
+each residual. Differentiating this Gaussian variance and applying
+Stein's identity to the Lipschitz profile loss gives
+\begin{equation}\label{eq:supp-exact-gaussian-curvature}
+ H_0(\beta^0)=\kappa_0\Sigma,\qquad
+ \kappa_0=\E\sum_{j=1}^m\varepsilon_j u_j(r).
+\end{equation}
+This calculation integrates the nonsmooth score through the Gaussian
+density. Conditional on $b$, a cell with $l$ residuals below the
+nuisance solution has $\gamma=(\tau-l/m)/\lambda$ and fixed dual
+bounds. On a face with $\gamma=r_{(l)}$, the interior dual coordinate
+is $\lambda r_{(l)}-\{(m-1)\tau-l+1\}/m$, and
+$r_{(l)}$ lies between $(\tau-l/m)/\lambda$ and
+$(\tau-(l-1)/m)/\lambda$. Binomial order-statistic densities and
+truncated Gaussian first moments therefore give the conditional
+expectation in \eqref{eq:supp-exact-gaussian-curvature}. Gaussian
+quadrature over $b$, followed by averaging over cluster sizes,
+determines $\kappa_0$. Two quadrature orders and an independent
+population calculation check its value.
+
+For an AR(1) covariance, $\Sigma^{-1}e_k$ is available directly from
+its tridiagonal inverse. The scaling calculations therefore evaluate
+the theoretical contribution in the article at $\beta^0$ using
+$\omega_{0k}=\Sigma^{-1}e_k/\kappa_0$. Subtracting its sample average
+from $\widehat\beta_k-\beta_k^0$ gives the observed influence
+remainder. This diagnostic also retains the selected-model Hessian
+error and inverse-row error separately at each bandwidth and fold.

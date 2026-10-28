@@ -1,0 +1,12 @@
+\begin{table}[t]
+\caption{Profile and marginal quantile projections under predictor dependent error scales}\label{tab:conditional-scale-targets}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrr@{}}
+\toprule
+Error & Quantile & Generated & Profile & MCSE & QR slope & QR intercept \\
+\midrule
+Gaussian & 0.25 & 0.750 & 0.836 & 0.0009 & 0.817 & -0.282 \\
+$t_3$ & 0.75 & 0.750 & 0.670 & 0.0013 & 0.693 & 0.406 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip\noindent Slope entries concern the first coordinate. Profile targets use four independent populations of 100{,}000 clusters and a half-bandwidth refinement; MCSE refers to that population calculation. Marginal QR includes an unpenalised intercept and uses deterministic quadrature, checked by four independent populations of 100{,}000 clusters. The fitted design has 1000 slope coordinates and eight nonzero generating coefficients.
+\end{table}

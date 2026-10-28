@@ -39,7 +39,7 @@ fit_benchmark_qgee_scad_v2 <- function(train,
     return(benchmark_failure_v2("QGEE-SCAD", "schema",
                                 "Dimension mismatch."))
   }
-  # Observation counts per cluster, aligned with the row order.
+  # cluster计数使用设计矩阵中的出现顺序。
   cluster_factor <- factor(cluster_id, levels = unique(cluster_id))
   nobs <- as.integer(table(cluster_factor))
   if (sum(nobs) != length(y)) {
@@ -55,21 +55,19 @@ fit_benchmark_qgee_scad_v2 <- function(train,
   maxit <- as.integer(control$maxit %||% 100L)
   epsilon <- control$epsilon %||% 1e-4
 
-  # geeVerse derives the intercept flag from attr(x, "assign"): a leading 0
-  # marks the intercept column. Our designs carry no intercept column, so
-  # declare every column as a penalised term (assign >= 1) to avoid the
-  # empty-logical bug when the attribute is absent.
-  attr(X, "assign") <- rep(seq_len(ncol(X)), 1)
-
+  # geeVerse使用assign属性识别固定intercept。
+  attr(X, "assign") <- if (intercept) c(0L, seq_len(ncol(X) - 1L)) else seq_len(ncol(X))
+  qpgee_fit <- if (isTRUE(control$batch_geometry)) submission_qpgee else geeVerse::qpgee
   fit <- tryCatch(
-    geeVerse::qpgee(
+    qpgee_fit(
       x = X, y = y, nobs = nobs, tau = tau,
       corstr = corstr, lambda = lambda, method = method,
       intercept = intercept,
       nfold = nfold,
       control = geeVerse::qpgeeControl(
         epsilon = epsilon, maxit = maxit,
-        shrinkCutoff = control$shrinkCutoff %||% 1e-4
+        shrinkCutoff = control$shrinkCutoff %||% 1e-4,
+        standardize = control$standardize %||% FALSE
       )
     ),
     error = function(e) e
@@ -135,7 +133,8 @@ fit_benchmark_qgee_scad_v2 <- function(train,
     runtime_sec = elapsed,
     converged = isTRUE(fit$converged %||% TRUE),
     kkt_residual = NA_real_,
-    warning_messages = character(),
+    warning_messages = if (isTRUE(fit$converged %||% TRUE)) character() else
+      "geeVerse qpgee reported non-convergence.",
     implementation_version = "geeVerse-0.3.1-official",
     target_scope = "marginal_longitudinal_quantile"
   )

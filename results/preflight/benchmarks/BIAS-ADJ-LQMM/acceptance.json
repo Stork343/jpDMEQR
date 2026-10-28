@@ -1,13 +1,45 @@
 {
   "method_id": "BIAS-ADJ-LQMM",
-  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "commit_sha": "458b83799e577adef18c7343818ce1a0c8a5dfad",
   "reference_identifier": "Battagliola-et-al-2022-10.1016/j.ecosta.2021.07.003",
+  "method_version": null,
   "unit_test_pass": true,
   "limiting_case_pass": true,
   "fidelity_check_pass": true,
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|bias|prediction_optional|coverage_source_supported",
-  "created_utc": "2026-09-01 01:57:32 UTC",
-  "notes": "RW-bootstrap bias-adjusted LQMM faithful to ran_int_bias_adj.R; status ok:TRUE; finite:TRUE"
+  "source_checks": [
+    {
+      "method_id": "BIAS-ADJ-LQMM",
+      "calculation": "official_two_step_coefficients",
+      "discrepancy": 0,
+      "tolerance": 1e-08,
+      "passed": true,
+      "source": "official ran_int_bias_adj.R"
+    },
+    {
+      "method_id": "BIAS-ADJ-LQMM",
+      "calculation": "official_adjusted_coefficients",
+      "discrepancy": 0,
+      "tolerance": 1e-08,
+      "passed": true,
+      "source": "official ran_int_bias_adj.R B100"
+    },
+    {
+      "method_id": "BIAS-ADJ-LQMM",
+      "calculation": "official_interval",
+      "discrepancy": 0,
+      "tolerance": 1e-08,
+      "passed": true,
+      "source": "official ran_int_bias_adj.R B100"
+    }
+  ],
+  "reference_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/reference_fidelity",
+  "test_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/test_results.rds",
+  "test_names": ["BIAS-ADJ-LQMM adapter is deterministic and schema-conformant", "BIAS-ADJ-LQMM uses the intercept direction for q>1 designs", "BIAS-ADJ-LQMM two-step estimate matches manual pipeline", "BIAS-ADJ-LQMM wild weights follow the source distribution", "BIAS-ADJ-LQMM small random-effect variance limit"],
+  "assertion_count": 17,
+  "warning_count": 8,
+  "source_specification_status": "complete_source_or_maintained_package_checked",
+  "created_utc": "2026-10-22 17:15:18 UTC"
 }

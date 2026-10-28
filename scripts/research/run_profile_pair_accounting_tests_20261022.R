@@ -1,0 +1,15 @@
+root <- normalizePath(".", mustWork = TRUE)
+source(file.path(root, "tests", "testthat", "helper-v2-skip.R"))
+args <- commandArgs(trailingOnly = TRUE)
+run_id <- if (length(args)) args[[1L]] else format(Sys.time(), "%Y%m%dT%H%M%S", tz = "UTC")
+out <- file.path(root, "results", "scratch", "profile_pair_accounting_tests_20261022", run_id)
+if (dir.exists(out)) stop("The accounting check directory already exists.")
+dir.create(out, recursive = TRUE)
+result <- testthat::test_file(file.path(root, "tests", "testthat", "test-profile-pair-runner-accounting.R"),
+                               reporter = "summary", stop_on_failure = FALSE)
+saveRDS(result, file.path(out, "results.rds"))
+summary <- as.data.frame(result)
+utils::write.csv(summary[, c("file", "test", "nb", "failed", "error", "skipped", "warning", "passed")],
+                 file.path(out, "summary.csv"), row.names = FALSE)
+stopifnot(!any(summary$error), all(summary$failed == 0L), sum(summary$skipped) == 0L)
+print(c(assertions = sum(summary$nb), passed = sum(summary$passed), failed = sum(summary$failed)))

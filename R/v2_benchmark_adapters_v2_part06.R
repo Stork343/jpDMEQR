@@ -1,7 +1,7 @@
 # Fidelity implementation of DOUBLE-PEN-QLMM.
 #
-# Source method: Li, Y., Liu, Y., and Luo, Y. (2020). "Variable Selection for
-# Joint Fixed and Random Effects in Quantile Mixed Models". Journal of
+# 来源为 Hanfang Li、Yuan Liu 和 Youxi Luo 的论文
+# "Double Penalized Quantile Regression for the Linear Mixed Effects Model"。Journal of
 # Systems Science and Complexity 33:2080-2102, DOI 10.1007/s11424-020-9065-4.
 #
 # Model: y_ij = x_ij' beta + z_ij' alpha_i + eps_ij, i=1..n, j=1..n_i.
@@ -59,11 +59,10 @@ fit_double_pen_qlmm_v2 <- function(y,
   }
 
   fit_l1_block <- function(design, response, lambda) {
-    if (lambda <= 0) {
-      return(quantreg::rq.fit(x = design, y = response, tau = tau))
-    }
-    quantreg::rq.fit.lasso(x = design, y = response, tau = tau, lambda = lambda)
+    fit_quantile_l1_block_v2(design, response, tau, lambda)
   }
+
+  if (is.null(beta_init)) beta <- as.numeric(fit_l1_block(X, y, lambda_beta)$coefficients)
 
   converged <- FALSE
   failure_stage <- ""
@@ -110,11 +109,9 @@ fit_double_pen_qlmm_v2 <- function(y,
       break
     }
   }
-  if (!converged && max_iter > 1L && history[max_iter] <= eps * 10) {
-    converged <- TRUE
-  }
 
   names(beta) <- colnames(X)
+  if (!converged) failure_stage <- "iteration_limit"
   colnames(alpha) <- colnames(Z) %||% paste0("z", seq_len(q))
   rownames(alpha) <- ci$levels
 
@@ -128,11 +125,12 @@ fit_double_pen_qlmm_v2 <- function(y,
     alpha = alpha,
     objective = objective,
     converged = converged,
-    iterations = if (converged) min(which(history > 0 | seq_along(history) == 1L)) else max_iter,
+    iterations = iter,
     failure_stage = failure_stage,
     failure_message = "",
     selected_beta = which(abs(beta) > 1e-6),
     selected_alpha = which(abs(alpha) > 1e-6),
+    beta_change_history = history[seq_len(iter)],
     tau = tau,
     lambda_beta = lambda_beta,
     lambda_alpha = lambda_alpha,
@@ -157,33 +155,100 @@ tune_double_pen_qlmm_v2 <- function(y, X, Z, cluster_id, tau,
   ci <- cluster_index_v2(cluster_id)
   N <- length(y)
 
-  # For tuning purposes, fix lambda_alpha at its grid midpoint and select
-  # lambda_beta by the criterion (mirrors the paper's one-at-a-time rule).
-  lambda_alpha_mid <- lambda_alpha_grid[ceiling(length(lambda_alpha_grid) / 2)]
-  best <- NULL
-  for (lb in lambda_beta_grid) {
-    fit <- fit_double_pen_qlmm_v2(
-      y, X, Z, cluster_id, tau,
-      lambda_beta = lb, lambda_alpha = lambda_alpha_mid,
-      control = control
+  p <- ncol(X)
+  q <- ncol(Z)
+  max_iter <- as.integer(control$max_iter %||% 50L)
+  eps <- control$eps %||% 1e-4
+  beta_tol <- control$beta_tol %||% 1e-6
+  criterion_value <- function(residual, nonzero) {
+    loss <- sum(residual * (tau - as.numeric(residual < 0)))
+    if (!is.finite(loss) || loss <= 0) stop("The block selection loss must be positive and finite.")
+    if (criterion == "SIC") return(log(loss / N) + log(N) * nonzero / (2 * N))
+    if (N <= nonzero) return(Inf)
+    loss / (N - nonzero)
+  }
+  choose_beta <- function(alpha) {
+    adjusted <- y - rowSums(Z * alpha[as.integer(ci$factor), , drop = FALSE])
+    choices <- lapply(lambda_beta_grid, function(lambda) {
+      block <- fit_quantile_l1_block_v2(X, adjusted, tau, lambda)
+      beta <- as.numeric(block$coefficients)
+      beta[abs(beta) < 1e-6] <- 0
+      list(beta = beta, lambda = lambda,
+           criterion = criterion_value(adjusted - as.numeric(X %*% beta),
+                                         sum(abs(beta) > 1e-6)))
+    })
+    values <- vapply(choices, `[[`, numeric(1), "criterion")
+    if (!any(is.finite(values))) stop("No finite fixed-effect block selection criterion is available.")
+    selected <- choices[[which.min(values)]]
+    selected$candidates <- data.frame(lambda = lambda_beta_grid, criterion = values)
+    selected
+  }
+  choose_alpha <- function(beta) {
+    adjusted <- y - as.numeric(X %*% beta)
+    choices <- lapply(lambda_alpha_grid, function(lambda) {
+      alpha <- matrix(0, ci$n, q)
+      for (i in seq_len(ci$n)) {
+        rows <- ci$rows[[i]]
+        block <- fit_quantile_l1_block_v2(Z[rows, , drop = FALSE], adjusted[rows], tau, lambda)
+        alpha[i, ] <- as.numeric(block$coefficients)
+      }
+      alpha[abs(alpha) < 1e-6] <- 0
+      residual <- adjusted - rowSums(Z * alpha[as.integer(ci$factor), , drop = FALSE])
+      list(alpha = alpha, lambda = lambda,
+           criterion = criterion_value(residual, sum(abs(alpha) > 1e-6)))
+    })
+    values <- vapply(choices, `[[`, numeric(1), "criterion")
+    if (!any(is.finite(values))) stop("No finite random-effect block selection criterion is available.")
+    selected <- choices[[which.min(values)]]
+    selected$candidates <- data.frame(lambda = lambda_alpha_grid, criterion = values)
+    selected
+  }
+  alpha <- matrix(0, ci$n, q)
+  beta_choice <- choose_beta(alpha)
+  initialization_candidates <- beta_choice$candidates
+  beta <- beta_choice$beta
+  converged <- FALSE
+  history <- vector("list", max_iter)
+  candidates <- vector("list", max_iter)
+  for (iter in seq_len(max_iter)) {
+    previous <- beta
+    alpha_choice <- choose_alpha(beta)
+    alpha <- alpha_choice$alpha
+    beta_choice <- choose_beta(alpha)
+    beta <- beta_choice$beta
+    change <- abs(beta - previous)
+    history[[iter]] <- data.frame(
+      iteration = iter, lambda_beta = beta_choice$lambda,
+      lambda_alpha = alpha_choice$lambda,
+      criterion_beta = beta_choice$criterion, criterion_alpha = alpha_choice$criterion,
+      beta_change_mean = mean(change), beta_change_max = max(change)
     )
-    if (!fit$converged) next
-    resid <- y - as.numeric(X %*% fit$beta) -
-      rowSums(Z * fit$alpha[as.integer(ci$factor), , drop = FALSE])
-    s_m <- sum(resid * (tau - as.numeric(resid < 0)))
-    n_nonzero <- sum(abs(fit$beta) > 1e-6) + sum(abs(fit$alpha) > 1e-6)
-    crit <- if (criterion == "SIC") {
-      log(s_m / N) + log(N) / (2 * N) * n_nonzero
-    } else {
-      s_m / (N - n_nonzero)
-    }
-    if (is.null(best) || crit < best$criterion) {
-      best <- list(lambda_beta = lb, lambda_alpha = lambda_alpha_mid,
-                   criterion = crit, fit = fit)
+    candidates[[iter]] <- list(alpha = alpha_choice$candidates, beta = beta_choice$candidates)
+    if (mean(change) < eps && max(change) < beta_tol) {
+      converged <- TRUE
+      break
     }
   }
-  if (is.null(best)) stop("No converged fit on the tuning grid.")
-  best
+  if (!converged) stop("The block-tuned double-penalised algorithm did not converge.")
+  names(beta) <- colnames(X)
+  dimnames(alpha) <- list(ci$levels, colnames(Z))
+  residual <- y - as.numeric(X %*% beta) -
+    rowSums(Z * alpha[as.integer(ci$factor), , drop = FALSE])
+  fit <- list(beta = beta, alpha = alpha, converged = converged,
+              iterations = iter, failure_stage = "", failure_message = "",
+              selected_beta = which(abs(beta) > 1e-6),
+              selected_alpha = which(abs(alpha) > 1e-6),
+              objective = sum(residual * (tau - as.numeric(residual < 0))) +
+                beta_choice$lambda * sum(abs(beta)) +
+                alpha_choice$lambda * sum(abs(alpha)),
+              tau = tau, lambda_beta = beta_choice$lambda,
+              lambda_alpha = alpha_choice$lambda, N = N, n_clusters = ci$n,
+              lambda_beta_grid = lambda_beta_grid, lambda_alpha_grid = lambda_alpha_grid,
+              initialization_candidates = initialization_candidates,
+              tuning_candidates = candidates[seq_len(iter)],
+              tuning_history = do.call(rbind, history[seq_len(iter)]))
+  list(lambda_beta = beta_choice$lambda, lambda_alpha = alpha_choice$lambda,
+       criterion = beta_choice$criterion, fit = fit)
 }
 
 fit_benchmark_double_pen_qlmm_v2 <- function(train,
@@ -210,16 +275,17 @@ fit_benchmark_double_pen_qlmm_v2 <- function(train,
   }
   n_clusters <- length(unique(cluster_id))
 
-  # Frozen lambda rates scaled to the paper's sparsity level; the multiplier
-  # grids come from the registry tuning rule. A reduced default grid keeps
-  # pilot/development runs tractable; the final freeze restores the full
-  # grid via control$lambda_beta_grid / control$lambda_alpha_grid.
   log_p <- log(max(ncol(X), 2))
   lambda_scale <- sqrt(log_p / length(y))
+  alpha_scale <- lambda_scale * sqrt(n_clusters / length(y))
+  if (isTRUE(control$raw_sum_penalty_scales)) {
+    lambda_scale <- sqrt(tau * (1 - tau) * length(y) * log_p)
+    alpha_scale <- sqrt(tau * (1 - tau) * mean(table(cluster_id)) * log(max(n_clusters * ncol(Z), 2)))
+  }
   lambda_beta_grid <- (control$lambda_beta_grid %||% c(0.5, 1, 2)) *
     lambda_scale
   lambda_alpha_grid <- (control$lambda_alpha_grid %||% c(0.5, 1)) *
-    lambda_scale * sqrt(n_clusters / length(y))
+    alpha_scale
 
   best <- tryCatch(
     tune_double_pen_qlmm_v2(
@@ -280,6 +346,7 @@ fit_benchmark_double_pen_qlmm_v2 <- function(train,
       fit = fit,
       alpha = fit$alpha,
       selected_alpha = fit$selected_alpha,
+      penalty_scales = c(beta = lambda_scale, alpha = alpha_scale),
       tuning = list(lambda_beta = best$lambda_beta,
                     lambda_alpha = best$lambda_alpha,
                     criterion = control$tuning_criterion %||% "SIC"),

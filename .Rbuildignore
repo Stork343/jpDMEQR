@@ -12,3 +12,7 @@
 ^scripts$
 ^code_v2$
 ^jss-article-tex$
+^research$
+^tools$
+^SHA256SUMS$
+^tmp_head[0-9]*\.txt$

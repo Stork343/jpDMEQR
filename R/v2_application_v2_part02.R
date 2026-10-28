@@ -6,9 +6,15 @@ audit_primary_outcome_v2 <- function(metadata,
                                      maximum_missing_fraction = 0.30,
                                      minimum_distinct_values = 20L,
                                      maximum_modal_fraction = 0.20,
-                                     minimum_visits_per_subject = 2L) {
+                                     minimum_visits_per_subject = 2L,
+                                     expression_sample_ids = NULL,
+                                     primary_quantiles = c(0.25, 0.50, 0.75),
+                                     sensitivity_quantiles = 0.10,
+                                     bandwidth_multipliers = c(0.75, 1, 1.25),
+                                     curvature_rule = NULL) {
   if (!outcome %in% names(metadata)) stop("Outcome field not found: ", outcome)
   sle <- metadata$group_type == "SLE" & !metadata$technical_replicate_flag
+  sle[is.na(sle)] <- FALSE
   y_all <- suppressWarnings(as.numeric(metadata[[outcome]]))
   eligible_visit <- sle & is.finite(y_all) & y_all > 0 & !is.na(metadata$subject_id)
   subjects_all <- unique(metadata$subject_id[sle & !is.na(metadata$subject_id)])
@@ -70,13 +76,17 @@ audit_primary_outcome_v2 <- function(metadata,
     stringsAsFactors = FALSE
   )
 
-  list(
+  audit <- list(
     gates = gates,
     summary = summary,
     eligible_visit = final_visit,
     eligible_subjects = repeated_subjects,
     outcome = y_all,
-    transformed_outcome = ifelse(final_visit, log(y_all), NA_real_)
+    transformed_outcome = replace(rep(NA_real_, nrow(metadata)), final_visit, log(y))
+  )
+  complete_gse65391_audit_v2(
+    audit, metadata, expression_sample_ids, primary_quantiles,
+    sensitivity_quantiles, bandwidth_multipliers, curvature_rule
   )
 }
 

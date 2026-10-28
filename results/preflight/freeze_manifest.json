@@ -1,11 +1,11 @@
 {
-  "pass": false,
+  "pass": true,
   "final": true,
-  "commit_sha": "93d13628f37eea733a3ab74d3f95478913c06345",
+  "commit_sha": "0b4023b1f3f472709283d4aa563f88847b9de82b",
   "branch": "gpt/simulation-freeze-resolution",
-  "config_path": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\config\\simulation_main.csv",
-  "config_sha256": "3da319d4ead5927968b2e1540acf8ef10656cc068cc34db1120b36b37551b132",
-  "created_utc": "2026-09-01 00:41:44 UTC",
+  "config_path": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\config\\simulation_main_b200.csv",
+  "config_sha256": "90aac2994a36fe26ae93e7afff61811ce004610ede8e0a346c56e1f5da0c3eea",
+  "created_utc": "2026-10-03 12:14:01 UTC",
   "governance": {
     "pass": true,
     "missing": []
@@ -17,7 +17,7 @@
     "row_count": 78,
     "experiment_ids": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12", "B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11", "B12", "B13", "B14", "B15", "B16", "B17", "B18", "B19", "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16", "D01", "D02", "D03", "D04", "D05", "D06", "E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "F01", "F02", "F03", "F04", "F05", "F06", "G01", "G02", "G03", "G04", "G05", "G06", "G07", "H01", "H02", "H03", "H04"],
     "methods": ["BIAS-ADJ-LQMM", "DOUBLE-PEN-QLMM", "LQMM", "POOLED-QR-LASSO", "PROFILE-DQR", "PROFILE-DQR-POP-H", "PROFILE-DQR-SPLIT", "PROFILE-DQR-TRUE-NUISANCE", "PROFILE-DQR-TRUE-SUPPORT", "QGEE-SCAD", "QIF-SEE", "SQR-DEBIASED-IID"],
-    "config_sha256": "3da319d4ead5927968b2e1540acf8ef10656cc068cc34db1120b36b37551b132",
+    "config_sha256": "90aac2994a36fe26ae93e7afff61811ce004610ede8e0a346c56e1f5da0c3eea",
     "registry_type": "main"
   },
   "benchmark": {
@@ -91,7 +91,7 @@
     "manifest": {
       "pass": true,
       "strict": true,
-      "commit_sha": "93d13628f37eea733a3ab74d3f95478913c06345",
+      "commit_sha": "0b4023b1f3f472709283d4aa563f88847b9de82b",
       "branch": "gpt/simulation-freeze-resolution",
       "seed_count": 20,
       "case_count": 760,
@@ -103,8 +103,97 @@
       "non_diagonal_lambda_checked": true,
       "dantzig_checked": true,
       "dantzig_pass": true,
-      "dantzig_residual": 0.050000000133404,
+      "dantzig_residual": 0.0500000000000002,
       "dantzig_mu": 0.05,
+      "assembly_modes_checked": true,
+      "assembly_pass": true,
+      "assembly_case_count": 6,
+      "assembly_cases": [
+        {
+          "case": 1,
+          "n_clusters": 10,
+          "p": 4,
+          "q": 1,
+          "tau": 0.5,
+          "m_rule": "uniform",
+          "error_dist": "gaussian",
+          "hessian_max_difference": 2.22044604925031e-16,
+          "fold_hessian_max_difference": 6.66133814775094e-16,
+          "identity_matrix_max_difference": 5.55111512312578e-17,
+          "identity_error_max": 2.22044604925031e-16,
+          "pass": true
+        },
+        {
+          "case": 2,
+          "n_clusters": 10,
+          "p": 4,
+          "q": 2,
+          "tau": 0.25,
+          "m_rule": "geometric_imbalance",
+          "error_dist": "t3",
+          "hessian_max_difference": 5.55111512312578e-17,
+          "fold_hessian_max_difference": 8.88178419700125e-16,
+          "identity_matrix_max_difference": 5.55111512312578e-17,
+          "identity_error_max": 1.11022302462516e-16,
+          "pass": true
+        },
+        {
+          "case": 3,
+          "n_clusters": 24,
+          "p": 40,
+          "q": 1,
+          "tau": 0.5,
+          "m_rule": "uniform",
+          "error_dist": "gaussian",
+          "hessian_max_difference": 2.22044604925031e-16,
+          "fold_hessian_max_difference": 1.77635683940025e-15,
+          "identity_matrix_max_difference": 2.22044604925031e-16,
+          "identity_error_max": 2.22044604925031e-16,
+          "pass": true
+        },
+        {
+          "case": 4,
+          "n_clusters": 24,
+          "p": 40,
+          "q": 2,
+          "tau": 0.75,
+          "m_rule": "geometric_imbalance",
+          "error_dist": "gaussian",
+          "hessian_max_difference": 2.22044604925031e-16,
+          "fold_hessian_max_difference": 2.66453525910038e-15,
+          "identity_matrix_max_difference": 1.11022302462516e-16,
+          "identity_error_max": 1.66533453693773e-16,
+          "pass": true
+        },
+        {
+          "case": 5,
+          "n_clusters": 40,
+          "p": 80,
+          "q": 2,
+          "tau": 0.5,
+          "m_rule": "uniform",
+          "error_dist": "gaussian",
+          "hessian_max_difference": 4.44089209850063e-16,
+          "fold_hessian_max_difference": 4.88498130835069e-15,
+          "identity_matrix_max_difference": 3.88578058618805e-16,
+          "identity_error_max": 4.44089209850063e-16,
+          "pass": true
+        },
+        {
+          "case": 6,
+          "n_clusters": 60,
+          "p": 120,
+          "q": 1,
+          "tau": 0.25,
+          "m_rule": "geometric_imbalance",
+          "error_dist": "t3",
+          "hessian_max_difference": 3.88578058618805e-16,
+          "fold_hessian_max_difference": 7.105427357601e-15,
+          "identity_matrix_max_difference": 2.22044604925031e-16,
+          "identity_error_max": 3.33066907387547e-16,
+          "pass": true
+        }
+      ],
       "thresholds": {
         "gradient": 0.0002,
         "hessian": 0.003,
@@ -112,17 +201,28 @@
         "nuisance": 1e-07,
         "dantzig": 1e-06
       },
-      "maxima": {
-        "gradient": 1.5004392173168e-09,
-        "hessian": 9.97268143565488e-05,
-        "identity": 3.33066907387547e-16,
-        "nuisance": 9.99355637132382e-09
+      "solver_configuration": {
+        "dantzig_solver": "dual_warm",
+        "cluster_solver": "newton",
+        "assembly": "batch",
+        "cv_workers": 2,
+        "hessian_refresh": 5,
+        "shared_first_stage": false
       },
-      "created_utc": "2026-09-01 00:33:14 UTC"
+      "maxima": {
+        "gradient": 1.15994089333604e-09,
+        "hessian": 2.06872888802723e-05,
+        "identity": 4.44089209850063e-16,
+        "nuisance": 9.99589516714749e-09,
+        "assembly_hessian": 4.44089209850063e-16,
+        "assembly_fold_hessian": 7.105427357601e-15,
+        "assembly_identity_matrix": 3.88578058618805e-16
+      },
+      "created_utc": "2026-10-02 10:49:14 UTC"
     }
   },
   "targets": {
-    "pass": false,
+    "pass": true,
     "table": [
       {
         "experiment_id": "C06",
@@ -181,140 +281,140 @@
       {
         "experiment_id": "A01",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A02",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A03",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A04",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A05",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A06",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A07",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A08",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A09",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A10",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A11",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "A12",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "C06",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "C07",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "C14",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "C15",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "C16",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "D01",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "D02",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "D03",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "D04",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "D05",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       },
       {
         "experiment_id": "D06",
         "asset": "population_direction",
-        "pass": false,
-        "reason": "invalid, inaccurate, or stale"
+        "pass": true,
+        "reason": "accepted"
       }
     ]
   },
@@ -323,13 +423,13 @@
     "reason": "accepted",
     "manifest": {
       "pass": true,
-      "commit_sha": "93d13628f37eea733a3ab74d3f95478913c06345",
+      "commit_sha": "0b4023b1f3f472709283d4aa563f88847b9de82b",
       "config_sha256": "ec2e45ba1896c07bc2d7e272231fbdecc126f37a9f30ebc20bda47e1e103f4c6",
-      "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\micro_preflight_06",
+      "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\micro_preflight_11",
       "method_rows": 34,
       "coordinate_rows": 112,
       "runner_failure_count": 0,
-      "created_utc": "2026-09-01 00:37:58 UTC"
+      "created_utc": "2026-10-02 12:17:51 UTC"
     }
   },
   "pilot": {
@@ -337,7 +437,7 @@
     "reason": "accepted",
     "manifest": {
       "pass": true,
-      "commit_sha": "93d13628f37eea733a3ab74d3f95478913c06345",
+      "commit_sha": "0b4023b1f3f472709283d4aa563f88847b9de82b",
       "v1_classification": "V1 (round-6 ladder; bands are diagnostics)",
       "mechanism_evidence": [
         {
@@ -407,20 +507,20 @@
           "formal_gate": false
         }
       ],
-      "run_id": "pilot_v5_B200",
-      "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\pilot_v5_B200",
-      "evaluated_utc": "2026-09-01 00:27:58 UTC",
+      "run_id": "pilot_v7_B200",
+      "run_dir": "D:\\OneDrive\\paper\\Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression\\jpDMEQR\\results\\raw\\simulation\\pilot_v7_B200",
+      "evaluated_utc": "2026-10-03 11:13:01 UTC",
       "convergence_pass": true,
       "identity_pass": true,
       "dantzig_pass": true,
       "inverse_defect_diagnostic": {
-        "D_k_median": 5.75892567111054,
-        "D_k_q90": 13.5410633305853,
-        "A_k_median": 0.477428261598074,
-        "A_k_q90": 1.8427599233232
+        "D_k_median": 5.80308158745694,
+        "D_k_q90": 13.6056482222647,
+        "A_k_median": 0.473579245243342,
+        "A_k_q90": 1.84019872264911
       },
       "p06_scaling": {
-        "se_sd_ratio": [0.776594275167177, 0.661285526957666, 0.718795398645723, 0.756970642254107],
+        "se_sd_ratio": [0.776594254235691, 0.65923224545315, 0.719454687322681, 0.756970640860563],
         "coverage": [0.885, 0.79, 0.835, 0.845]
       },
       "calibration_baseline": "P05",
@@ -447,5 +547,13 @@
     "physical_cores": 8,
     "r_version": "R version 4.6.1 (2026-06-24 ucrt)",
     "platform": "x86_64-w64-mingw32"
+  },
+  "solver_configuration": {
+    "dantzig_solver": "dual_warm",
+    "cluster_solver": "newton",
+    "assembly": "batch",
+    "cv_workers": 2,
+    "hessian_refresh": 5,
+    "shared_first_stage": false
   }
 }

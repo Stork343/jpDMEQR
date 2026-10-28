@@ -1,151 +1,218 @@
-\section{Theoretical properties}\label{sec:theory}
+\section{Target preservation and statistical inference}\label{sec:theory}
 
-This section states the working theorem system for the rebuilt estimator. Detailed proofs and the remaining proof-audit items are organised in the \supp. The assumptions are intentionally expressed at the cluster-profile level. Primitive sufficient conditions for random-intercept and random-intercept--slope designs are then used to verify the profile regularity bounds.
+The theory connects the selected models to the full profile parameter.
+The learning samples provide comparison coefficients and contrasts.
+Independent estimation then permits a selected-model expansion at
+each bandwidth. Throughout, constants are uniform over the triangular
+array, and all rates use the number of clusters.
 
-\subsection{Assumptions}\label{subsec:assumptions}
+\subsection{Density and design conditions}\label{subsec:assumptions}
 
-Let $S_h=\{k:\beta_{h,k}^{\star}\neq0\}$ denote the support of the smoothed profile target and let $s=\sup_{h\leq h_0}|S_h|$. We assume that $s$ is finite or grows slowly; approximate sparsity can be handled by adding the usual tail-approximation term. For a vector $v$, write $\|v\|_0$ for its number of nonzero entries, and for a matrix $M$, write $\|M\|_{\max}=\max_{k\ell}|M_{k\ell}|$.
-
-\begin{assumption}[Clusters and moments]\label{ass:clusters}
-The clusters $D_1,\ldots,D_n$ are independent and identically distributed after conditioning on prespecified design strata. Cluster sizes satisfy $2\leq m_i\leq m_{\max}<\infty$, and $q$ is fixed. The coordinates of $X_{ij}$ and $Z_{ij}$ have uniformly bounded sub-Gaussian norms. The cluster influence variables defined in \eqref{eq:influence} have uniformly bounded $(2+\nu)$ moments for some $\nu>0$.
-\end{assumption}
-
-\begin{assumption}[Working nuisance penalty and kernel]\label{ass:kernel}
-The eigenvalues of $\Lambda$ lie in $[c_{\Lambda},C_{\Lambda}]$ for fixed positive constants. The kernel $K$ is symmetric, bounded, Lipschitz, compactly supported, integrates to one, and has finite nonzero second moment. The bandwidth satisfies $h\to0$ and $nh/\log p\to\infty$.
-\end{assumption}
-
-\begin{assumption}[Profile target and local curvature]\label{ass:curvature}
-The unsmoothed profile risk $R$ has a unique minimiser $\beta^{\star}$. The smoothed risk $R_h$ has a unique local minimiser $\beta_h^{\star}$ in a neighbourhood $\mathcal N$ of $\beta^{\star}$. Its effective Hessian $H_h$ has eigenvalues bounded above, and it obeys a restricted eigenvalue condition: for all $\Delta$ in the cone $\|\Delta_{S_h^c}\|_1\leq3\|\Delta_{S_h}\|_1$,
-\[
- \Delta^{\mathsf T}H_h\Delta\geq\kappa\|\Delta\|_2^2
-\]
-for a constant $\kappa>0$ uniformly in sufficiently small $h$.
-\end{assumption}
-
-\begin{assumption}[Second-order profile approximation]\label{ass:approximation}
-Uniformly for $\beta\in\mathcal N$, smoothing the complete cluster criterion satisfies
-\[
- \|\nabla R_h(\beta)-\partial R(\beta)\|_{\infty}\leq C h^2,
- \qquad
- \|\nabla^2R_h(\beta)-H_0(\beta)\|_{\max}\leq C h^2,
-\]
-where $\partial R$ denotes the locally selected population subgradient and $H_0$ is a nonsingular limiting profile curvature. A sufficient condition is that the conditional cluster distribution induces twice continuously differentiable profiled residual densities near zero and that the ridge profile map is locally Lipschitz.
-\end{assumption}
-
-\begin{assumption}[Sparsity and effective inverse]\label{ass:sparsity}
-The smoothed profile target is uniformly sparse with $s=o(n/\log p)$. The inverse effective information satisfies $\|H_h^{-1}\|_{L_1}\leq C_{\Omega}$. For every targeted coordinate $k\in\mathcal K$, $\omega_{k,h}=H_h^{-1}e_k$ satisfies $\|\omega_{k,h}\|_1\leq C_{\omega}$ and $\|\omega_{k,h}\|_0\leq s_{\omega,k}$. The minimum diagonal asymptotic variance is bounded away from zero. Weak $\ell_r$ row sparsity can replace exact support sparsity, with the usual change from $s_{\omega,k}\mu_n$ to an $\ell_r$ approximation bound.
-\end{assumption}
-
-\begin{assumption}[Empirical profile regularity]\label{ass:empirical}
-Let $\lambda_n=C_{\lambda}\sqrt{\log(p)/n}$. With probability tending to one,
-\begin{align*}
- \|g_{n,h}(\beta_h^{\star})\|_{\infty}&\leq \lambda_n/2,\\
- \|\widehat H_{\mathrm{eff}}(\widehat\beta)-H_h\|_{\max}&\leq C\delta_{n,h},
-\end{align*}
-where
-\begin{equation}\label{eq:delta}
- \delta_{n,h}=\sqrt{\frac{\log p}{nh}}+h^2+\eta_{n,h}.
+\begin{assumption}[Clusters and population regularity]\label{ass:clusters}
+The clusters are iid with bounded sizes. Their nuisance designs are
+bounded matrices with a fixed number of columns, and the eigenvalues
+of the fixed positive-definite $\Lambda$ lie in a positive compact
+interval. The kernel is symmetric, compactly
+supported and Lipschitz, is positive in its interior, and has an
+absolutely continuous inverse distribution function. Conditional on
+$(X,Z,m)$, the outcome density belongs to $C^3(\mathbb R^m)$ and obeys
+\begin{equation}\label{eq:density-section}
+ \sup_{y_A}\int |\partial^\alpha f(y_A,y_B)|\,dy_B\leq C,
+ \qquad B=A^c,\quad |\alpha|\leq3,
 \end{equation}
-The term $\eta_{n,h}$ controls the plug-in effect from evaluating the profile Hessian at $(\widehat\beta,\widehat\gamma)$ rather than at the population profile. In addition, for $\Delta=\widehat\beta-\beta_h^{\star}$,
-\begin{equation}\label{eq:taylor-remainder}
- \left\|
- g_{n,h}(\widehat\beta)-g_{n,h}(\beta_h^{\star})
- -H_h\Delta
- \right\|_{\infty}
- =O_p(\mathfrak t_{n,h}).
-\end{equation}
-The sequences satisfy $\delta_{n,h}\to0$ and $\sqrt n\,\mathfrak t_{n,h}\to0$ under the scaling stated in Theorem~\ref{thm:bahadur}.
+for every coordinate partition, with a uniform constant. The profile
+risk is finite, has a unique minimiser $\beta^\star$, and the average
+absolute response has bounded expectation.
 \end{assumption}
 
-Assumption~\ref{ass:empirical} isolates the only model-specific empirical-process step. The score is bounded and therefore concentrates at the ordinary cluster rate. The Hessian contains $K_h$, producing the factor $(nh)^{-1/2}$. The plug-in term must be controlled by local, averaged kernel stability; using only the global bound $\sup|K_h'|=O(h^{-2})$ is too crude and can create an empty bandwidth regime.
+\begin{assumption}[Design contrasts and sparse curvature]\label{ass:design}
+Conditional on $(Z,m)$, each design contrast $X_j^Tv$ on the relevant
+sparse supports has sub-Gaussian norm at most $C\|v\|_2$.
+Sparse design eigenvalues are bounded above
+and away from zero. On a fixed coefficient ball containing the
+considered sparse population minimisers, the complete profile risk has
+restricted Hessian eigenvalues in $[\kappa,C]$ and uniformly bounded
+third directional derivatives. These bounds hold on the sparse
+supports and enlarged supports used in the learning arguments.
+\end{assumption}
 
-\subsection{Target approximation and penalised estimation}\label{subsec:target-theory}
+Independent Gaussian or standardised $t_3$ errors with bounded positive
+scales satisfy the density section conditions after arbitrary
+conditional location mixing. The curvature argument applies to bounded
+nuisance designs of any fixed dimension. The
+Supporting Information gives the population and empirical arguments
+for these classes.
 
-\begin{theorem}[Target approximation]\label{thm:target}
-Under Assumptions~\ref{ass:kernel}--\ref{ass:approximation}, suppose the local inverse profile curvature has uniformly bounded row sums. Then, for all sufficiently small $h$,
-\begin{equation}\label{eq:target-rate}
- \|\beta_h^{\star}-\beta^{\star}\|_{\infty}\leq C h^2.
+\begin{theorem}[Population bandwidth expansion]\label{thm:target}
+Under Assumptions~\ref{ass:clusters} and \ref{ass:design}, the complete
+profile gradient has the expansion
+\begin{equation}\label{eq:score-bandwidth-expansion}
+ \E g_{i,b}(\beta)=\nabla R_0(\beta)+bB_1(\beta)+O(b^2).
 \end{equation}
-If $\beta_h^{\star}-\beta^{\star}$ is supported on a set of order $s$, then
-$\|\beta_h^{\star}-\beta^{\star}\|_2\leq C\sqrt{s}\,h^2$.
-\end{theorem}
-
-Theorem~\ref{thm:target} separates the inferential target from the numerical smoothing parameter. It also identifies the undersmoothing requirement needed to transfer a root-$n$ limit from $\beta_h^{\star}$ to $\beta^{\star}$.
-
-\begin{theorem}[Penalised profile estimation]\label{thm:estimation}
-Suppose Assumptions~\ref{ass:clusters}--\ref{ass:empirical} hold, and choose $\lambda_{\beta}\asymp\lambda_n$. Then
-\begin{equation}\label{eq:estimation-rates}
- \|\widehat\beta-\beta_h^{\star}\|_1=O_p(s\lambda_n),
- \qquad
- \|\widehat\beta-\beta_h^{\star}\|_2=O_p(\sqrt{s}\lambda_n).
-\end{equation}
-Consequently,
-\[
- \|\widehat\beta-\beta^{\star}\|_2
- =O_p\!\left(\sqrt{\frac{s\log p}{n}}+\sqrt{s}\,h^2\right).
-\]
-\end{theorem}
-
-The proof uses the basic inequality for the profiled convex criterion, score concentration at $\beta_h^{\star}$, and restricted curvature of the effective Hessian. No sure-screening event is required. If outcome-guided screening is used for computational reasons, it must be performed on independent clusters or incorporated explicitly into the inferential target.
-
-\subsection{Effective precision and Bahadur representation}\label{subsec:bahadur}
-
-Set $\mu_n=C_{\mu}\delta_{n,h}$ in \eqref{eq:dantzig-row}. Standard Dantzig arguments give the following row-wise result.
-
-\begin{theorem}[Effective precision row]\label{thm:precision}
-Under Assumptions~\ref{ass:curvature}, \ref{ass:sparsity}, and \ref{ass:empirical}, if $s_{\omega,k}\mu_n=o(1)$, then for each fixed $k\in\mathcal K$,
-\begin{equation}\label{eq:precision-rate}
- \|\widehat\omega_k-\omega_{k,h}\|_{\infty}=O_p(\mu_n),
- \qquad
- \|\widehat\omega_k-\omega_{k,h}\|_1=O_p(s_{\omega,k}\mu_n).
+The corresponding Hessian expands through order $b^2$. The
+directional forms are uniform on the stated sparse neighbourhood.
+For a selected population model with positive restricted curvature,
+\eqref{eq:coefficient-bandwidth-expansion} holds uniformly and
+\begin{equation}\label{eq:paired-population-coefficient}
+ 2\beta_{A,h/2}^P-\beta_{A,h}^P=\beta_A^P+O(h^2).
 \end{equation}
 \end{theorem}
 
-\begin{theorem}[Cluster Bahadur representation]\label{thm:bahadur}
-Suppose Assumptions~\ref{ass:clusters}--\ref{ass:empirical} hold. If, for a fixed $k\in\mathcal K$,
+The linear term in \eqref{eq:score-bandwidth-expansion} arises because
+the fitted cluster effect moves with $b$. The proof integrates the
+dual score over its active faces. It permits positive probability at
+zero for fitted profile residuals.
+
+\subsection{Approximation of the full target}\label{subsec:target-theory}
+
+Write $H_0=\nabla^2R_0(\beta^\star)$. For a target $k$, suppose a
+population contrast $c_{0k}$ exists with
+\begin{equation}\label{eq:population-direction}
+ c_{0k,k}=1,\qquad H_0c_{0k}=J_{0k}e_k,\qquad
+ J_{0k}=c_{0k}^TH_0c_{0k}>0,\qquad \omega_{0k}=c_{0k}/J_{0k}.
+\end{equation}
+Only the contrasts required by the target coordinates enter the
+assumptions. Let $e_n$ and $r_n$ describe the outcome and contrast
+approximations supplied by selection.
+
+\begin{theorem}[Selected model target]\label{thm:selected-target}
+Suppose $A$ contains a comparison coefficient $b_A$ with
+$R_0(b_A)-R_0(\beta^\star)=O_p(e_n^2)$ and a comparison contrast
+$v_A$ with $v_{A,k}=1$, support in $A$ and
+$\|v_A-c_{0k}\|_2=O_p(r_n)$. Under the local population curvature
+conditions, with $J_{0k}$ bounded away from zero,
+\begin{equation}\label{eq:selected-target-bound}
+ \|\beta_A^P-\beta^\star\|_2=O_p(e_n),\qquad
+ |\beta_{A,k}^P-\beta_k^\star|=O_p(e_n^2+r_ne_n).
+\end{equation}
+\end{theorem}
+
+Restricted stationarity gives $v_A^T\nabla R_0(\beta_A^P)=0$.
+Expanding at $\beta^\star$ leaves
+$J_{0k}(\beta_{A,k}^P-\beta_k^\star)$, a product involving
+$v_A-c_{0k}$ and the coefficient error, and a quadratic remainder.
+This explains why both components of selection enter
+\eqref{eq:selected-target-bound}.
+
+\begin{proposition}[Conditional covariates preserve a Gaussian slope]\label{prop:gaussian-target}
+Conditional on the nuisance design and cluster size, suppose the
+covariate rows are independent centred Gaussian with covariance
+$\Sigma$, and independent of the complete error and nuisance vectors.
+For $Y=X\beta^0+Zb+\varepsilon$, the selected population profile
+coefficient is, at every bandwidth,
+\begin{equation}\label{eq:gaussian-selected-target}
+ \beta_{A,A}^P=\beta_A^0+
+                 \Sigma_{AA}^{-1}\Sigma_{A,A^c}\beta_{A^c}^0.
+\end{equation}
+If $\operatorname{supp}(\Sigma^{-1}e_k)\subseteq A$, then
+$\beta_{A,k}^P=\beta_k^0$.
+\end{proposition}
+
+Gaussian conditional projection makes the omitted design residual
+independent of $X_A$. At the coefficient in
+\eqref{eq:gaussian-selected-target}, the complete profile score has
+mean zero. The stated inverse-row inclusion makes the $k$th row of
+$\Sigma_{AA}^{-1}\Sigma_{A,A^c}$ zero. Outcome coefficients can be
+omitted while that target coordinate remains unchanged.
+
+\subsection{Rates for the selected sets}\label{subsec:learning-rates}
+
+Assume $\beta^\star$ has at most $s$ nonzero coordinates and bounded
+Euclidean norm. The contrast $c_{0k}$ has at most $s_c$ nonzero
+coordinates and bounded L1 norm. Let $M$ be the largest inner value
+of $M_0(r)$, with the smallest value of the same order. Put
+$D=7M+s+s_c+|\mathcal U|+2$ and $L_n=\log(2np)$.
+Sparse eigenvalue bounds hold on sufficiently large multiples of the
+comparison supports to give the nodewise compatibility conditions.
+The graph budget admits the corresponding fixed multiple of $s_c$.
+
+\begin{theorem}[Outcome and contrast learning]\label{thm:learning}
+Under the preceding conditions, let $\epsilon_n$ bound the normalised
+primal-dual gaps of the initial fits and define
+\begin{align}
+ \delta_n&=\sqrt{D L_n/n}+(D L_n)^{3/2}/n,
+ &\nu_n&=\delta_n+n^{-1}+\sqrt{\epsilon_n},\nonumber\\
+ a_n&=\sqrt{D L_n/(nh)}+D L_n/(nh).
+ &&\label{eq:learning-fluctuations}
+\end{align}
+In the regime $a_n+\nu_n\to0$, the selected sets in
+\eqref{eq:selected-set} contain the comparison
+vectors required by Theorem~\ref{thm:selected-target}, with
+\begin{align}
+ e_n&=e^{-cM/(2s)}+\sqrt{s}\nu_n+
+                              \sqrt{\log(CM)/n},\label{eq:outcome-rate}\\
+ r_n&=(1+\sqrt{s_c})(a_n+e_n+h+n^{-1})
+                  +\sqrt{\log(CM\log n)/(nh)}.\label{eq:contrast-rate}
+\end{align}
+The bounds are uniform over the fixed number of outer folds and
+requested coordinates.
+\end{theorem}
+
+The proof controls nonsmooth profile dual scores uniformly over sparse
+sets. It then derives a geometric decrease of population risk along
+the greedy path, up to its sampling error. Heldout profile loss selects
+a comparison coefficient at that rate. Positive nodewise quadratic
+loss gives the contrast comparison. The union of the inner supports
+retains these vectors, and the design regression adds at most $M$
+coordinates. Outcome coefficients may approach zero at arbitrary
+rates within the stated sparsity and norm bounds.
+
+\subsection{Cluster influence representation}\label{subsec:bahadur}
+
+For $b>0$ let $m_b=\E g_{i,b}(\beta^\star)$ and define the centred
+triangular-array contribution
+\begin{equation}\label{eq:influence}
+ \xi_{ik,h}=-\omega_{0k}^T
+       [2\{g_{i,h/2}(\beta^\star)-m_{h/2}\}
+                         -\{g_{i,h}(\beta^\star)-m_h\}].
+\end{equation}
+Assume its variance $\sigma_{k,h}^2$ is bounded above and away from
+zero. Bounded dual scores and the design contrast condition give
+uniform moments above order two. Let $d_n$ bound the selected
+estimation dimension.
+
+\begin{theorem}[Paired coefficient inference]\label{thm:bahadur}
+Suppose the preceding conditions hold, and
 \begin{equation}\label{eq:remainder-conditions}
- \sqrt n\,\mu_n s\lambda_n\to0,
- \qquad
- s_{\omega,k}\mu_n\sqrt{\log p}\to0,
- \qquad
- \sqrt n\,\mathfrak t_{n,h}\to0,
+ \sqrt n(h^2+e_n^2+r_ne_n)\to0,\qquad
+ e_n^2/h+r_n^2\to0,\qquad
+ \frac{(d_n\log n)^3}{nh}\to0.
 \end{equation}
-then
+The numerical score residuals contribute $o_p(n^{-1/2})$. Then
 \begin{equation}\label{eq:bahadur}
- \sqrt n(\widetilde\beta_k-\beta_{h,k}^{\star})
- =\frac{1}{\sqrt n}\sum_{i=1}^n
- \omega_{k,h}^{\mathsf T}S_{i,h}(\beta_h^{\star})+o_p(1).
+ \sqrt n(\widehat\theta_k-\beta_k^\star)
+       =\frac1{\sqrt n}\sum_{i=1}^n\xi_{ik,h}+o_p(1),
 \end{equation}
-If additionally $\sqrt n h^2\to0$, the left-hand side in \eqref{eq:bahadur} may be centred at $\beta_k^{\star}$.
-\end{theorem}
-
-The three conditions in \eqref{eq:remainder-conditions} correspond to approximate Hessian inversion multiplied by the $\ell_1$ estimation error, precision-row estimation multiplied by the high-dimensional score, and nonlinear profile-score remainder, respectively. They replace incompatible conditions obtained from a global third-derivative bound.
-
-\begin{theorem}[Asymptotic normality and variance consistency]\label{thm:normality}
-Under the conditions of Theorem~\ref{thm:bahadur}, suppose additionally that $\sqrt n h^2\to0$ and
-\[
- \sigma_{k,h}^2=\Var\{\omega_{k,h}^{\mathsf T}S_{i,h}(\beta_h^{\star})\}
- \to\sigma_k^2\in(0,\infty).
-\]
-Then
+and
 \begin{equation}\label{eq:normality}
- \frac{\sqrt n(\widetilde\beta_k-\beta_k^{\star})}{\sigma_k}
- \rightsquigarrow N(0,1),
+ \frac{n\widehat s_k^2}{\sigma_{k,h}^2}\longrightarrow_p1,
  \qquad
- \widehat\sigma_k^2\overset{p}{\longrightarrow}\sigma_k^2.
+ \frac{\widehat\theta_k-\beta_k^\star}{\widehat s_k}
+                 \rightsquigarrow N(0,1).
 \end{equation}
-Hence the interval in \eqref{eq:ci} has asymptotic coverage $1-\alpha$ for each prespecified coordinate.
+The interval in \eqref{eq:ci} has limiting coverage $1-\alpha$ for
+the full profile coordinate.
 \end{theorem}
 
-\subsection{A non-empty bandwidth--sparsity regime}\label{subsec:feasible}
+Conditioning on one fold's selection sample fixes its selected model
+while preserving independent estimation observations. The selected
+population target is controlled by
+\eqref{eq:selected-target-bound}; pairing removes its first-order
+bandwidth term. The fitted cluster contributions then approach the
+same centred population contributions. This conditioning is used
+separately for each fold, without treating the two selected sets as
+jointly independent of all observations.
 
-The high-level conditions above are meaningful only if they can hold simultaneously. One conservative sufficient regime is useful for this purpose. Suppose $s$ and $s_{\omega,k}$ are bounded, $h=n^{-1/3}$,
+In the high-dimensional regime $p\geq n$, for bounded $s$, $s_c$ and
+$|\mathcal U|$, take the implemented
+asymptotic budget $M=\lceil(\log n)^3\rceil$ and $h=n^{-3/10}$.
+A sufficient dimension regime is
 \begin{equation}\label{eq:feasible-regime}
- \log p=o(n^{1/6}),
- \qquad
- \eta_{n,h}=O_p(\lambda_n/h),
- \qquad
- \mathfrak t_{n,h}=O_p(\lambda_n^2/h).
+ \log(2np)=o\{n^{7/20}/(\log n)^3\}.
 \end{equation}
-Then $nh/\log p\to\infty$, $\sqrt n h^2=n^{-1/6}\to0$, and every term in \eqref{eq:remainder-conditions} tends to zero. This regime permits polynomial dimensional growth and slower sub-exponential growth. It is intentionally conservative; sharper local empirical-process arguments may weaken the exponent. Its purpose is to demonstrate feasibility and to prevent the theorem from being stated over an empty asymptotic set.
-
+Here the dominant product is controlled by
+$D L_n/\sqrt{nh}\to0$, while $\sqrt n h^2=n^{-1/10}$.
+Growing sparsities retain the explicit requirements
+\eqref{eq:outcome-rate}--\eqref{eq:remainder-conditions}. For a
+prespecified fixed design, the selection approximation terms vanish
+and the same paired-fit argument applies with one estimation sample.

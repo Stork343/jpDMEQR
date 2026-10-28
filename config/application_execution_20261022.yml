@@ -1,0 +1,60 @@
+version: GSE65391_complete_20261022_v2
+method_version: profile_pair_20261022
+cohort_directory: data/derived/GSE65391/audit_20261022_bootstrap_v1
+subject_design_directory: data/derived/GSE65391/subject_design_20261022_v1
+outer_folds: 5
+outer_repetitions: 5
+inner_folds: 5
+base_seed: 20260817
+models: [A, B]
+quantiles: [0.25, 0.50, 0.75]
+prediction:
+  estimator: two_pass_score_loaded_initial_convex_l1
+  h_multiplier_grid: [0.75, 1.0, 1.25]
+  lambda_gamma_grid: [0.5, 1.0, 2.0]
+  lambda_multiplier_grid: [0.25, 0.5, 1.0, 2.0]
+  screening_dimensions: [100, 200, 400]
+  filter_sizes: [2000, 5000, 10000]
+  selection_rule: smallest_equal_subject_inner_pinball_loss
+  tie_rule: lexicographic_candidate_order
+comparators:
+  pooled:
+    implementation: quantreg_rq_fit_lasso
+    lambda_plugin: quantreg_LassoLambdaHat_official_defaults
+    lambda_multipliers: [0.25, 0.5, 1.0, 2.0]
+    screening_dimensions: [100, 200, 400]
+    clinical_module_penalty: 0
+  qgee:
+    implementation: geeVerse_official_single_lambda_kernel_HBIC
+    correlation: exchangeable
+    lambda_selection: official_HBIC_default_path
+    screening_dimensions: [100, 200, 400]
+    clinical_module_penalty: 0
+  lqmm:
+    implementation: lqmm_official
+    design: complete_clinical_and_five_modules
+    quadrature_points: 7
+    loglikelihood_tolerance: 0.000001
+module_inference:
+  lambda_gamma: 1.0
+  confidence: 0.95
+  simultaneous_family: models_two_times_quantiles_three_times_modules_five
+  simultaneous_family_size: 30
+  simultaneous_alpha: 0.05
+  jackknife: complete_workflow
+sensitivities:
+  lambda_gamma: [0.5, 2.0]
+  h_multipliers: [0.75, 1.25]
+  random_slope: true
+  tau_010: curvature_eligible_multipliers_only
+  processing: official_raw_route
+exploratory:
+  adjustment: clinical_only
+  subject_splits: 10
+  selection_fraction: 0.5
+  swap_roles: true
+  genes_per_role: 3
+  confidence: 0.95
+  aggregation: selection_frequency_and_descriptive_coefficient_median_iqr
+  preserve_each_split_interval: true
+  pooled_interval: false

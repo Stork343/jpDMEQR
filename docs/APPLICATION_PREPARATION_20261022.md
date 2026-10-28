@@ -1,0 +1,45 @@
+# 应用准备记录
+
+本次审计使用GSE65391原始ExpressionSet、GEO phenotype和processed expression。完整bootstrap审计保存于`data/derived/GSE65391/audit_20261022_bootstrap_v1/`。既有analysis_cohort、`config/gse65391_visit_multiset.csv`及原始数据保持原状。
+
+## 记录识别
+
+全部996份表达记录包含924份SLE记录和72份healthy记录。原始`data_processing`说明24名healthy controls在training与test各运行一次，通过两组表达均值比处理batch。metadata的24份healthy记录标记为technical replicate。
+
+另外24份SLE记录的原始`batch_replicate:ch1`为TRUE。每份记录在相同subject与visit、相同subject与cumulative_time以及physical array description上均只有一份观察记录。这些生物记录全部保留，原始flag及记录关系分别输出。
+
+GSM1594705的原始visit缺失，观测subject与cumulative_time=0可以唯一识别该次就诊。`canonical_visit_key`使用实际subject与time，`key_source=subject_time`。原始visit及title保留原值。其他SLE记录使用`subject_visit`。这项处理依据既定identifier reconciliation。
+
+## C3审计
+
+最终队列包含129名患者、867次合格就诊，29/924份SLE记录缺少C3。两组batch均覆盖按既定三个quantile划分的四个C3区域，表达列与metadata的sample identifiers一致，十项C3条件通过。
+
+`config/application_curvature_20261022.yml`与`docs/EMPIRICAL_AUDIT_RULE_20261022.md`记录本轮确定的统计定义。完整subject bootstrap使用B=10000、seed=20261022，每次重新计算log C3 quantiles与equal-subject kernel means。三个既定tau及三个h multiplier组成九格，family confidence=.95，使用Bonferroni单侧percentile下界，并要求local subjects及Kish effective subjects均至少27。27来自`floor(129/log(129))+1`。
+
+九格的下界均大于零，范围为0.3879400至1.0409986，最小Kish有效subject数量为42.06344。tau=.10的三个敏感性格独立检查，其中h multiplier=.75的Kish数量25.22852低于27，其余两个格通过。实际拟合时仍检查reduced profile Jacobian的曲率与数值条件。
+
+## 固定immune modules
+
+`config/module_signatures.csv`保存180个完整源gene成员，`config/module_score_members_20261022.csv`保存181个实际评分成员，两者均有独立freeze记录。完整来源、原文、annotation与逐项mapping见`docs/IMMUNE_MODULE_DEFINITIONS.md`及`data/raw/public_modules/banchereau2016_20261022/`。
+
+固定评分顺序为M1.2、M3.4、M4.11、M5.12、M5.15。前四个module采用27、53、18、59个gene的完整等权normalized expression均值，M5.15使用完整24个ILMN probe的等权均值。三个旧LOC名称经官方NCBI Gene ID和GPL10558实际记录唯一恢复，原始source名称与当前symbol均保留。每个module要求100%成员测量，随后仅使用training rows计算module center和SD。
+
+新的`probe_annotation_20261022.csv`覆盖全部43799个表达probe，其中41181个unique_gene、13个multiple_genes、2605个gene_unannotated。clinical加五个module的Model A为16维，Model B为17维，rank分别为16和17，均满足26维限制。
+
+## 低维计算与检查
+
+`R/v2_application_v2_part07.R`提供给定design的paired score、低维one-step及subject jackknife计算。sandwich使用相同subject上组合后的`2*g_h/2-g_h`，保留两种bandwidth之间的协方差，推断对象为unsmoothed regularised profile target。
+
+`R/v2_application_v2_part08.R`提供实际入口使用的全流程接口。完整样本及每次删除subject后的样本均重新计算clinical设计和全部五个module的preprocessing，随后调用paired拟合。module coefficient以各次样本重新估计的一个module SD为单位，保留相同coordinate名称；完整样本的h及h/2用于全部leave-one拟合。
+
+全流程jackknife作为预定敏感性区间，字段为`jackknife_scope=complete_sample_standardised_workflow`。`sandwich_scope=profile_score_given_full_sample_preprocessing`表示给定完整样本design的paired sandwich。每次preprocessing和完整fit对象分别保存，输出含probe选择、center和SD、module audit及全部fit诊断。application-matched模拟与相应理论检查继续处理自适应probe选择及sample standardisation的研究条件。
+
+真实12名subject的paired计算测试已通过10个assertions。module来源和评分测试通过20个assertions，并核对直接表达平均值及training转换。C3 audit测试包含完整B=10000重抽与独立的首轮bootstrap计算。`07_check_immune_modules.R`已经生成五模块覆盖与clinical/module维数报告。
+
+全流程研究检查按source batch各选择六名subject，共12名subject、78次就诊，计算预定的`(Intercept)`与`module__M1.2`两个坐标。全部12次leave-one均完成，paired Jacobian最小eigenvalue至少0.6639851，refit gradient最大值为3.064348e-8，profile identity error至多4.440892e-16。完整样本及每次leave-one均重新计算全部五个module。独立测试包含63个通过的assertions，还直接重新建立一次leave-one设计和拟合，与保存结果逐项核对。
+
+`results/raw/application/workflow_preflight_20261022_v3/`保存13份preprocessing与13份完整fit checkpoint。逐次probe选择与完整样本相比，最多13个gene使用了不同probe；源module成员及权重保持固定。各次选择、module center和SD可从对应checkpoint复查。
+
+完整应用关联计算继续要求与`profile_pair_20261022`一致的method检查、implementation记录，以及既定repeated subject validation。入口读取完整C3 audit、module freeze和matching method gate，使用全部16或17个既定坐标。研究检查可通过显式`coordinate_subset`计算低维固定坐标，全部module preprocessing仍然重新计算。所有结果文件保存各自的method_version、score定义、bandwidth、Lambda及输入来源。
+
+PAPP-LD程序保留全部scheduled repetitions及每个subject的leave-one结果。其smoothed score诊断具有明确方法标记，既有运行目录保持可查。

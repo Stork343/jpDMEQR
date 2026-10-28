@@ -163,7 +163,22 @@ fit_benchmark_qif_see_v2 <- function(train,
     # second order and omitted, standard for this estimating-equation form).
     dU <- n_subjects * crossprod(dgbar, Cbar_inv %*% dgbar)
     dF <- (1 - delta) * dU + diag(delta, p)
-    step <- tryCatch(-solve(dF + 1e-10 * diag(p), F), error = function(e) rep(0, p))
+    step <- withCallingHandlers(
+      -solve(dF + 1e-10 * diag(p), F),
+      error = function(e) {
+        e$failure_stage <- "estimating_equation"
+        e$diagnostics <- list(lambda = lambda, beta = beta, equation = F,
+                              jacobian = dF)
+        stop(e)
+      }
+    )
+    if (any(!is.finite(step))) {
+      failure <- simpleError("The QIF estimating-equation step is non-finite.")
+      failure$failure_stage <- "estimating_equation"
+      failure$diagnostics <- list(lambda = lambda, beta = beta, equation = F,
+                                  jacobian = dF)
+      stop(failure)
+    }
     list(step = step, F = F, delta = delta, U = U, gbar = gbar, Cbar = Cbar)
   }
 
@@ -234,7 +249,7 @@ fit_benchmark_qif_see_v2 <- function(train,
 
   ans <- list(
     method_id = "QIF-SEE",
-    status = "ok",
+    status = if (isTRUE(best$converged)) "ok" else "warning",
     failure_stage = "",
     failure_message = "",
     beta_hat = beta,
@@ -258,7 +273,8 @@ fit_benchmark_qif_see_v2 <- function(train,
     runtime_sec = elapsed,
     converged = best$converged,
     kkt_residual = NA_real_,
-    warning_messages = character(),
+    warning_messages = if (isTRUE(best$converged)) character() else
+      "QIF model-selection search did not converge.",
     implementation_version = "qif-see-ueki2009-construction",
     target_scope = "longitudinal_qif_selection"
   )

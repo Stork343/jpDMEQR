@@ -1,7 +1,25 @@
-\documentclass[APA,STIX1COL]{WileyNJDv5}
+% MiKTeX 的 etex.sty v2.7 不再定义 \reserveinserts，WileyNJDv5.cls 仍会调用它。
+\providecommand{\reserveinserts}[1]{}
+\documentclass[APA,STIX1COL,doublespace]{WileyNJDv5}
+\usepackage{setspace}
+\usepackage{longtable}
+\geometry{a4paper,margin=25mm,headheight=21pt,headsep=11pt,footskip=36pt}
 \articletype{Supporting Information}
-\received{00}\revised{00}\accepted{00}
-\hypersetup{hidelinks,pdftitle={Supporting Information: Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression},pdfauthor={Jian Hou, Tan Meng, and Maozai Tian}}
+\historydates{}
+\doiheadtext{}
+\startpage{1}
+\makeatletter
+\abs@coli@hsize=.28\textwidth
+\abs@colii@hsize=.68\textwidth
+\long\def\absworkarea#1#2{\par\noindent
+  \begin{minipage}[t]{\abs@coli@hsize}#1\end{minipage}\hfill
+  \begin{minipage}[t]{\abs@colii@hsize}#2\end{minipage}\par}
+\def\oddfoot@titlepage@info{\hbox to \textwidth{\hfill\pagenumfont\thepage}}
+\let\evenfoot@titlepage@info\oddfoot@titlepage@info
+\def\oddhead@titlepage@info{}
+\let\evenhead@titlepage@info\oddhead@titlepage@info
+\makeatother
+\hypersetup{hidelinks,pdftitle={Supporting Information for Joint Profile Inference for High Dimensional Mixed Effects Quantile Regression},pdfauthor={Jian Hou, Tan Meng, and Maozai Tian}}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator{\diag}{diag}
 \DeclareMathOperator{\Var}{Var}
@@ -11,26 +29,26 @@
 \renewcommand{\thesection}{S\arabic{section}}
 \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
 \renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
 \renewcommand{\theproposition}{S\arabic{proposition}}
 \renewcommand{\thelemma}{S\arabic{lemma}}
 \renewcommand{\thetheorem}{S\arabic{theorem}}
 \renewcommand{\theassumption}{S\arabic{assumption}}
 \begin{document}
-\title{Supporting Information for ``Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression with Many Small Clusters''}
+\title{Supporting Information for Joint Profile Inference for High Dimensional Mixed Effects Quantile Regression with Many Small Clusters}
 \author[1]{Jian Hou}\author[1]{Tan Meng}\author[1]{Maozai Tian}
-\authormark{Hou et al.}\titlemark{Supporting Information: profile inference}
+\authormark{Hou et al.}\titlemark{Supporting Information}
 \address[1]{\orgdiv{School of Statistics}, \orgname{Renmin University of China}, \orgaddress{\city{Beijing}, \country{China}}}
-\corres{Correspondence: Jian Hou. Email: houjian@ruc.edu.cn}
-\abstract[Summary]{This document gives the exact profile-calculus proof, proves the main estimation and inferential results under the high-level cluster-profile assumptions stated in the paper, records the remaining primitive empirical-process verification, and specifies the computational tests, simulation protocol, and GSE65391 data audit.}
-\keywords{clustered data; debiasing; profile Hessian; quantile regression; supporting information}
+\corres{Jian Hou. Email: houjian@ruc.edu.cn}
+\abstract[Summary]{We give the complete profile calculus, joint-density bandwidth expansion and sparse empirical bounds. These results establish the learning rates of the orthogonal search and nodewise adjustment rules, control the selected-model target and yield paired coefficient inference. Numerical specifications include certified convex optimisation, the independent simulation and its paired ablation. The GSE65391 sections provide module intervals, repeated subject validation and independent exploratory gene fits, with their observed availability.}
+\keywords{clustered data; joint optimisation; profile Hessian; quantile regression; supporting information}
 \maketitle
-
-\noindent\textit{Scope.} Proposition~\ref{prop:supp-profile} and Theorems~\ref{thm:supp-target}--\ref{thm:supp-normality} are proved below. The remaining theoretical task before submission is to verify the high-level Hessian plug-in and score-remainder rates from primitive conditions for the general random-intercept--slope model.
 
 \input{sections/supp_01_profile_calculus}
 \input{sections/supp_02_conditions}
-\input{sections/supp_03_proofs}
 \input{sections/supp_04_primitive_verification}
+\input{sections/supp_03_proofs}
 \input{sections/supp_05_computation}
 \input{sections/supp_06_simulation}
 \input{sections/supp_07_gse65391}

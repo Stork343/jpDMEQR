@@ -19,6 +19,7 @@ results/intermediate/
 results/tables/
 results/figures/
 results/logs/
+results/scratch/
 !results/README.md
 
 # Manuscript build products
@@ -37,5 +38,15 @@ manuscript/Fonts/
 .DS_Store
 *.swp
 *.swo
+src/*.o
+src/*.so
+src/*.dll
 .vscode/
 .idea/
+
+# 本地编译文件
+manuscript/*.pdf
+manuscript/*.bbl
+manuscript/*.pag
+manuscript/$out/
+tmp_head*.txt

@@ -1,0 +1,44 @@
+{
+  "unit_checks_pass": true,
+  "package_checks_pass": true,
+  "initial_checks_pass": true,
+  "initial_acceptance_manifest": "results/scratch/application_initial_acceptance_458b837_v1/initial_acceptance_manifest.json",
+  "generic_target_review_pass": true,
+  "commit_sha": "458b83799e577adef18c7343818ce1a0c8a5dfad",
+  "method_version": "profile_pair_20261022",
+  "score_definition": "profile_bandwidth_pair_2_half_minus_full",
+  "geometry_manifest": "results/preflight/profile_pair_20261022/geometry_manifest.json",
+  "application_method_preflight_manifest": "results/preflight/profile_pair_20261022/application_method_preflight_manifest.json",
+  "numeric_dependency_paths": ["config/application_curvature_20261022.yml", "config/application_execution_20261022.yml", "config/application_matched_prospective_20261022.yml", "config/application.yml", "config/module_score_members_20261022.csv", "config/module_score_members_20261022.csv.freeze.csv", "config/module_scoring_20261022.yml", "config/module_signatures.csv", "config/module_signatures.csv.freeze.csv", "DESCRIPTION", "NAMESPACE", "R/v2_application_v2_part01.R", "R/v2_application_v2_part02.R", "R/v2_application_v2_part03.R", "R/v2_application_v2_part04.R", "R/v2_application_v2_part05.R", "R/v2_application_v2_part06.R", "R/v2_application_v2_part07.R", "R/v2_application_v2_part08.R", "R/v2_application_v2_part09.R", "R/v2_application_v2_part10.R", "R/v2_application_v2_part11.R", "R/v2_application_v2_part12.R", "R/v2_application_v2_part13.R", "R/v2_application_v2_part14.R", "R/v2_application_v2_part15.R", "R/v2_application_v2_part16.R", "R/v2_benchmark_adapters_v2_part01.R", "R/v2_benchmark_adapters_v2_part02.R", "R/v2_benchmark_adapters_v2_part03.R", "R/v2_benchmark_adapters_v2_part04.R", "R/v2_benchmark_adapters_v2_part05.R", "R/v2_benchmark_adapters_v2_part06.R", "R/v2_benchmark_adapters_v2_part07.R", "R/v2_benchmark_adapters_v2_part08.R", "R/v2_benchmark_adapters_v2_part09.R", "R/v2_benchmark_adapters_v2_part10.R", "R/v2_benchmark_adapters_v2_part11.R", "R/v2_profile_v2_part01.R", "R/v2_profile_v2_part02.R", "R/v2_profile_v2_part03.R", "R/v2_profile_v2_part04.R", "R/v2_profile_v2_part05.R", "R/v2_profile_v2_part06.R", "R/v2_profile_v2_part07.R", "R/v2_profile_v2_part08.R", "R/v2_profile_v2_part09.R", "R/v2_profile_v2_part10.R", "R/v2_profile_v2_part11.R", "R/v2_profile_v2_part12.R", "R/v2_profile_v2_part13.R", "R/v2_profile_v2_part14.R", "R/v2_profile_v2_part15.R", "scripts/00_source_v2.R", "scripts/application/_paired_method_gate_20261022.R", "scripts/application/03_fit_GSE65391.R", "scripts/application/03_fit_lowdim_GSE65391.R", "scripts/application/09_fit_exploratory_pair_GSE65391.R", "scripts/application/12_validate_GSE65391.R", "src/cluster_profiles.cpp", "src/Makevars", "src/Makevars.win", "src/population_products.cpp"],
+  "benchmark_dependency_paths": ["R/v2_benchmark_adapters_v2_part01.R", "R/v2_benchmark_adapters_v2_part02.R", "R/v2_benchmark_adapters_v2_part03.R", "R/v2_benchmark_adapters_v2_part04.R", "R/v2_benchmark_adapters_v2_part05.R", "R/v2_benchmark_adapters_v2_part06.R", "R/v2_benchmark_adapters_v2_part07.R", "R/v2_benchmark_adapters_v2_part08.R", "R/v2_benchmark_adapters_v2_part09.R", "R/v2_benchmark_adapters_v2_part10.R", "R/v2_benchmark_adapters_v2_part11.R"],
+  "solver_configuration": {
+    "dantzig_solver": "dual_warm",
+    "cluster_solver": "compiled",
+    "assembly": "batch",
+    "cv_workers": 1,
+    "hessian_refresh": 20,
+    "unpenalised_optimizer": "newton_armijo",
+    "proximal_scaling": "cluster_rms",
+    "shared_first_stage": true,
+    "matrix_backend": "Eigen_single_thread",
+    "identity_detail": "aggregate"
+  },
+  "initial_configuration": {
+    "clinical_acceleration": "clinical_kkt"
+  },
+  "package_versions": {
+    "jpDMEQR": "0.4.0",
+    "CVXR": "1.0.15",
+    "quantreg": "6.1",
+    "lqmm": "1.5.8",
+    "geeVerse": "0.3.1",
+    "highs": "1.14.0.2"
+  },
+  "unit_request": "results/scratch/repository_package_checks_20261022/final_unit_458b837_01/request.json",
+  "unit_manifest": "results/scratch/repository_package_checks_20261022/final_unit_458b837_01/unit_manifest.json",
+  "unit_warning_count": 11,
+  "unit_warning_details": "results/scratch/repository_package_checks_20261022/final_unit_458b837_01/unit_warning_details.csv",
+  "package_manifest": "results/scratch/repository_package_checks_20261022/final_package_458b837_01/package/manifest.json",
+  "theory_review": "results/scratch/generic_target_review_20261023T005538_5b963b4/review.json",
+  "completed_utc": "2026-10-22 17:25:26 UTC"
+}

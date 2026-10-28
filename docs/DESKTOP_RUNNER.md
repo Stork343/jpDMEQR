@@ -33,6 +33,15 @@ acceptance before any full cell is started:
 Rscript <launcher> pilot_desktop_smoke P05 1 1
 ```
 
+The reviewer-facing smoke of the frozen pipeline is the quick reproduction
+entry (protocol and switch stack: `inst/REPRODUCIBILITY.md`). It requires the
+strict geometry gate under the same configuration first and fails fast with
+instructions otherwise:
+
+```powershell
+Rscript scripts/simulation/09_quick_repro.R --max-reps=1
+```
+
 ## 3. Launching cells
 
 Windows: one `Rscript` process per shard; size shards by memory

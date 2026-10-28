@@ -72,3 +72,70 @@ $A_i^{\mathsf T}B_iA_i=X_i^{\mathsf T}W_iZ_iB_i^{-1}Z_i^{\mathsf T}W_iX_i$
 proves the result.
 \end{proof}
 
+\subsection{Dual profile scores with bounded cluster sizes}
+
+Write $\mathcal C_\tau=[\tau-1,\tau]$ and let
+$c_\tau(s)=\sup_v\{sv-\rho_{\tau,1}(v)\}$ for $s\in\mathcal C_\tau$.
+The kernel is symmetric and has compact support. Consequently
+$\rho_{\tau,h}^*(s)=h c_\tau(s)$ on $\mathcal C_\tau$, and
+$c_\tau$ is bounded and continuous on this interval.
+
+\begin{proposition}[Dual profile score]\label{prop:supp-dual-profile}
+For $u=Y_i-X_i\beta$ and $h\geq0$, the profiled cluster criterion equals
+\begin{equation}\label{eq:supp-profile-dual}
+ \max_{s\in\mathcal C_\tau^{m_i}}
+ \left\{
+ \frac{s^{\mathsf T}u}{m_i}
+ -\frac{s^{\mathsf T}Z_i\Lambda^{-1}Z_i^{\mathsf T}s}{2m_i^2}
+ -\frac{h}{m_i}\sum_{j=1}^{m_i}c_\tau(s_j)
+ \right\}.
+\end{equation}
+For $h>0$, its maximiser $s_{i,h}$ is the vector
+$\psi_{\tau,h}(r_i)$. At $h=0$, every maximiser satisfies
+\[
+ \Lambda\gamma_i^\dagger=m_i^{-1}Z_i^{\mathsf T}s_{i,0},
+ \qquad
+ s_{ij,0}\in\partial\rho_\tau
+ (Y_{ij}-X_{ij}^{\mathsf T}\beta-Z_{ij}^{\mathsf T}\gamma_i^\dagger).
+\]
+If $Y_i$ has a joint conditional density given $(X_i,Z_i,m_i)$,
+the maximiser $s_{i,0}$ is unique almost surely at each fixed $\beta$.
+If additionally
+$\E[(m_i^{-1}\sum_j|X_{ij,k}|)^2]<\infty$ for coordinate $k$, then
+\[
+ m_i^{-1}X_{i,k}^{\mathsf T}s_{i,h}
+ \longrightarrow m_i^{-1}X_{i,k}^{\mathsf T}s_{i,0}
+ \quad\text{in }L_2\text{ as }h\downarrow0.
+\]
+The same conclusion holds for a fixed projected score when its design
+envelope has a finite second moment.
+\end{proposition}
+
+\begin{proof}
+Fenchel duality for the finite continuous convex criterion introduces
+$s_j\in\mathcal C_\tau$ for each check loss. Minimising over $\gamma$
+gives $\gamma=\Lambda^{-1}Z_i^{\mathsf T}s/m_i$ and the quadratic term
+in \eqref{eq:supp-profile-dual}. The scaling identity
+$\rho_{\tau,h}(v)=h\rho_{\tau,1}(v/h)$ gives its conjugate.
+The Fenchel optimality conditions give the stated score and nuisance
+stationarity relations.
+
+At $h=0$ the value in \eqref{eq:supp-profile-dual} is a finite convex
+Lipschitz function of $u\in\R^{m_i}$. It is differentiable Lebesgue
+almost everywhere. Its subdifferential in $u$ consists of the dual
+maximisers divided by $m_i$, so differentiability makes the maximiser
+unique. The joint conditional density gives this event probability one.
+The dual objective converges uniformly on its compact feasible set as
+$h\downarrow0$, since $c_\tau$ is bounded. Every accumulation point of
+$s_{i,h}$ therefore maximises the limiting objective, giving
+$s_{i,h}\to s_{i,0}$ almost surely. The bound
+$|s_{ij,h}|\leq1$ and the assumed design envelope permit dominated
+convergence for the squared coordinate or projected score.
+\end{proof}
+
+When a profiled residual equals zero, its dual coordinate is chosen
+jointly with the other residuals through nuisance stationarity. This
+selection enters both the population profile gradient and its limiting
+variance. Joint outcome densities permit the preceding argument even
+when the fitted profile residual has positive probability at zero.
+

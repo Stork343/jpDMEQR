@@ -1,0 +1,10 @@
+"quantity","value"
+"Independent numerical seeds",20
+"Differential geometry cases",81
+"Complete fitting and inference cases",20
+"Largest score finite difference error",2.69077687631292e-08
+"Largest Jacobian finite difference error",0.000218181297686221
+"Largest Schur identity error",6.66133814775094e-16
+"Largest paired variance identity error",5.20417042793042e-18
+"Registry method evaluations",18
+"Registry coordinate records",64

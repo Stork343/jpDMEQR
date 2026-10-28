@@ -1,19 +1,209 @@
-\section{GSE65391 audit and analysis protocol}\label{supp:gse}
+\section{GSE65391 construction and analysis}\label{supp:gse}
+\input{generated/profile_pair_application_values}
+\input{generated/joint_profile/prediction_values}
 
-\subsection{Metadata audit}\label{supp:metadata}
+\subsection{Metadata and outcome information}
 
-The audit script must produce a machine-readable table containing: GEO accession, sample identifier, subject identifier, visit number, cumulative time, days since last visit, batch, technical-replicate flag, C3, C4, anti-dsDNA, ESR, age, sex, race, treatment indicators, and expression-column identifier. Every exclusion receives one mutually exclusive reason. The script reports missingness by variable, number of visits per subject before and after outcome filtering, and whether visit spacing supports a random time slope.
+Source phenotype fields and their parsed versions are retained
+separately. Subject and visit identifiers define biological visits.
+One record with an unavailable visit number has a unique observed
+subject and cumulative-time combination. A source replicate flag
+is interpreted alongside the observed record relationships; a
+flagged SLE measurement remains eligible when it is the sole
+observed biological record at that subject and visit.
 
-\subsection{Expression audit}\label{supp:expression}
+Positive C3 values, usable expression and repeated measurements
+yield \SLEEligibleSubjects{} subjects and \SLEEligibleVisits{}
+visits. Both batches contain observations in all four outcome
+regions defined by the three analysis quantiles. The recorded
+SLEDAI total is used in Model B. Its low-complement component
+includes C3, C4 or CH50 below the laboratory reference range
+\cite{torontoSLEDAI2K}.
 
-The expression workflow verifies the platform annotation version, identifies array-control probes, checks the supplied batch normalisation using healthy technical replicates, and records every probe-to-gene mapping decision. All filtering and scaling objects are estimated inside training clusters. The final analysis object contains no outcome-derived feature filter before the sample-splitting step.
+Local outcome information is checked at $\tau=0.25,0.50,0.75$ and
+bandwidth multipliers $0.75,1,1.25$. Each of 10000 subject bootstrap
+samples re-estimates the empirical quantile and the equal-subject
+mean kernel weight. The nine combinations share one-sided error
+allocation $0.05/9$. Their lower percentile bounds are positive,
+and local counts and Kish effective subject counts exceed
+$\lfloor n/\log(\max(n,3))\rfloor+1$. The lower-decile calculations
+use a separate family and the eligible bandwidth multipliers
+$1$ and $1.25$. Each actual profile fit also checks its selected
+curvature and final score residual.
 
-\subsection{Outcome and estimands}\label{supp:outcome}
+\subsection{Expression transformations}
 
-The primary outcome is C3. Units and data-entry conventions must be verified from the study documentation before transformation. If the empirical distribution is strongly right-skewed, log transformation is permitted only after checking positivity and is fixed before model comparison. Primary quantile levels are $0.25$, $0.50$, and $0.75$; $0.10$ is analysed only when the outcome audit and local-curvature diagnostics support it. The primary confirmatory estimands are profile coefficients for prespecified, versioned immune-module scores. At minimum these include reproducible interferon-response signatures; additional plasmablast or neutrophil modules are included only after their exact gene definitions are frozen. Gene-level estimands are exploratory and use independent subject selection/inference splits.
+The processed Series Matrix supplies the reference normalised
+expression. Official GPL10558 annotation retains probe IDs, gene
+symbols and Gene IDs. Historical symbols with a unique Gene ID
+mapping retain their source identifiers. Module membership and
+measurement units are fixed independently of C3 associations.
+All required members have observed expression.
 
-\subsection{Reproducibility outputs}\label{supp:reproducibility}
+The four gene-based modules retain the uniquely mapped probe with
+largest training-sample median absolute deviation for each member.
+The fifth module retains its fixed original probe representation.
+Each module averages its members before training-sample centring
+and standardisation. Gene prediction similarly uses training-sample
+probe selection, feature filtering and scaling. Complete subject
+roles determine the training observations at every stage.
 
-The final repository must contain the raw-data download script, checksum manifest, cohort-construction script, annotation version, preprocessing code, fixed random seeds, optimisation logs, simulation summaries, and a session-information file. Tables in the paper are generated directly from saved analysis objects. Manual transcription of numerical values into LaTeX is not permitted.
+For the raw-array sensitivity, detection-p-value normexp correction
+uses \texttt{limma::nec} with offset 16 and
+\texttt{robust=FALSE}. Each array's background parameters depend on
+its own measurements. Healthy technical pairs spanning R1 and R2
+provide a per-probe arithmetic-mean R2/R1 ratio that multiplies R1
+measurements. These healthy references are disjoint from the SLE
+cohort. A quantile-normalisation target estimated on the current
+SLE training visits is applied to validation arrays and followed
+by $\log_2$ transformation. Every inner training role and subject
+deletion estimates its own target.
 
+The probe-aggregation sensitivity takes the median of uniquely
+mapped probes for each gene and visit. M5.15 keeps its original
+probe representation. All processing routes use the same eligible
+visits, module membership and frozen subject assignments.
+
+\subsection{Complete module workflows}
+
+The clinical and module designs contain \SLEModelADimension{}
+coordinates in Model A and \SLEModelBDimension{} in Model B.
+For each setting, the fixed-design interface jointly fits the
+complete selected profile at $h$ and $h/2$. It retains the separate
+nuisance solutions, Hessian inverses and subject scores, then forms
+the paired coefficient and covariance.
+
+Let $a(D)$ denote the sample-fitted expression and clinical
+transformations and write
+\[
+ T(D)=2\widehat\beta_{h/2}\{D;a(D),\Lambda\}
+                      -\widehat\beta_h\{D;a(D),\Lambda\}.
+\]
+For $T_{-i}=T(D_{-i})$ and
+$\overline T_-=n^{-1}\sum_iT_{-i}$, the complete-workflow covariance
+is
+\[
+ \widehat V_T=\frac{n-1}{n}\sum_i
+       (T_{-i}-\overline T_-)(T_{-i}-\overline T_-)^T.
+\]
+Each deletion repeats probe selection, centring and standardisation
+while holding $h$ at its full-sample value. The repeated
+coefficients retain their sample-standardised units. For a fixed
+raw-scale module with slope $\theta(D)$ and estimated scale $s_D$,
+the corresponding coefficient is $s_D\theta(D)$. Its variation
+therefore includes estimation of that scale.
+
+For a random slope, changing the time centre also changes the
+nuisance coordinates. If $Z_D=Z_{ref}R_D$, the fixed matrix
+$\Lambda$ in the sample's coordinates corresponds to
+$R_D^{-T}\Lambda R_D^{-1}$ in reference coordinates. Recomputing
+the complete deletion estimator retains the variation from the
+estimated centre.
+
+The reference interval family has $K=30$ module coordinates, with
+critical value $z_{1-0.05/(2K)}$ for each interval procedure. Each
+working-penalty, bandwidth, random-slope or processing sensitivity
+uses its own declared family. At $\tau=0.10$, $K=10$.
+The result builder calculates every simultaneous interval from its
+saved coefficient and standard error using this family definition.
+The \JointModuleWorkflows{} reference and sensitivity workflows
+each complete the full fit and all \SLEEligibleSubjects{} deletions,
+giving \JointModulePairedFits{} paired coefficient fits.
+
+\begingroup\small
+\input{generated/joint_profile/module_intervals}
+\input{generated/joint_profile/processing_modules}
+\endgroup
+\input{generated/joint_profile/module_sensitivity}
+
+\subsection{Repeated subject validation}
+
+Five repetitions of five outer subject folds define prediction
+roles. Each outer role has five inner subject folds. The outcome
+search considers additions from zero through the common inner
+budget $\lfloor r/\log r\rfloor$, with clinical and module
+coordinates always included. Inner validation selects this size
+and $\lambda\in\{0.5,1,2\}$, setting $\Lambda=\lambda I$.
+Loss is the fixed-part pinball loss averaged within subjects and
+then over the heldout training subjects. Ties follow the declared
+candidate order. The chosen size and matrix are fitted on the
+complete outer training sample.
+
+The reference processing includes 5000 candidate genes, feature
+counts 2000 and 10000, and a 5000-gene random-slope sensitivity.
+Both alternative processing routes use 5000 candidates and a
+random intercept. Across two clinical models and three quantiles,
+these specifications give \JointPredictionFits{} complete outer
+fits. The final random-slope records use the prescribed quadratic
+solver in Section~\ref{supp:computation}; retained numerical
+attempts are separately accounted for in the replication files.
+
+For each sensitivity, a subject supplies a vector of five
+out-of-fold loss differences relative to reference processing with
+5000 genes and a random intercept. The reported difference averages
+within this vector and then equally across all 129 subjects.
+Ten thousand multinomial resamples of the subject vectors give
+the 2.5th and 97.5th percentiles. The same weights are used for
+every sensitivity. These are conditional resampling ranges for the
+saved fold models; training-sample variation is held fixed.
+
+\begingroup\small
+\input{generated/joint_profile/prediction_sensitivity}
+\endgroup
+
+The recorded published-method comparisons supply six completed
+outer computations for each of pooled quantile Lasso, QGEE-SCAD and LQMM.
+They cover one outer fold in one repetition, with
+\JointComparatorSubjects{} heldout
+subjects for every model and quantile. Their remaining 144
+scheduled fits per method are pending. Table~\ref{tab:joint-comparators}
+uses precisely those observed predictions and the same subject
+resampling weights saved with the comparator records. Its
+difference is the joint-profile loss minus the comparator loss.
+The table describes the available subject subset.
+The \JointComparatorUnconverged{} non-median QGEE-SCAD fits report
+nonconvergence and retain that status in place of a loss comparison.
+The LQMM entries retain the returned package fits and their
+recorded convergence information.
+
+The pooled method uses \texttt{quantreg::rq.fit.lasso}, with
+training-fold choice among its declared screening dimensions and
+penalty multipliers. QGEE-SCAD uses the official
+\texttt{geeVerse} single-penalty kernel on its original 30-point
+HBIC path and exchangeable working correlation. LQMM uses the
+official \texttt{lqmm} implementation on the clinical and module
+design with a random intercept. The replication records preserve
+their package versions, selected settings and convergence output.
+
+\begingroup\small
+\input{generated/joint_profile/available_comparators}
+\endgroup
+
+\subsection{Independent exploratory gene inference}
+
+Each of ten subject splits is used in both role assignments.
+Selection-group preprocessing supplies 5000 candidate genes.
+Clinical covariates remain included and three steps of the joint
+outcome search select exactly three genes, with $\Lambda=I$.
+The independent group estimates the resulting clinical and
+three-gene profile with bandwidth equal to its cluster count to
+power $-3/10$. The interval refers to that role-specific selected
+population parameter.
+
+All \JointGeneRoles{} model, quantile, processing and role combinations
+complete independent inference, giving \JointGeneIntervals{}
+coordinate intervals.
+Table~\ref{tab:joint-genes} reports the three most frequent selected
+identifiers within each processing route, model and quantile.
+Frequency has denominator 20 role assignments. Coefficient medians
+and interquartile ranges condition on selection and describe the
+observed selected designs. Every individual interval remains in
+the replication records with its exact selection and inference
+subjects.
+
+\begingroup\small
+\input{generated/joint_profile/gene_selection}
+\endgroup
+
+\bibliography{references}
 \end{document}

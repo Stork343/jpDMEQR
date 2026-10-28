@@ -1,0 +1,23 @@
+version: G2_mixed_full_membership_20261022
+source: https://pmc.ncbi.nlm.nih.gov/articles/PMC4118927/
+source_method: average_normalised_expression_of_all_module_genes
+score: equal_weight_mean_processed_normalised_expression
+score_transformation: module_mean_center_and_sd_from_training_rows
+minimum_fraction: 1.0
+membership_file: config/module_signatures.csv
+membership_freeze_file: config/module_signatures.csv.freeze.csv
+score_membership_file: config/module_score_members_20261022.csv
+score_membership_freeze_file: config/module_score_members_20261022.csv.freeze.csv
+module_order: [M1.2, M3.4, M4.11, M5.12, M5.15]
+representations:
+  M1.2: gene_symbol
+  M3.4: gene_symbol
+  M4.11: gene_symbol
+  M5.12: gene_symbol
+  M5.15: ILMN_probe
+annotation_path: data/interim/GSE65391/probe_annotation_20261022.csv
+missing_member_action: stop
+ambiguous_member_action: stop
+probe_collapse_rule: highest_training_mad
+standardisation_scope: training_subjects_only
+association_selection_performed: false

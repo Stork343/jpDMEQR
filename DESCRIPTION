@@ -1,26 +1,31 @@
 Package: jpDMEQR
 Type: Package
 Title: Debiased Profile Inference for High-Dimensional Mixed-Effects Quantile Regression
-Version: 0.2.0
+Version: 0.4.0
 Authors@R: person(given = "Jian", family = "Hou", role = c("aut", "cre"), email = "houjian@ruc.edu.cn")
 Author: Jian Hou [aut, cre]
 Maintainer: Jian Hou <houjian@ruc.edu.cn>
-Description: Research implementation for regularised profile estimation and
-    coordinate-wise debiased inference in high-dimensional mixed-effects
-    quantile regression with many independent, small clusters. The repository
-    retains the original jointly penalised implementation for provenance and
-    adds a correctness-first reference implementation of the exact profile
-    score, Schur-complement effective Hessian, row-wise Dantzig inversion, and
-    cluster sandwich variance used in the Scandinavian Journal of Statistics
-    reconstruction.
+Description: Regularised profile estimation and coordinate-wise debiased
+    inference for high-dimensional mixed-effects quantile regression with
+    many independent small clusters. Convex selection with cluster score
+    loadings is followed by an unpenalised profile refit. Paired bandwidth
+    scores and their exact Jacobian determine the one-step correction and
+    cluster sandwich uncertainty. Population target and precision direction
+    assets retain their numerical diagnostics and method identity.
 License: GPL (>= 3)
 URL: https://github.com/Stork343/jpDMEQR
 BugReports: https://github.com/Stork343/jpDMEQR/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports:
+    clarabel,
+    jsonlite,
     MASS,
+    Matrix,
+    methods,
+    parallel,
     quantreg,
+    Rcpp,
     stats,
     utils
 Suggests:
@@ -31,23 +36,36 @@ Suggests:
     data.table,
     digest,
     dplyr,
+    fastclime,
+    filelock,
     future.apply,
     geeVerse,
     GEOquery,
     ggplot2,
     glmmLasso,
+    glmnet,
+    highs,
     illuminaHumanv4.db,
     limma,
     lqmm,
     matrixStats,
+    osqp,
     peakRAM,
+    pkgload,
+    ps,
+    processx,
     purrr,
     readr,
+    rcmdcheck,
     rqPen,
+    statmod,
     testthat (>= 3.0.0),
     tidyr,
+    withr,
     yaml
 VignetteBuilder: utils
 Config/testthat/edition: 3
-NeedsCompilation: no
+LinkingTo: Rcpp, RcppArmadillo, RcppEigen
+SystemRequirements: C++14
+NeedsCompilation: yes
 RoxygenNote: 7.3.3

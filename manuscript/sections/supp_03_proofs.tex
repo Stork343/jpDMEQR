@@ -1,245 +1,418 @@
-\section{Proofs of the main theoretical results}\label{supp:proofs}
+\section{Learning bounds and coordinate inference proofs}\label{supp:proofs}
 
-\subsection{Smoothing target approximation}\label{supp:target-proof}
+\subsection{Uniform nonsmooth profile gradients}
 
-\begin{theorem}[Target approximation]\label{thm:supp-target}
-Under Assumption~\ref{ass:supp-target},
-\[
- \norm{\beta_h^{\star}-\beta^{\star}}_{\infty}\leq C_HC h^2.
-\]
-If the difference is supported on a set of order $s$, then
-$\norm{\beta_h^{\star}-\beta^{\star}}_2=O(\sqrt{s}\,h^2)$.
-\end{theorem}
+Select the minimum Euclidean norm dual optimiser at bandwidth zero
+and denote its induced coefficient subgradient by $g_{i,0}^{c}(\beta)$.
+For a fixed $\beta$ it is the almost surely unique dual score of
+Proposition~\ref{prop:supp-dual-profile}. Its expectation is
+$\nabla R_0(\beta)$ under the density and moment conditions.
 
-\begin{proof}
-Let $d_h=\beta_h^{\star}-\beta^{\star}$. By the first-order condition and the integral mean-value identity,
-\[
- 0=\nabla R_h(\beta_h^{\star})
- =\nabla R_h(\beta^{\star})+\overline H_hd_h.
-\]
-Thus $d_h=-\overline H_h^{-1}\nabla R_h(\beta^{\star})$, and
-\[
- \norm{d_h}_{\infty}
- \leq\norm{\overline H_h^{-1}}_{L_1}
- \norm{\nabla R_h(\beta^{\star})}_{\infty}
- \leq C_HC h^2.
-\]
-The $\ell_2$ statement follows from
-$\norm{d_h}_2\leq\sqrt{|\operatorname{supp}(d_h)|}\norm{d_h}_{\infty}$.
-\end{proof}
-
-\subsection{Penalised profile rate}\label{supp:estimation-proof}
-
-\begin{theorem}[Penalised estimation]\label{thm:supp-estimation}
-Under Assumption~\ref{ass:supp-estimation}, choose
-$\lambda_{\beta}\geq2\norm{g_{n,h}(\beta_h^{\star})}_{\infty}$. Then
-\[
- \norm{\widehat\beta-\beta_h^{\star}}_2
- \leq C\sqrt{s}\lambda_{\beta},
- \qquad
- \norm{\widehat\beta-\beta_h^{\star}}_1
- \leq Cs\lambda_{\beta}.
-\]
-The same orders hold for a finite block of unpenalised covariates after augmenting the restricted-curvature condition by that block.
-\end{theorem}
-
-\begin{proof}
-Set $\Delta=\widehat\beta-\beta_h^{\star}$ and $S=S_h$. The basic inequality is
-\begin{equation}\label{eq:supp-basic}
- L_{n,h}^{\mathrm{prof}}(\beta_h^{\star}+\Delta)
- -L_{n,h}^{\mathrm{prof}}(\beta_h^{\star})
- +\lambda_{\beta}
- \{\norm{\beta_h^{\star}+\Delta}_1-\norm{\beta_h^{\star}}_1\}\leq0.
+\begin{lemma}[Sparse gradient fluctuation]\label{lem:supp-gradient}
+For the sparse coefficient ball and unit directions whose combined
+support has size at most a fixed multiple of $D$, let $L_n=\log(2np)$.
+Then
+\begin{equation}\label{eq:supp-gradient-rate}
+ \sup_{\beta,v}|(P_T-P)v^Tg_{i,0}^{c}(\beta)|
+   =O_p\!\left\{\sqrt{D L_n/n}+(D L_n)^{3/2}/n\right\}
+   =O_p(\delta_n).
 \end{equation}
-Restricted curvature and the score bound give
-\[
- L_{n,h}^{\mathrm{prof}}(\beta_h^{\star}+\Delta)
- -L_{n,h}^{\mathrm{prof}}(\beta_h^{\star})
- \geq g_{n,h}(\beta_h^{\star})^{\mathsf T}\Delta
- +\frac{\kappa}{2}\norm{\Delta}_2^2,
-\]
-and
-$|g_{n,h}(\beta_h^{\star})^{\mathsf T}\Delta|
-\leq(\lambda_{\beta}/2)\norm{\Delta}_1$.
-The decomposability inequality
-\[
- \norm{\beta_h^{\star}+\Delta}_1-\norm{\beta_h^{\star}}_1
- \geq\norm{\Delta_{S^c}}_1-\norm{\Delta_S}_1
-\]
-inserted into \eqref{eq:supp-basic} yields
-\[
- \frac{\kappa}{2}\norm{\Delta}_2^2
- +\frac{\lambda_{\beta}}{2}\norm{\Delta_{S^c}}_1
- \leq\frac{3\lambda_{\beta}}{2}\norm{\Delta_S}_1.
-\]
-Hence $\Delta\in\mathcal C(S,3)$ and
-$\kappa\norm{\Delta}_2^2/2
-\leq3\lambda_{\beta}\sqrt{s}\norm{\Delta}_2/2$.
-This proves the $\ell_2$ bound. The cone inequality then gives
-$\norm{\Delta}_1\leq4\norm{\Delta_S}_1
-\leq4\sqrt{s}\norm{\Delta}_2$, proving the $\ell_1$ bound.
-\end{proof}
-
-\subsection{Row-wise Dantzig inversion}\label{supp:precision-proof}
-
-\begin{theorem}[Precision-row rate]\label{thm:supp-precision}
-Under Assumption~\ref{ass:supp-precision}, any solution of the row-wise Dantzig program satisfies
-\[
- \norm{\widehat\omega_k-\omega_{k,h}}_{\infty}=O_p(\mu_n),
- \qquad
- \norm{\widehat\omega_k-\omega_{k,h}}_1
- =O_p(s_{\omega,k}\mu_n).
-\]
-\end{theorem}
+If $u$ supplies an $\epsilon_n$-subgradient of the empirical profile
+risk at a sparse coefficient, its directional difference from the
+population gradient is $O_p(\delta_n+\sqrt{\epsilon_n})$.
+\end{lemma}
 
 \begin{proof}
-Write $H=H_h$, $\widehat H=\widehat H_{\mathrm{eff}}(\widehat\beta)$,
-$\omega=\omega_{k,h}$, and $u=\widehat\omega_k-\omega$.
-Because $H\omega=e_k$,
+The dual box has dimension at most $m_{\max}$. On each lower, upper
+and free-coordinate pattern, its KKT equations are linear in the
+free dual coordinates and in $Y-X\beta$. Minimum norm selection on a
+possibly singular face is a parametric quadratic problem with a
+fixed finite number of constraints. Enumerating its active sets gives
+affine solution pieces. Feasibility and comparisons between pieces
+are polynomial inequalities of bounded degree, with their number
+depending on the bounded cluster size. A projected score subgraph
+therefore has polynomial sign complexity in $O(D)$ real parameters
+on a given support. Warren's sign count, including the equality
+extension in \citeA{goldberg1995}, gives covering logarithm
+$CD\log(Cp/\varepsilon)$ after taking the union over supports.
+
+Every projected score is bounded in absolute value by
+$\max_j|X_j^Tv|$. Its second moment is uniformly bounded. The observed
+envelope over the sparse unit directions is $O_p(\sqrt{D L_n})$.
+Symmetrisation and the entropy bound give a variance contribution
+$C\sqrt{D L_n/n}$. Bernstein truncation gives an envelope
+contribution $C\sqrt{D L_n}(D L_n)/n$. Sub-Gaussian tails make the
+truncation remainder smaller than these terms. This proves
+\eqref{eq:supp-gradient-rate}.
+
+Let $f_T=P_T\ell_{i,0}^{\mathrm{prof}}$. For an epsilon subgradient
+$u$ and a unit sparse direction $v$,
 \[
- \norm{\widehat H\omega-e_k}_{\infty}
- \leq\norm{\widehat H-H}_{\max}\norm{\omega}_1
- \leq C_{\omega}\delta_{n,h}\leq\mu_n.
+ \frac{f_T(\beta)-f_T(\beta-tv)-\epsilon_n}{t}
+ \leq u^Tv\leq
+ \frac{f_T(\beta+tv)-f_T(\beta)+\epsilon_n}{t}.
 \]
-Thus $\omega$ is feasible. The $\ell_1$ objective implies
-$\norm{u_{T^c}}_1\leq\norm{u_T}_1$ for $T=\operatorname{supp}(\omega)$, and therefore
-$\norm{u}_1\leq2s_{\omega,k}\norm{u}_{\infty}$.
-Since both $\widehat\omega_k$ and $\omega$ are feasible,
-$\norm{\widehat Hu}_{\infty}\leq2\mu_n$. Hence
-\begin{align*}
- \norm{u}_{\infty}
- &\leq\norm{H^{-1}}_{L_1}\norm{Hu}_{\infty}\\
- &\leq C_{\Omega}
- \{\norm{(H-\widehat H)u}_{\infty}+\norm{\widehat Hu}_{\infty}\}\\
- &\leq C_{\Omega}\{2s_{\omega,k}\delta_{n,h}\norm{u}_{\infty}+2\mu_n\}.
-\end{align*}
-The first term is absorbed because $s_{\omega,k}\delta_{n,h}=o(1)$.
-This proves the $\ell_{\infty}$ rate, and the cone bound gives the $\ell_1$ rate.
+The profile loss is Lipschitz and is absolutely continuous along
+these segments. Integrate the canonical subgradient along them;
+the exceptional directional nondifferentiability points do not
+affect the integral. Applying \eqref{eq:supp-gradient-rate} and the
+population Hessian bound gives a directional error at most
+$C(\delta_n+t+\epsilon_n/t)$. Set $t=\sqrt{\epsilon_n}$, with a
+limit as $t\downarrow0$ when the gap is zero. This argument controls
+the dual vector actually used by the search even at a sample
+nondifferentiability point.
 \end{proof}
 
-\subsection{Cluster Bahadur representation}\label{supp:bahadur-proof}
+The joint primal-dual certificate gives the required epsilon
+subgradient. The Fenchel gap is the sum of the profile dual gap and
+the nonnegative quadratic conjugacy gap for the selected coefficients.
+Minimising the returned objective over the nuisance effects can only
+reduce it. The remaining profile dual gap is therefore bounded by the
+reported normalised joint gap.
 
-\begin{theorem}[Bahadur representation]\label{thm:supp-bahadur}
-Under Assumptions~\ref{ass:supp-estimation}--\ref{ass:supp-expansion},
-\[
- \sqrt n(\widetilde\beta_k-\beta_{h,k}^{\star})
- =\frac1{\sqrt n}\sum_{i=1}^n
- \omega_{k,h}^{\mathsf T}S_{i,h}(\beta_h^{\star})+o_p(1).
-\]
-\end{theorem}
+\subsection{Greedy approximation and model size selection}
+
+Put $\nu_n=\delta_n+n^{-1}+\sqrt{\epsilon_n}$. The prediction ridge
+gradient has norm $O(n^{-1})$ on the considered coefficient ball.
+At a restricted empirical fit the population gradient in the selected
+span consequently has norm $O_p(\nu_n)$.
+
+\begin{lemma}[Risk along the search path]\label{lem:supp-greedy}
+Let $r_j=R_0(\widehat\beta_j)-R_0(\beta^\star)$ at search step $j$.
+On the uniform gradient and sparse eigenvalue events,
+\begin{equation}\label{eq:supp-greedy-recursion}
+ r_{j+1}\leq(1-c/s)r_j+C\nu_n^2,
+ \qquad r_M\leq e^{-cM/s}r_0+Cs\nu_n^2.
+\end{equation}
+\end{lemma}
 
 \begin{proof}
-Let $g^{\star}=g_{n,h}(\beta_h^{\star})$ and
-$\Delta=\widehat\beta-\beta_h^{\star}$. By
-\eqref{eq:supp-score-expansion},
-\begin{align*}
- \widetilde\beta_k-\beta_{h,k}^{\star}
- &=e_k^{\mathsf T}\Delta
- -\widehat\omega_k^{\mathsf T}
- (g^{\star}+H_h\Delta+r_{n,h})\\
- &=-\omega_{k,h}^{\mathsf T}g^{\star}+R_{1k}+R_{2k}+R_{3k},
-\end{align*}
-where
-\begin{align*}
- R_{1k}&=-(\widehat\omega_k-\omega_{k,h})^{\mathsf T}g^{\star},\\
- R_{2k}&=(e_k-H_h\widehat\omega_k)^{\mathsf T}\Delta,\\
- R_{3k}&=-\widehat\omega_k^{\mathsf T}r_{n,h}.
-\end{align*}
-Theorem~\ref{thm:supp-estimation} and Theorem~\ref{thm:supp-precision} imply
+Sparse Gram concentration bounds every eligible residualised column
+norm above and away from zero. Let $b_{jl}$ be its normalised
+coefficient direction. Resolve $\beta^\star-\widehat\beta_j$ into
+the selected span and the residual directions of its at most $s$
+omitted target columns. The selected component has norm at most a
+constant times $\|\widehat\beta_j-\beta^\star\|_2$, and its gradient
+product is at most $C\nu_n$ times that norm. The sum of the absolute
+coefficients of the residual directions is at most
+$C\sqrt{s}\|\widehat\beta_j-\beta^\star\|_2$. Convexity gives
+$r_j\leq\nabla R_0(\widehat\beta_j)^T
+(\widehat\beta_j-\beta^\star)$. Together with restricted curvature,
+this yields
 \[
- |R_{1k}|=O_p(s_{\omega,k}\mu_n\lambda_n).
+ \max_{l\notin S_j}|\nabla R_0(\widehat\beta_j)^Tb_{jl}|
+       \geq c\sqrt{r_j/s}-C\nu_n.
 \]
-Moreover,
+Lemma~\ref{lem:supp-gradient} controls the computed dual correlations
+in these directions. The chosen direction therefore has the same
+lower bound with a different constant. A population step in that
+direction decreases risk by its squared gradient divided by a fixed
+upper-curvature constant.
+
+For any enlarged selected set, compare its empirical fit with its
+population restricted minimiser. Approximate empirical optimality,
+the integrated gradient bound and the numerical ridge imply
 \[
- \norm{e_k-H_h\widehat\omega_k}_{\infty}
- \leq\norm{e_k-\widehat H\widehat\omega_k}_{\infty}
- +\norm{\widehat H-H_h}_{\max}\norm{\widehat\omega_k}_1
- =O_p(\mu_n),
+ \frac\kappa2\|\Delta\|_2^2
+       \leq C(\delta_n+n^{-1})\|\Delta\|_2+\epsilon_n.
 \]
-so $|R_{2k}|=O_p(\mu_ns\lambda_n)$. Finally,
-$|R_{3k}|=O_p(\mathfrak t_{n,h})$ because
-$\norm{\widehat\omega_k}_1=O_p(1)$.
-The scaling in Assumption~\ref{ass:supp-expansion} makes each remainder
-$o_p(n^{-1/2})$. Since
-$g^{\star}=-n^{-1}\sum_iS_{i,h}(\beta_h^{\star})$, the result follows.
+Its population excess over that restricted minimum is
+$O_p(\nu_n^2)$. Combining these inequalities proves the recursion.
+Summing it proves the endpoint bound.
 \end{proof}
 
-\subsection{Normal approximation and studentisation}\label{supp:normality-proof}
+The fits can be localised before this argument. Nuisance stationarity
+and the bounded dual box imply $\|\gamma_i(\beta)\|_2\leq C$.
+The population profile risk is bounded below by
+$c\E m_i^{-1}\sum_j|X_{ij}^T\beta|
+-\E m_i^{-1}\sum_j|Y_{ij}|-C$. The sparse small-ball bound and
+the response moment condition place all restricted population
+minimisers in a fixed ball. The uniform population Hessian Lipschitz
+bound extends the assumed positive curvature to a fixed neighbourhood
+of its coefficient ball, with a smaller positive lower constant.
 
-\begin{theorem}[Normality and variance consistency]\label{thm:supp-normality}
-Under Assumptions~\ref{ass:supp-estimation}--\ref{ass:supp-variance},
-\[
- \frac{\sqrt n(\widetilde\beta_k-\beta_{h,k}^{\star})}{\sigma_k}
- \rightsquigarrow N(0,1),
- \qquad
- \widehat\sigma_k^2\overset{p}{\longrightarrow}\sigma_k^2.
-\]
-If additionally $\sqrt n h^2\to0$, the statistic may be centred at
-$\beta_k^{\star}$.
-\end{theorem}
+For each selected support, consider a small fixed-radius sphere around
+its restricted population minimiser. Integrating
+Lemma~\ref{lem:supp-gradient} along radial segments bounds the
+empirical loss increment minus its population increment by
+$O_p(\delta_n)$ times the radius, uniformly over the supports.
+The prediction ridge changes these increments by $O_p(n^{-1})$.
+Population curvature therefore gives a positive constant objective
+increase on every such sphere with probability tending to one.
+Convexity and a vanishing primal-dual gap place the computed fits
+inside these spheres. The preceding quadratic inequality then gives
+their $O_p(\nu_n)$ distances from the restricted population minima.
+
+\begin{lemma}[Heldout outcome comparison]\label{lem:supp-outcome-cv}
+The selected inner path sets contain coefficient comparison vectors
+with Euclidean error
+\begin{equation}\label{eq:supp-en}
+ e_n=e^{-cM/(2s)}+\sqrt{s}\nu_n+\sqrt{\log(CM)/n}.
+\end{equation}
+\end{lemma}
 
 \begin{proof}
-The Lyapunov ratio for the independent triangular array
-$\{\xi_{ik,h}:i=1,\ldots,n\}$ is bounded by
+For a training-measurable candidate $\beta$, the heldout profile
+loss difference from $\beta^\star$ is bounded by
+$m^{-1}\sum_j|X_j^T(\beta-\beta^\star)|$. Its conditional
+sub-Gaussian scale is at most $C\|\beta-\beta^\star\|_2$.
+Population curvature and Young's inequality give, simultaneously
+over the finite paths,
 \[
- \frac{\sum_i\E|\xi_{ik,h}|^{2+\nu}}
- \{\sum_i\Var(\xi_{ik,h})\}^{1+\nu/2}
- \leq C n^{-\nu/2}\to0.
+ |(P_V-P)(\ell_0^{\mathrm{prof}}(\beta)
+                  -\ell_0^{\mathrm{prof}}(\beta^\star))|
+ \leq a\{R_0(\beta)-R_0(\beta^\star)\}
+                       +C_a\log(CM/\delta)/|V|
 \]
-The cluster central limit theorem and Theorem~\ref{thm:supp-bahadur} therefore give the first assertion for $\beta_{h,k}^{\star}$.
-Theorem~\ref{thm:supp-target} and $\sqrt n h^2\to0$ permit replacement by $\beta_k^{\star}$.
-
-For variance consistency, write
-$\widehat\xi_{ik}=\widehat\omega_k^{\mathsf T}(\widehat S_i-\overline S)$ and
-$\xi_{ik,h}=\omega_{k,h}^{\mathsf T}S_{i,h}^{\star}$. Before empirical centring,
-\begin{align*}
- \widehat\omega_k^{\mathsf T}\widehat S_i-\xi_{ik,h}
- &=(\widehat\omega_k-\omega_{k,h})^{\mathsf T}S_{i,h}^{\star}
- +\widehat\omega_k^{\mathsf T}(\widehat S_i-S_{i,h}^{\star}).
-\end{align*}
-The average square of the first term is
-$O_p(s_{\omega,k}^2\mu_n^2\log p)=o_p(1)$ under coordinatewise cluster-score moment bounds; the average square of the second is $o_p(1)$ by \eqref{eq:supp-score-plugin}. Empirical centring changes the average squared difference by $o_p(1)$. Consequently,
-$n^{-1}\sum_i(\widehat\xi_{ik}-\xi_{ik,h})^2=o_p(1)$.
-The cluster law of large numbers gives
-$n^{-1}\sum_i\xi_{ik,h}^2\to_p\sigma_k^2$, proving variance consistency.
+with probability at least $1-\delta$. The reference loss cancels
+when the path size is selected. Compare the selected average risk
+with the common endpoint in Lemma~\ref{lem:supp-greedy}. Every inner
+fold has positive limiting weight, so the resulting risk order holds
+for each selected inner fit. Restricted curvature gives
+\eqref{eq:supp-en}. Their union retains these fitted comparison
+vectors, and a population minimiser on the union has no larger risk.
 \end{proof}
 
-\subsection{A feasible asymptotic regime}\label{supp:feasible}
+\subsection{Profile contrast selection}
 
-\begin{proposition}[Non-empty scaling region]\label{prop:supp-feasible}
-Let $s$ and $s_{\omega,k}$ be bounded, $h=n^{-1/3}$,
-$\lambda_n=\sqrt{\log(p)/n}$,
+The directional version of Theorem~\ref{thm:supp-oracle} gives
+\begin{equation}\label{eq:supp-directional-moments}
+ \E|v^TH_{i,b}(\beta)w|^r
+       \leq r!C^r b^{1-r}\|v\|_2^r\|w\|_2^r,
+       \qquad r\geq2.
+\end{equation}
+Use coefficient nets on each sparse support and fixed-mesh nets on
+the corresponding unit spheres. Their total logarithmic size is
+$O(DL_n)$. Bernstein's inequality and the deterministic profile
+Lipschitz bounds from Section~\ref{supp:primitive} give
+\begin{equation}\label{eq:supp-operator-rate}
+ \sup_{\beta,A}\|(P_T-P)H_{i,b}(\beta)_{AA}\|_{\mathrm{op}}
+       =O_p(a_n),\quad
+ a_n=\sqrt{DL_n/(nh)}+DL_n/(nh),\quad b\in\{h,h/2\}.
+\end{equation}
+For example, on the design event
+$\max_{i,j,k}|X_{ij,k}|\leq C\sqrt{L_n}$, the entrywise Lipschitz
+bound extends to a restricted bilinear form with only polynomial
+factors in $D$, $L_n$ and $h^{-1}$. A coefficient mesh
+$n^{-2}h^6/(D^2L_n^3)$ makes that extension negligible. Its
+logarithmic cardinality still has order $DL_n$.
+
+\begin{lemma}[Nodewise comparison and validation]\label{lem:supp-nodewise}
+The selected profile graph sets contain contrasts $v_A$, with
+$v_{A,k}=1$, satisfying
+\begin{equation}\label{eq:supp-rn}
+ \|v_A-c_0\|_2=O_p(r_n),\quad
+ r_n=(1+\sqrt{s_c})(a_n+e_n+h+n^{-1})
+                      +\sqrt{\log(CM\log n)/(nh)}.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+On the curvature event in \eqref{eq:supp-operator-rate}, the
+standardisation diagonals are bounded above and away from zero.
+Work in these unit-diagonal coordinates. The nodewise gradient at
+the sparse comparison $c_0$ is bounded by
+$C(a_n+e_n+h)$, using the bandwidth expansion and population
+curvature continuity. A penalty of at least a sufficiently large
+multiple of this quantity gives the usual Lasso cone inequality.
+
+Here the required compatibility follows from the stated sparse
+eigenvalue bounds. Order the coefficients outside the comparison
+support into blocks of size $m$. Their summed Euclidean norms are
+bounded by the tail L1 norm divided by $\sqrt m$. The triangle
+inequality in the positive quadratic norm shows that the leading
+block's lower eigenvalue dominates the tail when $m$ is a sufficiently
+large fixed multiple of $s_c$. This yields a lower bound on the
+prediction norm throughout the cone. The basic inequality then gives
+squared prediction error $Cs_c(a_n+e_n+h)^2$.
+
+The KKT equations also bound support size. On any subset of active
+coordinates, the penalty norm, after subtracting the comparison
+gradient, is at most the sparse upper eigenvalue times the prediction
+error. Choosing an active subset larger than a sufficiently large
+multiple of $s_c$ contradicts the preceding error bound. The declared
+graph budget therefore admits this candidate.
+
+The penalty anchors of the inner fits and both bandwidths differ from
+their common population anchor by $O_p(a_n+e_n+h)$. If that anchor is
+of this order, the zero graph is a comparison of the stated accuracy.
+Otherwise the anchors are comparable and the geometric ratio grid
+contains a common eligible penalty of the required order. Its lower
+endpoint is smaller than that order. The bounded ratio spacing keeps
+the comparison constants fixed.
+
+Post Lasso quadratic fitting on the outcome and graph union preserves
+the comparison. Its population restricted minimiser has no larger
+quadratic risk than the Lasso comparison. The restricted normal
+equations and \eqref{eq:supp-operator-rate} bound the empirical
+refit's error from that minimiser by $C(a_n+n^{-1})$.
+
+For validation, write $\Delta=c-c_0$ and
+$\delta=e_n+h+n^{-1}$. Population curvature gives
 \[
- \eta_{n,h}=O_p(\lambda_n/h),\qquad
- \mathfrak t_{n,h}=O_p(\lambda_n^2/h),\qquad
- \log p=o(n^{1/6}),
+ \E\{\ell_{graph}(c)-\ell_{graph}(c_0)\}
+       \geq\kappa\|\Delta\|_2^2-C\delta\|\Delta\|_2.
 \]
-and
-$\delta_{n,h}=\sqrt{\log(p)/(nh)}+h^2+\eta_{n,h}$,
-$\mu_n\asymp\delta_{n,h}$. Then all scaling conditions in
-Assumptions~\ref{ass:supp-precision}--\ref{ass:supp-variance}, except the model-specific score plug-in statement \eqref{eq:supp-score-plugin}, are mutually compatible.
+Add a common sufficiently large multiple of $\delta^2$. This shifted
+excess is nonnegative and bounds $\|\Delta\|_2^2$. By
+\eqref{eq:supp-directional-moments}, the variance of a heldout loss
+difference is at most $C/h$ times the shifted excess. Bernstein's
+inequality therefore gives an oracle remainder
+$C\log(CM\log n)/(nh)$ over the possible outcome path sizes and
+nodewise ratios. The reference loss and shift cancel in ratio
+selection. Taking a union over outcome sizes permits the
+data-selected size to enter this step. Curvature converts the
+resulting risk bound to \eqref{eq:supp-rn}. Combining inner supports
+retains each comparison contrast. The additional design regression
+does not remove any of them.
+\end{proof}
+
+\subsection{The selected model parameter}
+
+\begin{proposition}[Selected target displacement]\label{prop:supp-selected-target}
+Suppose $A$ contains the comparison vectors of
+Lemmas~\ref{lem:supp-outcome-cv} and \ref{lem:supp-nodewise}.
+Then
+\[
+ \|\beta_A^P-\beta^\star\|_2=O_p(e_n),\qquad
+ |\beta_{A,k}^P-\beta_k^\star|=O_p(e_n^2+r_ne_n).
+\]
 \end{proposition}
 
 \begin{proof}
-Under $h=n^{-1/3}$,
+Population minimisation on $A$ cannot increase the comparison risk.
+Restricted curvature gives the Euclidean bound. If localisation is
+needed, convexity and the curvature on the boundary of the local
+ball force any minimiser with this small risk into its interior.
+Restricted stationarity gives $v_A^T\nabla R_0(\beta_A^P)=0$.
+For $\Delta_A=\beta_A^P-\beta^\star$, Taylor expansion gives
 \[
- \sqrt{\frac{\log p}{nh}}=n^{-1/3}\sqrt{\log p},
- \quad h^2=n^{-2/3},
- \quad \frac{\lambda_n}{h}=n^{-1/6}\sqrt{\log p}.
+ 0=J_0\Delta_{A,k}+(v_A-c_0)^TH_0(\beta^\star)\Delta_A
+                              +O(\|\Delta_A\|_2^2).
 \]
-Thus $\mu_n=O_p(n^{-1/6}\sqrt{\log p})$. It follows that
-\[
- \sqrt n\,\mu_n\lambda_n=O_p(n^{-1/6}\log p),
- \quad
- \mu_n\sqrt{\log p}=O_p(n^{-1/6}\log p),
-\]
-and
-\[
- \sqrt n\,\mathfrak t_{n,h}
- =O_p(n^{-1/6}\log p).
-\]
-All tend to zero when $\log p=o(n^{1/6})$. In addition,
-$\sqrt n h^2=n^{-1/6}\to0$ and
-$\mu_n^2\log p=O_p(n^{-1/3}(\log p)^2)=o_p(1)$.
+The sparse operator bound controls the middle term by $Cr_ne_n$,
+and $J_0$ is bounded away from zero.
 \end{proof}
 
+For the Gaussian statement, conditional on $(Z,m)$ use
+\[
+ X_{A^c}=X_A\Sigma_{AA}^{-1}\Sigma_{A,A^c}+E_A,
+ \qquad E_A\ \text{independent of }X_A.
+\]
+Substitution into the outcome shows that at
+$\beta_A^0+\Sigma_{AA}^{-1}\Sigma_{A,A^c}\beta_{A^c}^0$ the
+profile residual vector is independent of the centred selected
+design. Its expected complete profile gradient is zero at every
+bandwidth, and identification gives the stated selected target.
+If $v=\Sigma^{-1}e_k$ is supported on $A$, its block equations give
+$v_A=\Sigma_{AA}^{-1}e_{k,A}$ and
+$\Sigma_{A^c,A}v_A=0$. Thus
+$e_{k,A}^T\Sigma_{AA}^{-1}\Sigma_{A,A^c}=0$, proving exact
+preservation of the target coordinate.
+
+\subsection{The selected coefficient expansion}
+
+The population density proof can be applied to arbitrary sparse
+design contrasts. The directional moment condition bounds the
+remainder in Euclidean norm and the Hessian remainder in restricted
+operator norm. At a selected population minimiser, the implicit
+equation consequently gives
+\begin{equation}\label{eq:supp-root-expansion}
+ \beta_{A,b}^P=\beta_A^P
+       -b\{H_0(\beta_A^P)_{AA}\}^{-1}B_{1,A}(\beta_A^P)+O(b^2).
+\end{equation}
+The same set at both bandwidths has the same coefficient of $b$.
+Pairing \eqref{eq:supp-root-expansion} and using
+Proposition~\ref{prop:supp-selected-target} gives target error
+$O_p(h^2+e_n^2+r_ne_n)$.
+
+Conditional on the selection sample, the estimation observations are
+iid and $A$ is fixed. A coefficient net within that selected space
+has logarithmic size $O(d_n\log n)$. The gradient and curvature
+arguments give
+\[
+ u_n=O\!\left(\sqrt{d_n\log n/n}\right),\qquad
+ b_n=O\!\left(\sqrt{d_n\log n/(nh)}+d_n\log n/(nh)\right)
+\]
+for the coefficient error and local curvature fluctuation.
+Convexity localises the empirical minimiser around $\beta_{A,b}^P$.
+Taylor expansion of its selected score equations gives a remainder
+of order $u_nb_n+u_n^2+n_f^{-2}$, together with the numerical
+residual. The condition $(d_n\log n)^3/(nh)\to0$ makes this remainder
+$o(n^{-1/2})$.
+
+The same condition controls fitted second moments. At a fixed
+direction, the curvature second moment is $O(1/h)$ and its fourth
+moment is $O(1/h^3)$. Truncating the selected design norm at
+$C\sqrt{d_n\log n}$ and taking coefficient and sphere nets gives
+deviations bounded by
+\[
+ C\sqrt{d_n\log n/(nh^3)}
+            +C d_n^3(\log n)^3/(nh^2).
+\]
+They are $o(1/h)$ under the stated condition. Integration along a
+coefficient segment therefore bounds the empirical squared score
+change by its squared coefficient distance divided by $h$.
+
+\subsection{Influence representation and variance}
+
+For each estimation fold and bandwidth, expand its selected target
+estimate about $\beta_{A,b}^P$. Let $\omega_{A,b}$ be the population
+selected inverse row. The comparison contrast and population
+continuity imply
+\[
+ \|\omega_{A,b}-\omega_0\|_2=O_p(r_n+e_n+h).
+\]
+To see this, $\omega_0$ has outside-$A$ norm at most $Cr_n$ because
+the comparison contrast is supported on $A$. Subtract the selected
+normal equations from $H_0(\beta^\star)\omega_0=e_k$. Restricted
+curvature bounds the inside-$A$ difference by $C(r_n+e_n+h)$.
+
+After centring each population score at its own mean, the directional
+moment bound controls the conditional mean squared difference between
+the selected population contribution and
+$-\omega_0^T\{g_{i,b}(\beta^\star)-m_b\}$ by
+\[
+ C(e_n^2/h+r_n^2+h).
+\]
+The term $h$ includes the bandwidth displacement of the population
+selected coefficient. Conditional Chebyshev bounds make the
+corresponding root sample size scaled averages negligible. This
+conditioning is applied separately to each fold; no joint
+independence of both selected sets from the data is used.
+
+The two bandwidth expansions, with weights $(2,-1)$, give
+\[
+ \sqrt n(\widehat\theta_k-\beta_k^\star)
+       =n^{-1/2}\sum_i\xi_{i,h}+o_p(1)
+\]
+when $\sqrt n(h^2+e_n^2+r_ne_n)\to0$. Fold weights $n_f/n$
+assign each estimation cluster weight $1/n$. Uniform moments above
+order two and the nondegenerate triangular-array variance yield the
+central limit theorem.
+
+For the sandwich, the fitted inverse rows converge to their
+population counterparts. The fitted second-moment bound and
+$e_n^2/h+r_n^2\to0$ make the average squared difference between
+the recorded paired cluster contributions and their population
+versions vanish. The empirical covariance of fixed population scores
+has bounded restricted operator norm under the design contrast
+moment condition. Cauchy--Schwarz controls the remaining cross terms.
+Centring within a fixed number of proportional folds preserves the
+limit, giving
+\[
+ n\widehat s_k^2/\sigma_h^2\longrightarrow_p1.
+\]
+Slutsky's theorem proves the stated normal interval. When the
+projected bandwidth scores also converge uniformly in mean square,
+the influence can be written as
+$-\omega_0^Tg_{i,0}(\beta^\star)$. The triangular-array formulation
+already supplies the studentised conclusion.
+
+For bounded sparsities, $M\asymp(\log n)^3$ and $h=n^{-3/10}$,
+the condition $D\log(2np)/\sqrt{nh}\to0$ gives the displayed
+high-dimensional regime in the article. The other requirements follow
+from $\sqrt n h^2=n^{-1/10}$ and the polylogarithmic selected
+dimension. If the model is fixed independently of its estimation
+outcomes, the selection target term is absent and the same proof
+uses a single estimation sample.

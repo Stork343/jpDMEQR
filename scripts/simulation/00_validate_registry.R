@@ -12,12 +12,8 @@ source_v2_module(root, "simulation_v2", envir = environment())
 source(file.path(root, "scripts", "simulation", "_run_registry_helpers.R"))
 
 cli <- parse_cli_args_v2(commandArgs(trailingOnly = TRUE))
-config <- cli$config %||% file.path(root, "config", "simulation_main.csv")
-type <- cli$type %||% if (identical(basename(config), "simulation_main.csv")) {
-  "main"
-} else if (identical(basename(config), "simulation_pilot.csv")) {
-  "pilot"
-} else "preflight"
+config <- cli$config %||% file.path(root, "config", "simulation_main_b200.csv")
+type <- cli$type %||% registry_type_for_path_v2(config)
 ans <- validate_registry_contract_v2(root, config, type)
 print(ans)
 if (!ans$pass) stop("Registry validation failed: ", paste(ans$problems, collapse = "; "))

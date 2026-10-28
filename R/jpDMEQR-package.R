@@ -6,4 +6,7 @@
 #' @keywords internal
 #' @import stats
 #' @import utils
+#' @importFrom methods as
 "_PACKAGE"
+
+utils::globalVariables(c("dantzig_cv_worker_v2", "dantzig_dual_worker_v2"))

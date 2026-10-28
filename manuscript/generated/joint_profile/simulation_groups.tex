@@ -1,0 +1,23 @@
+\begin{table}[t]
+\caption{Coverage and interval length with paired removal of design adjustment}\label{tab:joint-simulation}
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+Setting & Coordinate & Full coverage & Ablation & Difference & Length \\
+\midrule
+$t_3$ errors & Active & 0.963 (0.009) & 0.948 (0.010) & 0.015 (0.008) & 0.249 / 0.232 \\
+$t_3$ errors & Null & 0.963 (0.008) & 0.960 (0.009) & 0.002 (0.009) & 0.290 / 0.257 \\
+Correlation 0.8 & Active & 0.975 (0.014) & 0.983 (0.012) & -0.008 (0.015) & 0.489 / 0.472 \\
+Correlation 0.8 & Null & 0.967 (0.016) & 0.975 (0.014) & -0.008 (0.015) & 0.568 / 0.545 \\
+Gaussian n200 & Active & 0.968 (0.007) & 0.956 (0.008) & 0.013 (0.007) & 0.312 / 0.299 \\
+Gaussian n200 & Null & 0.969 (0.007) & 0.964 (0.007) & 0.006 (0.007) & 0.367 / 0.327 \\
+Gaussian n400 & Active & 0.964 (0.007) & 0.950 (0.009) & 0.014 (0.006) & 0.203 / 0.190 \\
+Gaussian n400 & Null & 0.971 (0.006) & 0.961 (0.007) & 0.010 (0.007) & 0.222 / 0.209 \\
+Larger dimension & Active & 0.958 (0.009) & 0.958 (0.010) & 0.000 (0.009) & 0.253 / 0.238 \\
+Larger dimension & Null & 0.965 (0.009) & 0.950 (0.011) & 0.015 (0.008) & 0.287 / 0.261 \\
+Weak signals & Active & 0.958 (0.010) & 0.803 (0.022) & 0.156 (0.022) & 0.338 / 0.308 \\
+Weak signals & Null & 0.972 (0.009) & 0.922 (0.014) & 0.050 (0.014) & 0.386 / 0.341 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{\textwidth}{\footnotesize Parentheses give Monte Carlo standard errors. Differences use the same generated datasets. Length lists the full procedure followed by the ablation. Each dataset contributes two active and two null coordinates; standard errors use averages within datasets and retain the scenario strata.}
+\end{table}

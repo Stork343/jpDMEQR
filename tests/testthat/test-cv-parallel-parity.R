@@ -27,6 +27,7 @@ make_synthetic_fold_inputs <- function(p, n, n_folds = 4L, seed = 7L) {
 }
 
 run_cv_with_cores <- function(inp, coordinate, mu_grid, cv_cores) {
+  withr::local_envvar(c(JPDMEQR_CV_CORES = NA))
   old <- getOption("jpDMEQR.cv_cores", 1L)
   options(jpDMEQR.cv_cores = cv_cores)
   on.exit(options(jpDMEQR.cv_cores = old), add = TRUE)

@@ -1,3 +1,9 @@
+lqmm_convergence_v2 <- function(fit) {
+  codes <- unlist(fit$opt, use.names = TRUE)
+  if (!length(codes) || !is.numeric(codes) || any(!is.finite(codes))) stop("LQMM convergence codes are unavailable.")
+  all(codes >= 0)
+}
+
 fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
                                   random_slope = FALSE, control = list()) {
   if (!requireNamespace("lqmm", quietly = TRUE)) {
@@ -52,9 +58,10 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
                                 "Could not extract fixed effects.", elapsed))
   }
   names(beta) <- colnames(X)[seq_along(beta)]
+  converged <- lqmm_convergence_v2(fit)
   list(
     method_id = "LQMM",
-    status = "ok",
+    status = if (converged) "ok" else "warning",
     failure_stage = "",
     failure_message = "",
     beta_hat = beta,
@@ -63,9 +70,9 @@ fit_benchmark_lqmm_v2 <- function(train, tau, target_coords, tuning, seed,
     selected = which(abs(beta) > (control$selection_tol %||% 1e-8)),
     fit_object = fit,
     runtime_sec = elapsed,
-    converged = TRUE,
+    converged = converged,
     kkt_residual = NA_real_,
-    warning_messages = character(),
+    warning_messages = if (converged) character() else "LQMM reported non-convergence.",
     implementation_version = "lqmm"
   )
 }

@@ -1,0 +1,23 @@
+source("research/score_validity_20261026/load_joint.R")
+source_v2_module(".", "application_v2", .GlobalEnv)
+root <- "results/scratch/joint_profile_manuscript_20261026"
+dir.create(root, recursive = TRUE, showWarnings = FALSE)
+inputs <- readRDS("data/derived/GSE65391/subject_design_20261022_v1/analysis_inputs.rds")
+cat("Analysis input fields:", names(inputs), "\n")
+cat("Metadata dimensions:", dim(inputs$eligible_metadata), "\n")
+cat("Metadata columns:", names(inputs$eligible_metadata), "\n")
+cat("Expression file:", inputs$expression_file, "\n")
+config <- yaml::read_yaml("config/application_execution_20261022.yml")
+print(config)
+request <- readRDS("results/raw/application/sle_complete_20261022_v1_module_001_A_tau25/run_request.rds")
+str(request, max.level = 2L)
+modules <- read.csv("config/module_signatures.csv", stringsAsFactors = FALSE)
+members <- read_frozen_module_score_members_v2("config/module_score_members_20261022.csv")
+rule <- yaml::read_yaml("config/module_scoring_20261022.yml")
+expression <- readRDS("data/derived/GSE65391/module_measurements_20261022_v1/observed_module_probe_expression.rds")
+cat("Module measurement class:", class(expression), "\n")
+if (is.list(expression)) cat("Module measurement fields:", names(expression), "\n")
+if (is.matrix(expression)) cat("Module measurement dimensions:", dim(expression), "\n")
+saveRDS(list(input_names = names(inputs), config = config, module_request = request,
+             module_rule = rule, member_count = nrow(members), module_count = length(unique(members$module_id))),
+        file.path(root, "source_inventory.rds"))

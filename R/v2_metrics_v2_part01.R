@@ -9,6 +9,216 @@ pinball_loss_v2 <- function(y, qhat, tau, na_rm = FALSE) {
   if (na_rm) mean(loss, na.rm = TRUE) else mean(loss)
 }
 
+# 区间、覆盖指示、簇级损失分位数与内存采样：记录层共用的辅助函数。
+normal_interval_multiplier_v2 <- function(level = 0.95) {
+  stats::qnorm(1 - (1 - level) / 2)
+}
+
+interval_bounds_v2 <- function(estimate, se, level = 0.95) {
+  estimate <- as.numeric(estimate)
+  se <- as.numeric(se)
+  if (length(estimate) != 1L || length(se) != 1L ||
+      !is.finite(estimate) || !is.finite(se) || se < 0) {
+    return(c(lower = NA_real_, upper = NA_real_))
+  }
+  half <- normal_interval_multiplier_v2(level) * se
+  c(lower = estimate - half, upper = estimate + half)
+}
+
+coverage_indicator_v2 <- function(lower, upper, value) {
+  if (!is.finite(lower) || !is.finite(upper) || !is.finite(value)) return(NA)
+  isTRUE(lower <= value && upper >= value)
+}
+
+cluster_loss_quantiles_v2 <- function(y, qhat, cluster_id, tau,
+                                      probs = c(0.1, 0.5, 0.9)) {
+  y <- as.numeric(y)
+  qhat <- as.numeric(qhat)
+  if (length(y) != length(qhat)) stop("y and qhat length mismatch.")
+  if (length(cluster_id) != length(y)) stop("cluster_id and y length mismatch.")
+  labels <- paste0("q", formatC(probs * 100, format = "d"))
+  if (any(!is.finite(qhat))) {
+    out <- rep(NA_real_, length(probs))
+    names(out) <- labels
+    return(out)
+  }
+  u <- y - qhat
+  loss <- u * (tau - as.numeric(u < 0))
+  per_cluster <- tapply(loss, cluster_id, mean)
+  per_cluster <- per_cluster[is.finite(per_cluster)]
+  if (!length(per_cluster)) {
+    out <- rep(NA_real_, length(probs))
+    names(out) <- labels
+    return(out)
+  }
+  out <- stats::quantile(per_cluster, probs = probs, names = FALSE, type = 8)
+  names(out) <- labels
+  out
+}
+
+memory_snapshot_v2 <- function() {
+  if (!requireNamespace("ps", quietly = TRUE)) {
+    stop("The ps package is required for peak-memory recording.")
+  }
+  info <- ps::ps_memory_full_info()
+  c(rss_mb = as.numeric(info[["rss"]]) / 1048576,
+    peak_wset_mb = if ("peak_wset" %in% names(info))
+      as.numeric(info[["peak_wset"]]) / 1048576 else NA_real_,
+    peak_rss_mb = if ("maxrss" %in% names(info))
+      as.numeric(info[["maxrss"]]) / 1048576 else NA_real_)
+}
+
+# 推断摘要辅助：极值比例、零假设 p 值分布、studentised 分位数、对数斜率与
+# 选择稳定性。汇总只读取记录层已有的列。
+extremes_summary_v2 <- function(p_value, alpha) {
+  p_value <- p_value[is.finite(p_value)]
+  total <- length(p_value)
+  if (!total) {
+    return(c(scheduled = 0L, evaluable = 0L, rate = NA_real_, mcse = NA_real_,
+             binom_lower = NA_real_, binom_upper = NA_real_))
+  }
+  success <- sum(p_value <= alpha)
+  rate <- success / total
+  ci <- binomial_interval_v2(success, total)
+  c(scheduled = total, evaluable = total, rate = rate,
+    mcse = sqrt(rate * (1 - rate) / total),
+    binom_lower = ci[1], binom_upper = ci[2])
+}
+
+replicate_coverage_summary_v2 <- function(covered, replicate) {
+  keep <- is.finite(covered)
+  if (!any(keep)) {
+    return(c(replications = 0L, rate = NA_real_, mcse = NA_real_))
+  }
+  per_replicate <- tapply(covered[keep], replicate[keep], mean)
+  per_replicate <- per_replicate[is.finite(per_replicate)]
+  if (!length(per_replicate)) {
+    return(c(replications = 0L, rate = NA_real_, mcse = NA_real_))
+  }
+  c(replications = length(per_replicate),
+    rate = mean(per_replicate),
+    mcse = if (length(per_replicate) > 1L) {
+      stats::sd(per_replicate) / sqrt(length(per_replicate))
+    } else NA_real_)
+}
+
+replicate_rate_summary_v2 <- function(p_value, replicate, alpha) {
+  keep <- is.finite(p_value)
+  if (!any(keep)) {
+    return(c(replications = 0L, rate = NA_real_, mcse = NA_real_))
+  }
+  per_replicate <- tapply(p_value[keep] <= alpha, replicate[keep], mean)
+  per_replicate <- per_replicate[is.finite(per_replicate)]
+  if (!length(per_replicate)) {
+    return(c(replications = 0L, rate = NA_real_, mcse = NA_real_))
+  }
+  c(replications = length(per_replicate),
+    rate = mean(per_replicate),
+    mcse = if (length(per_replicate) > 1L) {
+      stats::sd(per_replicate) / sqrt(length(per_replicate))
+    } else NA_real_)
+}
+
+null_pvalue_bins_v2 <- function(p_value, breaks = seq(0, 1, by = 0.1)) {
+  p_value <- p_value[is.finite(p_value)]
+  if (!length(p_value)) {
+    return(data.frame(bin_lower = head(breaks, -1), bin_upper = tail(breaks, -1),
+                      count = rep(0L, length(breaks) - 1L),
+                      fraction = rep(0, length(breaks) - 1L),
+                      expected_fraction = diff(breaks), stringsAsFactors = FALSE))
+  }
+  counts <- graphics::hist(p_value, breaks = breaks, plot = FALSE)$counts
+  data.frame(
+    bin_lower = head(breaks, -1),
+    bin_upper = tail(breaks, -1),
+    count = counts,
+    fraction = counts / length(p_value),
+    expected_fraction = diff(breaks),
+    stringsAsFactors = FALSE
+  )
+}
+
+ks_uniform_v2 <- function(p_value) {
+  p_value <- p_value[is.finite(p_value)]
+  if (length(p_value) < 2L) {
+    return(c(statistic = NA_real_, mcse_bound = NA_real_, n = length(p_value)))
+  }
+  statistic <- unname(stats::ks.test(p_value, "punif")$statistic)
+  c(statistic = statistic, mcse_bound = 0.5 / sqrt(length(p_value)),
+    n = length(p_value))
+}
+
+studentised_quantiles_v2 <- function(z, probs = seq(0.01, 0.99, by = 0.01)) {
+  z <- z[is.finite(z)]
+  if (!length(z)) {
+    return(data.frame(probability = probs, empirical = NA_real_,
+                      normal = stats::qnorm(probs), stringsAsFactors = FALSE))
+  }
+  data.frame(
+    probability = probs,
+    empirical = unname(stats::quantile(z, probs, type = 8)),
+    normal = stats::qnorm(probs),
+    stringsAsFactors = FALSE
+  )
+}
+
+loglog_slope_v2 <- function(n, value, min_points = 3L) {
+  keep <- is.finite(n) & is.finite(value) & n > 1 & value > 0
+  points <- sum(keep)
+  if (points < min_points) {
+    return(c(slope = NA_real_, slope_mcse = NA_real_, points = points))
+  }
+  fit <- stats::lm(log(value[keep]) ~ log(n[keep]))
+  coefficients <- summary(fit)$coefficients
+  c(slope = unname(coefficients[2, 1]),
+    slope_mcse = unname(coefficients[2, 2]),
+    points = points)
+}
+
+selection_stability_v2 <- function(selected_names, active_names,
+                                   null_names = character()) {
+  selection_sets <- lapply(
+    strsplit(selected_names, "|", fixed = TRUE),
+    function(x) x[nzchar(x)]
+  )
+  replications <- length(selection_sets)
+  frequency_table <- if (replications) {
+    counts <- table(unlist(selection_sets, use.names = FALSE))
+    counts / replications
+  } else numeric()
+  frequencies <- function(names) {
+    if (!length(names)) return(numeric())
+    # 选择集合全部为空时 table() 没有条目，此时每个候选坐标的频率为 0。
+    if (!length(frequency_table)) return(rep(0, length(names)))
+    out <- as.numeric(frequency_table[names])
+    out[is.na(out)] <- 0
+    out
+  }
+  compact <- function(x) {
+    x <- x[is.finite(x)]
+    if (!length(x)) return(c(mean = NA_real_, q90 = NA_real_, max = NA_real_))
+    c(mean = mean(x),
+      q90 = unname(stats::quantile(x, 0.9, names = FALSE)),
+      max = max(x))
+  }
+  active_frequency <- frequencies(active_names)
+  null_frequency <- frequencies(null_names)
+  active <- compact(active_frequency)
+  null <- compact(null_frequency)
+  c(active_selection_frequency_mean = active[["mean"]],
+    active_selection_frequency_q90 = active[["q90"]],
+    active_selection_frequency_max = active[["max"]],
+    stable_active_fraction = if (length(active_frequency)) {
+      mean(active_frequency >= 0.5)
+    } else NA_real_,
+    null_selection_frequency_mean = null[["mean"]],
+    null_selection_frequency_q90 = null[["q90"]],
+    null_selection_frequency_max = null[["max"]],
+    unstable_null_count = if (length(null_frequency)) {
+      sum(null_frequency >= 0.5)
+    } else NA_real_)
+}
+
 selection_metrics_v2 <- function(selected, active, p) {
   selected <- sort(unique(as.integer(selected)))
   active <- sort(unique(as.integer(active)))
@@ -48,6 +258,24 @@ estimation_metrics_v2 <- function(beta_hat, beta_target, active = NULL) {
     } else NA_real_,
     stringsAsFactors = FALSE
   )
+}
+
+mean_or_na_v2 <- function(x) {
+  x <- x[is.finite(x)]
+  if (!length(x)) return(NA_real_)
+  mean(x)
+}
+
+median_or_na_v2 <- function(x) {
+  x <- x[is.finite(x)]
+  if (!length(x)) return(NA_real_)
+  stats::median(x)
+}
+
+max_or_na_v2 <- function(x) {
+  x <- x[is.finite(x)]
+  if (!length(x)) return(NA_real_)
+  max(x)
 }
 
 coordinate_inference_metrics_v2 <- function(inference_table,

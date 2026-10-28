@@ -1,13 +1,37 @@
 {
   "method_id": "QIF-SEE",
-  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "commit_sha": "458b83799e577adef18c7343818ce1a0c8a5dfad",
   "reference_identifier": "Bhattacharya-Bhuiyan-Chatla-2026-10.1111/sjos.70077",
+  "method_version": null,
   "unit_test_pass": true,
   "limiting_case_pass": true,
   "fidelity_check_pass": true,
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
   "allowed_metrics": "estimation|selection|prediction",
-  "created_utc": "2026-09-01 01:57:47 UTC",
-  "notes": "QIF (Qu et al. 2000) + SEE (Ueki 2009), rqPen initial, BIC tuning; smoothing note in docs/benchmark_notes/QIF-SEE.md; status ok:TRUE"
+  "source_checks": [
+    {
+      "method_id": "QIF-SEE",
+      "calculation": "independent_Algorithm1_modified_score_and_Newton_step",
+      "discrepancy": 5.92695337253701e-11,
+      "tolerance": 1e-05,
+      "passed": true,
+      "source": "Bhattacharya et al full text Eq3 Eq5 Eq6 Algorithm1 with explicitly supplied Normal density"
+    },
+    {
+      "method_id": "QIF-SEE",
+      "calculation": "source_ordinary_inverse_domain",
+      "discrepancy": 0,
+      "tolerance": 0,
+      "passed": true,
+      "source": "Eq6 covariance rank at most n for the Bp by Bp ordinary inverse"
+    }
+  ],
+  "reference_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/reference_fidelity",
+  "test_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/test_results.rds",
+  "test_names": ["QIF-SEE source domain failure is deterministic and schema conformant", "QIF-SEE modified extended score matches Eq3 Eq5 and frozen delta derivatives", "QIF-SEE source limiting case reproduces independent smoothed quantile equations"],
+  "assertion_count": 27,
+  "warning_count": 1,
+  "source_specification_status": "Algorithm1_explicit_density_and_ordinary_inverse_domain",
+  "created_utc": "2026-10-22 17:15:18 UTC"
 }

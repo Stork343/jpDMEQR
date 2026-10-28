@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "generated_at": "2026-10-22T11:10:07.627Z",
+  "request": {
+    "topic": "",
+    "title": "",
+    "dois": [
+      "10.1111/sjos.70077"
+    ],
+    "pdf_url": "",
+    "si_requested": true,
+    "language_override": "",
+    "route_override": "open_access",
+    "source_url": "",
+    "api_fallback_web": null,
+    "api_fallback_web_for": [],
+    "no_api_fallback_web_for": []
+  },
+  "summary": {
+    "total": 1,
+    "downloaded": 0,
+    "seconds": 2.6
+  },
+  "results": [
+    {
+      "doi": "10.1111/sjos.70077",
+      "title": "Automatic Variable Selection for Longitudinal Quantile Regression With Application to Alzheimer's Disease Progression",
+      "language": "en",
+      "publisher": "Wiley",
+      "route": "open_access",
+      "route_reason": "explicit_override",
+      "si_requested": true,
+      "status": "oa_not_found",
+      "provider": "open_access",
+      "oaAssessment": "confirmed_oa",
+      "oaChecks": {
+        "pmc": {
+          "checked": true,
+          "pmcid": "",
+          "error": ""
+        },
+        "unpaywall": {
+          "checked": false,
+          "error": "",
+          "is_oa": null
+        },
+        "crossref_license": "http://onlinelibrary.wiley.com/termsAndConditions#vor"
+      },
+      "oaAttempts": [
+        {
+          "source": "publisher_oa",
+          "url": "https://onlinelibrary.wiley.com/doi/pdf/10.1111/sjos.70077",
+          "status": "invalid_or_unavailable",
+          "http_status": 403,
+          "reason": "invalid content"
+        }
+      ]
+    }
+  ]
+}

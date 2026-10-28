@@ -1,0 +1,9 @@
+row_label,experiment_id,family
+Baseline schema and adapter dispatch,PF01,baseline
+Gaussian copula errors,PF02,copula
+Cluster size imbalance,PF03,imbalance
+X random effect correlation profile target,PF04,profile_target
+Informative cluster size profile target,PF05,profile_target
+Nonlinear random effect profile target,PF06,profile_target
+Outcome blind variance screening,PF07,screening
+True nuisance oracle,PF10,true_nuisance

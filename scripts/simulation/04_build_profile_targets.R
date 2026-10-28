@@ -13,7 +13,7 @@ source_v2_module(root, "metrics_v2", envir = environment())
 source(file.path(root, "scripts", "simulation", "_run_registry_helpers.R"))
 
 cli <- parse_cli_args_v2(commandArgs(trailingOnly = TRUE))
-config_path <- cli$config %||% file.path(root, "config", "simulation_main.csv")
+config_path <- cli$config %||% file.path(root, "config", "simulation_main_b200.csv")
 development <- as_bool_cli_v2(cli$development, FALSE)
 n_population <- as.integer(cli$`n-population` %||% if (development) 10000L else 100000L)
 repeats <- as.integer(cli$repeats %||% if (development) 2L else 4L)
@@ -22,6 +22,9 @@ base_seed <- as.integer(cli$seed %||% 87001L)
 only_id <- cli$`experiment-id` %||% ""
 build_pop_h <- as_bool_cli_v2(cli$`build-pop-h`, TRUE)
 audit_structural <- as_bool_cli_v2(cli$`audit-structural`, TRUE)
+repeat_cores <- as.integer(cli$`repeat-cores` %||%
+                             getOption("jpDMEQR.repeat_cores", 1L))
+options(jpDMEQR.repeat_cores = repeat_cores)
 
 if (!development) {
   if (n_population < 100000L) stop("Final target construction requires at least 100000 clusters.")
@@ -53,46 +56,70 @@ all_diagnostics <- list(); dd <- 0L
 
 build_target_for_config <- function(cfg, repeats_local, label = "profile_target") {
   target_columns <- population_target_columns_v2(cfg)
-  run_one <- function(rr) {
-    seed <- seed_from_id_v2(base_seed, paste0(cfg$experiment_id, "_", label), rr, "population-target")
+  target_seed <- function(rr) {
+    seed_from_id_v2(base_seed, paste0(cfg$experiment_id, "_", label), rr,
+                    "population-target")
+  }
+  run_one <- function(rr, rule) {
     message(sprintf(
-      "%s %s repeat %d/%d with %d population clusters",
-      label, cfg$experiment_id, rr, repeats_local, n_population
+      "%s %s repeat %d/%d with %d population clusters at %s bandwidth",
+      label, cfg$experiment_id, rr, repeats_local, n_population, rule
     ))
-    approximate_profile_target_v2(
+    started <- Sys.time()
+    started_cpu <- proc.time()
+    out <- approximate_profile_target_v2(
       config = cfg,
       target_columns = target_columns,
       n_population = n_population,
-      seed = seed,
+      seed = target_seed(rr),
+      bandwidth_rule = rule,
       fit_control = list(
         max_iter = 350L,
         beta_tol = 2e-7,
-        kkt_tol = 2e-6,
+        kkt_normalized_tol = 2e-6,
         nuisance_control = list(reltol = 1e-10, maxit = 300L, grad_tol = 1e-7)
       ),
       retain_fit = FALSE
     )
+    # 记录单次拟合的处理器时间与挂钟时间：目标资产的两轮拟合是整条门禁链里
+    # 最耗时的部分，资产文件与诊断表保留这两个数值以便复算成本。
+    out$runtime_sec <- as.numeric(difftime(Sys.time(), started, units = "secs"))
+    finished_cpu <- proc.time()
+    out$cpu_sec <- as.numeric(
+      (finished_cpu - started_cpu)[["user.self"]] +
+        (finished_cpu - started_cpu)[["sys.self"]]
+    )
+    out
   }
   # Parallel repeats: each repeat is an independent deterministic run with
   # its own seed. mclapply on non-Windows; on Windows a deterministic PSOCK
 # cluster is used so the offline desktop can build final assets in parallel
 # (results identical - repeats are independent and order-preserved).
-  repeat_cores <- getOption("jpDMEQR.repeat_cores", 1L)
-  fits <- if (repeat_cores > 1L && repeats_local > 1L &&
-              .Platform$OS.type != "windows") {
-    parallel::mclapply(seq_len(repeats_local), run_one,
-                       mc.cores = min(repeat_cores, repeats_local),
-                       mc.preschedule = TRUE)
-  } else if (repeat_cores > 1L && repeats_local > 1L) {
-    cl <- parallel::makeCluster(min(repeat_cores, repeats_local),
-                                type = "PSOCK")
-    on.exit(parallel::stopCluster(cl), add = TRUE)
-    parallel::parLapply(cl, seq_len(repeats_local), run_one)
-  } else {
-    lapply(seq_len(repeats_local), run_one)
+  dispatch_repeats <- function(rule) {
+    repeat_cores <- getOption("jpDMEQR.repeat_cores", 1L)
+    if (repeat_cores > 1L && repeats_local > 1L &&
+        .Platform$OS.type != "windows") {
+      parallel::mclapply(seq_len(repeats_local), run_one, rule = rule,
+                         mc.cores = min(repeat_cores, repeats_local),
+                         mc.preschedule = TRUE)
+    } else if (repeat_cores > 1L && repeats_local > 1L) {
+      # outfile = "" 把工作进程的输出接回父进程，每轮重复的开始与结束
+      # 时间因此可以在构建日志中看到；这不改变任何计算过程。
+      cl <- parallel::makeCluster(min(repeat_cores, repeats_local),
+                                  type = "PSOCK", outfile = "")
+      on.exit(parallel::stopCluster(cl), add = TRUE)
+      parallel::clusterExport(cl, varlist = ls(globalenv(), all.names = TRUE),
+                              envir = globalenv())
+      parallel::parLapply(cl, seq_len(repeats_local), run_one, rule = rule)
+    } else {
+      lapply(seq_len(repeats_local), function(rr) run_one(rr, rule))
+    }
   }
+  fits <- dispatch_repeats("population")
+  analysis_fits <- dispatch_repeats("analysis")
   obj <- summarise_profile_target_repeats_v2(
-    fits, cfg, target_columns, implementation_commit = commit
+    fits, cfg, target_columns, implementation_commit = commit,
+    analysis_fits = analysis_fits
   )
   obj$config_sha256 <- config_sha
   obj$development <- development
@@ -109,6 +136,9 @@ for (ii in seq_len(nrow(profile_rows))) {
   coord <- data.frame(
     coordinate = names(obj$beta_star_mc),
     beta_star_mc = as.numeric(obj$beta_star_mc),
+    beta_analysis_bandwidth_mc = as.numeric(obj$beta_analysis_bandwidth_mc),
+    smoothing_displacement = as.numeric(obj$beta_analysis_bandwidth_mc) -
+      as.numeric(obj$beta_star_mc),
     target_mc_sd = as.numeric(obj$target_mc_sd_by_coordinate),
     target_mc_se = as.numeric(obj$target_mc_se_by_coordinate),
     between_repeat_range = as.numeric(obj$between_run_range_by_coordinate),
@@ -124,11 +154,17 @@ for (ii in seq_len(nrow(profile_rows))) {
       repeat_id = rr,
       seed = fit$seed,
       n_population = fit$n_population,
+      bandwidth_rule = fit$bandwidth_rule,
+      h_target = fit$h_target,
+      h_analysis_rule = fit$h_analysis_rule,
+      smoothing_target_distance = obj$smoothing_target_distance_by_repeat[rr],
       converged = fit$converged,
       kkt_residual = fit$kkt_residual,
       profile_identity_error = fit$profile_identity_error,
       max_nuisance_gradient = fit$max_nuisance_gradient,
       nuisance_converged = fit$nuisance_converged,
+      runtime_sec = fit$runtime_sec %||% NA_real_,
+      cpu_sec = fit$cpu_sec %||% NA_real_,
       stringsAsFactors = FALSE
     )
   }
@@ -148,12 +184,15 @@ if (audit_structural) {
     obj$beta0 <- beta0
     obj$target_displacement <- obj$beta_star_mc - beta0
     obj$max_absolute_displacement <- max(abs(obj$target_displacement))
+    obj$smoothing_displacement <- obj$beta_analysis_bandwidth_mc - obj$beta_star_mc
     saveRDS(obj, file.path(audit_dir, paste0(cfg$experiment_id, ".rds")), compress = "xz")
     write_atomic_csv_v2(data.frame(
       coordinate = names(obj$beta_star_mc),
       beta0 = as.numeric(beta0),
       beta_star_mc = as.numeric(obj$beta_star_mc),
+      beta_analysis_bandwidth_mc = as.numeric(obj$beta_analysis_bandwidth_mc),
       displacement = as.numeric(obj$target_displacement),
+      smoothing_displacement = as.numeric(obj$smoothing_displacement),
       target_mc_se = as.numeric(obj$target_mc_se_by_coordinate),
       stringsAsFactors = FALSE
     ), file.path(audit_dir, paste0(cfg$experiment_id, "_coordinates.csv")))
@@ -185,25 +224,42 @@ if (build_pop_h) {
     direction_run_one <- function(rr) {
       seed <- seed_from_id_v2(base_seed + 100000L, paste0(cfg$experiment_id, "_popH"),
                               rr, "population-direction")
+      started <- Sys.time()
+      fit <- approximate_population_direction_v2(
+        config = cfg,
+        beta_target = beta_target,
+        target_columns = target_columns,
+        requested_coordinates = requested,
+        n_population = n_population,
+        seed = seed
+      )
+      fit$runtime_sec <- as.numeric(difftime(Sys.time(), started, units = "secs"))
       list(
         rr = rr,
         message = sprintf(
           "population direction %s repeat %d/%d with %d clusters",
           cfg$experiment_id, rr, direction_repeats, n_population
         ),
-        fit = approximate_population_direction_v2(
-          config = cfg,
-          beta_target = beta_target,
-          target_columns = target_columns,
-          requested_coordinates = requested,
-          n_population = n_population,
-          seed = seed
-        )
+        fit = fit
       )
     }
     if (dir_repeat_cores > 1L && .Platform$OS.type != "windows") {
       dir_out <- parallel::mclapply(seq_len(direction_repeats), direction_run_one,
                                     mc.cores = min(dir_repeat_cores, direction_repeats))
+    } else if (dir_repeat_cores > 1L) {
+      # Windows 上方向重复同样走 PSOCK 集群，导出规则与目标构建相同；
+      # dir_cl 持有连接对象不可序列化，从导出名单里排除；
+      # 重复之间独立且按序汇总，结果与串行一致
+      dir_cl <- parallel::makeCluster(min(dir_repeat_cores, direction_repeats),
+                                      type = "PSOCK", outfile = "")
+      parallel::clusterExport(
+        dir_cl,
+        varlist = setdiff(ls(globalenv(), all.names = TRUE), "dir_cl"),
+        envir = globalenv()
+      )
+      dir_out <- parallel::parLapply(dir_cl, seq_len(direction_repeats),
+                                     direction_run_one)
+      parallel::stopCluster(dir_cl)
     } else {
       dir_out <- lapply(seq_len(direction_repeats), direction_run_one)
     }
@@ -270,10 +326,24 @@ if (build_pop_h) {
 }
 
 if (length(all_diagnostics)) {
-  write_atomic_csv_v2(
-    do.call(rbind, all_diagnostics),
-    file.path(target_dir, "profile_target_diagnostics.csv")
-  )
+  diagnostics_path <- file.path(target_dir, "profile_target_diagnostics.csv")
+  fresh <- do.call(rbind, all_diagnostics)
+  merged <- fresh
+  if (file.exists(diagnostics_path)) {
+    # 诊断表按实验编号累积：本次构建覆盖的行替换旧记录，其余行保留，避免后一次
+    # 构建把先前资产的门禁诊断抹掉。两次构建的记录层列不完全相同时按列合并。
+    old <- utils::read.csv(diagnostics_path, stringsAsFactors = FALSE)
+    if (!"asset_type" %in% names(old)) old$asset_type <- "profile_target"
+    replaced <- old$experiment_id %in% unique(fresh$experiment_id) &
+      old$asset_type %in% unique(fresh$asset_type)
+    kept <- old[!replaced, , drop = FALSE]
+    for (nm in setdiff(names(fresh), names(kept))) kept[[nm]] <- NA
+    for (nm in setdiff(names(kept), names(fresh))) fresh[[nm]] <- NA
+    merged <- rbind(kept[, names(fresh), drop = FALSE], fresh)
+  }
+  merged <- merged[order(merged$asset_type, merged$experiment_id, merged$repeat_id), ,
+                   drop = FALSE]
+  write_atomic_csv_v2(merged, diagnostics_path)
 }
 write_json_v2(list(
   development = development,

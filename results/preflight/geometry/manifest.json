@@ -1,7 +1,7 @@
 {
   "pass": true,
   "strict": true,
-  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "commit_sha": "0b4023b1f3f472709283d4aa563f88847b9de82b",
   "branch": "gpt/simulation-freeze-resolution",
   "seed_count": 20,
   "case_count": 760,
@@ -13,8 +13,97 @@
   "non_diagonal_lambda_checked": true,
   "dantzig_checked": true,
   "dantzig_pass": true,
-  "dantzig_residual": 0.050000000133404,
+  "dantzig_residual": 0.0500000000000002,
   "dantzig_mu": 0.05,
+  "assembly_modes_checked": true,
+  "assembly_pass": true,
+  "assembly_case_count": 6,
+  "assembly_cases": [
+    {
+      "case": 1,
+      "n_clusters": 10,
+      "p": 4,
+      "q": 1,
+      "tau": 0.5,
+      "m_rule": "uniform",
+      "error_dist": "gaussian",
+      "hessian_max_difference": 2.22044604925031e-16,
+      "fold_hessian_max_difference": 6.66133814775094e-16,
+      "identity_matrix_max_difference": 5.55111512312578e-17,
+      "identity_error_max": 2.22044604925031e-16,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "n_clusters": 10,
+      "p": 4,
+      "q": 2,
+      "tau": 0.25,
+      "m_rule": "geometric_imbalance",
+      "error_dist": "t3",
+      "hessian_max_difference": 5.55111512312578e-17,
+      "fold_hessian_max_difference": 8.88178419700125e-16,
+      "identity_matrix_max_difference": 5.55111512312578e-17,
+      "identity_error_max": 1.11022302462516e-16,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "n_clusters": 24,
+      "p": 40,
+      "q": 1,
+      "tau": 0.5,
+      "m_rule": "uniform",
+      "error_dist": "gaussian",
+      "hessian_max_difference": 2.22044604925031e-16,
+      "fold_hessian_max_difference": 1.77635683940025e-15,
+      "identity_matrix_max_difference": 2.22044604925031e-16,
+      "identity_error_max": 2.22044604925031e-16,
+      "pass": true
+    },
+    {
+      "case": 4,
+      "n_clusters": 24,
+      "p": 40,
+      "q": 2,
+      "tau": 0.75,
+      "m_rule": "geometric_imbalance",
+      "error_dist": "gaussian",
+      "hessian_max_difference": 2.22044604925031e-16,
+      "fold_hessian_max_difference": 2.66453525910038e-15,
+      "identity_matrix_max_difference": 1.11022302462516e-16,
+      "identity_error_max": 1.66533453693773e-16,
+      "pass": true
+    },
+    {
+      "case": 5,
+      "n_clusters": 40,
+      "p": 80,
+      "q": 2,
+      "tau": 0.5,
+      "m_rule": "uniform",
+      "error_dist": "gaussian",
+      "hessian_max_difference": 4.44089209850063e-16,
+      "fold_hessian_max_difference": 4.88498130835069e-15,
+      "identity_matrix_max_difference": 3.88578058618805e-16,
+      "identity_error_max": 4.44089209850063e-16,
+      "pass": true
+    },
+    {
+      "case": 6,
+      "n_clusters": 60,
+      "p": 120,
+      "q": 1,
+      "tau": 0.25,
+      "m_rule": "geometric_imbalance",
+      "error_dist": "t3",
+      "hessian_max_difference": 3.88578058618805e-16,
+      "fold_hessian_max_difference": 7.105427357601e-15,
+      "identity_matrix_max_difference": 2.22044604925031e-16,
+      "identity_error_max": 3.33066907387547e-16,
+      "pass": true
+    }
+  ],
   "thresholds": {
     "gradient": 0.0002,
     "hessian": 0.003,
@@ -22,11 +111,22 @@
     "nuisance": 1e-07,
     "dantzig": 1e-06
   },
-  "maxima": {
-    "gradient": 1.5004392173168e-09,
-    "hessian": 9.97268143565488e-05,
-    "identity": 3.33066907387547e-16,
-    "nuisance": 9.99355637132382e-09
+  "solver_configuration": {
+    "dantzig_solver": "dual_warm",
+    "cluster_solver": "newton",
+    "assembly": "batch",
+    "cv_workers": 2,
+    "hessian_refresh": 5,
+    "shared_first_stage": false
   },
-  "created_utc": "2026-09-01 01:53:56 UTC"
+  "maxima": {
+    "gradient": 1.15994089333604e-09,
+    "hessian": 2.06872888802723e-05,
+    "identity": 4.44089209850063e-16,
+    "nuisance": 9.99589516714749e-09,
+    "assembly_hessian": 4.44089209850063e-16,
+    "assembly_fold_hessian": 7.105427357601e-15,
+    "assembly_identity_matrix": 3.88578058618805e-16
+  },
+  "created_utc": "2026-10-08 03:00:33 UTC"
 }

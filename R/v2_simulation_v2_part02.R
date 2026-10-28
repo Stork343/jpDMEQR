@@ -369,7 +369,28 @@ ca_iqr_sis_screen_v2 <- function(y, X, cluster_id, tau, d,
 }
 
 read_simulation_registry_v2 <- function(path) {
-  cfg <- utils::read.csv(path, stringsAsFactors = FALSE, check.names = FALSE)
+  specification <- NULL
+  source_path <- path
+  if (tolower(tools::file_ext(path)) %in% c("yml", "yaml")) {
+    specification <- yaml::read_yaml(path)
+    fields <- c("registry_kind", "registry_source", "phase", "method_version",
+                "mean_score_multiplier", "prospective_date")
+    if (!is.list(specification) || !setequal(names(specification), fields) ||
+        !identical(specification$registry_kind, "profile_pair_registry") ||
+        !specification$phase %in% c("main", "pilot", "preflight") ||
+        !identical(specification$method_version, "profile_pair_20261022") ||
+        !is.numeric(specification$mean_score_multiplier) ||
+        length(specification$mean_score_multiplier) != 1L ||
+        !is.finite(specification$mean_score_multiplier) ||
+        specification$mean_score_multiplier <= 0) {
+      stop("Invalid paired registry specification.")
+    }
+    source_path <- file.path(dirname(path), specification$registry_source)
+    if (!file.exists(source_path) || tolower(tools::file_ext(source_path)) != "csv") {
+      stop("The paired registry must reference an existing frozen CSV registry.")
+    }
+  }
+  cfg <- utils::read.csv(source_path, stringsAsFactors = FALSE, check.names = FALSE)
   required <- c(
     "experiment_id", "module", "n_clusters", "p", "s", "tau", "q",
     "m_values", "m_rule", "error_dist", "error_dependence",
@@ -380,6 +401,16 @@ read_simulation_registry_v2 <- function(path) {
   missing <- setdiff(required, names(cfg))
   if (length(missing)) stop("Config is missing columns: ", paste(missing, collapse = ", "))
   if (anyDuplicated(cfg$experiment_id)) stop("experiment_id values must be unique.")
+  if (!is.null(specification)) {
+    if ("method_version" %in% names(cfg) &&
+        any(cfg$method_version != specification$method_version)) {
+      stop("Source registry and paired specification have different method versions.")
+    }
+    cfg$method_version <- specification$method_version
+    cfg$mean_score_multiplier <- specification$mean_score_multiplier
+    attr(cfg, "registry_phase") <- specification$phase
+    attr(cfg, "registry_source_file") <- normalizePath(source_path, mustWork = TRUE)
+  }
   cfg
 }
 

@@ -1,0 +1,11 @@
+{
+  "method_version": "profile_pair_20261022",
+  "score_definition": "profile_bandwidth_pair_2_half_minus_full",
+  "geometry_manifest": "results/scratch/profile_pair_geometry_development_20261022/strict_development05/manifest.json",
+  "simulation_run": "results/raw/simulation/integration_20261022_05",
+  "cohort_dir": "data/derived/GSE65391/audit_20261022_bootstrap_v1",
+  "module_coverage": "data/raw/public_modules/banchereau2016_20261022/score_representation_coverage.csv",
+  "verification_only": true,
+  "final_monte_carlo_results": false,
+  "generated_at_utc": "2026-10-22 10:27:19 UTC"
+}

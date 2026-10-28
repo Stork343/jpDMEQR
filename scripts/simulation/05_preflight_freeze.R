@@ -14,7 +14,7 @@ source_v2_module(root, "benchmark_adapters_v2", envir = environment())
 source(file.path(root, "scripts", "simulation", "_run_registry_helpers.R"))
 
 cli <- parse_cli_args_v2(commandArgs(trailingOnly = TRUE))
-config <- cli$config %||% file.path(root, "config", "simulation_main.csv")
+config <- cli$config %||% file.path(root, "config", "simulation_main_b200.csv")
 development <- as_bool_cli_v2(cli$development, FALSE)
 manifest <- freeze_preflight_v2(
   root = root,

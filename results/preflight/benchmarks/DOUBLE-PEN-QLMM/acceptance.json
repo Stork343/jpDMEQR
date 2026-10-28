@@ -1,13 +1,29 @@
 {
   "method_id": "DOUBLE-PEN-QLMM",
-  "commit_sha": "683be5bc0524a746eec4f6cfbc06973d64bca017",
+  "commit_sha": "458b83799e577adef18c7343818ce1a0c8a5dfad",
   "reference_identifier": "Li-Liu-Luo-2020-10.1007/s11424-020-9065-4",
+  "method_version": null,
   "unit_test_pass": true,
   "limiting_case_pass": true,
   "fidelity_check_pass": true,
   "schema_check_pass": true,
   "deterministic_seed_pass": true,
-  "allowed_metrics": "estimation|selection|prediction",
-  "created_utc": "2026-09-01 01:57:38 UTC",
-  "notes": "Alternating L1 quantile regression (paper eq. 12); no inferential output; status ok:TRUE"
+  "allowed_metrics": "estimation|selection|prediction|coverage_source_supported",
+  "source_checks": [
+    {
+      "method_id": "DOUBLE-PEN-QLMM",
+      "calculation": "independent_block_algorithm",
+      "discrepancy": 2.0404090528281e-07,
+      "tolerance": 0.0001,
+      "passed": true,
+      "source": "Li Liu Luo Section 3.1 with independent CVXR block LPs"
+    }
+  ],
+  "reference_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/reference_fidelity",
+  "test_record": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/results/preflight/benchmark_acceptance_20261022T171429.524643/test_results.rds",
+  "test_names": ["DOUBLE-PEN-QLMM adapter is deterministic and schema-conformant", "DOUBLE-PEN-QLMM objective matches paper equation (12)", "DOUBLE-PEN-QLMM tiny penalties preserve the numerical iteration limit", "DOUBLE-PEN-QLMM zero fixed penalty and suppressed nuisance match pooled QR", "DOUBLE-PEN-QLMM recovers active signs on deterministic data"],
+  "assertion_count": 22,
+  "warning_count": 0,
+  "source_specification_status": "complete_source_or_maintained_package_checked",
+  "created_utc": "2026-10-22 17:15:18 UTC"
 }

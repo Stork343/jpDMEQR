@@ -38,6 +38,10 @@ testthat::test_that("PROFILE-DQR adapter is deterministic and schema-conformant"
                               "inference_object", "runtime_sec",
                               "converged", "kkt_residual",
                               "profile_identity_error") %in% names(a1)))
+  testthat::expect_true(all(c("first_stage_sec", "refit_sec", "nuisance_iterations") %in%
+                              names(a1)))
+  testthat::expect_true(is.finite(a1$first_stage_sec) && is.finite(a1$refit_sec))
+  testthat::expect_true(is.finite(a1$nuisance_iterations) && a1$nuisance_iterations >= 0)
   testthat::expect_equal(a1$method_id, "PROFILE-DQR")
   inf <- a1$inference_object$table
   testthat::expect_true(all(inf$feasible))
@@ -107,6 +111,17 @@ testthat::test_that("POOLED-QR-LASSO has no naive interval by default", {
                                           tuning, seed = 5L)
   testthat::expect_null(ans$beta_tilde)
   testthat::expect_null(ans$se)
+})
+
+testthat::test_that("a comparator without a precision program carries no Dantzig tolerance", {
+  train <- make_train(seed = 606)
+  ans <- fit_benchmark_pooled_qr_lasso_v2(train, 0.5, colnames(train$X)[1:3],
+                                          tuning, seed = 5L)
+  # The record layer records dantzig_feasible_fraction only where a row-wise
+  # precision program exists, so the comparator's table must not supply a
+  # tolerance that would be read as a feasible solve.
+  tab <- ans$inference_object$table %||% data.frame()
+  testthat::expect_true(nrow(tab) == 0L || all(is.na(tab$mu)))
 })
 
 # ---------------------------------------------------------------------------

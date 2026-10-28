@@ -1,0 +1,8 @@
+row_label,experiment_id,family
+Random intercept gaussian errors,C01,gaussian_intercept
+Random intercept and slope gaussian errors,C03,gaussian_slope
+Student t3 errors,B05,t3
+Contaminated normal errors,B12,contaminated
+Heteroscedastic gaussian errors,B17,heteroscedastic
+Omitted random slope profile target,C06,profile_target
+Dense effective inverse stress test,D06,dense_precision

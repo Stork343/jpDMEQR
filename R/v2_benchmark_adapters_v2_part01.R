@@ -35,6 +35,101 @@ benchmark_not_implemented_v2 <- function(method_id, reason) {
   )
 }
 
+fit_quantile_l1_block_v2 <- function(design, response, tau, penalty) {
+  design <- assert_numeric_matrix_v2(design, "design")
+  response <- as.numeric(response)
+  p <- ncol(design)
+  if (length(response) != nrow(design)) stop("Quantile block dimensions differ.")
+  penalty <- as.numeric(penalty)
+  if (length(penalty) == 1L) penalty <- rep(penalty, p)
+  if (length(penalty) != p || any(!is.finite(penalty)) || any(penalty < 0)) {
+    stop("Quantile block penalties must be finite nonnegative coordinate values.")
+  }
+  positive <- which(penalty > 0)
+  augmented <- design
+  augmented_response <- response
+  if (length(positive)) {
+    # rho_tau(u) 与 rho_tau(-u) 的和精确等于 |u|。
+    R <- diag(penalty, nrow = p)[positive, , drop = FALSE]
+    augmented <- rbind(design, R, -R)
+    augmented_response <- c(response, rep(0, 2L * length(positive)))
+  }
+  fit <- quantreg::rq.fit.fnb(augmented, augmented_response, tau = tau, eps = 1e-9)
+  names(fit$coefficients) <- colnames(design)
+  fit$residuals <- response - as.numeric(design %*% fit$coefficients)
+  fit$penalty <- penalty
+  fit$solver_eps <- 1e-9
+  fit
+}
+
+# Lever 2（COMPUTATIONAL_OPTIMISATION_PLAN.md 第 2 节）：一次重复内共享同一次
+# 校准第一阶段拟合。校准第一阶段是确定性计算，PROFILE-DQR、POP-H 与
+# POSTREFIT-EXACT-H 在同一训练数据上构造出逐项相同的请求，缓存命中的对象与
+# 各方法独立拟合逐位相同。请求签名不一致的方法（子设计或改写数据的 oracle
+# 适配器）照旧获得全新拟合，且不会改动已有缓存条目。拟合错误同样入缓存，
+# 使共享同一请求的方法报告一致的失败。
+calibrated_first_stage_request_v2 <- function(train, tau, target_coords, tuning,
+                                              control) {
+  list(
+    y = train$y,
+    X = train$X,
+    Z = train$Z,
+    cluster_id = train$cluster_id,
+    tau = tau,
+    h_est = tuning$h_est,
+    h_inf = tuning$h,
+    lambda_0_n = tuning$lambda_0_n,
+    lambda_gamma = tuning$lambda_gamma,
+    base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
+    target_coordinates = target_coords,
+    control = list(
+      fit_control = control$fit_control %||% list(),
+      nuisance_control = control$fit_control$nuisance_control %||% list()
+    )
+  )
+}
+
+obtain_calibrated_first_stage_v2 <- function(cache, train, tau, target_coords,
+                                             tuning, control) {
+  request <- tryCatch(
+    calibrated_first_stage_request_v2(train, tau, target_coords, tuning, control),
+    error = function(e) e
+  )
+  if (inherits(request, "error")) return(request)
+  entries <- list()
+  if (!is.null(cache)) {
+    if (!is.environment(cache)) {
+      stop("shared_first_stage must be an environment or NULL, got: ",
+           class(cache)[1])
+    }
+    entries <- cache$entries %||% list()
+    for (entry in entries) {
+      if (identical(entry$request, request)) return(entry$value)
+    }
+  }
+  computed <- tryCatch(
+    fit_profile_lasso_calibrated_v2(
+      y = request$y,
+      X = request$X,
+      Z = request$Z,
+      cluster_id = request$cluster_id,
+      tau = request$tau,
+      h_est = request$h_est,
+      h_inf = request$h_inf,
+      lambda_0_n = request$lambda_0_n,
+      lambda_gamma = request$lambda_gamma,
+      base_penalty_factor = request$base_penalty_factor,
+      target_coordinates = request$target_coordinates,
+      control = request$control
+    ),
+    error = function(e) e
+  )
+  if (!is.null(cache)) {
+    cache$entries <- c(entries, list(list(request = request, value = computed)))
+  }
+  computed
+}
+
 fit_benchmark_pooled_qr_lasso_v2 <- function(train, tau, target_coords,
                                              tuning, seed, control = list()) {
   if (!requireNamespace("quantreg", quietly = TRUE)) {
@@ -45,8 +140,12 @@ fit_benchmark_pooled_qr_lasso_v2 <- function(train, tau, target_coords,
   X <- as.matrix(train$X)
   y <- as.numeric(train$y)
   lambda <- tuning$lambda_beta %||% stop("tuning$lambda_beta is required")
+  if (!is.null(control$penalty_factor)) lambda <- lambda * control$penalty_factor
+  block_solver <- if (identical(control$pooled_optimizer, "column_generation"))
+    submission_quantile_column_fit else fit_quantile_l1_block_v2
+  if (identical(control$pooled_optimizer, "dual_lp")) block_solver <- submission_quantile_highs
   fit <- tryCatch(
-    quantreg::rq.fit.lasso(x = X, y = y, tau = tau, lambda = lambda),
+    block_solver(X, y, tau, lambda),
     error = function(e) e
   )
   elapsed <- proc.time()[[3]] - start
@@ -78,29 +177,18 @@ fit_benchmark_pooled_qr_lasso_v2 <- function(train, tau, target_coords,
 
 fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
                                          tuning, seed, control = list()) {
+  if (identical(tuning$method_version, "profile_pair_20261022")) {
+    return(fit_benchmark_profile_pair_v2(train, tau, target_coords, tuning, seed, control))
+  }
   set.seed(seed)
   start <- proc.time()[[3]]
   calibrate <- isTRUE(control$calibrate_first_stage %||% TRUE)
-  fit <- tryCatch(
-    if (calibrate && exists("fit_profile_lasso_calibrated_v2", mode = "function")) {
-      fit_profile_lasso_calibrated_v2(
-        y = train$y,
-        X = train$X,
-        Z = train$Z,
-        cluster_id = train$cluster_id,
-        tau = tau,
-        h_est = tuning$h_est,
-        h_inf = tuning$h,
-        lambda_0_n = tuning$lambda_0_n,
-        lambda_gamma = tuning$lambda_gamma,
-        base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
-        target_coordinates = target_coords,
-        control = list(
-          fit_control = control$fit_control %||% list(),
-          nuisance_control = control$fit_control$nuisance_control %||% list()
-        )
-      )
-    } else {
+  fit <- if (calibrate && exists("fit_profile_lasso_calibrated_v2", mode = "function")) {
+    obtain_calibrated_first_stage_v2(
+      control$shared_first_stage, train, tau, target_coords, tuning, control
+    )
+  } else {
+    tryCatch(
       fit_profile_lasso_v2(
         y = train$y,
         X = train$X,
@@ -112,10 +200,10 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
         lambda_gamma = tuning$lambda_gamma,
         penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
         control = control$fit_control %||% list()
-      )
-    },
-    error = function(e) e
-  )
+      ),
+      error = function(e) e
+    )
+  }
   elapsed_fit <- proc.time()[[3]] - start
   if (inherits(fit, "error")) {
     return(benchmark_failure_v2("PROFILE-DQR", "penalised_fit",
@@ -139,6 +227,7 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
   ) -> guard_ans
   if (is.list(guard_ans) && identical(guard_ans$status, "failed")) return(guard_ans)
 
+  inference_start <- proc.time()[[3]]
   inf <- tryCatch(
     debias_profile_coordinates_v2(
       fit = fit,
@@ -149,6 +238,7 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
     ),
     error = function(e) e
   )
+  inference_sec <- proc.time()[[3]] - inference_start
   elapsed <- proc.time()[[3]] - start
   if (inherits(inf, "error")) {
     return(benchmark_failure_v2("PROFILE-DQR", "precision_solver",
@@ -172,6 +262,7 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
     "zero_profile_score_max", "zero_kkt_ratio_max",
     "preliminary_kkt_normalized", "final_kkt_normalized", "final_kkt_absolute",
     "first_stage_iterations", "first_stage_beta_change", "first_stage_nonzero_count",
+    "first_stage_sec", "refit_sec", "nuisance_iterations",
     "selected_support_size", "refit_set_size", "refit_contains_targets",
     "post_refit_status", "post_refit_iterations", "post_refit_gradient_max",
     "post_refit_nuisance_gradient_max", "post_refit_beta_change",
@@ -192,6 +283,7 @@ fit_benchmark_profile_dqr_v2 <- function(train, tau, target_coords,
     fit_object = fit,
     inference_object = inf,
     runtime_sec = elapsed,
+    inference_sec = inference_sec,
     converged = fit$converged,
     kkt_residual = fit$kkt_residual,
     profile_identity_error = fit$components$profile_identity_error,
@@ -235,8 +327,13 @@ fit_benchmark_profile_true_support_v2 <- function(train, tau, target_coords,
   full_beta <- setNames(rep(0, ncol(train$X)), colnames(train$X))
   full_beta[names(ans$beta_hat)] <- ans$beta_hat
   ans$beta_hat <- full_beta
+  if (identical(tuning$method_version, "profile_pair_20261022")) {
+    ans$prediction_function <- profile_pair_prediction_v2(full_beta)
+  }
   ans$selected <- keep
   ans$method_id <- "PROFILE-DQR-TRUE-SUPPORT"
-  ans$implementation_version <- "profile-v2-oracle-support"
+  ans$implementation_version <- if (identical(tuning$method_version, "profile_pair_20261022")) {
+    "profile_pair_20261022_true_support"
+  } else "profile-v2-oracle-support"
   ans
 }

@@ -2,6 +2,7 @@
 
 root <- v2_require_root()
 source(file.path(root, "scripts", "00_source_v2.R"), local = FALSE)
+source_v2_module(root, "profile_v2", envir = .GlobalEnv)
 source_v2_module(root, "simulation_v2", envir = .GlobalEnv)
 
 testthat::test_that("m_multiset is used verbatim by the DGP", {

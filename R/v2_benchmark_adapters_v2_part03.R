@@ -28,6 +28,11 @@ fit_benchmark_profile_true_nuisance_v2 <- function(train,
     ))
   }
   q <- ncol(train$Z)
+  if (identical(tuning$method_version, "profile_pair_20261022") &&
+      (ncol(train$random_effects) != q ||
+       any(abs(train$nonlinear_component %||% 0) > 0))) {
+    stop("Known-nuisance inference requires the correctly specified generated nuisance design.")
+  }
   if (ncol(train$random_effects) < q) {
     return(benchmark_failure_v2(
       "PROFILE-DQR-TRUE-NUISANCE", "oracle_context",
@@ -48,7 +53,9 @@ fit_benchmark_profile_true_nuisance_v2 <- function(train,
     ))
   )
   ans$method_id <- "PROFILE-DQR-TRUE-NUISANCE"
-  ans$implementation_version <- "profile-v2-known-generated-nuisance"
+  ans$implementation_version <- if (identical(tuning$method_version, "profile_pair_20261022")) {
+    "profile_pair_20261022_known_nuisance"
+  } else "profile-v2-known-generated-nuisance"
   ans$oracle_nuisance_removed <- nuisance_truth
   ans$target_scope <- "structural_known_nuisance"
   benchmark_add_metadata_v2(
@@ -81,7 +88,13 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
                                            tuning,
                                            seed,
                                            population_direction_asset,
-                                           control = list()) {
+                                           control = list(), context = list()) {
+  if (identical(tuning$method_version, "profile_pair_20261022")) {
+    return(fit_benchmark_profile_pair_pop_h_v2(
+      train, tau, target_coords, tuning, seed, population_direction_asset, control,
+      config = context$config
+    ))
+  }
   if (is.null(population_direction_asset)) {
     return(benchmark_failure_v2(
       "PROFILE-DQR-POP-H", "oracle_asset",
@@ -90,25 +103,8 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
   }
   set.seed(seed)
   start <- proc.time()[[3]]
-  fit <- tryCatch(
-    fit_profile_lasso_calibrated_v2(
-      y = train$y,
-      X = train$X,
-      Z = train$Z,
-      cluster_id = train$cluster_id,
-      tau = tau,
-      h_est = tuning$h_est,
-      h_inf = tuning$h,
-      lambda_0_n = tuning$lambda_0_n,
-      lambda_gamma = tuning$lambda_gamma,
-      base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
-      target_coordinates = target_coords,
-      control = list(
-        fit_control = control$fit_control %||% list(),
-        nuisance_control = control$fit_control$nuisance_control %||% list()
-      )
-    ),
-    error = function(e) e
+  fit <- obtain_calibrated_first_stage_v2(
+    control$shared_first_stage, train, tau, target_coords, tuning, control
   )
   if (inherits(fit, "error")) {
     return(benchmark_failure_v2(
@@ -134,6 +130,7 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
   ) -> guard_ans
   if (is.list(guard_ans) && identical(guard_ans$status, "failed")) return(guard_ans)
 
+  inference_start <- proc.time()[[3]]
   coords <- if (is.character(target_coords)) target_coords else names(fit$beta)[as.integer(target_coords)]
   alpha <- 1 - (control$ci_level %||% 0.95)
   zcrit <- stats::qnorm(1 - alpha / 2)
@@ -187,6 +184,7 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
   }
 
   tab <- do.call(rbind, rows)
+  inference_sec <- proc.time()[[3]] - inference_start
   elapsed <- proc.time()[[3]] - start
   audit_names <- c(
     "lambda_rule", "lambda_alpha", "lambda_normal_quantile",
@@ -197,6 +195,7 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
     "zero_profile_score_max", "zero_kkt_ratio_max",
     "preliminary_kkt_normalized", "final_kkt_normalized", "final_kkt_absolute",
     "first_stage_iterations", "first_stage_beta_change", "first_stage_nonzero_count",
+    "first_stage_sec", "refit_sec", "nuisance_iterations",
     "selected_support_size", "refit_set_size", "refit_contains_targets",
     "post_refit_status", "post_refit_iterations", "post_refit_gradient_max",
     "post_refit_nuisance_gradient_max", "post_refit_beta_change",
@@ -218,6 +217,7 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
     inference_object = list(table = tab, directions = directions),
     population_direction_asset = population_direction_asset,
     runtime_sec = elapsed,
+    inference_sec = inference_sec,
     converged = fit$converged,
     kkt_residual = fit$kkt_residual,
     profile_identity_error = fit$components$profile_identity_error,
@@ -244,27 +244,15 @@ fit_benchmark_profile_pop_h_v2 <- function(train,
 # -----------------------------------------------------------------------------
 fit_benchmark_postrefit_exact_h_v2 <- function(train, tau, target_coords,
                                                tuning, seed, control = list()) {
+  if (identical(tuning$method_version, "profile_pair_20261022")) {
+    return(fit_benchmark_profile_pair_exact_h_v2(
+      train, tau, target_coords, tuning, seed, control
+    ))
+  }
   set.seed(seed)
   start <- proc.time()[[3]]
-  fit <- tryCatch(
-    fit_profile_lasso_calibrated_v2(
-      y = train$y,
-      X = train$X,
-      Z = train$Z,
-      cluster_id = train$cluster_id,
-      tau = tau,
-      h_est = tuning$h_est,
-      h_inf = tuning$h,
-      lambda_0_n = tuning$lambda_0_n,
-      lambda_gamma = tuning$lambda_gamma,
-      base_penalty_factor = control$penalty_factor %||% rep(1, ncol(train$X)),
-      target_coordinates = target_coords,
-      control = list(
-        fit_control = control$fit_control %||% list(),
-        nuisance_control = control$fit_control$nuisance_control %||% list()
-      )
-    ),
-    error = function(e) e
+  fit <- obtain_calibrated_first_stage_v2(
+    control$shared_first_stage, train, tau, target_coords, tuning, control
   )
   elapsed <- proc.time()[[3]] - start
   if (inherits(fit, "error")) {
@@ -285,6 +273,7 @@ fit_benchmark_postrefit_exact_h_v2 <- function(train, tau, target_coords,
   ) -> guard_ans
   if (is.list(guard_ans) && identical(guard_ans$status, "failed")) return(guard_ans)
 
+  inference_start <- proc.time()[[3]]
   S_R <- fit$refit_set
   if (is.null(S_R) || !length(S_R)) {
     return(benchmark_failure_v2("POSTREFIT-EXACT-H", "post_refit",
@@ -347,8 +336,10 @@ fit_benchmark_postrefit_exact_h_v2 <- function(train, tau, target_coords,
     directions[[ii]] <- list(omega = omega, residual = residual, feasible = TRUE)
   }
   tab <- do.call(rbind, rows)
+  inference_sec <- proc.time()[[3]] - inference_start
   audit_names <- c(
     "selected_support_size", "refit_set_size", "refit_contains_targets",
+    "first_stage_sec", "refit_sec", "nuisance_iterations",
     "post_refit_status", "post_refit_iterations", "post_refit_gradient_max",
     "post_refit_nuisance_gradient_max", "post_refit_beta_change",
     "post_refit_hessian_min_eigenvalue", "post_refit_hessian_condition_number"
@@ -368,6 +359,7 @@ fit_benchmark_postrefit_exact_h_v2 <- function(train, tau, target_coords,
     fit_object = fit,
     inference_object = list(table = tab, directions = directions),
     runtime_sec = elapsed,
+    inference_sec = inference_sec,
     converged = fit$converged,
     kkt_residual = fit$kkt_residual,
     profile_identity_error = fit$components$profile_identity_error,
@@ -400,9 +392,16 @@ fit_benchmark_profile_split_v2 <- function(train,
         "Screening and inference cluster sets overlap."
       ))
     }
+    actual_clusters <- unique(as.character(train$cluster_id))
+    if (any(!actual_clusters %in% as.character(screening$fit_clusters)) ||
+        length(intersect(actual_clusters, as.character(screening$screen_clusters)))) {
+      stop("Split-profile training data must contain inference clusters only.")
+    }
     ans <- fit_benchmark_profile_dqr_v2(train, tau, target_coords, tuning, seed, control)
     ans$method_id <- "PROFILE-DQR-SPLIT"
-    ans$implementation_version <- "profile-v2-independent-cluster-screening"
+    ans$implementation_version <- if (identical(tuning$method_version, "profile_pair_20261022")) {
+      "profile_pair_20261022_independent_screening"
+    } else "profile-v2-independent-cluster-screening"
     ans$screening <- screening
     ans$target_scope <- "regularised_profile_independent_split"
     return(benchmark_add_metadata_v2(
@@ -429,9 +428,14 @@ fit_benchmark_profile_split_v2 <- function(train,
   full_beta <- setNames(rep(0, ncol(train$X)), colnames(train$X))
   full_beta[names(ans$beta_hat)] <- ans$beta_hat
   ans$beta_hat <- full_beta
+  if (identical(tuning$method_version, "profile_pair_20261022")) {
+    ans$prediction_function <- profile_pair_prediction_v2(full_beta)
+  }
   ans$selected <- selected
   ans$method_id <- "PROFILE-DQR-SPLIT"
-  ans$implementation_version <- "profile-v2-independent-cluster-screening"
+  ans$implementation_version <- if (identical(tuning$method_version, "profile_pair_20261022")) {
+    "profile_pair_20261022_independent_screening"
+  } else "profile-v2-independent-cluster-screening"
   ans$screening <- list(
     method = "split_quantile_score",
     screen_clusters = split$a,
@@ -453,10 +457,20 @@ fit_benchmark_profile_split_v2 <- function(train,
 # contract.
 fit_benchmark_by_id_v2 <- function(method_id, train, tau, target_coords,
                                    tuning, seed, context = list(), control = list()) {
+  if (startsWith(method_id, "JOINT-PROFILE")) {
+    return(submission_benchmark(method_id, train, tau, target_coords, tuning, seed, context, control))
+  }
+  # Lever 2：开关打开且调用方提供了重复级缓存时，PROFILE-DQR、POP-H 与
+  # POSTREFIT-EXACT-H 经由同一 control 共享同一次校准第一阶段拟合；其余方法
+  # 的训练数据或设计不同，control 保持原样，行为不变。
+  shared_control <- control
+  if (!is.null(context$shared_first_stage) && shared_first_stage_v2()) {
+    shared_control$shared_first_stage <- context$shared_first_stage
+  }
   ans <- switch(
     method_id,
     `PROFILE-DQR` = fit_benchmark_profile_dqr_v2(
-      train, tau, target_coords, tuning, seed, control
+      train, tau, target_coords, tuning, seed, shared_control
     ),
     `POOLED-QR-LASSO` = fit_benchmark_pooled_qr_lasso_v2(
       train, tau, target_coords, tuning, seed, control
@@ -475,10 +489,10 @@ fit_benchmark_by_id_v2 <- function(method_id, train, tau, target_coords,
     `PROFILE-DQR-POP-H` = fit_benchmark_profile_pop_h_v2(
       train, tau, target_coords, tuning, seed,
       population_direction_asset = context$population_direction_asset,
-      control = control
+      control = shared_control, context = context
     ),
     `POSTREFIT-EXACT-H` = fit_benchmark_postrefit_exact_h_v2(
-      train, tau, target_coords, tuning, seed, control
+      train, tau, target_coords, tuning, seed, shared_control
     ),
     `PROFILE-DQR-SPLIT` = fit_benchmark_profile_split_v2(
       train, tau, target_coords, tuning, seed,

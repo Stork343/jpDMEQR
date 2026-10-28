@@ -1,0 +1,55 @@
+version: GSE65391_matched_20261022
+status: mathematically_reviewed_prospective_definition
+method_version: profile_pair_20261022
+population_preprocessing: fixed_from_all_129_observed_subjects
+replicate_preprocessing: complete_subject_resample_then_recompute
+source_membership: config/module_score_members_20261022.csv
+n_subjects: 129
+models: [A, B]
+quantiles: [0.25, 0.50, 0.75]
+error_families: [normal, t3]
+random_effect_dimensions: [1, 2]
+replications: 200
+base_seed: 202610220
+population_targets:
+  clusters_per_repeat: 100000
+  independent_repeats: 4
+  median: analytic_central_symmetry_with_score_audit
+  lower_quantile: complete_profile_monte_carlo
+  upper_quantile: exact_reflection_with_independent_score_audit
+  record_target_mcse: true
+generating_coefficients:
+  intercept: 4.605170185988092
+  centered_time_per_population_sd: -0.10
+  age_per_population_sd: 0.05
+  sledai_per_population_sd: -0.05
+  categorical_coefficients: 0
+  module__M1.2: -0.15
+  module__M3.4: 0.00
+  module__M4.11: 0.10
+  module__M5.12: 0.05
+  module__M5.15: -0.10
+random_effects:
+  distribution: centered_normal
+  intercept_sd: 0.15
+  slope_sd_per_population_time_sd: 0.15
+  intercept_slope_correlation: 0
+errors:
+  marginal_sd: 0.20
+  normal: independent_standard_normal_times_marginal_sd
+  t3: independent_t3_times_marginal_sd_divided_by_sqrt3
+working_penalty:
+  lambda_gamma: 1.0
+  matrix: identity_q
+bandwidth:
+  multiplier: 1.0
+  exponent: -0.30
+  jackknife: fixed_full_sample_pair
+inference:
+  pointwise_confidence: 0.95
+  jackknife_scope: complete_sample_standardised_workflow
+  reporting_units: fixed_population_preprocessing_units
+  module_coefficient_map: beta_rep_times_population_sd_divided_by_rep_sd
+  intercept_map: add_time_center_and_module_center_adjustments
+  changed_probe_handling: retain_real_recomputed_selection_and_record_changes
+  changed_categorical_coordinate_handling: record_failure

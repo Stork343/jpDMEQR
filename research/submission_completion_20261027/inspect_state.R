@@ -1,0 +1,17 @@
+library(jsonlite)
+registry <- read.csv("config/simulation_main.csv", stringsAsFactors = FALSE)
+print(registry[c("experiment_id", "module", "n_clusters", "p", "s", "tau", "q", "target_mode", "replications", "methods")], row.names = FALSE)
+cat("Datasets", sum(registry$replications), "method units", sum(lengths(strsplit(registry$methods, "|", fixed = TRUE)) * registry$replications), "\n")
+print(registry[registry$module %in% c("E_tuning", "F_screening", "G_computation"), ], row.names = FALSE)
+assets <- list.files("results/intermediate/profile_pair_20261022", "[.]rds$", recursive = TRUE)
+cat("Population records\n", paste(assets, collapse = "\n"), "\n")
+acceptance <- list.files("results/preflight/benchmarks", "^acceptance[.]json$", recursive = TRUE, full.names = TRUE)
+for (path in acceptance) {
+  value <- fromJSON(path)
+  cat(path, "\n")
+  str(value, max.level = 1)
+}
+cat("QGEE controls\n")
+print(geeVerse::qpgeeControl())
+cat("QGEE kernel\n")
+print(get(".fit_single_lambda", envir = asNamespace("geeVerse")))
