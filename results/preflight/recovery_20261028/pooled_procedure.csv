@@ -1,0 +1,2 @@
+"maximum_coefficient_difference","reference_seconds","candidate_seconds","reference_solver","candidate_solver"
+4.66050809055929e-14,42.238,3.517,"quantreg","HiGHS_dual_LP"

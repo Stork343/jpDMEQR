@@ -1,0 +1,173 @@
+{
+  "numerical_pass": true,
+  "registered_replications": 1200,
+  "observed_replications": 1200,
+  "proposed": [
+    {
+      "experiment_id": "P01",
+      "method_id": "JOINT-PROFILE",
+      "attempted": 200,
+      "converged_fraction": 1,
+      "maximum_kkt": 9.9934e-09,
+      "median_runtime": 0.2685,
+      "failures": 0
+    },
+    {
+      "experiment_id": "P02",
+      "method_id": "JOINT-PROFILE",
+      "attempted": 200,
+      "converged_fraction": 1,
+      "maximum_kkt": 9.9778e-09,
+      "median_runtime": 0.491,
+      "failures": 0
+    },
+    {
+      "experiment_id": "P03",
+      "method_id": "JOINT-PROFILE",
+      "attempted": 200,
+      "converged_fraction": 1,
+      "maximum_kkt": 9.9647e-09,
+      "median_runtime": 0.476,
+      "failures": 0
+    },
+    {
+      "experiment_id": "P04",
+      "method_id": "JOINT-PROFILE",
+      "attempted": 200,
+      "converged_fraction": 1,
+      "maximum_kkt": 9.989e-09,
+      "median_runtime": 0.4815,
+      "failures": 0
+    },
+    {
+      "experiment_id": "P05",
+      "method_id": "JOINT-PROFILE",
+      "attempted": 200,
+      "converged_fraction": 1,
+      "maximum_kkt": 9.9969e-09,
+      "median_runtime": 1.117,
+      "failures": 0
+    },
+    {
+      "experiment_id": "P06",
+      "method_id": "JOINT-PROFILE",
+      "attempted": 200,
+      "converged_fraction": 1,
+      "maximum_kkt": 9.9718e-09,
+      "median_runtime": 2.805,
+      "failures": 0
+    }
+  ],
+  "coverage": [
+    {
+      "experiment_id": "P01",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "active",
+      "mcse": 0.0084,
+      "coverage": 0.97,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P01",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "null",
+      "mcse": 0.0102,
+      "coverage": 0.96,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P02",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "active",
+      "mcse": 0.0077,
+      "coverage": 0.975,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P02",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "null",
+      "mcse": 0.0077,
+      "coverage": 0.975,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P03",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "active",
+      "mcse": 0.0077,
+      "coverage": 0.975,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P03",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "null",
+      "mcse": 0.0078,
+      "coverage": 0.98,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P04",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "active",
+      "mcse": 0.0092,
+      "coverage": 0.975,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P04",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "null",
+      "mcse": 0.011,
+      "coverage": 0.9525,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P05",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "active",
+      "mcse": 0.0065,
+      "coverage": 0.9825,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P05",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "null",
+      "mcse": 0.0084,
+      "coverage": 0.97,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P06",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "active",
+      "mcse": 0.0132,
+      "coverage": 0.9375,
+      "availability": 1,
+      "replications": 200
+    },
+    {
+      "experiment_id": "P06",
+      "method_id": "JOINT-PROFILE",
+      "coordinate_type": "null",
+      "mcse": 0.0094,
+      "coverage": 0.9675,
+      "availability": 1,
+      "replications": 200
+    }
+  ],
+  "calibration_action": "none",
+  "completed": "2026-10-28 21:31:18.570817"
+}

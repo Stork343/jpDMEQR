@@ -1,0 +1,2 @@
+"maximum_difference","tuning_difference","reference_seconds","candidate_seconds","reference_solver","candidate_solver"
+0,0,5587.531,194.634,"full_HiGHS_complete_CV","hybrid_certified_exact_CV_pruning"
