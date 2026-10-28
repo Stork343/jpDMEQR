@@ -28,7 +28,11 @@ for (i in seq_len(nrow(jobs))) {
     prior <- readRDS(file.path(current, "request.rds"))
     if (!isTRUE(all.equal(prior$config, config)) || prior$replicate != job$replicate || prior$base_seed != request$base_seed)
       stop("An interrupted replication has a different statistical definition.")
-  } else dir.create(current, recursive = TRUE)
+  } else {
+    dir.create(current, recursive = TRUE)
+    submission_atomic_rds(list(config = config, replicate = job$replicate, base_seed = request$base_seed,
+      implementation_commit = commit, started = Sys.time()), file.path(current, "request.rds"))
+  }
   saveRDS(list(config = config, replicate = job$replicate, base_seed = request$base_seed,
     implementation_commit = commit, numerical_specification = yaml::read_yaml("config/submission_comparator_numerics_20261028.yml"),
     started = Sys.time()), file.path(current, paste0("completion_request_", Sys.getpid(), ".rds")))

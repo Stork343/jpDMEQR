@@ -29,3 +29,12 @@ submission_worker_alive <- function(worker) {
   if (!is.null(worker$process)) isTRUE(worker$process$is_alive()) else
     isTRUE(ps::ps_is_running(worker$handle))
 }
+
+submission_atomic_rds <- function(value, path, compress = "xz") {
+  if (file.exists(path)) stop("The completed output already exists: ", path)
+  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+  temporary <- paste0(path, ".", Sys.getpid(), ".writing")
+  saveRDS(value, temporary, compress = compress)
+  if (!file.rename(temporary, path)) stop("Unable to publish the complete output: ", path)
+  invisible(path)
+}

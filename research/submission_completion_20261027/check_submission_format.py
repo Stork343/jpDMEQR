@@ -33,7 +33,7 @@ abstract = values["abstract"]
 if any(isinstance(node, LatexMathNode) for node in abstract.nodelist):
     raise ValueError("The abstract contains a mathematical formula")
 words = len(LatexNodes2Text().nodelist_to_text(abstract.nodelist).split())
-numeric_macros = {"JointIntervals", "JointDatasets", "JointRuntimeTenThousand"}
+numeric_macros = {"JointIntervals", "JointDatasets", "JointRuntimeTenThousand", "RegisteredJointDatasets", "RegisteredJointSettings"}
 words += sum(isinstance(node, LatexMacroNode) and node.macroname in numeric_macros for node in abstract.nodelist)
 keywords = [text.strip() for text in LatexNodes2Text().nodelist_to_text(values["keywords"].nodelist).split(";")]
 running_title = LatexNodes2Text().nodelist_to_text(values["titlemark"].nodelist)

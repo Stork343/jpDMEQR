@@ -5,6 +5,8 @@
 The repeated observation model permits a direct calculation of the
 coefficient pairing. A cluster contains two identical observations
 $Y\sim N(0,1)$, with $X=Z=1$ and $\Lambda=\lambda$.
+The within-cluster average gives the same profile criterion as a
+single Gaussian observation.
 Deterministic integration gives the unsmoothed population minimiser,
 the minimiser at each positive bandwidth, and the coefficient
 combination $2\beta_{h/2}-\beta_h$. Figure~\ref{fig:joint-smoothing}
@@ -30,13 +32,64 @@ The R plotting code was developed with OpenAI Codex.}
 \label{fig:joint-smoothing}
 \end{figure}
 
-\subsection{Independent simulation design}\label{subsec:sim-design}
+\subsection{Registered study of full target inference}\label{subsec:registered-study}
 
+The registered statistical study contains \RegisteredJointSettings{}
+settings and \RegisteredJointDatasets{} generated datasets.
 Independent clusters follow
 \[
- Y_{ij}=X_{ij}^T\beta^0+Z_{ij}^Tb_i+\varepsilon_{ij}.
+ Y_{ij}=X_{ij}^T\beta^0+Z_{ij}^Tb_i+\varepsilon_{ij},
 \]
-The evaluation contains 24 settings, each with 60 independent datasets.
+with additional specified terms in the nuisance-misspecification
+settings. The default design has Gaussian AR(1) covariates with
+correlation $0.5$, cluster sizes from three through eight, and
+alternating nonzero coefficients of magnitude $0.75$. The
+configurations vary sample size and dimension before examining
+innovation distributions and cluster heterogeneity. Their covariance
+and signal settings test the adjustment step, while a separate
+group varies the working penalty and learning budget. Most settings
+use all generated predictors. Five prescreening settings examine
+how the available predictor set affects the inferential target.
+Supporting Information specifies every generating distribution and
+the 500 or 1000 replications assigned to each setting.
+
+The full profile target is calculated independently whenever its
+equality with the generating slope is unavailable. Four population
+repetitions, each containing at least 100000 clusters, determine
+these targets and their Monte Carlo errors. The sample algorithm
+uses its fixed training rules and never receives those population
+calculations. Two active and two null coordinates are requested
+in every statistical dataset.
+
+Table~\ref{tab:registered-joint-overview} reports coverage of the
+full target. Each setting contributes equally within its declared
+input category, and the parentheses give Monte Carlo standard errors
+based on replication averages. The fits column records numerical
+completion. The \RegisteredJointFailures{} unavailable fits remain
+in the coverage denominator. The complete setting-level results and
+interval lengths appear in Supporting Information.
+
+\input{generated/submission/joint_overview}
+
+Variance filtering changes the target in a reproducible way. In
+F05, it retains 300 of the 5000 predictors by their observed variance
+and adds the requested coordinates. Active and null coverage are
+\VarianceFilterActiveCoverage{} and \VarianceFilterNullCoverage{}.
+The exact Gaussian projection of each saved selected model shows
+a displacement of the second coordinate in
+\VarianceFilterSecondShifted{} of 500 datasets and of the eleventh
+coordinate in \VarianceFilterEleventhShifted{} datasets. Both
+coordinates have conditional adjustments outside the retained pool.
+The full-design setting F06 has coverages
+\FullDesignActiveCoverage{} and \FullDesignNullCoverage{}, and
+every requested selected target agrees with its full-design value
+within $10^{-8}$. These calculations locate the coverage loss in
+the parameter change induced by prescreening.
+
+\subsection{Independent assessment of conditional adjustment}\label{subsec:sim-design}
+
+An independent ablation study contains 24 settings, each with
+60 independent datasets from the same model form.
 Cluster sizes are sampled uniformly from three through eight.
 Covariate rows are centred Gaussian with
 $\Sigma_{kl}=\rho_X^{|k-l|}$, independent of the cluster effects and
@@ -67,7 +120,7 @@ group. Monte Carlo standard errors use these replication averages
 and retain the scenario strata. Coordinatewise exact binomial
 intervals are reported separately in Supporting Information.
 
-\subsection{Conditional adjustment and interval coverage}\label{subsec:sim-comparators}
+\label{subsec:sim-comparators}
 
 A paired ablation removes $S_{fk}^X$ from
 \eqref{eq:selected-set}. It retains the outcome search, profile
@@ -112,7 +165,7 @@ show that the coverage difference varies across configurations.
 \subsection{Growing sample size and influence approximation}\label{subsec:sim-influence}
 \input{generated/submission/gaussian_values}
 
-A separate scaling study varies $n\in\{100,200,400\}$ and
+The registered scaling settings vary $n\in\{100,200,400\}$ and
 $p\in\{500,1000,2000\}$ with five active coefficients. An additional
 sequence has ten active coefficients at $p=1000$. These twelve
 settings use Gaussian innovations, a random intercept, covariate
@@ -169,3 +222,16 @@ profile and conditional covariate selection, so they measure the
 implemented statistical procedure.
 
 \input{generated/joint_profile/runtime}
+
+\input{generated/submission/computation_values}
+The registered computation study adds fifty repetitions in each of
+seven settings, including random slopes, prescreening and twelve
+requested coordinates. At $n=200$ and $p=2000$, median time for the
+complete four-coordinate procedure is
+\SubmissionTimingJointHigh{} seconds. Pooled quantile Lasso takes
+\SubmissionTimingPooledHigh{} seconds for its tuning and fit on
+the same datasets. The twelve-coordinate procedure at $n=200$ and
+$p=1000$ takes \SubmissionTimingTwelve{} seconds. Supporting
+Information reports the complete timing distributions and the
+four-worker and eight-worker calculations with identical data
+and tuning seeds.

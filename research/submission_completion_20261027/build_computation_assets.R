@@ -60,9 +60,12 @@ fwrite(wall, file.path(output, "batch_wall_times.csv"))
 generated <- "manuscript/generated/submission"
 dir.create(generated, recursive = TRUE, showWarnings = FALSE)
 number <- function(x) formatC(x, format = "f", digits = 3L)
-labels <- c("JOINT-PROFILE" = "Joint profile", "JOINT-PROFILE-TRUE-SUPPORT" = "Known support", "POOLED-QR-LASSO" = "Pooled Lasso")
+labels <- c("JOINT-PROFILE" = "Joint profile", "JOINT-PROFILE-TRUE-SUPPORT" = "Known support oracle", "POOLED-QR-LASSO" = "Pooled Lasso")
+available <- metrics[method_id == "JOINT-PROFILE", .(lower = min(p), upper = max(p)), by = experiment_id]
+available <- available[match(registry$experiment_id, available$experiment_id)]
 design <- data.frame(Setting = registry$experiment_id, n = registry$n_clusters, p = registry$p,
-  Fitted = ifelse(registry$screen_method == "none", registry$p, registry$screen_dim),
+  Available = ifelse(available$lower == available$upper, as.character(available$lower),
+    paste0(available$lower, "--", available$upper)),
   q = registry$q, Targets = registry$target_coordinate_count, Workers = registry$workers)
 names(design)[c(2L, 3L, 5L)] <- c("$n$", "$p$", "$q$")
 writeLines(as.character(knitr::kable(design, format = "latex", booktabs = TRUE, escape = FALSE,
@@ -72,17 +75,18 @@ table <- data.frame(Setting = timings$experiment_id, Method = unname(labels[timi
   Fits = paste0(timings$converged, "/", timings$replications), Median = number(timings$median_seconds),
   Quartiles = paste0("[", number(timings$lower_quartile_seconds), ", ", number(timings$upper_quartile_seconds), "]"))
 writeLines(as.character(knitr::kable(table, format = "latex", booktabs = TRUE, longtable = TRUE,
-  caption = "Elapsed fitting time in seconds including each method's tuning", label = "registered-computation-time", linesep = "")),
+  caption = "Elapsed fitting time in seconds including tuning", label = "registered-computation-time", linesep = "")),
   file.path(generated, "computation_time.tex"))
 values <- c(SubmissionTimingReplications = as.character(nrow(request$jobs)),
   SubmissionTimingJointHigh = number(timings[experiment_id == "G02" & method_id == "JOINT-PROFILE", median_seconds]),
   SubmissionTimingPooledHigh = number(timings[experiment_id == "G02" & method_id == "POOLED-QR-LASSO", median_seconds]),
   SubmissionTimingTwelve = number(timings[experiment_id == "G05" & method_id == "JOINT-PROFILE", median_seconds]),
   SubmissionWallFour = number(wall[experiment_id == "G06", wall_seconds]),
-  SubmissionWallEight = number(wall[experiment_id == "G07", wall_seconds]))
+  SubmissionWallEight = number(wall[experiment_id == "G07", wall_seconds]),
+  SubmissionParallelComparisons = as.character(length(parallel_checks)))
 writeLines(paste0("\\newcommand{\\", names(values), "}{", values, "}"), file.path(generated, "computation_values.tex"))
 jsonlite::write_json(list(registered_timed_runs = nrow(request$jobs), method_fits = nrow(metrics),
-  replication_unit = "one_generated_dataset_and_requested_method_set", method_clock = "tuning_and_fitting_excluding_data_generation",
+  replication_unit = "one_generated_dataset_and_requested_method_set", method_clock = "tuning_and_fitting_after_prescreening_excluding_data_generation",
   throughput_clock = "complete_batch_including_worker_startup_and_data_generation", timing_summary = "median_and_interquartile_range",
   parallel_parameter_comparisons = length(parallel_checks),
   maximum_parallel_difference = max(vapply(parallel_checks, function(x) x$maximum_difference, numeric(1))),

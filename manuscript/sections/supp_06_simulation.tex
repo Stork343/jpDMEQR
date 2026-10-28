@@ -138,6 +138,40 @@ together with the largest selected model and final score residual.
 The executable source and saved session information identify the
 machine and numerical environment for these measurements.
 
+\input{generated/submission/computation_values}
+The registered computation study contains
+\SubmissionTimingReplications{} timed replications in the seven
+settings of Table~\ref{tab:registered-computation-design}. The
+available-predictor column gives the pool passed to each method
+after any prescreening. The proposed procedure subsequently selects
+its coordinate-specific designs. In G04, an outcome-free variance
+filter retains 500 of the original 5000 predictors, together with
+any requested coordinates outside that set. The known-support oracle
+uses the generated active coordinates and the requested targets.
+
+\input{generated/submission/computation_design}
+
+Table~\ref{tab:registered-computation-time} reports median fitting
+times and empirical interquartile ranges over fifty runs. These
+clocks include tuning and estimation after prescreening. The complete
+batch clocks also include data generation, prescreening, process
+startup and result storage. During timing, the other simulation and
+application fitting processes in this project were suspended.
+All registered method fits converged.
+
+G06 and G07 use the same fifty generated datasets and the same
+method-specific tuning seeds. Four workers complete their batches
+in \SubmissionWallFour{} seconds and eight workers in
+\SubmissionWallEight{} seconds. The
+\SubmissionParallelComparisons{} paired method comparisons return
+identical coefficient vectors, interval endpoints and standard
+errors. Each batch includes the proposed method, pooled quantile
+Lasso and the known-support oracle.
+
+\begingroup\small
+\input{generated/submission/computation_time}
+\endgroup
+
 The independent evaluation and its ablation each retain a result
 for every registered dataset and coordinate. The final result
 builder requires complete paired keys before calculating summaries.

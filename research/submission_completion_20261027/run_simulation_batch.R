@@ -1,4 +1,5 @@
 source("research/submission_completion_20261027/load.R")
+source("research/submission_completion_20261027/dispatch_state.R")
 args <- commandArgs(trailingOnly = TRUE)
 destination <- args[1L]
 batch <- as.integer(args[2L])
@@ -22,14 +23,14 @@ for (i in seq_len(nrow(jobs))) {
     if (request$family == "comparators") !startsWith(config$methods, "JOINT-PROFILE") else config$methods == request$family
   config$methods <- config$methods[selected]
   if (!length(config$methods)) stop("The batch selected no registered method.")
-  saveRDS(list(config = config, replicate = job$replicate, base_seed = request$base_seed,
+  submission_atomic_rds(list(config = config, replicate = job$replicate, base_seed = request$base_seed,
                started = Sys.time()), file.path(current, "request.rds"))
   result <- run_one_replication_v2(".", config, job$replicate,
     base_seed = request$base_seed, allow_missing_benchmarks = FALSE, final = TRUE,
     run_id = basename(destination), implementation_commit = request$implementation_commit)
   validate_paired_failed_coordinate_accounting_v2(result$metrics, result$coordinates)
   if (!setequal(result$metrics$method_id, config$methods)) stop("Missing registered method record.")
-  saveRDS(result, file.path(current, "result.rds"))
+  submission_atomic_rds(result, file.path(current, "result.rds"))
   completed <- completed + 1L
   write.csv(data.frame(experiment_id = job$experiment_id, replicate = job$replicate, completed = completed,
                        time = as.character(Sys.time())), file.path(destination, sprintf("batch_%03d_progress.csv", batch)), row.names = FALSE)

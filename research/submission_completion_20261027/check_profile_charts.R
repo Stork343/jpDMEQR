@@ -1,4 +1,5 @@
 source("research/score_validity_20261026/load_joint.R")
+dir.create("results/scratch/submission_completion_20261027", recursive = TRUE, showWarnings = FALSE)
 set.seed(2026102809L)
 records <- list()
 for (q in 1:4) for (m in c(2L, 5L, 8L)) for (pattern in c("separated", "repeated", "close")) {
