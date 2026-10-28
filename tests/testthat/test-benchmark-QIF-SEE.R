@@ -1,84 +1,73 @@
-# Deterministic acceptance tests for QIF-SEE (Bhattacharya et al. 2026).
-
 root <- v2_require_root()
 source(file.path(root, "scripts", "00_source_v2.R"), local = FALSE)
-source_v2_module(root, "profile_v2", envir = .GlobalEnv)
-source_v2_module(root, "simulation_v2", envir = .GlobalEnv)
-source_v2_module(root, "metrics_v2", envir = .GlobalEnv)
-source_v2_module(root, "benchmark_adapters_v2", envir = .GlobalEnv)
-
-make_train <- function(n = 40, p = 10, s = 3, seed = 202L) {
-  generate_profile_qr_data_v2(
-    n_clusters = n, p = p, s = s, tau = 0.5, q = 1L,
-    m_values = 4:6, m_rule = "uniform", sigma_b0 = 1,
-    error_dist = "gaussian", seed = seed
-  )
+for (module in c("profile_v2", "simulation_v2", "metrics_v2", "benchmark_adapters_v2")) {
+  source_v2_module(root, module, .GlobalEnv)
 }
 
-testthat::test_that("QIF-SEE adapter is deterministic and schema-conformant", {
-  train <- make_train(seed = 202)
-  tuning <- list(h = 0.5, lambda_beta = 0.1, lambda_gamma = 1,
-                 mu_grid = c(0.3, 0.6, 1.2))
-  ctrl <- list(lambda_grid = c(0.1, 0.3, 0.5), gamma = 1)
-  a1 <- fit_benchmark_qif_see_v2(train, 0.5, colnames(train$X)[1:5],
-                                 tuning, seed = 21L, control = ctrl)
-  a2 <- fit_benchmark_qif_see_v2(train, 0.5, colnames(train$X)[1:5],
-                                 tuning, seed = 21L, control = ctrl)
-  testthat::expect_equal(a1$status, "ok")
-  testthat::expect_identical(a1$beta_hat, a2$beta_hat)
-  testthat::expect_identical(a1$selected, a2$selected)
-  testthat::expect_true(all(c("method_id", "status", "beta_hat", "selected",
-                              "runtime_sec", "converged",
-                              "reference_identifier",
-                              "adapter_fidelity_status") %in% names(a1)))
-  testthat::expect_equal(a1$method_id, "QIF-SEE")
-  testthat::expect_equal(a1$adapter_fidelity_status,
-                         "formula_level_implemented")
-  testthat::expect_true(all(names(a1$beta_hat) == colnames(train$X)))
-  testthat::expect_true(is.null(a1$beta_tilde))  # no coverage claim by default
-  testthat::expect_true(all(a1$inference_object$table$feasible == FALSE))
+testthat::test_that("QIF-SEE source domain failure is deterministic and schema conformant", {
+  dat <- generate_profile_qr_data_v2(n_clusters = 30L, p = 40L, s = 3L, q = 1L,
+                                      tau = .25, seed = 700770L)
+  a <- fit_benchmark_qif_see_v2(dat, .25, colnames(dat$X)[1:3], list(), 1L)
+  b <- fit_benchmark_qif_see_v2(dat, .25, colnames(dat$X)[1:3], list(), 1L)
+  testthat::expect_identical(a$status, "failed")
+  testthat::expect_identical(a$failure_stage, "qif_covariance_rank")
+  testthat::expect_identical(a$fit_object, b$fit_object)
+  testthat::expect_equal(a$fit_object$matrix_dimension, 120L)
+  testthat::expect_equal(a$fit_object$rank_upper_bound, 30L)
+  testthat::expect_true(is.na(a$fit_object$actual_rank))
+  testthat::expect_identical(a$fit_object$inverse_definition, "ordinary_inverse")
+  testthat::expect_true(all(c("method_id", "status", "failure_stage", "failure_message",
+                              "runtime_sec", "fit_object", "reference_identifier") %in% names(a)))
 })
 
-testthat::test_that("QIF-SEE selects active variables on deterministic data", {
-  train <- make_train(seed = 303)
-  tuning <- list(h = 0.5, lambda_beta = 0.1, lambda_gamma = 1,
-                 mu_grid = c(0.3, 0.6, 1.2))
-  ans <- fit_benchmark_qif_see_v2(train, 0.5, colnames(train$X)[1:3],
-                                  tuning, seed = 3L,
-                                  control = list(lambda_grid = c(0.1, 0.3),
-                                                 gamma = 1))
-  # The SEE variable-selection mechanism should retain the true active set
-  # on a clean deterministic DGP (possibly with extra noise coordinates).
-  testthat::expect_true(all(1:3 %in% ans$selected))
-  active_est <- unname(ans$beta_hat[1:3])
-  for (kk in which(active_est != 0)) {
-    expected_sign <- if (kk %% 2L == 1L) 1 else -1
-    testthat::expect_equal(sign(active_est[kk]), expected_sign)
-  }
+testthat::test_that("QIF-SEE modified extended score matches Eq3 Eq5 and frozen delta derivatives", {
+  dat <- generate_profile_qr_data_v2(n_clusters = 40L, p = 3L, s = 2L, q = 1L,
+                                      tau = .35, sigma_b0 = 0, seed = 700771L)
+  beta <- as.numeric(quantreg::rq.fit(dat$X, dat$y, tau = .35)$coefficients)
+  weights <- rep(stats::dnorm(stats::qnorm(.35)), length(dat$y))
+  delta <- c(.1, .2, .3)
+  h <- 40^(-1 / 2)
+  component <- qif_see_extended_source_v2(dat$y, dat$X, dat$cluster_id, beta, .35,
+                                          h, weights, delta)
+  rows <- which(dat$cluster_id == dat$cluster_id[1L])
+  X <- dat$X[rows, , drop = FALSE]
+  residual <- dat$y[rows] - as.numeric(X %*% beta)
+  psi <- stats::pnorm(residual / h) - .65
+  blocks <- lapply(qif_see_basis_v2(length(rows)), function(M) {
+    as.numeric(crossprod(X, weights[rows] * as.numeric(M %*% psi)))
+  })
+  raw <- as.numeric(t(do.call(cbind, blocks)))
+  expected <- rep(1 - delta, each = 3L) * raw + rep(delta * beta, each = 3L)
+  testthat::expect_equal(component$G[, 1L], expected, tolerance = 1e-12)
+  testthat::expect_equal(component$covariance, tcrossprod(component$G) / 40L, tolerance = 1e-12)
+  numerical <- finite_difference_jacobian_v2(function(b) {
+    qif_see_extended_source_v2(dat$y, dat$X, dat$cluster_id, b, .35, h, weights, delta)$mean
+  }, beta, eps = 1e-6)
+  testthat::expect_equal(component$derivative, numerical, tolerance = 1e-6)
+  singular <- qif_see_extended_source_v2(dat$y, dat$X, dat$cluster_id, beta, .35,
+                                         h, weights, rep(1, 3L))
+  testthat::expect_error(qif_see_source_step_v2(singular, beta), class = "qif_see_source_error")
 })
 
-testthat::test_that("QIF-SEE is invariant to cluster permutation", {
-  train <- make_train(seed = 404)
-  tuning <- list(h = 0.5, lambda_beta = 0.1, lambda_gamma = 1,
-                 mu_grid = c(0.3, 0.6, 1.2))
-  ctrl <- list(lambda_grid = c(0.1, 0.3), gamma = 1)
-  a1 <- fit_benchmark_qif_see_v2(train, 0.5, colnames(train$X)[1:3],
-                                 tuning, seed = 9L, control = ctrl)
-  # Permute the order of clusters (rows and identifiers together).
-  ord <- order(runif(length(train$cluster_id)))
-  train2 <- train
-  train2$y <- train$y[ord]
-  train2$X <- train$X[ord, , drop = FALSE]
-  train2$Z <- train$Z[ord, , drop = FALSE]
-  train2$cluster_id <- train$cluster_id[ord]
-  a2 <- fit_benchmark_qif_see_v2(train2, 0.5, colnames(train2$X)[1:3],
-                                 tuning, seed = 9L, control = ctrl)
-  # The QIF extended-score construction is permutation invariant, but the
-  # rqPen initial estimator draws internal CV folds from the row order, so
-  # the initial beta_tilde can differ slightly under permutation. Require
-  # the same selected set and matching signs/direction of the retained
-  # active coefficients rather than exact numerical equality.
-  testthat::expect_identical(a1$selected, a2$selected)
-  testthat::expect_equal(sign(a1$beta_hat[a1$selected]),
-                         sign(a2$beta_hat[a2$selected]))
+testthat::test_that("QIF-SEE source limiting case reproduces independent smoothed quantile equations", {
+  dat <- generate_profile_qr_data_v2(n_clusters = 120L, p = 2L, s = 2L, q = 1L,
+                                      tau = .5, sigma_b0 = 0, seed = 700772L)
+  beta <- as.numeric(quantreg::rq.fit(dat$X, dat$y, tau = .5)$coefficients)
+  density <- rep(stats::dnorm(0), length(dat$y))
+  a <- fit_qif_see_source_v2(dat$y, dat$X, dat$cluster_id, .5, beta, density,
+                              lambda = 1e-10, gamma = 1, corstr = "independence", max_iter = 100L)
+  b <- fit_qif_see_source_v2(dat$y, dat$X, dat$cluster_id, .5, beta, density,
+                              lambda = 1e-10, gamma = 1, corstr = "independence", max_iter = 100L)
+  reference <- fit_sqr_iid_lasso_v2(dat$y, dat$X, .5, 120^(-1 / 2), 0,
+                                    control = list(max_iter = 2000L, beta_tol = 1e-9, kkt_tol = 1e-8))
+  testthat::expect_true(a$converged && reference$converged)
+  testthat::expect_identical(a$beta, b$beta)
+  testthat::expect_equal(a$beta, as.numeric(reference$beta), tolerance = 1e-5)
+  testthat::expect_equal(a$bic, a$q_value + a$df * log(120), tolerance = 1e-12)
+  testthat::expect_equal(a$history[[1L]]$delta, pmin(1, 1e-10 / abs(beta)^2), tolerance = 1e-15)
+  testthat::expect_equal(a$history[[2L]]$delta,
+                         pmin(1, 1e-10 / abs(a$history[[2L]]$beta)^2), tolerance = 1e-15)
+  testthat::expect_error(fit_benchmark_qif_see_v2(dat, .5, colnames(dat$X), list(), 1L,
+                                                 control = list(corstr = "independence")),
+                         class = "qif_see_source_error")
 })

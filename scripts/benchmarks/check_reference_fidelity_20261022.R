@@ -65,7 +65,7 @@ record("LQMM", "maintained_package_coefficients",
        max_difference(lqmm_adapter$beta_hat, stats::coef(lqmm_reference)),
        1e-10, "lqmm 1.5.8 direct call")
 
-official_path <- file.path(root, "..", "research", "battagliola", "official_code", "ran_int_bias_adj.R")
+official_path <- file.path(root, "data", "raw", "public_methods", "battagliola", "official_code", "ran_int_bias_adj.R")
 if (!file.exists(official_path)) stop("The official bias-adjustment reference function is required.")
 official <- new.env(parent = environment())
 sys.source(official_path, envir = official)

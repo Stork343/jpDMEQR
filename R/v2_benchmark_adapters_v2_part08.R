@@ -1,286 +1,210 @@
-# Fidelity implementation of QIF-SEE.
-#
-# Source method: Bhattacharya, I., Bhuiyan, M.A.N., and Chatla, S.B. (2026).
-# "Automatic Variable Selection for Longitudinal Quantile Regression With
-# Application to Alzheimer's Disease Progression". Scandinavian Journal of
-# Statistics 53(3):1189-1205, DOI 10.1111/sjos.70077.
-#
-# The method combines the quadratic inference function (QIF) of Qu, Lindsay
-# and Li (2000) with the smooth-threshold estimating equations (SEE) of
-# Ueki (2009):
-#   - QIF basis matrices for the inverse working correlation: M1 = I_m
-#     (independence), M2 (exchangeable off-diagonal ones), M3 (AR(1)
-#     first off-diagonals);
-#   - extended score g_i(beta) = [ X_i' M1 psi_i ; X_i' M2 psi_i ;
-#     X_i' M3 psi_i ], psi_ij = tau - 1{Y_ij <= X_ij'beta};
-#   - QIF objective Q_n(beta) = n gbar' Cbar^{-1} gbar with
-#     Cbar = n^{-1} sum_i g_i g_i';
-#   - smooth-threshold weights delta_k = min{1, lambda / |beta_tilde_k|^(1+gamma)}
-#     applied to the estimating equation: (1 - delta_k) U_k + delta_k beta_k = 0;
-#   - initial estimator from rqPen with 10-fold cross-validation;
-#   - Newton-Raphson-type iteration alternating beta and Cbar;
-#   - BIC tuning for (lambda, gamma).
-#
-# Formula-confirmation note: the Wiley full text was paywalled during
-# preparation; the construction above follows the confirmed fragments of the
-# paper (QIF basis with independence/exchangeable/AR(1)/unstructured, SEE
-# delta form, rqPen initial estimator, Newton-Raphson update, BIC tuning)
-# together with the standard Qu et al. (2000) and Ueki (2009) definitions.
-# The default gamma = 1 follows Ueki (2009). The quantile score is used in
-# its unsmoothed form (no induced smoothing), matching the confirmed
-# "quantile score (check loss)" fragments.
+qif_see_stop_v2 <- function(stage, message, diagnostics, partial_fit = NULL) {
+  condition <- simpleError(message)
+  condition$failure_stage <- stage
+  condition$diagnostics <- diagnostics
+  condition$partial_fit <- partial_fit
+  class(condition) <- c("qif_see_source_error", class(condition))
+  stop(condition)
+}
 
-fit_benchmark_qif_see_v2 <- function(train,
-                                     tau,
-                                     target_coords,
-                                     tuning,
-                                     seed,
-                                     context = list(),
-                                     control = list()) {
-  if (!requireNamespace("rqPen", quietly = TRUE)) {
-    return(benchmark_failure_v2("QIF-SEE", "dependency",
-                                "rqPen is required for the initial estimator."))
+qif_see_basis_v2 <- function(m, corstr = "combined_known_basis") {
+  identity <- diag(m)
+  exchangeable <- matrix(1, m, m) - identity
+  adjacent <- matrix(0, m, m)
+  if (m > 1L) {
+    adjacent[cbind(seq_len(m - 1L), seq.int(2L, m))] <- 1
+    adjacent[cbind(seq.int(2L, m), seq_len(m - 1L))] <- 1
   }
-  set.seed(seed)
-  start <- proc.time()[[3]]
-  y <- as.numeric(train$y)
-  X <- as.matrix(train$X)
-  cluster_id <- as.character(train$cluster_id)
-  if (length(y) != nrow(X) || length(cluster_id) != length(y)) {
-    return(benchmark_failure_v2("QIF-SEE", "schema", "Dimension mismatch."))
-  }
-  cluster_factor <- factor(cluster_id, levels = unique(cluster_id))
-  nobs <- as.integer(table(cluster_factor))
-  n_subjects <- length(nobs)
-  m_max <- max(nobs)
+  switch(corstr, independence = list(identity),
+         exchangeable = list(identity, exchangeable),
+         combined_known_basis = list(identity, exchangeable, adjacent),
+         stop("Unknown declared QIF basis specification."))
+}
+
+qif_see_extended_source_v2 <- function(y, X, cluster_id, beta, tau, h,
+                                        density_weights, delta,
+                                        corstr = "combined_known_basis") {
+  clusters <- split(seq_along(y), factor(as.character(cluster_id), levels = unique(as.character(cluster_id))))
   p <- ncol(X)
-  if (sum(nobs) != length(y)) {
-    return(benchmark_failure_v2("QIF-SEE", "schema",
-                                "Cluster sizes do not reconcile."))
+  B <- length(qif_see_basis_v2(length(clusters[[1L]]), corstr))
+  n <- length(clusters)
+  G <- matrix(0, B * p, n)
+  derivative <- matrix(0, B * p, p)
+  lift <- kronecker(diag(p), matrix(1, B, 1L))
+  weights <- rep(1 - delta, each = B)
+  for (i in seq_along(clusters)) {
+    rows <- clusters[[i]]
+    Xi <- X[rows, , drop = FALSE]
+    residual <- y[rows] - as.numeric(Xi %*% beta)
+    psi <- stats::pnorm(residual / h) - (1 - tau)
+    phi <- stats::dnorm(residual / h) / h
+    basis <- qif_see_basis_v2(length(rows), corstr)
+    raw <- matrix(0, p, B)
+    dRaw <- matrix(0, B * p, p)
+    for (b in seq_len(B)) {
+      raw[, b] <- as.numeric(crossprod(Xi, density_weights[rows] * as.numeric(basis[[b]] %*% psi)))
+      positions <- seq.int(b, B * p, by = B)
+      dRaw[positions, ] <- -crossprod(Xi, density_weights[rows] * (basis[[b]] %*% (phi * Xi)))
+    }
+    # Eq3按coordinate排列各basis分量，Eq5逐coordinate重复加入delta乘beta。
+    G[, i] <- weights * as.numeric(t(raw)) + as.numeric(lift %*% (delta * beta))
+    derivative <- derivative + weights * dRaw + sweep(lift, 2L, delta, "*")
   }
-  gamma <- control$gamma %||% 1
-  max_iter <- as.integer(control$max_iter %||% 50L)
-  tol <- control$tol %||% 1e-5
+  list(G = G, mean = rowMeans(G), covariance = tcrossprod(G) / n,
+       derivative = derivative / n, B = B, n = n,
+       score_definition = "source_Eq5_modified_extended_quasi_score")
+}
 
-  ci_rows <- split(seq_along(cluster_factor), cluster_factor, drop = TRUE)
-
-  # --- initial estimator: rqPen lasso QR, 10-fold CV ------------------------
-  init <- tryCatch(
-    rqPen::rq.pen.cv(
-      x = X, y = y, tau = tau, penalty = "LASSO",
-      nfolds = as.integer(control$nfold %||% 10L),
-      printProgress = FALSE
-    ),
-    error = function(e) e
+qif_see_source_step_v2 <- function(component, beta, context = list()) {
+  C <- component$covariance
+  dimension <- nrow(C)
+  rank <- qr(component$G)$rank
+  diagnostics <- c(context, list(matrix_dimension = dimension, rank_upper_bound = component$n,
+                                  actual_rank = rank, covariance = C,
+                                  score_mean = component$mean, derivative = component$derivative))
+  if (rank < dimension) qif_see_stop_v2(
+    "qif_covariance_rank", "The source QIF covariance has no ordinary inverse.",
+    c(diagnostics, list(status = "rank_deficient")), list(beta = beta, component = component)
   )
-  if (inherits(init, "error")) {
-    return(benchmark_failure_v2("QIF-SEE", "initial_fit",
-                                conditionMessage(init),
-                                proc.time()[[3]] - start))
+  withCallingHandlers({
+    weighted_mean <- solve(C, component$mean)
+    weighted_derivative <- solve(C, component$derivative)
+    gradient <- 2 * as.numeric(crossprod(component$derivative, weighted_mean))
+    hessian <- 2 * crossprod(component$derivative, weighted_derivative)
+    step <- -as.numeric(solve(hessian, gradient))
+    if (any(!is.finite(step))) stop("The source QIF Newton step is non-finite.")
+    list(step = step, gradient = gradient, hessian = hessian,
+         q_value = component$n * sum(component$mean * weighted_mean), rank = rank)
+  }, error = function(condition) {
+    if (inherits(condition, "qif_see_source_error")) return(invisible(NULL))
+    condition$failure_stage <- "qif_ordinary_inverse"
+    condition$diagnostics <- diagnostics
+    condition$partial_fit <- list(beta = beta, component = component)
+    stop(condition)
+  })
+}
+
+fit_qif_see_source_v2 <- function(y, X, cluster_id, tau, beta_init, density_weights,
+                                   lambda, gamma, corstr = "combined_known_basis",
+                                   max_iter = 50L, tol = 1e-5) {
+  n <- length(unique(cluster_id))
+  h <- n^(-1 / 2)
+  beta <- as.numeric(beta_init)
+  history <- list()
+  converged <- FALSE
+  for (iteration in seq_len(max_iter)) {
+    # Algorithm1第3步每轮更新delta，第11步在该轮固定delta计算导数。
+    denominator <- abs(beta)^(1 + gamma)
+    delta <- rep(1, length(beta))
+    positive <- denominator > 0
+    delta[positive] <- pmin(1, lambda / denominator[positive])
+    component <- qif_see_extended_source_v2(y, X, cluster_id, beta, tau, h,
+                                             density_weights, delta, corstr)
+    calculation <- qif_see_source_step_v2(
+      component, beta, list(lambda = lambda, gamma = gamma, iteration = iteration,
+                            completed_iterations = history, delta = delta)
+    )
+    beta_new <- beta + calculation$step
+    change <- sqrt(sum(calculation$step^2))
+    history[[iteration]] <- list(beta = beta, beta_new = beta_new, delta = delta,
+                                  change = change, q_value = calculation$q_value,
+                                  covariance_rank = calculation$rank)
+    beta <- beta_new
+    if (change < tol) {
+      converged <- TRUE
+      break
+    }
   }
-  beta_tilde <- tryCatch(
-    as.numeric(stats::coef(init)),
-    error = function(e) NULL
+  if (!converged) qif_see_stop_v2(
+    "qif_iteration_limit", "The source QIF algorithm reached its numerical iteration limit.",
+    list(lambda = lambda, gamma = gamma, history = history), list(beta = beta)
   )
-  if (is.null(beta_tilde) || length(beta_tilde) != p + 1L) {
-    # rqPen returns an intercept; drop it when the design has none.
-    beta_tilde <- tryCatch(as.numeric(init$models[[which.min(init$cv)]][["coefficients"]]),
-                           error = function(e) NULL)
-    if (is.null(beta_tilde) || length(beta_tilde) < p) {
-      return(benchmark_failure_v2("QIF-SEE", "initial_fit",
-                                  "Could not extract the rqPen initial estimator.",
-                                  proc.time()[[3]] - start))
-    }
-    beta_tilde <- beta_tilde[seq_len(p)]
-  } else {
-    beta_tilde <- beta_tilde[-1]  # drop intercept
+  denominator <- abs(beta)^(1 + gamma)
+  delta <- rep(1, length(beta))
+  positive <- denominator > 0
+  delta[positive] <- pmin(1, lambda / denominator[positive])
+  final <- qif_see_extended_source_v2(y, X, cluster_id, beta, tau, h, density_weights, delta, corstr)
+  calculation <- qif_see_source_step_v2(final, beta, list(lambda = lambda, gamma = gamma, iteration = iteration))
+  df <- sum(abs(beta) > 1e-6)
+  list(beta = beta, lambda = lambda, gamma = gamma, h = h, delta = delta,
+       q_value = calculation$q_value, bic = calculation$q_value + df * log(n),
+       df = df, converged = TRUE, iterations = iteration, history = history,
+       final_component = final, final_step = calculation,
+       source_algorithm = "Algorithm1_iterated_delta_Gauss_Newton_ordinary_inverse")
+}
+
+fit_benchmark_qif_see_v2 <- function(train, tau, target_coords, tuning, seed,
+                                     context = list(), control = list()) {
+  set.seed(seed)
+  started <- proc.time()[[3L]]
+  X <- assert_numeric_matrix_v2(train$X, "X")
+  y <- as.numeric(train$y)
+  cluster <- as.character(train$cluster_id)
+  n <- length(unique(cluster))
+  p <- ncol(X)
+  corstr <- control$corstr %||% "combined_known_basis"
+  B <- length(qif_see_basis_v2(2L, corstr))
+  if (length(y) != nrow(X) || length(cluster) != length(y) ||
+      any(!is.finite(y)) || is.null(colnames(X))) stop("Invalid QIF data dimensions or coordinates.")
+  if (B * p > n) {
+    ans <- benchmark_failure_v2("QIF-SEE", "qif_covariance_rank",
+                                "The source Bp-dimensional covariance has rank at most the number of clusters.",
+                                proc.time()[[3L]] - started)
+    ans$fit_object <- list(matrix_dimension = B * p, n_clusters = n, rank_upper_bound = n,
+                           actual_rank = NA_integer_, status = "rank_deficient_by_dimension",
+                           covariance_definition = "n_inverse_sum_modified_score_outer_product",
+                           inverse_definition = "ordinary_inverse", basis = corstr,
+                           density_definition = "source_conditional_error_density_at_zero")
+    return(benchmark_add_metadata_v2(ans,
+      reference_identifier = "Bhattacharya-Bhuiyan-Chatla-2026-10.1111/sjos.70077",
+      fidelity_status = "source_Algorithm1_domain_failure"))
   }
-  names(beta_tilde) <- colnames(X)
-
-  # --- QIF basis matrices (Qu et al. 2000) ----------------------------------
-  basis_matrices <- function(m) {
-    M1 <- diag(m)
-    M2 <- matrix(0, m, m)
-    M2[col(M2) != row(M2)] <- 1
-    M3 <- matrix(0, m, m)
-    if (m > 1L) {
-      M3[cbind(seq_len(m - 1L), 2:m)] <- 1
-      M3[cbind(2:m, seq_len(m - 1L))] <- 1
-    }
-    list(M1, M2, M3)
+  density <- control$density_weights
+  if (is.null(density)) qif_see_stop_v2(
+    "source_density_unspecified", "Source conditional error-density weights must be supplied explicitly.",
+    list(source = "Eq3 Gamma_i", source_estimator_specification = "not_supplied_in_article")
+  )
+  if (length(density) != length(y) || any(!is.finite(density)) || any(density < 0)) {
+    stop("QIF conditional density weights must be nonnegative finite values for every observation.")
   }
-
-  # Induced-smoothed quantile score (Brown & Wang 2005, as cited by the
-  # source paper and used by the companion QGEE literature): replace the
-  # step function tau - 1{r <= 0} by its smoothed expectation
-  #   Phi(r/h_s) - (1 - tau),  h_s = n^{-1/2}.
-  # This keeps the extended score differentiable so the Newton-Raphson
-  # update of the estimating equations is numerically well defined, and it
-  # matches the smoothing convention of Zu et al. (2023).
-  h_smooth <- n_subjects^(-1 / 2)
-  quantile_score <- function(r) stats::pnorm(r / h_smooth) - (1 - tau)
-  quantile_density <- function(r) stats::dnorm(r / h_smooth) / h_smooth
-
-  # Stacked extended score (3p x 1) per cluster, plus its analytic Jacobian
-  # w.r.t. beta (3p x p): dg_i/dbeta = -[X_i' M1 D_i X_i ; X_i' M2 D_i X_i ;
-  # X_i' M3 D_i X_i] with D_i = diag(phi(r_ij/h)/h).
-  cluster_extended <- function(beta) {
-    G <- matrix(0, 3L * p, n_subjects)
-    dG <- array(0, dim = c(3L * p, p, n_subjects))
-    for (i in seq_len(n_subjects)) {
-      idx <- ci_rows[[i]]
-      m_i <- length(idx)
-      x_i <- X[idx, , drop = FALSE]
-      r_i <- y[idx] - as.numeric(x_i %*% beta)
-      psi_i <- quantile_score(r_i)
-      d_i <- quantile_density(r_i)
-      basis <- basis_matrices(m_i)
-      for (kk in seq_along(basis)) {
-        Mk <- basis[[kk]]
-        rows <- (kk - 1L) * p + seq_len(p)
-        G[rows, i] <- as.numeric(crossprod(x_i, Mk %*% psi_i))
-        dG[rows, , i] <- -crossprod(x_i, Mk %*% (d_i * x_i))
-      }
-    }
-    list(G = G, dG = dG)
+  init <- rqPen::rq.pen.cv(x = X, y = y, tau = tau, penalty = "LASSO", nfolds = 10L,
+                           printProgress = FALSE)
+  coefficients <- as.numeric(stats::coef(init))
+  if (length(coefficients) != p + 1L || any(!is.finite(coefficients))) {
+    qif_see_stop_v2("initial_fit", "The rqPen initial coefficient vector has an unexpected dimension.", list(initial = init))
   }
-
-  # --- smooth-threshold estimating equations (Ueki 2009) --------------------
-  solve_see <- function(beta, lambda) {
-    ce <- cluster_extended(beta)
-    G <- ce$G
-    gbar <- rowMeans(G)
-    Cbar <- tcrossprod(G) / n_subjects
-    Cbar_inv <- tryCatch(solve((Cbar + t(Cbar)) / 2 + 1e-10 * diag(nrow(Cbar))),
-                         error = function(e) MASS::ginv(Cbar))
-    # dgbar/dbeta = row means of the per-cluster analytic Jacobians.
-    dgbar <- apply(ce$dG, c(1, 2), mean)
-    U <- as.numeric(n_subjects * crossprod(dgbar, Cbar_inv %*% gbar))
-    delta <- pmin(1, lambda / (abs(beta_tilde)^(1 + gamma) + 1e-12))
-    # Modified estimating equation: (1 - delta_k) U_k + delta_k beta_k = 0.
-    F <- (1 - delta) * U + delta * beta
-    # Jacobian of U w.r.t. beta (analytic leading term; Cbar variation is
-    # second order and omitted, standard for this estimating-equation form).
-    dU <- n_subjects * crossprod(dgbar, Cbar_inv %*% dgbar)
-    dF <- (1 - delta) * dU + diag(delta, p)
-    step <- withCallingHandlers(
-      -solve(dF + 1e-10 * diag(p), F),
-      error = function(e) {
-        e$failure_stage <- "estimating_equation"
-        e$diagnostics <- list(lambda = lambda, beta = beta, equation = F,
-                              jacobian = dF)
-        stop(e)
+  beta_init <- coefficients[-1L]
+  grid <- expand.grid(lambda = control$lambda_grid %||% exp(seq(log(.05), log(1), length.out = 8L)),
+                       gamma = control$gamma_grid %||% control$gamma %||% 1,
+                       stringsAsFactors = FALSE)
+  if (any(!is.finite(as.matrix(grid))) || any(grid$lambda <= 0) || any(grid$gamma <= 0)) stop("Invalid QIF tuning grid.")
+  candidates <- vector("list", nrow(grid))
+  for (index in seq_len(nrow(grid))) {
+    candidates[[index]] <- withCallingHandlers(
+      fit_qif_see_source_v2(y, X, cluster, tau, beta_init, density,
+                            grid$lambda[index], grid$gamma[index], corstr,
+                            max_iter = control$max_iter %||% 50L, tol = control$tol %||% 1e-5),
+      error = function(condition) {
+        condition$diagnostics <- c(condition$diagnostics, list(candidate = index,
+          tuning_grid = grid, completed_candidates = candidates[seq_len(index - 1L)], initial = init))
+        stop(condition)
       }
     )
-    if (any(!is.finite(step))) {
-      failure <- simpleError("The QIF estimating-equation step is non-finite.")
-      failure$failure_stage <- "estimating_equation"
-      failure$diagnostics <- list(lambda = lambda, beta = beta, equation = F,
-                                  jacobian = dF)
-      stop(failure)
-    }
-    list(step = step, F = F, delta = delta, U = U, gbar = gbar, Cbar = Cbar)
   }
-
-  # --- BIC tuning over lambda ------------------------------------------------
-  lambda_grid <- control$lambda_grid %||%
-    exp(seq(log(0.05), log(1.0), length.out = 8))
-  best <- NULL
-  for (lambda in lambda_grid) {
-    beta_cur <- beta_tilde
-    converged <- FALSE
-    for (iter in seq_len(max_iter)) {
-      out <- solve_see(beta_cur, lambda)
-      beta_new <- beta_cur + out$step
-      if (max(abs(out$step)) < tol) {
-        converged <- TRUE
-        break
-      }
-      beta_cur <- beta_new
-    }
-    if (!converged) next
-    G <- cluster_extended(beta_cur)$G
-    gbar <- rowMeans(G)
-    Cbar <- tcrossprod(G) / n_subjects
-    q_value <- as.numeric(n_subjects * crossprod(gbar, solve(
-      (Cbar + t(Cbar)) / 2 + 1e-10 * diag(nrow(Cbar)), gbar)))
-    n_nonzero <- sum(abs(beta_cur) > 1e-6)
-    bic <- log(max(q_value, 1e-10)) + n_nonzero * log(n_subjects) / n_subjects
-    if (is.null(best) || bic < best$bic) {
-      best <- list(lambda = lambda, bic = bic, beta = beta_cur,
-                   converged = converged, q_value = q_value,
-                   delta = out$delta)
-    }
-  }
-  if (is.null(best)) {
-    return(benchmark_failure_v2("QIF-SEE", "tuning",
-                                "No converged solution on the lambda grid.",
-                                proc.time()[[3]] - start))
-  }
-
-  beta <- best$beta
-  names(beta) <- colnames(X)
-  selected <- which(abs(beta) > 1e-6)
-  elapsed <- proc.time()[[3]] - start
-
-  requested <- if (is.character(target_coords)) {
-    intersect(as.character(target_coords), names(beta))
-  } else {
-    idx <- as.integer(target_coords)
-    idx <- idx[idx >= 1L & idx <= length(beta)]
-    names(beta)[idx]
-  }
-  inf_tab <- data.frame(
-    coordinate = requested %||% character(),
-    index = match(requested %||% character(), names(beta)),
-    feasible = rep(FALSE, length(requested %||% character())),
-    beta_hat = as.numeric(beta[requested %||% character()]),
-    beta_tilde = NA_real_,
-    se = NA_real_,
-    ci_lower = NA_real_,
-    ci_upper = NA_real_,
-    mu = NA_real_,
-    dantzig_residual = NA_real_,
-    omega_l1 = NA_real_,
-    omega_l2 = NA_real_,
-    stringsAsFactors = FALSE
-  )
-  if (!nrow(inf_tab)) inf_tab <- data.frame()
-
-  ans <- list(
-    method_id = "QIF-SEE",
-    status = if (isTRUE(best$converged)) "ok" else "warning",
-    failure_stage = "",
-    failure_message = "",
-    beta_hat = beta,
-    beta_tilde = NULL,
-    se = NULL,
-    selected = selected,
-    fit_object = list(
-      beta_tilde_init = beta_tilde,
-      lambda = best$lambda,
-      gamma = gamma,
-      bic = best$bic,
-      q_value = best$q_value,
-      delta = best$delta,
-      converged = best$converged
-    ),
-    inference_object = list(
-      table = inf_tab,
-      ci_level = NA_real_,
-      target_scope = "longitudinal_qif_selection"
-    ),
-    runtime_sec = elapsed,
-    converged = best$converged,
-    kkt_residual = NA_real_,
-    warning_messages = if (isTRUE(best$converged)) character() else
-      "QIF model-selection search did not converge.",
-    implementation_version = "qif-see-ueki2009-construction",
-    target_scope = "longitudinal_qif_selection"
-  )
-  benchmark_add_metadata_v2(
-    ans,
+  chosen <- which.min(vapply(candidates, `[[`, numeric(1), "bic"))
+  best <- candidates[[chosen]]
+  beta <- setNames(best$beta, colnames(X))
+  ans <- list(method_id = "QIF-SEE", status = "ok", failure_stage = "", failure_message = "",
+              beta_hat = beta, beta_tilde = NULL, se = NULL, selected = which(abs(beta) > 1e-6),
+              fit_object = list(initial = init, beta_tilde_init = beta_init,
+                                tuning_grid = grid, candidates = candidates, selected_candidate = chosen,
+                                density_weights = density, basis = corstr, best = best),
+              inference_object = list(table = data.frame(), target_scope = "longitudinal_qif_selection"),
+              runtime_sec = proc.time()[[3L]] - started, converged = TRUE, kkt_residual = NA_real_,
+              warning_messages = character(), implementation_version = "qif_see_source_20261022",
+              target_scope = "longitudinal_qif_selection",
+              prediction_function = local({ coefficient <- beta; function(newX) as.numeric(as.matrix(newX) %*% coefficient) }))
+  benchmark_add_metadata_v2(ans,
     reference_identifier = "Bhattacharya-Bhuiyan-Chatla-2026-10.1111/sjos.70077",
-    fidelity_status = "formula_level_implemented"
-  )
+    fidelity_status = "source_Algorithm1_with_explicit_density")
 }
