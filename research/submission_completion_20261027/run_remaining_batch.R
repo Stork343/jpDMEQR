@@ -45,6 +45,7 @@ for (i in seq_len(nrow(jobs))) {
   saveRDS(result, temporary, compress = "xz")
   if (!file.rename(temporary, file.path(current, "result.rds"))) stop("Unable to publish the complete simulation record.")
   completed <- completed + 1L
+  if (completed %% 100L == 0L) submission_backup_run(root)
   submission_atomic_csv(data.frame(experiment_id = job$experiment_id, replicate = job$replicate,
     completed = completed, time = as.character(Sys.time())), file.path(root, sprintf("batch_%03d_progress.csv", batch)))
 }
@@ -52,3 +53,4 @@ if (completed != nrow(jobs)) stop("The remaining batch accounting differs.")
 saveRDS(list(completed = completed, implementation_commit = commit, finished = Sys.time()),
   file.path(root, sprintf("batch_%03d_completed.rds", batch)))
 cat("Completed registered simulation batch", batch, completed, "\n")
+submission_backup_run(root, force = TRUE)

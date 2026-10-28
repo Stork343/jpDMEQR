@@ -41,6 +41,7 @@ repeat {
   for (index in head(which(batches$state == "pending"), max(0L, workers - length(active)))) {
     active[[as.character(index)]] <- processx::process$new(file.path(R.home("bin"), "Rscript"),
       c("research/submission_completion_20261027/run_simulation_batch.R", destination, as.character(batches$batch[index])),
+      cleanup = FALSE,
       stdout = file.path(destination, sprintf("batch_%03d.log", index)), stderr = "2>&1")
     batches$state[index] <- "running"
   }

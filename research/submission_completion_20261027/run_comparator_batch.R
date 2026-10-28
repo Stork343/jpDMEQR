@@ -32,8 +32,10 @@ for (i in seq_len(nrow(jobs))) {
   result <- submission_compact_diagnostics(result)
   submission_atomic_rds(result, file.path(current, "result.rds"))
   completed <- completed + 1L
+  if (completed %% 100L == 0L) submission_backup_run(destination)
   write.csv(data.frame(experiment_id = job$experiment_id, replicate = job$replicate, completed = completed,
     time = as.character(Sys.time())), file.path(destination, sprintf("batch_%03d_progress.csv", batch)), row.names = FALSE)
 }
 saveRDS(list(completed = completed, finished = Sys.time()), file.path(destination, sprintf("batch_%03d_completed.rds", batch)))
+submission_backup_run(destination, force = TRUE)
 cat("Completed comparator batch", batch, "replications", completed, "\n")

@@ -38,3 +38,28 @@ submission_atomic_rds <- function(value, path, compress = "xz") {
   if (!file.rename(temporary, path)) stop("Unable to publish the complete output: ", path)
   invisible(path)
 }
+
+submission_backup_run <- function(root, force = FALSE) {
+  base <- Sys.getenv("JPDMEQR_BACKUP_DIR", unset = file.path(path.expand("~"), "jpDMEQR-backups"))
+  destination <- file.path(base, basename(dirname(root)), basename(root))
+  dir.create(destination, recursive = TRUE, showWarnings = FALSE)
+  lock <- filelock::lock(file.path(destination, "backup.lock"), timeout = if (force) 60000 else 0)
+  if (is.null(lock)) {
+    if (force) stop("Unable to acquire the output backup lock.")
+    return(invisible(FALSE))
+  }
+  on.exit(filelock::unlock(lock), add = TRUE)
+  outputs <- list.files(root, "^(result|fit_[0-9]+)[.]rds$", recursive = TRUE)
+  metadata <- c("request.rds", "dispatcher.rds", "config_snapshot.csv", "scheduled_replications.csv")
+  metadata <- metadata[file.exists(file.path(root, metadata))]
+  files <- sort(unique(c(outputs, metadata)))
+  if (!length(files)) stop("No completed files are available for backup.")
+  manifest <- file.path(root, paste0("backup_files_", Sys.getpid(), ".txt"))
+  writeLines(files, manifest)
+  status <- system2("rsync", c("-a", shQuote(paste0("--files-from=", normalizePath(manifest))),
+    shQuote(paste0(normalizePath(root), "/")), shQuote(paste0(normalizePath(destination), "/"))))
+  if (status != 0L) stop("The completed output backup failed.")
+  submission_atomic_csv(data.frame(source = normalizePath(root), files = length(files),
+    completed_outputs = length(outputs), saved = as.character(Sys.time())), file.path(destination, "backup_status.csv"))
+  invisible(TRUE)
+}

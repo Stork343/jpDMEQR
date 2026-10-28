@@ -32,8 +32,10 @@ for (i in seq_len(nrow(jobs))) {
   if (!setequal(result$metrics$method_id, config$methods)) stop("Missing registered method record.")
   submission_atomic_rds(result, file.path(current, "result.rds"))
   completed <- completed + 1L
+  if (completed %% 100L == 0L) submission_backup_run(destination)
   write.csv(data.frame(experiment_id = job$experiment_id, replicate = job$replicate, completed = completed,
                        time = as.character(Sys.time())), file.path(destination, sprintf("batch_%03d_progress.csv", batch)), row.names = FALSE)
 }
+submission_backup_run(destination, force = TRUE)
 saveRDS(list(completed = completed, finished = Sys.time()), file.path(destination, sprintf("batch_%03d_completed.rds", batch)))
 cat("Completed batch", batch, "replications", completed, "\n")
