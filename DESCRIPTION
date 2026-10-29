@@ -46,6 +46,8 @@ Suggests:
     glmnet,
     highs (>= 1.15.1-1),
     illuminaHumanv4.db,
+    kableExtra,
+    knitr,
     limma,
     lqmm,
     matrixStats,

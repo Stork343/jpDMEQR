@@ -17,7 +17,7 @@ cran_required <- c(
   "jsonlite", "ggplot2", "dplyr", "tidyr", "readr", "purrr",
   "matrixStats", "digest", "lqmm", "Matrix", "quadprog", "nloptr",
   "Rcpp", "RcppArmadillo", "RcppEigen", "glmnet", "filelock", "processx", "rcmdcheck", "statmod", "geeVerse",
-  "osqp", "igraph"
+  "osqp", "igraph", "knitr", "kableExtra"
 )
 cran_optional <- c(
   "pbapply", "future.apply", "qs", "arrow", "peakRAM", "foreach",

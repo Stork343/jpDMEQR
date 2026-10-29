@@ -1,0 +1,10 @@
+{
+  "source": "results/raw/application/joint_profile_20261026",
+  "workflows": 40,
+  "fits": 5200,
+  "module_intervals": 200,
+  "reference_family_size": 30,
+  "maximum_workflow_se_difference": 0,
+  "maximum_simultaneous_interval_difference": 0,
+  "generated": "2026-10-29 23:41:34.42973"
+}
