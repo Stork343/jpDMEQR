@@ -1,0 +1,742 @@
+{
+  "inspection": "PDF object and text inspection without visual inspection",
+  "documents": [
+    {
+      "name": "sjs_profile_quantile_main",
+      "pages": 25,
+      "source": {
+        "expanded_characters": 68527,
+        "citations": 29,
+        "labels": 88
+      },
+      "fonts": {
+        "/GVQZND+STIX-Bold-Identity-H": true,
+        "/TPOAQJ+STIX-Regular-Identity-H": true,
+        "/YHQDVQ+CMR10": true,
+        "/LCIUZM+STIX-Italic-Identity-H": true,
+        "/JOAAUS+CMMI10": true,
+        "/TEIHTH+CMSY10": true,
+        "/RNFXXW+MSBM10": true,
+        "/WFOYXD+CMMI7": true,
+        "/TKSSHA+CMR7": true,
+        "/NXNOCH+CMSY7": true,
+        "/ECEPLR+CMEX10": true,
+        "/IWDYCP+MSBM7": true,
+        "/NEPSLI+LMMono8-Regular-Identity-H": true,
+        "/APIJIC+LMMono10-Regular-Identity-H": true,
+        "/BWIKVL+LMMonoLt10-Bold-Identity-H": true,
+        "/ZTCQYX+MSAM10": true,
+        "/WNNHBW+CMR6": true
+      },
+      "page_bounds": [
+        {
+          "page": 1,
+          "characters": 2283,
+          "outside": [],
+          "x_min": 70.418,
+          "x_max": 526.1559999999997,
+          "y_min": 81.2962,
+          "y_max": 808.6324500000001
+        },
+        {
+          "page": 2,
+          "characters": 2888,
+          "outside": [],
+          "x_min": 70.396,
+          "x_max": 526.1559999999995,
+          "y_min": 51.50064999999995,
+          "y_max": 751.9990000000004
+        },
+        {
+          "page": 3,
+          "characters": 1951,
+          "outside": [],
+          "x_min": 70.536,
+          "x_max": 526.0759999999998,
+          "y_min": 51.50064999999995,
+          "y_max": 774.3099750000001
+        },
+        {
+          "page": 4,
+          "characters": 1564,
+          "outside": [],
+          "x_min": 70.39600000000007,
+          "x_max": 526.166,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 5,
+          "characters": 985,
+          "outside": [],
+          "x_min": 70.44599999999997,
+          "x_max": 526.1659999999998,
+          "y_min": 51.50064999999995,
+          "y_max": 775.681975
+        },
+        {
+          "page": 6,
+          "characters": 1933,
+          "outside": [],
+          "x_min": 70.55599999999998,
+          "x_max": 525.659,
+          "y_min": 51.50064999999995,
+          "y_max": 773.8599172
+        },
+        {
+          "page": 7,
+          "characters": 1757,
+          "outside": [],
+          "x_min": 70.396,
+          "x_max": 526.1500000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 8,
+          "characters": 1216,
+          "outside": [],
+          "x_min": 70.39599999999996,
+          "x_max": 525.08,
+          "y_min": 51.50064999999995,
+          "y_max": 775.236975
+        },
+        {
+          "page": 9,
+          "characters": 1692,
+          "outside": [],
+          "x_min": 70.396,
+          "x_max": 526.1659999999997,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000003
+        },
+        {
+          "page": 10,
+          "characters": 2042,
+          "outside": [],
+          "x_min": 70.556,
+          "x_max": 526.1559999999998,
+          "y_min": 51.50064999999995,
+          "y_max": 775.236975
+        },
+        {
+          "page": 11,
+          "characters": 1776,
+          "outside": [],
+          "x_min": 70.396,
+          "x_max": 526.1600000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 773.8709172
+        },
+        {
+          "page": 12,
+          "characters": 1526,
+          "outside": [],
+          "x_min": 70.50600000000009,
+          "x_max": 526.067,
+          "y_min": 51.50064999999995,
+          "y_max": 777.419
+        },
+        {
+          "page": 13,
+          "characters": 1770,
+          "outside": [],
+          "x_min": 70.55599999999998,
+          "x_max": 526.158,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000002
+        },
+        {
+          "page": 14,
+          "characters": 2056,
+          "outside": [],
+          "x_min": 70.50599999999996,
+          "x_max": 526.1689999999995,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 15,
+          "characters": 2518,
+          "outside": [],
+          "x_min": 70.506,
+          "x_max": 526.1559999999996,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000002
+        },
+        {
+          "page": 16,
+          "characters": 2964,
+          "outside": [],
+          "x_min": 70.506,
+          "x_max": 526.157,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 17,
+          "characters": 1979,
+          "outside": [],
+          "x_min": 70.556,
+          "x_max": 526.1659999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 18,
+          "characters": 1910,
+          "outside": [],
+          "x_min": 70.86599999999999,
+          "x_max": 526.0759999999996,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000002
+        },
+        {
+          "page": 19,
+          "characters": 2107,
+          "outside": [],
+          "x_min": 70.556,
+          "x_max": 526.0759999999995,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 20,
+          "characters": 2417,
+          "outside": [],
+          "x_min": 70.506,
+          "x_max": 526.1689999999998,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000002
+        },
+        {
+          "page": 21,
+          "characters": 1512,
+          "outside": [],
+          "x_min": 70.86599999999999,
+          "x_max": 526.1659999999996,
+          "y_min": 51.50064999999995,
+          "y_max": 773.524
+        },
+        {
+          "page": 22,
+          "characters": 2408,
+          "outside": [],
+          "x_min": 70.506,
+          "x_max": 526.0689999999996,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000003
+        },
+        {
+          "page": 23,
+          "characters": 1603,
+          "outside": [],
+          "x_min": 70.506,
+          "x_max": 526.0759999999997,
+          "y_min": 51.50064999999995,
+          "y_max": 773.524
+        },
+        {
+          "page": 24,
+          "characters": 2430,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 526.1659999999998,
+          "y_min": 51.50064999999995,
+          "y_max": 773.524
+        },
+        {
+          "page": 25,
+          "characters": 2090,
+          "outside": [],
+          "x_min": 70.67600000000004,
+          "x_max": 526.159,
+          "y_min": 51.50064999999995,
+          "y_max": 667.604
+        }
+      ],
+      "title": "Joint Profile Inference for High Dimensional Mixed Effects Quantile Regression with Many Small Clusters"
+    },
+    {
+      "name": "sjs_profile_quantile_supplement",
+      "pages": 50,
+      "source": {
+        "expanded_characters": 158039,
+        "citations": 11,
+        "labels": 72
+      },
+      "fonts": {
+        "/YQOAEK+STIX-Bold-Identity-H": true,
+        "/FNJXPT+STIX-Regular-Identity-H": true,
+        "/OHVOHV+STIX-Italic-Identity-H": true,
+        "/JQPYRD+CMMI10": true,
+        "/YIEVAB+CMR10": true,
+        "/CHZMHC+CMR7": true,
+        "/DVACTK+CMEX10": true,
+        "/HQIQQA+CMMI7": true,
+        "/MDYFEV+LMSans8-Regular-Identity-H": true,
+        "/JFAQHE+CMSY10": true,
+        "/LDVDRN+CMSY7": true,
+        "/JIYKFB+CMMI5": true,
+        "/IAXNAE+MSBM10": true,
+        "/XKJLCU+MSBM7": true,
+        "/BZWGGK+LMMono10-Regular-Identity-H": true,
+        "/XENFNX+CMR5": true,
+        "/OAAFTM+CMMI8": true
+      },
+      "page_bounds": [
+        {
+          "page": 1,
+          "characters": 1235,
+          "outside": [],
+          "x_min": 70.567,
+          "x_max": 525.0790000000002,
+          "y_min": 81.30520000000001,
+          "y_max": 808.6324500000001
+        },
+        {
+          "page": 2,
+          "characters": 1140,
+          "outside": [],
+          "x_min": 70.396,
+          "x_max": 525.0800000000003,
+          "y_min": 51.50064999999995,
+          "y_max": 775.5199750000002
+        },
+        {
+          "page": 3,
+          "characters": 2059,
+          "outside": [],
+          "x_min": 70.55600000000015,
+          "x_max": 526.07,
+          "y_min": 51.50064999999995,
+          "y_max": 773.524
+        },
+        {
+          "page": 4,
+          "characters": 1811,
+          "outside": [],
+          "x_min": 70.556,
+          "x_max": 526.1590000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000003
+        },
+        {
+          "page": 5,
+          "characters": 1782,
+          "outside": [],
+          "x_min": 69.86599999999976,
+          "x_max": 526.1600000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 773.524
+        },
+        {
+          "page": 6,
+          "characters": 1813,
+          "outside": [],
+          "x_min": 70.64600000000002,
+          "x_max": 526.1560000000002,
+          "y_min": 51.50064999999995,
+          "y_max": 774.267975
+        },
+        {
+          "page": 7,
+          "characters": 2011,
+          "outside": [],
+          "x_min": 70.55599999999993,
+          "x_max": 526.1600000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 736.4199750000002
+        },
+        {
+          "page": 8,
+          "characters": 2389,
+          "outside": [],
+          "x_min": 69.70100000000002,
+          "x_max": 526.0790000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 774.7719750000001
+        },
+        {
+          "page": 9,
+          "characters": 1411,
+          "outside": [],
+          "x_min": 70.50599999999991,
+          "x_max": 526.073,
+          "y_min": 51.50064999999995,
+          "y_max": 721.7349750000001
+        },
+        {
+          "page": 10,
+          "characters": 1636,
+          "outside": [],
+          "x_min": 70.55599999999998,
+          "x_max": 525.0790000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 775.3289750000001
+        },
+        {
+          "page": 11,
+          "characters": 2144,
+          "outside": [],
+          "x_min": 70.39599999999996,
+          "x_max": 526.3349402,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 12,
+          "characters": 2017,
+          "outside": [],
+          "x_min": 70.368,
+          "x_max": 526.159,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 13,
+          "characters": 2135,
+          "outside": [],
+          "x_min": 70.506,
+          "x_max": 526.0789999999998,
+          "y_min": 51.50064999999995,
+          "y_max": 774.267975
+        },
+        {
+          "page": 14,
+          "characters": 2185,
+          "outside": [],
+          "x_min": 70.536,
+          "x_max": 526.164,
+          "y_min": 51.50064999999995,
+          "y_max": 775.3099750000001
+        },
+        {
+          "page": 15,
+          "characters": 1887,
+          "outside": [],
+          "x_min": 70.36799999999994,
+          "x_max": 526.0660000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000002
+        },
+        {
+          "page": 16,
+          "characters": 2222,
+          "outside": [],
+          "x_min": 70.50599999999997,
+          "x_max": 526.3339402,
+          "y_min": 51.50064999999995,
+          "y_max": 775.4339750000001
+        },
+        {
+          "page": 17,
+          "characters": 1696,
+          "outside": [],
+          "x_min": 70.55599999999993,
+          "x_max": 526.1590000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 774.267975
+        },
+        {
+          "page": 18,
+          "characters": 1721,
+          "outside": [],
+          "x_min": 70.50599999999997,
+          "x_max": 526.3339401999999,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000002
+        },
+        {
+          "page": 19,
+          "characters": 1979,
+          "outside": [],
+          "x_min": 70.50599999999999,
+          "x_max": 525.6559999999995,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000003
+        },
+        {
+          "page": 20,
+          "characters": 1600,
+          "outside": [],
+          "x_min": 70.55600000000004,
+          "x_max": 525.6600000000001,
+          "y_min": 51.50064999999995,
+          "y_max": 774.3099749999999
+        },
+        {
+          "page": 21,
+          "characters": 2321,
+          "outside": [],
+          "x_min": 70.506,
+          "x_max": 526.1559999999996,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000003
+        },
+        {
+          "page": 22,
+          "characters": 2898,
+          "outside": [],
+          "x_min": 68.94600000000027,
+          "x_max": 526.1519999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 767.5850000000003
+        },
+        {
+          "page": 23,
+          "characters": 2616,
+          "outside": [],
+          "x_min": 70.556,
+          "x_max": 526.1689999999998,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000003
+        },
+        {
+          "page": 24,
+          "characters": 2273,
+          "outside": [],
+          "x_min": 70.36800000000005,
+          "x_max": 524.4189999999995,
+          "y_min": 51.50064999999995,
+          "y_max": 767.6263249999996
+        },
+        {
+          "page": 25,
+          "characters": 1911,
+          "outside": [],
+          "x_min": 70.50599999999999,
+          "x_max": 526.159,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 26,
+          "characters": 2148,
+          "outside": [],
+          "x_min": 70.86599999999999,
+          "x_max": 525.2449999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 762.1303249999996
+        },
+        {
+          "page": 27,
+          "characters": 1742,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4097999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 771.0933249999997
+        },
+        {
+          "page": 28,
+          "characters": 1708,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4026628,
+          "y_min": 51.50064999999995,
+          "y_max": 771.0933249999999
+        },
+        {
+          "page": 29,
+          "characters": 2547,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4097999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 761.1793249999996
+        },
+        {
+          "page": 30,
+          "characters": 2493,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4026628,
+          "y_min": 51.50064999999995,
+          "y_max": 761.1793249999996
+        },
+        {
+          "page": 31,
+          "characters": 2480,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4097999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 761.1793249999996
+        },
+        {
+          "page": 32,
+          "characters": 2451,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4026628,
+          "y_min": 51.50064999999995,
+          "y_max": 761.1793249999996
+        },
+        {
+          "page": 33,
+          "characters": 2347,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4097999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 726.3033249999996
+        },
+        {
+          "page": 34,
+          "characters": 2173,
+          "outside": [],
+          "x_min": 70.55599999999998,
+          "x_max": 526.1559999999996,
+          "y_min": 51.50064999999995,
+          "y_max": 716.2660000000002
+        },
+        {
+          "page": 35,
+          "characters": 1194,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4097999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 775.7809750000001
+        },
+        {
+          "page": 36,
+          "characters": 2978,
+          "outside": [],
+          "x_min": 70.55599999999993,
+          "x_max": 526.1689999999998,
+          "y_min": 51.50064999999995,
+          "y_max": 763.8973249999997
+        },
+        {
+          "page": 37,
+          "characters": 2822,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4097999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 761.7633249999996
+        },
+        {
+          "page": 38,
+          "characters": 2630,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4026628,
+          "y_min": 51.50064999999995,
+          "y_max": 763.4743249999997
+        },
+        {
+          "page": 39,
+          "characters": 2251,
+          "outside": [],
+          "x_min": 70.556,
+          "x_max": 526.1659999999997,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000001
+        },
+        {
+          "page": 40,
+          "characters": 2118,
+          "outside": [],
+          "x_min": 70.556,
+          "x_max": 524.6586,
+          "y_min": 51.50064999999995,
+          "y_max": 773.524
+        },
+        {
+          "page": 41,
+          "characters": 2005,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 526.0659999999996,
+          "y_min": 51.50064999999995,
+          "y_max": 766.1813249999998
+        },
+        {
+          "page": 42,
+          "characters": 2304,
+          "outside": [],
+          "x_min": 70.556,
+          "x_max": 526.1659999999997,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000003
+        },
+        {
+          "page": 43,
+          "characters": 2195,
+          "outside": [],
+          "x_min": 70.50599999999999,
+          "x_max": 526.1659999999997,
+          "y_min": 51.50064999999995,
+          "y_max": 773.5240000000003
+        },
+        {
+          "page": 44,
+          "characters": 2571,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4026628,
+          "y_min": 51.50064999999995,
+          "y_max": 759.4683249999998
+        },
+        {
+          "page": 45,
+          "characters": 2518,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 524.4097999999999,
+          "y_min": 51.50064999999995,
+          "y_max": 713.1373249999996
+        },
+        {
+          "page": 46,
+          "characters": 2617,
+          "outside": [],
+          "x_min": 70.50599999999999,
+          "x_max": 526.1659999999996,
+          "y_min": 51.50064999999995,
+          "y_max": 762.4083249999998
+        },
+        {
+          "page": 47,
+          "characters": 2460,
+          "outside": [],
+          "x_min": 70.61599999999999,
+          "x_max": 526.0789999999998,
+          "y_min": 51.50064999999995,
+          "y_max": 766.1813249999998
+        },
+        {
+          "page": 48,
+          "characters": 2686,
+          "outside": [],
+          "x_min": 70.506,
+          "x_max": 526.0789999999997,
+          "y_min": 51.50064999999995,
+          "y_max": 771.8863249999996
+        },
+        {
+          "page": 49,
+          "characters": 2307,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 526.1659999999997,
+          "y_min": 51.50064999999995,
+          "y_max": 773.524
+        },
+        {
+          "page": 50,
+          "characters": 420,
+          "outside": [],
+          "x_min": 70.866,
+          "x_max": 526.159,
+          "y_min": 51.50064999999995,
+          "y_max": 166.88
+        }
+      ],
+      "title": "Supporting Information for Joint Profile Inference for High Dimensional Mixed Effects Quantile Regression"
+    }
+  ]
+}

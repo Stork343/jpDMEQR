@@ -1,5 +1,117 @@
 \section{Simulation construction and complete results}\label{supp:simulation}
 \input{generated/joint_profile/inference_values}
+\input{generated/submission/joint_values}
+
+\subsection{Registered statistical configurations}\label{supp:registered-study}
+
+The registered study comprises \RegisteredJointSettings{} settings
+and \RegisteredJointDatasets{} independently generated datasets.
+Table~\ref{tab:registered-study-design} gives their sample sizes,
+dimensions and replication counts. Each dataset requests coordinates
+$1$, $2$, $s+1$ and $s+2$, where $s$ is the number of nonzero
+generating coefficients. The first two coordinates assess active
+effects and the latter two assess null effects. The target is the
+complete unsmoothed profile parameter for the full generating design.
+
+The Gaussian scaling settings A01 through A12 vary the cluster count
+at each dimension and sparsity level. The error settings B01 through
+B19 use standard normal, $t_3/\sqrt{3}$, unit-variance Laplace and
+$(\chi_3^2-3)/\sqrt{6}$ innovations, together with a
+$0.9N(0,1)+0.1N(0,25)$ mixture and a unit-variance asymmetric Laplace
+distribution. Each innovation is centred at its specified quantile.
+Predictor-dependent scale multiplies the centred innovation by
+$\exp\{0.35\operatorname{clip}(X_1,-3,3)\}$. The nonmedian
+scale settings B16 and B19 use the independently calculated profile
+targets described below.
+
+Cluster heterogeneity settings C01 through C16 change the random
+intercept variance and include correlated intercepts and time slopes.
+They also examine non-Gaussian cluster effects and departures from
+the fitted nuisance model. Gaussian-copula innovations have
+within-cluster AR(1) correlation $0.4$ and preserve their declared
+marginal quantiles. The non-informative imbalance setting samples
+$m\in\{2,\ldots,12\}$ with probability proportional to
+$0.35(1-0.35)^{m-2}$. Profile target calculations apply to the omitted
+slope, random-scale and nonlinear nuisance settings, and to the
+settings that link covariates or cluster size to cluster effects.
+
+The design settings D01 through D06 vary correlation and the
+population inverse-information structure. The working-penalty
+settings retain fixed positive values of $\Lambda$, and the bandwidth
+sensitivities use multiples $0.75$ and $1.25$ of $n^{-3/10}$.
+E07 and E08 multiply the joint learning budget by $0.5$ and $2$.
+The signal settings use coefficient magnitudes $0.40$ and $1.10$.
+The complete generating parameters are retained in the accompanying
+configuration and source tables.
+
+In F01 through F03, independent screening uses half of the subjects
+and passes its predictor pool to the estimation sample. F04 uses
+same-sample CA-IQR-SIS. F05 uses outcome-free variance filtering,
+while F06 passes the full predictor set to coordinate learning.
+Each screening rule adds the requested coordinates when needed.
+The coverage calculations retain the full-design targets across
+these input rules.
+
+\begingroup\small
+\input{generated/submission/joint_registry}
+\endgroup
+
+\subsection{Coverage accounting and interval uncertainty}
+
+The registered study yields \RegisteredJointAvailable{} numerically
+completed fits. Its \RegisteredJointFailures{} unavailable fits
+remain in the coverage denominator. For a coordinate group $G$ in
+setting $a$ and replication $r$, define
+\[
+ C_{ar,G}=\frac{1}{|G|}\sum_{k\in G}
+  1\{\text{interval }I_{ark}\text{ is available}\}
+  1\{\beta_k^\star\in I_{ark}\}.
+\]
+Group coverage is the mean of $C_{ar,G}$ over the registered
+replications, with Monte Carlo standard error
+$\operatorname{sd}(C_{ar,G})/\sqrt{B_a}$. This calculation retains
+the dependence between coordinates in a dataset. When settings are
+averaged within an input category, each setting receives equal weight
+and its Monte Carlo variance contributes with the squared averaging
+weight.
+
+Table~\ref{tab:registered-joint-coverage} reports every setting's
+active and null coverage. Table~\ref{tab:registered-joint-length}
+gives mean lengths among available intervals; its Monte Carlo
+standard error uses the joint replication averages of available
+length and interval availability. At the individual-coordinate level,
+Table~\ref{tab:registered-joint-coordinates} reports exact 95\%
+binomial intervals for coverage. The standard error ratio divides
+the mean reported standard error by the empirical standard deviation
+among available coefficient estimates for that coordinate.
+
+\begingroup\small
+\input{generated/submission/joint_coverage}
+\input{generated/submission/joint_lengths}
+\input{generated/submission/joint_coordinates}
+\endgroup
+
+\subsection{Target changes induced by variance filtering}
+
+The Gaussian projection formula gives the selected population target
+from the saved supports in F05 and F06. For each estimation fold,
+we evaluate $\Sigma_{AA}^{-1}\Sigma_{A,S_0}\beta^0_{S_0}$ in the
+original generating coordinate system and then combine the requested
+coordinate with the estimator's fold weights.
+Table~\ref{tab:registered-prescreen-targets} reports how often the
+result differs from the full target by more than $10^{-8}$, with
+exact binomial intervals and Monte Carlo errors.
+
+Variance filtering changes the second-coordinate target in
+\VarianceFilterSecondShifted{} of 500 datasets and the
+eleventh-coordinate target in \VarianceFilterEleventhShifted{}.
+Their conditional adjustment variables can be absent from the
+retained pool. In F06, every requested selected target agrees with
+its full-design coordinate within the stated tolerance. Both settings'
+coverage in Table~\ref{tab:registered-joint-coverage} is evaluated
+against the full target.
+
+\input{generated/submission/prescreen_targets}
 
 \subsection{Generating distributions and independent replication}
 
@@ -162,8 +274,7 @@ All registered method fits converged.
 G06 and G07 use the same fifty generated datasets and the same
 method-specific tuning seeds. Four workers complete their batches
 in \SubmissionWallFour{} seconds and eight workers in
-\SubmissionWallEight{} seconds. The
-\SubmissionParallelComparisons{} paired method comparisons return
+\SubmissionWallEight{} seconds. The paired method comparisons return
 identical coefficient vectors, interval endpoints and standard
 errors. Each batch includes the proposed method, pooled quantile
 Lasso and the known-support oracle.

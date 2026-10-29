@@ -1,0 +1,12 @@
+{
+  "settings": 71,
+  "datasets": 45500,
+  "converged": 45494,
+  "numerical_failures": 6,
+  "requested_intervals": 182000,
+  "covariance_unit": "independent_simulation_replication",
+  "input_summary_weighting": "equal_weight_over_registered_settings",
+  "failure_coverage": "unavailable_intervals_count_as_noncoverage",
+  "source": "results/tables/submission_20261028/collections/submission_20261027_main_joint",
+  "generated": "2026-10-30 00:04:28.428393"
+}

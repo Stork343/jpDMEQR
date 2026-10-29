@@ -1,0 +1,20 @@
+{
+  "abstract_words": 138,
+  "keywords": [
+    "clustered data",
+    "conditional adjustment",
+    "convolution smoothing",
+    "high-dimensional inference",
+    "mixed-effects model",
+    "profile M-estimation",
+    "quantile regression"
+  ],
+  "running_title": "Joint profile quantile inference",
+  "running_title_characters": 32,
+  "source": "https://onlinelibrary.wiley.com/page/journal/14679469/homepage/forauthors.html",
+  "limits": {
+    "abstract_words": 150,
+    "keywords": 7,
+    "running_title_characters": 40
+  }
+}

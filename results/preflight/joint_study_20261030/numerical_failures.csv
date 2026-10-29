@@ -1,0 +1,7 @@
+experiment_id,replicate,method_id,failure_stage,failure_message
+B19,231,JOINT-PROFILE,unknown,Joint profile optimisation reached its iteration limit with gap 1.78547e-08.
+D03,6,JOINT-PROFILE,unknown,The nodewise KKT check failed.
+D03,191,JOINT-PROFILE,unknown,The nodewise KKT check failed.
+D03,261,JOINT-PROFILE,unknown,The nodewise KKT check failed.
+D03,413,JOINT-PROFILE,unknown,The nodewise KKT check failed.
+D03,429,JOINT-PROFILE,unknown,The nodewise KKT check failed.

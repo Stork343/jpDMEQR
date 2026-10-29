@@ -42,6 +42,7 @@ uncertainty <- function(value, mcse) paste0(number(value), " (", number(mcse), "
 write_table <- function(table, caption, label, stem, long = TRUE) {
   content <- knitr::kable(table, format = "latex", booktabs = TRUE, longtable = long, escape = FALSE,
     caption = caption, label = label, linesep = "")
+  if (long) content <- kableExtra::kable_styling(content, latex_options = "repeat_header")
   writeLines(as.character(content), file.path(generated, paste0(stem, ".tex")))
 }
 table <- data.frame(Input = overview_wide$input, Settings = overview_wide$settings,
@@ -58,6 +59,15 @@ table <- data.frame(Setting = coverage_wide$experiment_id,
   Active = uncertainty(coverage_wide$mean_length_active, coverage_wide$length_mcse_active),
   Null = uncertainty(coverage_wide$mean_length_null, coverage_wide$length_mcse_null))
 write_table(table, "Registered interval lengths with Monte Carlo standard errors", "registered-joint-length", "joint_lengths")
+table <- data.frame(Setting = coordinates$experiment_id,
+  Coordinate = as.integer(sub("^x", "", coordinates$coordinate)),
+  Available = paste0(coordinates$available_count, "/", coordinates$replications),
+  Coverage = uncertainty(coordinates$coverage_all, coordinates$coverage_mcse),
+  Interval = paste0("[", number(coordinates$coverage_lower), ", ", number(coordinates$coverage_upper), "]"),
+  Ratio = number(coordinates$se_sd_ratio))
+names(table)[6L] <- "$\\overline{s}/\\mathrm{SD}$"
+write_table(table, "Coordinate coverage with exact binomial intervals and standard error ratios",
+  "registered-joint-coordinates", "joint_coordinates")
 table <- data.frame(Setting = registry$experiment_id, n = registry$n_clusters, p = registry$p,
   s = registry$s, tau = registry$tau, q = registry$q, Replications = registry$replications,
   Input = unname(labels[registry$screen_method]))
@@ -79,6 +89,11 @@ get_coverage <- function(id, type) {
 values <- c(RegisteredJointSettings = as.character(nrow(registry)), RegisteredJointDatasets = as.character(nrow(core)),
   RegisteredJointFailures = as.character(sum(!core$optimizer_converged)),
   RegisteredJointAvailable = as.character(sum(core$optimizer_converged)),
+  RegisteredFullPredictorSettings = as.character(overview[input == "Full predictor set" & coordinate_type == "active", settings]),
+  RegisteredFullActiveCoverage = number(overview[input == "Full predictor set" & coordinate_type == "active", coverage]),
+  RegisteredFullActiveMCSE = number(overview[input == "Full predictor set" & coordinate_type == "active", coverage_mcse]),
+  RegisteredFullNullCoverage = number(overview[input == "Full predictor set" & coordinate_type == "null", coverage]),
+  RegisteredFullNullMCSE = number(overview[input == "Full predictor set" & coordinate_type == "null", coverage_mcse]),
   VarianceFilterActiveCoverage = get_coverage("F05", "active"), VarianceFilterNullCoverage = get_coverage("F05", "null"),
   FullDesignActiveCoverage = get_coverage("F06", "active"), FullDesignNullCoverage = get_coverage("F06", "null"),
   VarianceFilterSecondShifted = as.character(shifts[experiment_id == "F05" & coordinate == "x00002", shifted]),
