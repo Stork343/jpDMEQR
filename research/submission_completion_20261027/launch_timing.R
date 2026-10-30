@@ -17,7 +17,7 @@ root <- if (phase == "probe") "results/scratch/submission_completion_20261027/ti
 if (dir.exists(root)) stop("The timing dispatch already exists.")
 dir.create(root, recursive = TRUE)
 saveRDS(list(registry = registry, jobs = jobs, base_seed = 20261027L,
-  implementation_commit = current_commit_v2(), numerical_specification = yaml::read_yaml("config/submission_comparator_numerics_20261028.yml"),
+  implementation_commit = current_commit_v2(), numerical_specification = submission_numerical_specification,
   session = sessionInfo(), system = Sys.info(),
   shared_parallel_fitting_id = "G_parallel", started = Sys.time()), file.path(root, "request.rds"))
 write.csv(jobs, file.path(root, "scheduled_replications.csv"), row.names = FALSE)

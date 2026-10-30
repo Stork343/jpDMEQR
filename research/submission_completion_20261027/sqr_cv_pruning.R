@@ -9,7 +9,8 @@ submission_sqr_gamma_cv <- function(train, tau, target_coords, config, tuning, s
   folds <- make_subject_folds_v2(train$cluster_id, k = 5L, seed = role_seed)
   diagnostic <- list(method_version = "source_20261023_CV",
     selection_rule = "five_subject_folds_mean_full_matrix_inverse_defect",
-    execution = "certified_nonnegative_fold_loss_pruning",
+    execution = if (identical(control$solver_opts$algorithm, "compiled_certified"))
+      "certified_column_and_fold_loss_bounds" else "certified_nonnegative_fold_loss_pruning",
     loss_definition = "squared_Frobenius_H_validation_W_sym_minus_I_divided_by_p",
     configured_multipliers = configured, candidate_multipliers = multipliers, folds = folds, fold_seed = role_seed,
     roles = vector("list", 5L), inner_lambda_cv = vector("list", 5L),
@@ -39,7 +40,7 @@ submission_sqr_gamma_cv <- function(train, tau, target_coords, config, tuning, s
       n_training = length(training_subjects), N_training = N,
       n_validation = length(validation_subjects), N_validation = length(validation$y), warning_messages = character())
     if (!fitted$converged) sqr_source_tuning_stop_v2("An SQR fold initial estimator did not converge.", diagnostic)
-    prepared[[fold]] <- list(H = fitted$hessian,
+    prepared[[fold]] <- list(H = fitted$hessian, path_cache = new.env(parent = emptyenv()),
       validation_H = sqr_iid_hessian_fn_v2(validation$y, validation$X, fitted$beta, tau, h), tuning = fold_tuning,
       n_training = length(training_subjects), N_training = N, n_validation = length(validation_subjects),
       N_validation = length(validation$y), h = h, lambda = lambda, lambda_multiplier = multiplier)
@@ -74,15 +75,29 @@ submission_sqr_gamma_cv <- function(train, tau, target_coords, config, tuning, s
       } else {
         # 单个gamma的数值失败使该候选不满足完整五折规则。
         computed <- tryCatch(withCallingHandlers({
+          numerical_control <- control$solver_opts %||% list()
+          numerical_control$path_cache <- item$path_cache
+          if (identical(numerical_control$algorithm, "compiled_certified") &&
+              isTRUE(numerical_control$column_loss_bounds)) {
+            threshold <- incumbent + 1e-12 * max(1, abs(incumbent))
+            budget <- if (is.finite(threshold)) max(0, 5 * threshold - accumulated) else Inf
+            submission_clime_bounded_cv(item$H, gamma, item$validation_H, budget,
+              numerical_control, coordinates)
+          } else {
           precision <- solve_clime_matrix_iid_v2(item$H, gamma,
             solver_preference = control$solver_preference %||% c("CLARABEL", "ECOS", "SCS"),
-            solver_opts = control$solver_opts %||% list(), coordinates = coordinates)
+            solver_opts = numerical_control, coordinates = coordinates)
           precision_record <- sqr_cv_precision_record_v2(precision, coordinates)
           if (!isTRUE(precision$feasible)) list(record = precision_record, feasible = FALSE) else {
-            defect <- profile_dense_crossprod_v2(item$validation_H, precision$omega_symmetric) - diag(nrow(item$H))
-            value <- sum(defect^2) / nrow(item$H)
+            value <- if (identical(numerical_control$algorithm, "compiled_certified")) {
+              submission_sqr_sparse_loss_cpp(item$validation_H, precision$omega_symmetric)
+            } else {
+              defect <- profile_dense_crossprod_v2(item$validation_H, precision$omega_symmetric) - diag(nrow(item$H))
+              sum(defect^2) / nrow(item$H)
+            }
             if (!is.finite(value) || value < 0) stop("Invalid SQR validation loss.")
             list(record = precision_record, feasible = TRUE, loss = value)
+          }
           }
         }, warning = function(condition) {
           native_warnings <<- c(native_warnings, conditionMessage(condition))
@@ -94,6 +109,13 @@ submission_sqr_gamma_cv <- function(train, tau, target_coords, config, tuning, s
           solver_status <- computed$condition$diagnostics$status %||% "failed"
           record <- list(status = "failed", condition = computed$condition,
             failure_diagnostics = computed$condition$diagnostics)
+        } else if (isTRUE(computed$pruned)) {
+          record <- computed$record
+          accumulated <- accumulated + computed$lower_bound
+          pruned <- TRUE
+          incumbent_at_pruning <- incumbent
+          status <- "pruned_by_column_loss_lower_bound"
+          solver_status <- "certified_nonnegative_column_loss_bound"
         } else {
           record <- computed$record
           if (!computed$feasible) {

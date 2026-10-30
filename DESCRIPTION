@@ -68,6 +68,6 @@ Suggests:
 VignetteBuilder: utils
 Config/testthat/edition: 3
 LinkingTo: Rcpp, RcppArmadillo, RcppEigen
-SystemRequirements: C++14
+SystemRequirements: C++17, CMake (>= 3.15), pkg-config
 NeedsCompilation: yes
 RoxygenNote: 7.3.3

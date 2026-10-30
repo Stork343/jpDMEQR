@@ -1,0 +1,49 @@
+version: submission_comparator_numerics_20261030
+source_registry: config/joint_profile_submission_20261027.yml
+POOLED-QR-LASSO:
+  optimizer: HiGHS_dual_linear_programme
+  certificate: full_primal_dual_gap
+SQR-DEBIASED-IID:
+  initial_optimizer: matrix_free_fista
+  precision_optimizer: compiled_certified
+  precision_library: HiGHS_1.15.1
+  precision_certificate: complete_primal_dual
+  working_set_additions: 16
+  simplex_iteration_limit: 20p
+  primal_feasibility_tolerance: 0.00000001
+  dual_feasibility_tolerance: 0.00000001
+  complete_gamma_grid: true
+  complete_precision_for_eligible_candidates: true
+  lambda_subject_folds: 5
+  gamma_subject_folds: 5
+  inner_lambda_subject_folds: 5
+  native_path_maximum_pivots: 4p
+  native_path_required_below_gamma: 0.25
+  native_path_before_loss_below_gamma: 0.1
+  shared_fixed_Hessian_path: true
+  column_loss_bounds: true
+  unknown_symmetric_entries: exact_absolute_raw_row_bounds
+  validation_bound: scaled_quadratic_dual_certificate
+  shared_infeasibility_certificates: true
+  exact_nonnegative_fold_loss_pruning: true
+  inner_prediction_hessians: false
+DOUBLE-PEN-QLMM:
+  criterion: SIC
+  beta_penalty_scale: sqrt(tau*(1-tau)*N*log(p))
+  alpha_penalty_scale: sqrt(tau*(1-tau)*(N/n)*log(n*q))
+  beta_multipliers: [0.25, 0.5, 1, 2]
+  alpha_multipliers: [0.5, 1]
+QGEE-SCAD:
+  numerical_backend: cluster_batched_products_LAPACK_SVD
+  singular_value_relative_threshold: 0.00000001490116
+  shared_path_initial_estimator: true
+  standardize: false
+  fixed_intercept: true
+  penalty_path: geeVerse_0.3.1_HBIC
+  maxit: 1000
+  epsilon: 0.0001
+execution:
+  comparator_process_budget: 12
+  sqr_processes_with_two_other_queues: 8
+  sqr_processes_with_one_other_queue: 8
+  single_remaining_queue_process_limit: 12

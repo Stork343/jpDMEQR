@@ -53,16 +53,31 @@ submission_launchers_alive <- function(root) {
   found
 }
 
+submission_comparator_allocations <- function(completed) {
+  families <- c("mixed", "pooled", "sqr", "qgee", "bias_adjusted")
+  if (!identical(names(completed), families) || anyNA(completed)) stop("Invalid comparator completion states.")
+  allocation <- setNames(integer(length(families)), families)
+  active <- families[!completed]
+  if (!length(active)) return(allocation)
+  if ("sqr" %in% active) {
+    others <- setdiff(active, "sqr")
+    allocation["sqr"] <- if (!length(others)) 12L else min(8L, 12L - 2L * length(others))
+    if (length(others)) allocation[others] <- as.integer((12L - allocation["sqr"]) / length(others))
+  } else {
+    allocation[active] <- 12L %/% length(active)
+  }
+  if (sum(allocation) > 12L || any(allocation < 0L)) stop("The comparator allocation exceeds the processor budget.")
+  allocation
+}
+
 submission_comparator_capacity <- function(family, workers) {
   families <- c("mixed", "pooled", "sqr", "qgee", "bias_adjusted")
-  if (!family %in% families || !workers %in% 1:8) stop("Invalid comparator capacity request.")
+  if (!family %in% families || !workers %in% 1:12) stop("Invalid comparator capacity request.")
   if (!file.exists("results/raw/simulation/submission_20261027_main_joint/completed.rds"))
     return(min(workers, 1L))
-  if (family != "sqr") return(min(workers, 2L))
-  other <- setdiff(families, "sqr")
-  remaining <- sum(!file.exists(file.path("results/raw/simulation",
-    paste0("submission_20261028_main_", other), "completed.rds")))
-  min(workers, 12L - 2L * remaining)
+  completed <- setNames(file.exists(file.path("results/raw/simulation",
+    paste0("submission_20261028_main_", families), "completed.rds")), families)
+  min(workers, submission_comparator_allocations(completed)[[family]])
 }
 
 submission_atomic_rds <- function(value, path, compress = "xz") {
@@ -89,6 +104,9 @@ submission_backup_run <- function(root, force = FALSE) {
   if (file.exists(completed_path)) invisible(readRDS(completed_path))
   metadata <- c("request.rds", "dispatcher.rds", "config_snapshot.csv", "scheduled_replications.csv", "completed.rds")
   metadata <- metadata[file.exists(file.path(root, metadata))]
+  metadata <- unique(c(metadata,
+    list.files(root, "^(request|completion_request_[0-9]+)[.]rds$", recursive = TRUE),
+    list.files(root, "^(continuation_|numerical_transition_).*[.]rds$")))
   files <- sort(unique(c(outputs, metadata)))
   if (!length(files)) stop("No completed files are available for backup.")
   manifest <- file.path(root, paste0("backup_files_", Sys.getpid(), ".txt"))

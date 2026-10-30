@@ -76,6 +76,7 @@ install_parametric_clime <- function() {
     stop("The required archived CLIME dependency was not installed.")
 }
 install_parametric_clime()
+source("research/submission_completion_20261027/install_compiled_clime.R")
 if (install_optional) {
   optional_missing <- cran_optional[!vapply(cran_optional, requireNamespace, logical(1), quietly = TRUE)]
   if (length(optional_missing)) {

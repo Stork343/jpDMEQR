@@ -5,7 +5,7 @@ source("research/submission_completion_20261027/dispatch_state.R")
 args <- commandArgs(trailingOnly = TRUE)
 root <- args[1L]
 workers <- as.integer(args[2L])
-if (!workers %in% 1:8 || !file.exists(file.path(root, "request.rds"))) stop("Invalid simulation continuation.")
+if (!workers %in% 1:12 || !file.exists(file.path(root, "request.rds"))) stop("Invalid simulation continuation.")
 run <- function() {
   if (length(submission_launchers_alive(root))) stop("A live dispatcher already owns this simulation queue.")
   lock <- filelock::lock(file.path(root, "continuation.lock"), timeout = 0)

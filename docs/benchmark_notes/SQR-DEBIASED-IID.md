@@ -1,88 +1,87 @@
-# SQR-DEBIASED-IID — source note
+# Smoothed quantile regression inference
 
-## Reference
+`SQR-DEBIASED-IID` implements the independent-observation procedure of
+Yan, Wang and Zhang (2023), *Confidence Intervals and Hypothesis Testing
+for High-dimensional Quantile Regression: Convolution Smoothing and
+Debiasing*, Journal of Machine Learning Research 24(245), 1–49.
+The [journal record](https://www.jmlr.org/papers/v24/22-1217.html) supplies
+the published article.
 
-Yan, Y., Wang, X., and Zhang, R. (2023). Confidence Intervals and Hypothesis
-Testing for High-dimensional Quantile Regression: Convolution Smoothing and
-Debiasing. *Journal of Machine Learning Research* 24(245):1-49.
-Paper identifier: `22-1217`.
-URL: https://www.jmlr.org/papers/v24/22-1217.html
+## Statistical definition
 
-## Role in this project
+The Gaussian-smoothed check loss is
+`u * (tau - Phi(-u/h)) + h * phi(u/h)`. Its L1-penalised empirical
+minimiser uses an unpenalised working intercept. With N observations,
+the score and Hessian are
 
-Modern iid negative control: debiased convolution-smoothed high-dimensional
-quantile regression applied at the observation level, ignoring clustering.
-Isolates the cost of ignoring cluster structure for a modern inferential
-method. All inference is labelled `naive_iid`.
+\[
+ g=N^{-1}\sum_i[\Phi\{(X_i^T\widehat\beta-Y_i)/h\}-\tau]X_i,
+ \qquad
+ H=(Nh)^{-1}\sum_i\phi\{(X_i^T\widehat\beta-Y_i)/h\}X_iX_i^T.
+\]
 
-## Implemented formulas (exact)
+For a common tolerance gamma, every required CLIME direction minimises
+its L1 norm subject to `max(abs(H %*% omega - e_k)) <= gamma`.
+Pairwise minimum-magnitude symmetrisation gives the matrix W used in
+the coefficient correction. Its requested row w gives
 
-- Smoothed check loss (Gaussian kernel): `l_{h,tau}(u) = u*(tau - Phi(-u/h)) + h*phi(u/h)`.
-- iid score: `n^{-1} sum_i [ Phi((x_i'beta - y_i)/h) - tau ] x_i`.
-- iid Hessian: `(n h)^{-1} sum_i phi((x_i'beta - y_i)/h) x_i x_i'`.
-- l1-SQR: `argmin n^{-1} sum l_{h,tau}(y_i - x_i'beta) + lambda ||beta||_1`,
-  solved by proximal gradient with backtracking on the exact objective
-  (JMLR Algorithm 1, step 1).
-- Row-wise CLIME direction: for target coordinate k,
-  `omega_k = argmin ||omega||_1` s.t. `||H omega - e_k||_inf <= gamma`
-  (JMLR eq. 11/15), solved with CVXR (CLARABEL/ECOS/SCS). Smallest feasible
-  value on the frozen `gamma` grid is used.
-- One-step debiasing: `beta_tilde_k = beta_hat_k + omega_k' score`
-  (JMLR eq. 10; sign as printed: `+ W n^{-1} sum [tau - Phi(.)] x_i`).
-- iid variance: `tau(1-tau) * omega_k' Sigma_hat omega_k / N` with
-  `Sigma_hat = N^{-1} sum x_i x_i'` (JMLR eq. 19); observation-level sample
-  size `N` is the stochastic index. No cluster sandwich.
-- Bandwidth: `h = max{ sqrt(tau(1-tau)) (log p)^{1/2} N^{-3/10}, 0.05 }`
-  (JMLR Section 4 simulation setting).
-- Penalty rate: `lambda = c_lambda sqrt( tau(1-tau) log p / N )`; the frozen
-  `c_lambda = 1` multiplier is used unless the runner supplies a multiplier.
+\[
+ \widetilde\beta_k=\widehat\beta_k-w^Tg,\qquad
+ \widehat{\operatorname{se}}_k^2
+ =\tau(1-\tau)w^T\widehat\Sigma w/N,
+ \qquad \widehat\Sigma=N^{-1}\sum_iX_iX_i^T.
+\]
 
-## Deviations / decisions
+The bandwidth is
+`max(sqrt(tau*(1-tau))*sqrt(log(p))*N^(-3/10), 0.05)`, with p the
+working design dimension. The initial penalty is
+`c_lambda*sqrt(tau*(1-tau)*log(p)/N)`.
 
-- No official code or supplementary materials exist for the source paper
-  (JMLR page serves only the PDF; GitHub mirror contains no code). The
-  implementation is written directly from the printed formulas.
-- The paper selects `lambda` and `gamma` by cross-validation without giving
-  the CV scheme; in this project both follow the frozen grid rule
-  (smallest feasible gamma on the deterministic grid; lambda multiplier
-  fixed by the frozen registry tuning rule).
-- Only requested target-coordinate rows of the CLIME direction are solved
-  (row-wise form is mathematically identical to the paper's row
-  decomposition, eq. 15).
-- The paper's Theorem 2 `gamma_n` formula prints `log p/(nh)` twice; we do
-  not rely on that formula for the grid (grid comes from the frozen
-  Dantzig multipliers).
+## Project tuning protocol
 
-## Allowed metrics
+Five whole-subject folds choose the initial penalty multiplier using
+equal-subject pinball loss. Five subject folds choose the common
+precision tolerance by mean squared full-matrix inverse error,
+`sum((H_validation %*% W - I)^2)/p`. Each precision-training fold
+reselects its initial penalty within its own subjects.
 
-Estimation, selection, prediction, and coordinate coverage **always labelled
-naive iid**. Coverage comparisons against the profile target are not
-confirmatory for cluster-heterogeneous designs; they quantify the cost of
-ignoring clustering.
+The multiplier grids and fold-specific scales come from the frozen
+registry. The candidate records retain the configured values and
+their actual tolerances. Values at or above one have the recorded
+zero-direction exclusion. The selected tolerance is then used for
+the complete full-training precision matrix and coordinate intervals.
 
-## Dependencies
+## Numerical implementation
 
-- `CVXR` (with CLARABEL/ECOS/SCS) for the CLIME row program.
-- Base R only for the l1-SQR proximal gradient (no quantreg dependency).
+Matrix-free FISTA computes the initial estimator. HiGHS solves the
+CLIME programmes through a compiled active-row and active-column
+driver, with full primal-dual verification. Certified column-loss
+bounds permit early elimination of candidates that cannot minimise
+the complete validation criterion. Eligible candidates and the final
+fit retain their complete symmetrised matrices.
 
-## Acceptance evidence
+The bound, its floating-point allowance and the retained first-direction
+path budget are documented in
+[Certified computation for SQR](../SQR_COMPUTATION_20261030.md).
+The execution specification is
+`config/submission_comparator_numerics_20261030.yml`.
 
-See `results/preflight/benchmarks/SQR-DEBIASED-IID/acceptance.json`
-generated by `scripts/benchmarks/accept_sqr_debiased_iid.R` and the unit
-test `tests/testthat/test-benchmark-SQR-DEBIASED-IID.R`.
+## Outputs and validation
 
-Fidelity checks:
+The estimator reports estimation and selection metrics, prediction,
+and intervals with the `naive_iid` variance identity. Each scenario
+retains its declared target. Predictor-dependent scale settings use
+the separately calculated marginal quantile projection.
 
-1. Formula mapping to JMLR 22-1217 (this note).
-2. `N` (observation count) is the stochastic index; no cluster sandwich.
-3. No nuisance ridge or profile nuisance appears in the iid objective.
-4. Frozen bandwidth/penalty/gamma rules (above).
-5. Limiting case: one observation per independent cluster and no nuisance
-   column — the iid implementation agrees with the reduced proposed
-   implementation up to documented numerical tolerance.
-6. On genuinely clustered data the adapter ignores clustering and is
-   labelled `naive_iid`.
-7. Source simulation cell reproduction: coverage at
-   (n=500, p=500, tau=0.7, rho=0.1, Gaussian) is compatible with the
-   published Table 1 value (0.925) within Monte Carlo uncertainty
-   (B=500 diagnostic run; MCSE ~0.012).
+Validation compares complete saved datasets, including the chosen
+penalty and tolerance, coefficients, standard errors and endpoints.
+Independent R HiGHS calculations check the compiled CLIME solutions.
+OSQP checks the validation bound against box-constrained quadratic
+programmes. A registered 2000-predictor case independently verifies
+all selected-fold losses and the final coefficient correction.
+
+Required libraries are RcppEigen, the R HiGHS interface and the compiled
+HiGHS 1.15.1 library. The retained parametric path uses fastclime
+1.4.1.1. `scripts/00_install_dependencies.R` declares the installation
+steps, and numerical checks are saved under
+`results/preflight/sqr_acceleration_20261030/`.

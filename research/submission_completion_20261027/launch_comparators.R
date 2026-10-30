@@ -4,7 +4,7 @@ library(processx)
 args <- commandArgs(trailingOnly = TRUE)
 family <- args[1L]
 workers <- as.integer(args[2L])
-if (!workers %in% 1:8) stop("Invalid comparator worker count.")
+if (!workers %in% 1:12) stop("Invalid comparator worker count.")
 methods <- switch(family, mixed = c("DOUBLE-PEN-QLMM", "LQMM", "QIF-SEE"),
   pooled = "POOLED-QR-LASSO", sqr = "SQR-DEBIASED-IID", qgee = "QGEE-SCAD", bias_adjusted = "BIAS-ADJ-LQMM",
   stop("Unknown comparator queue."))
@@ -37,7 +37,7 @@ dispatch_lock <- filelock::lock(file.path(destination, "continuation.lock"), tim
 if (is.null(dispatch_lock)) stop("This comparator queue already has a dispatcher.")
 saveRDS(list(registry = registry, jobs = jobs, family = family, methods = methods, workers = workers, base_seed = 20261027L,
   implementation_commit = current_commit_v2(), session = sessionInfo(), system = Sys.info(),
-  numerical_specification = yaml::read_yaml("config/submission_comparator_numerics_20261028.yml"),
+  numerical_specification = submission_numerical_specification,
   reference_fidelity = reference, numerical_checks = checks, started = Sys.time()), file.path(destination, "request.rds"))
 write.csv(registry, file.path(destination, "config_snapshot.csv"), row.names = FALSE)
 write.csv(jobs, file.path(destination, "scheduled_replications.csv"), row.names = FALSE)

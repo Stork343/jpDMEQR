@@ -34,13 +34,14 @@ for (i in seq_len(nrow(jobs))) {
       implementation_commit = commit, started = Sys.time()), file.path(current, "request.rds"))
   }
   saveRDS(list(config = config, replicate = job$replicate, base_seed = request$base_seed,
-    implementation_commit = commit, numerical_specification = yaml::read_yaml("config/submission_comparator_numerics_20261028.yml"),
+    implementation_commit = commit, numerical_specification = submission_numerical_specification,
     started = Sys.time()), file.path(current, paste0("completion_request_", Sys.getpid(), ".rds")))
   result <- run_one_replication_v2(".", config, job$replicate, base_seed = request$base_seed,
     allow_missing_benchmarks = FALSE, final = TRUE, run_id = basename(root), implementation_commit = commit)
   validate_paired_failed_coordinate_accounting_v2(result$metrics, result$coordinates)
   if (!setequal(result$metrics$method_id, config$methods)) stop("A remaining simulation method is missing.")
   result <- submission_compact_diagnostics(result)
+  result$numerical_specification <- submission_numerical_specification
   temporary <- file.path(current, paste0("result_", Sys.getpid(), ".writing"))
   saveRDS(result, temporary, compress = "xz")
   if (!file.rename(temporary, file.path(current, "result.rds"))) stop("Unable to publish the complete simulation record.")
