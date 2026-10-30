@@ -1,0 +1,12 @@
+{
+  "observed": "2026-10-30 18:56:06.617126",
+  "started": "2026-10-30 18:29:03.756872",
+  "completed_before_transition": 1085,
+  "completed_after_transition": 100,
+  "converged_after_transition": 100,
+  "elapsed_hours": 0.4508,
+  "completed_per_hour": 221.8306,
+  "registered_datasets": 30500,
+  "remaining_datasets": 29315,
+  "source": "results/raw/simulation/submission_20261028_main_sqr"
+}

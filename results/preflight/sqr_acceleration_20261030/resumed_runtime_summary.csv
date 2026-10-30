@@ -1,0 +1,4 @@
+n_clusters,p_original,completed,converged,median_fitting_seconds,maximum_fitting_seconds
+100,1000,20,20,55.8625000000001,452.258
+200,1000,69,69,89.73,192.785
+400,1000,11,11,231.053,323.931
