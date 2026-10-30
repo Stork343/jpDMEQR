@@ -1,7 +1,7 @@
 {
   "passed": true,
   "numerical_specification": "submission_comparator_numerics_20261030",
-  "validated_code_commit": "7b3da82afce7818bc4c35d65c7e552a454aa90d5",
+  "validated_code_commit": "b350e0a8d459f35349267c4a7a7b790642ce3b34",
   "validated_paths": ["R", "src", "config", "research/submission_completion_20261027", "scripts/simulation", "scripts/00_install_dependencies.R", "DESCRIPTION"],
   "complete_recorded_datasets": 4,
   "largest_verified_dimension": 2000,
@@ -10,5 +10,5 @@
   "clime_comparisons": 6,
   "independent_box_comparisons": 4,
   "allocation_states": 32,
-  "generated": "2026-10-30 18:13:07.05987"
+  "generated": "2026-10-30 18:28:52.972922"
 }
