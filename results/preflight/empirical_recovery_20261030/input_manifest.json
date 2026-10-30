@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "subjects": 129,
+  "visits": 867,
+  "outer_roles": 25,
+  "exploratory_roles": 20,
+  "source": {
+    "cohort": "data/derived/GSE65391/audit_20261022_bootstrap_v1/analysis_cohort.rds",
+    "expression": "data/interim/GSE65391/expression_processed_probe.rds",
+    "recorded_expression": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/data/interim/GSE65391/expression_processed_probe.rds",
+    "annotation": "data/interim/GSE65391/probe_annotation_20261022.csv"
+  },
+  "checked": "2026-10-30 19:51:34.88685"
+}

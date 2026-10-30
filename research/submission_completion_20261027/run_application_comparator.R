@@ -1,6 +1,8 @@
 source("research/score_validity_20261026/load_joint.R")
 source_v2_module(".", "application_v2", .GlobalEnv)
 source("research/submission_completion_20261027/application.R")
+source("research/submission_completion_20261027/dispatch_state.R")
+source("research/empirical_recovery_20261030/inputs.R")
 args <- commandArgs(trailingOnly = TRUE)
 root <- args[1L]
 job_id <- as.integer(args[2L])
@@ -14,7 +16,11 @@ saveRDS(job, file.path(output, "request.rds"))
 stage <- "preprocessing"
 globalCallingHandlers(error = function(condition) saveRDS(list(job = job, stage = stage,
   condition = condition, finished = Sys.time()), file.path(output, "failure.rds")))
-cohort <- readRDS("data/derived/GSE65391/audit_20261022_bootstrap_v1/analysis_cohort.rds")
+input <- empirical_inputs(load_expression = FALSE)
+cohort <- input$cohort
+empirical_prepare_prediction(input, job$processing, job$repetition, job$fold)
+rm(input)
+gc()
 metadata <- cohort$eligible_metadata
 heldout <- cohort$subject_folds$subject_id[cohort$subject_folds$repetition == job$repetition & cohort$subject_folds$fold == job$fold]
 inner_roles <- read.csv("data/derived/GSE65391/execution_20261022_v1/inner_subject_folds.csv")
@@ -105,7 +111,7 @@ predictions <- data.frame(sample_id = rownames(metadata)[testing], subject_id = 
   loss = residual * (job$tau - (residual < 0)), repetition = job$repetition, fold = job$fold,
   model = job$model, tau = job$tau, method = job$method, processing = job$processing,
   filter_size = 5000L, random_slope = FALSE)
-saveRDS(list(job = job, predictions = predictions, fit = fitted, selected = grid[selected, ],
+submission_atomic_rds(list(job = job, predictions = predictions, fit = fitted, selected = grid[selected, ],
              clinical_transform = design$clinical_transform, native_warnings = native_warnings,
              runtime = proc.time()[[3L]] - started, completed = Sys.time()), file.path(output, "result.rds"))
 write.csv(predictions, file.path(output, "predictions.csv"), row.names = FALSE)

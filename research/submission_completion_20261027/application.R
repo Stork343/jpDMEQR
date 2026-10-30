@@ -1,9 +1,8 @@
 submission_application_base <- function(processing, repetition, fold, inner_fold, metadata) {
   suffix <- if (inner_fold == 0L) "outer" else sprintf("inner%02d", inner_fold)
   key <- sprintf("prediction_r%02d_f%02d_%s", repetition, fold, suffix)
-  path <- if (processing == "reference") {
-    file.path("results/scratch/submission_application_20261027/preprocessing", key, "prepared_base.rds")
-  } else file.path("data/derived/GSE65391/processing_20261023_v1", processing, "preprocessing_cache", key, "prepared_base.rds")
+  path <- file.path("data/derived/GSE65391/empirical_recovery_20261030/preprocessing",
+    processing, key, "prepared_base.rds")
   base <- readRDS(path)
   if (!identical(base$sample_ids, rownames(metadata))) stop("The preprocessing sample identifiers differ.")
   base
