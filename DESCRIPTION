@@ -54,6 +54,7 @@ Suggests:
     osqp,
     peakRAM,
     pkgload,
+    preprocessCore,
     ps,
     processx,
     purrr,

@@ -4,7 +4,7 @@ Sys.setenv(TMPDIR = normalizePath("results/scratch/runtime"),
 root <- "results/raw/application/empirical_recovery_20261030"
 dir.create(root, recursive = TRUE, showWarnings = FALSE)
 process <- processx::process$new(file.path(R.home("bin"), "Rscript"),
-  "research/empirical_recovery_20261030/dispatch.R", cleanup = FALSE,
+  c("research/empirical_recovery_20261030/dispatch.R", commandArgs(trailingOnly = TRUE)), cleanup = FALSE,
   stdout = file.path(root, "dispatcher.log"), stderr = "2>&1")
 pid <- process$get_pid()
 processx::process$new("/usr/bin/caffeinate", c("-s", "-w", as.character(pid)), cleanup = FALSE)

@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "processing": "processed_median_across_mapped_probes",
+  "checked_genes": 255,
+  "maximum_median_difference": 8.8818e-16,
+  "module_center_error": 3.4157e-14,
+  "module_scale_error": 1.6653e-15,
+  "probe_module_difference": 0,
+  "source": {
+    "cohort": "data/derived/GSE65391/audit_20261022_bootstrap_v1/analysis_cohort.rds",
+    "expression": "data/interim/GSE65391/expression_processed_probe.rds",
+    "recorded_expression": "/Users/houjian/Library/CloudStorage/OneDrive-个人/paper/Jointly Penalised and Debiased Inference for High-Dimensional Mixed-Effects Quantile Regression/jpDMEQR/data/interim/GSE65391/expression_processed_probe.rds",
+    "annotation": "data/interim/GSE65391/probe_annotation_20261022.csv"
+  },
+  "checked": "2026-10-30 20:07:22.087822"
+}

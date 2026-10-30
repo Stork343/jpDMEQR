@@ -87,7 +87,7 @@ if (install_optional) {
 
 if (install_bioc) {
   if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-  bioc <- c("GEOquery", "Biobase", "limma", "AnnotationDbi", "illuminaHumanv4.db")
+  bioc <- c("GEOquery", "Biobase", "limma", "preprocessCore", "AnnotationDbi", "illuminaHumanv4.db")
   missing_bioc <- bioc[!vapply(bioc, requireNamespace, logical(1), quietly = TRUE)]
   if (length(missing_bioc)) {
     message("Installing Bioconductor packages: ", paste(missing_bioc, collapse = ", "))

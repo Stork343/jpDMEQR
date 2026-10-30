@@ -32,7 +32,7 @@ empirical_registry <- function() {
         file.path("results/raw/application_exploratory/joint_profile_20261026", route, role), 6L, i)
     }
     if (route != "reference") {
-      cases <- expand.grid(model = c("A", "B"), tau = c(.25, .5, .75))
+      cases <- expand.grid(model = c("A", "B"), tau = c(.25, .5, .75), stringsAsFactors = FALSE)
       for (i in seq_len(nrow(cases))) add("processing_modules", route,
         file.path(script_root, "run_processing_module.R"),
         c(route, cases$model[i], cases$tau[i]),

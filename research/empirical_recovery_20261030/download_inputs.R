@@ -7,9 +7,9 @@ directory <- "data/raw/GSE65391"
 path <- file.path(directory, name)
 manifest <- file.path(directory, paste0("download_recovery_20261030_", release, ".csv"))
 if (file.exists(path)) stop("The requested raw expression file already exists.")
-partial <- paste0(path, ".partial")
-status <- system2("curl", c("--fail", "--location", "--connect-timeout", "30",
-  "--max-time", "7200", "--continue-at", "-", "--output", shQuote(partial), shQuote(url)))
+partial <- paste0(path, ".pypdl.partial")
+status <- system2("python3", c("research/empirical_recovery_20261030/download_file.py",
+  shQuote(url), shQuote(partial)), env = paste0("PYTHONPATH=", normalizePath("results/scratch/python_dependencies")))
 if (status != 0L) stop("The raw expression download did not complete.")
 if (system2("gzip", c("-t", shQuote(partial))) != 0L) stop("The downloaded gzip file is incomplete.")
 if (!file.rename(partial, path)) stop("Unable to publish the downloaded input.")
