@@ -1,0 +1,74 @@
+{
+  "state": "terminated_by_user",
+  "recorded": "2026-10-30 23:38:26.411398",
+  "completed_outputs": "preserved",
+  "remaining_processes": 0,
+  "dispatch_counts": [
+    {
+      "phase": "comparator_checks",
+      "state": "completed",
+      "N": 1
+    },
+    {
+      "phase": "exploratory",
+      "state": "completed",
+      "N": 40
+    },
+    {
+      "phase": "exploratory",
+      "state": "cancelled_by_user",
+      "N": 20
+    },
+    {
+      "phase": "prediction",
+      "state": "completed",
+      "N": 48
+    },
+    {
+      "phase": "prediction",
+      "state": "cancelled_by_user",
+      "N": 25
+    },
+    {
+      "phase": "processing_modules",
+      "state": "completed",
+      "N": 6
+    },
+    {
+      "phase": "processing_modules",
+      "state": "cancelled_by_user",
+      "N": 6
+    },
+    {
+      "phase": "comparators",
+      "state": "completed",
+      "N": 22
+    },
+    {
+      "phase": "slope_prediction",
+      "state": "completed",
+      "N": 24
+    },
+    {
+      "phase": "comparators",
+      "state": "failed",
+      "N": 2
+    },
+    {
+      "phase": "prediction",
+      "state": "terminated_by_user",
+      "N": 2
+    },
+    {
+      "phase": "comparators",
+      "state": "cancelled_by_user",
+      "N": 1326
+    },
+    {
+      "phase": "slope_prediction",
+      "state": "cancelled_by_user",
+      "N": 1
+    }
+  ],
+  "implementation_commit": "0509db8290d98210036f4cd9ea407042f2e97a91"
+}

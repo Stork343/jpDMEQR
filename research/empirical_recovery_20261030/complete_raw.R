@@ -1,5 +1,7 @@
 library(ps)
 library(filelock)
+source("research/empirical_recovery_20261030/execution_control.R")
+empirical_require_active()
 root <- "results/scratch/empirical_recovery_20261030"
 lock <- filelock::lock(file.path(root, "raw_preparation.lock"), timeout = 0)
 if (is.null(lock)) stop("The raw preparation is already running.")

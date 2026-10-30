@@ -1,0 +1,7 @@
+{
+  "state": "terminated",
+  "requested_by": "user",
+  "date": "2026-10-30",
+  "completed_outputs": "preserve",
+  "simulation_queues": "continue"
+}

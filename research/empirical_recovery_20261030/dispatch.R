@@ -1,5 +1,7 @@
 library(processx)
 library(filelock)
+source("research/empirical_recovery_20261030/execution_control.R")
+empirical_require_active()
 source("research/submission_completion_20261027/dispatch_state.R")
 source("research/empirical_recovery_20261030/queue.R")
 run <- function() {

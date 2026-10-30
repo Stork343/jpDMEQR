@@ -1,4 +1,6 @@
 library(processx)
+source("research/empirical_recovery_20261030/execution_control.R")
+empirical_require_active()
 source("research/submission_completion_20261027/dispatch_state.R")
 Sys.setenv(TMPDIR = normalizePath("results/scratch/runtime"))
 root <- "results/scratch/empirical_recovery_20261030"

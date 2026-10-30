@@ -1,4 +1,6 @@
 library(processx)
+source("research/empirical_recovery_20261030/execution_control.R")
+empirical_require_active()
 Sys.setenv(TMPDIR = normalizePath("results/scratch/runtime"),
   VECLIB_MAXIMUM_THREADS = "1", OPENBLAS_NUM_THREADS = "1", OMP_NUM_THREADS = "1")
 root <- "results/raw/application/empirical_recovery_20261030"
