@@ -33,10 +33,13 @@ for (i in seq_len(nrow(processes))) {
     }
   }
 }
-sqr_root <- if ("sqr" %in% names(roots)) roots[["sqr"]] else NULL
-workers <- if (is.null(sqr_root)) list() else submission_processes(sqr_root,
-  c("run_comparator_batch.R", "run_remaining_batch.R"))
-cat("Current SQR workers:", length(workers), "\n")
+workers <- list()
+for (family in names(roots)) {
+  group <- submission_processes(roots[[family]], c("run_comparator_batch.R", "run_remaining_batch.R"))
+  for (key in names(group)) workers[[paste0(family, "_", key)]] <-
+    c(group[[key]], list(family = family, batch = as.integer(key)))
+}
+cat("Current comparator workers:", length(workers), "\n")
 print(data.frame(queue = names(roots), dispatcher = vapply(managers,
   function(x) if (is.null(x)) NA_integer_ else ps::ps_pid(x), integer(1))))
 if (!"apply" %in% commandArgs(trailingOnly = TRUE)) quit(status = 0L)
@@ -56,10 +59,15 @@ activate <- function() {
   }
   snapshots <- list()
   if (length(workers)) {
-    request <- readRDS(file.path(sqr_root, "request.rds"))
+    requests <- lapply(roots, function(root) readRDS(file.path(root, "request.rds")))
+    methods <- c(sqr = "SQR-DEBIASED-IID", pooled = "POOLED-QR-LASSO", qgee = "QGEE-SCAD")
     for (key in names(workers)) {
-      jobs <- request$jobs[request$jobs$batch == as.integer(key), ]
-      paths <- file.path(sqr_root, "replications", jobs$experiment_id, sprintf("replicate_%05d", jobs$replicate))
+      worker <- workers[[key]]
+      family <- worker$family
+      root <- roots[[family]]
+      request <- requests[[family]]
+      jobs <- request$jobs[request$jobs$batch == worker$batch, ]
+      paths <- file.path(root, "replications", jobs$experiment_id, sprintf("replicate_%05d", jobs$replicate))
       completed <- file.exists(file.path(paths, "result.rds"))
       unfinished <- which(dir.exists(paths) & !completed)
       if (length(unfinished) > 1L) stop("A worker has multiple incomplete registered datasets.")
@@ -72,18 +80,22 @@ activate <- function() {
       last <- tail(which(completed), 1L)
       if (length(last)) {
         value <- readRDS(file.path(paths[last], "result.rds"))
-        if (nrow(value$metrics) != 1L || value$metrics$method_id != "SQR-DEBIASED-IID" ||
+        if (nrow(value$metrics) != 1L || value$metrics$method_id != methods[[family]] ||
             value$metrics$replicate != jobs$replicate[last] || value$metrics$experiment_id != jobs$experiment_id[last])
           stop("A completed dataset differs from its registered identity.")
       }
-      snapshots[[key]] <- list(batch = as.integer(key), pid = ps::ps_pid(workers[[key]]$handle),
+      snapshots[[key]] <- list(family = family, batch = worker$batch, pid = ps::ps_pid(worker$handle),
         completed_datasets = sum(completed), unfinished_directories = paths[unfinished])
     }
-    path <- file.path(sqr_root, paste0("numerical_transition_", Sys.getpid(), ".rds"))
-    submission_atomic_rds(list(created = Sys.time(), workers = snapshots,
-      numerical_specification = accepted$numerical_specification,
-      implementation_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE)), path)
-    submission_backup_run(sqr_root, force = TRUE)
+    for (family in names(roots)) {
+      root <- roots[[family]]
+      path <- file.path(root, paste0("numerical_transition_", Sys.getpid(), ".rds"))
+      saved_workers <- Filter(function(worker) worker$family == family, snapshots)
+      submission_atomic_rds(list(created = Sys.time(), workers = saved_workers,
+        numerical_specification = accepted$numerical_specification,
+        implementation_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE)), path)
+      submission_backup_run(root, force = TRUE)
+    }
   }
   for (worker in workers) ps::ps_kill(worker$handle)
   for (handle in managers) if (!is.null(handle) && isTRUE(ps::ps_is_running(handle))) ps::ps_kill(handle)
