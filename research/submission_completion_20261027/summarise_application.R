@@ -1,5 +1,5 @@
 library(data.table)
-output <- "results/tables/submission_20261028/application"
+output <- "results/tables/empirical_recovery_20261030/application"
 collected <- readRDS(file.path(output, "records.rds"))
 accounting <- as.data.table(collected$accounting)
 predictions <- as.data.table(collected$predictions)

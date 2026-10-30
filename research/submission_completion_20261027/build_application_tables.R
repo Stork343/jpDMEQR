@@ -1,5 +1,5 @@
 library(data.table)
-source <- "results/tables/submission_20261028/application"
+source <- "results/tables/empirical_recovery_20261030/application"
 manifest <- jsonlite::read_json(file.path(source, "manifest.json"), simplifyVector = TRUE)
 if (manifest$registered_comparator_jobs != 1350L || manifest$registered_joint_jobs != 900L)
   stop("The completed application study is required.")

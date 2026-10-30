@@ -25,10 +25,10 @@ destination <- file.path(path.expand("~"), "jpDMEQR-backups", "data/raw/GSE65391
 dir.create(destination, recursive = TRUE, showWarnings = FALSE)
 for (release in c("R1", "R2")) {
   filename <- paste0("GSE65391_non-normalized_data_Illumina_HT12_V4_", release, ".txt.gz")
-  if (!file.copy(file.path("data/raw/GSE65391", filename), file.path(destination, filename), overwrite = FALSE))
+  if (!file.copy(file.path("data/raw/GSE65391", filename), file.path(destination, filename), overwrite = TRUE, copy.date = TRUE))
     stop("The verified source backup was not written.")
   manifest <- paste0("download_recovery_20261030_", release, ".csv")
-  if (!file.copy(file.path("data/raw/GSE65391", manifest), file.path(destination, manifest), overwrite = FALSE))
+  if (!file.copy(file.path("data/raw/GSE65391", manifest), file.path(destination, manifest), overwrite = TRUE, copy.date = TRUE))
     stop("The acquisition record backup was not written.")
 }
 cat("The registered raw-array workflows are ready for the empirical dispatcher\n")

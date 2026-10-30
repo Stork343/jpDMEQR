@@ -40,7 +40,7 @@ for (release in releases) {
   detection_columns <- signal_columns + 1L
   if (names(raw)[1L] != "ID_REF" || ncol(raw) != 1L + 2L * length(signal_columns) ||
       any(names(raw)[detection_columns] != "Detection Pval") ||
-      anyDuplicated(raw[[1L]]) || !setequal(raw[[1L]], observed_probes) ||
+      anyDuplicated(raw[[1L]]) || !all(observed_probes %in% raw[[1L]]) ||
       anyNA(match(names(raw)[signal_columns], arrays$array_id)))
     stop("The raw-array expression and detection columns do not match the official records.")
   signal <- as.matrix(raw[, ..signal_columns])
@@ -57,8 +57,10 @@ for (release in releases) {
   difference <- max(abs(fitted[, 1L] - single[, 1L]))
   if (any(!is.finite(fitted)) || any(fitted <= 0) || difference > 1e-8)
     stop("The per-array background correction failed its independent check.")
-  fitted <- fitted[match(observed_probes, rownames(fitted)), , drop = FALSE]
+  probe_order <- c(observed_probes, setdiff(rownames(fitted), observed_probes))
+  fitted <- fitted[match(probe_order, rownames(fitted)), , drop = FALSE]
   checks[[release]] <- data.frame(release = release, probes = nrow(fitted), arrays = ncol(fitted),
+    reference_probes = length(observed_probes), additional_raw_probes = nrow(fitted) - length(observed_probes),
     single_array_difference = difference)
   submission_atomic_rds(list(expression = fitted, checks = checks[[release]],
     source_file = path, correction = list(method = "limma::nec", offset = 16, robust = FALSE,
@@ -72,6 +74,8 @@ if (length(releases) == 1L) {
   quit(status = 0L)
 }
 raw_ids <- unlist(lapply(corrected, colnames), use.names = FALSE)
+if (!setequal(rownames(corrected$R1), rownames(corrected$R2))) stop("The two raw releases have different probe sets.")
+corrected$R2 <- corrected$R2[match(rownames(corrected$R1), rownames(corrected$R2)), , drop = FALSE]
 if (anyDuplicated(raw_ids) || !setequal(raw_ids, arrays$array_id))
   stop("The two releases do not reconcile all observed arrays.")
 arrays$release <- ifelse(arrays$array_id %in% colnames(corrected$R1), "R1", "R2")

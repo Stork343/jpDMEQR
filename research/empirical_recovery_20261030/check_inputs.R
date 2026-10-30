@@ -29,8 +29,8 @@ dir.create(output, recursive = TRUE, showWarnings = FALSE)
 write.csv(do.call(rbind, records), file.path(output, "input_checks.csv"), row.names = FALSE)
 write.csv(input$fold_audit, file.path(output, "subject_fold_checks.csv"), row.names = FALSE)
 write.csv(input$exploratory_audit, file.path(output, "exploratory_role_checks.csv"), row.names = FALSE)
-jsonlite::write_json(list(passed = TRUE, subjects = 129L, visits = 867L,
+empirical_atomic_json(list(passed = TRUE, subjects = 129L, visits = 867L,
   outer_roles = nrow(input$fold_audit), exploratory_roles = nrow(input$exploratory_audit),
   source = input$source, checked = as.character(Sys.time())),
-  file.path(output, "input_manifest.json"), auto_unbox = TRUE, pretty = TRUE)
+  file.path(output, "input_manifest.json"))
 print(do.call(rbind, records))

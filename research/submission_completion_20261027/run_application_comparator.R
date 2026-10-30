@@ -12,7 +12,7 @@ if (nrow(job) != 1L || anyNA(job)) stop("Invalid comparator job.")
 output <- file.path(root, sprintf("job_%04d", job_id))
 if (dir.exists(output)) stop("The comparator job already exists.")
 dir.create(output, recursive = TRUE)
-saveRDS(job, file.path(output, "request.rds"))
+submission_atomic_rds(job, file.path(output, "request.rds"))
 stage <- "preprocessing"
 globalCallingHandlers(error = function(condition) saveRDS(list(job = job, stage = stage,
   condition = condition, finished = Sys.time()), file.path(output, "failure.rds")))

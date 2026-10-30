@@ -1,3 +1,9 @@
+empirical_atomic_json <- function(value, path) {
+  temporary <- paste0(path, ".", Sys.getpid(), ".writing")
+  jsonlite::write_json(value, temporary, auto_unbox = TRUE, pretty = TRUE)
+  if (!file.rename(temporary, path)) stop("Unable to publish the empirical checks.")
+}
+
 empirical_inputs <- function(load_expression = TRUE) {
   cohort_path <- "data/derived/GSE65391/audit_20261022_bootstrap_v1/analysis_cohort.rds"
   cohort <- readRDS(cohort_path)

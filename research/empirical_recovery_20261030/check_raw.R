@@ -29,9 +29,8 @@ fit <- jp_fit_fixed(input$metadata$log_c3, X, matrix(1, nrow(X), 1L),
 output <- "results/preflight/empirical_recovery_20261030"
 submission_atomic_rds(list(fit = fit, target_error = target_error, array_error = array_error),
   "results/scratch/empirical_recovery_20261030/raw_check.rds")
-jsonlite::write_json(list(passed = TRUE, processing = processing, subjects = 129L, visits = 867L,
+empirical_atomic_json(list(passed = TRUE, processing = processing, subjects = 129L, visits = 867L,
   normalisation_target_relative_error = target_error, heldout_array_relative_error = array_error,
   full_sample_module_coordinates = nrow(fit$table), preprocessCore = as.character(packageVersion("preprocessCore")),
-  checked = as.character(Sys.time())), file.path(output, paste0(processing, "_manifest.json")),
-  auto_unbox = TRUE, pretty = TRUE)
+  checked = as.character(Sys.time())), file.path(output, paste0(processing, "_manifest.json")))
 cat("Verified the registered raw-array processing and full-sample module fit\n")

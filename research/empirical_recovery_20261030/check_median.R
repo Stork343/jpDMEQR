@@ -25,10 +25,9 @@ if (probe_module_error > 1e-12) stop("The probe-defined module measurement diffe
 output <- "results/preflight/empirical_recovery_20261030"
 write.csv(data.frame(gene = selected, maximum_difference = errors),
   file.path(output, "median_probe_checks.csv"), row.names = FALSE)
-jsonlite::write_json(list(passed = TRUE, processing = processing,
+empirical_atomic_json(list(passed = TRUE, processing = processing,
   checked_genes = length(selected), maximum_median_difference = max(errors),
   module_center_error = mean_error, module_scale_error = scale_error,
   probe_module_difference = probe_module_error, source = input$source,
-  checked = as.character(Sys.time())), file.path(output, paste0(processing, "_manifest.json")),
-  auto_unbox = TRUE, pretty = TRUE)
+  checked = as.character(Sys.time())), file.path(output, paste0(processing, "_manifest.json")))
 cat("Verified median-probe processing for", length(selected), "genes\n")

@@ -30,7 +30,7 @@ output <- file.path("results/raw/application_prediction/joint_profile_20261026",
 if (dir.exists(output) && !resume) stop("This prediction role already exists.")
 if (!dir.exists(output)) {
   dir.create(output, recursive = TRUE)
-  saveRDS(list(processing = processing, repetition = repetition, fold = fold,
+  submission_atomic_rds(list(processing = processing, repetition = repetition, fold = fold,
                selection_subjects = unique(metadata$subject_id[outer_training]),
                heldout_subjects = heldout, inner_roles = inner_roles,
                implementation_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE),
@@ -75,7 +75,7 @@ for (i in seq_len(nrow(jobs))) {
     current_case <- file.path(current_case, sprintf("attempt_%02d", 2L + length(list.dirs(current_case, recursive = FALSE))))
   }
   dir.create(current_case, recursive = TRUE)
-  saveRDS(job, file.path(current_case, "request.rds"))
+  submission_atomic_rds(job, file.path(current_case, "request.rds"))
   started <- proc.time()[[3L]]
   inner <- lapply(1:5, function(g) {
     train <- bases[[g + 1L]]$training_rows

@@ -22,7 +22,7 @@ colnames(genes) <- paste0("gene__", sub("^gene__", "", colnames(genes)))
 output <- file.path("results/raw/application_exploratory/joint_profile_20261026", processing, role)
 if (dir.exists(output)) stop("This exploratory role already exists.")
 dir.create(output, recursive = TRUE)
-saveRDS(list(processing = processing, role = role, source_path = source_path,
+submission_atomic_rds(list(processing = processing, role = role, source_path = source_path,
              selection_subjects = reference$selection_subjects, inference_subjects = reference$inference_subjects,
              additions = 3L, lambda_gamma = 1,
              implementation_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE),
@@ -34,7 +34,7 @@ for (i in seq_len(nrow(jobs))) {
   job <- jobs[i, ]
   current <- file.path(output, sprintf("case_%02d", i))
   dir.create(current)
-  saveRDS(job, file.path(current, "request.rds"))
+  submission_atomic_rds(job, file.path(current, "request.rds"))
   X <- cbind(clinical[[job$model]]$X, genes)
   selection <- reference$selection_rows
   inference <- reference$inference_rows

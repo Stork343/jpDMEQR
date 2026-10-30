@@ -100,5 +100,14 @@ run <- function() {
   submission_atomic_rds(list(successful = sum(jobs$state == "completed"),
     failed = sum(jobs$state == "failed"), finished = Sys.time()),
     file.path(empirical_queue_root, "completed.rds"))
+  builders <- list(
+    c("research/empirical_recovery_20261030/audit_progress.R"),
+    c("research/empirical_recovery_20261030/collect_comparators.R", "final"),
+    c("research/submission_completion_20261027/summarise_application.R"),
+    c("research/submission_completion_20261027/build_application_tables.R"))
+  for (arguments in builders) {
+    status <- system2(file.path(R.home("bin"), "Rscript"), arguments)
+    if (status != 0L) stop("The empirical result collection did not complete: ", arguments[1L])
+  }
 }
 run()
