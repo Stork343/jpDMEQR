@@ -34,9 +34,12 @@ empirical_inputs <- function(load_expression = TRUE) {
 empirical_reference_base <- function(input, training_rows, filter_size = 10000L) {
   metadata <- input$metadata
   if (is.null(input$expression)) stop("The complete observed expression input is required.")
-  design <- prepare_gse65391_prediction_design_v2(metadata, input$expression,
-    input$annotation, input$modules, input$members, input$rule, training_rows,
-    include_sledai = FALSE, filter_size = filter_size)
+  design <- if (filter_size > 0L) {
+    prepare_gse65391_prediction_design_v2(metadata, input$expression,
+      input$annotation, input$modules, input$members, input$rule, training_rows,
+      include_sledai = FALSE, filter_size = filter_size)
+  } else prepare_gse65391_lowdim_design_v2(metadata, input$expression, input$annotation,
+    input$modules, training_rows, input$rule, FALSE, input$members)
   list(clinical = list(A = design$clinical,
     B = prepare_clinical_design_split_v2(metadata, training_rows, include_sledai = TRUE)),
     module_scores = design$X[, grepl("^module__", colnames(design$X)), drop = FALSE],
@@ -58,7 +61,8 @@ empirical_validate_base <- function(base, metadata, training_rows, processing) {
       !identical(base$training_rows, as.integer(training_rows)) ||
       !identical(base$processing, processing) ||
       !setequal(base$training_subjects, metadata$subject_id[training_rows]) ||
-      ncol(base$genes) < 10000L || nrow(base$genes) != nrow(metadata) ||
+      ncol(base$genes) < (if (processing == "reference") 10000L else 5000L) ||
+      nrow(base$genes) != nrow(metadata) ||
       ncol(base$module_scores) != 5L || any(!is.finite(base$module_scores)) ||
       any(!is.finite(base$genes))) stop("The saved preprocessing definition differs.")
   invisible(base)
@@ -102,9 +106,118 @@ empirical_prepare_prediction <- function(input, processing, repetition, fold) {
   invisible(roles)
 }
 
-empirical_prepare_base <- function(input, training_rows, processing) {
-  if (processing == "reference") return(empirical_reference_base(input, training_rows))
-  stop("The declared processing input has not yet been prepared: ", processing)
+empirical_prepare_base <- function(input, training_rows, processing,
+                                   filter_size = if (processing == "reference") 10000L else 5000L) {
+  if (processing == "reference") return(empirical_reference_base(input, training_rows, filter_size))
+  if (processing == "processed_median_across_mapped_probes")
+    return(empirical_median_base(input, training_rows, filter_size))
+  if (processing == "official_R1_R2_normexp_training_quantile") {
+    raw_path <- "data/interim/GSE65391/raw_calibrated_20261030.rds"
+    raw <- readRDS(raw_path)
+    values <- raw$expression[, rownames(input$metadata), drop = FALSE]
+    target <- preprocessCore::normalize.quantiles.determine.target(values[, training_rows, drop = FALSE])
+    normalised <- preprocessCore::normalize.quantiles.use.target(values, target)
+    dimnames(normalised) <- dimnames(values)
+    if (any(!is.finite(normalised)) || any(normalised <= 0))
+      stop("The raw-array quantile normalisation produced invalid values.")
+    input$expression <- log2(normalised)
+    base <- empirical_reference_base(input, training_rows, filter_size)
+    base$processing <- processing
+    base$source$raw_expression <- raw_path
+    base$processing_transformation <- list(target = target,
+      target_subjects = unique(as.character(input$metadata$subject_id[training_rows])),
+      package = as.character(packageVersion("preprocessCore")))
+    return(base)
+  }
+  stop("Unknown processing route: ", processing)
+}
+
+empirical_gene_medians <- function(input) {
+  path <- "data/interim/GSE65391/gene_probe_medians_20261030.rds"
+  if (!file.exists(path)) {
+    filtered <- remove_probe_rows_v2(input$expression, input$annotation)
+    groups <- split(seq_len(nrow(filtered$expression)), filtered$annotation$gene_symbol)
+    values <- t(vapply(groups, function(rows) {
+      if (length(rows) == 1L) as.numeric(filtered$expression[rows, ]) else
+        matrixStats::colMedians(filtered$expression[rows, , drop = FALSE])
+    }, numeric(ncol(filtered$expression))))
+    colnames(values) <- colnames(filtered$expression)
+    submission_atomic_rds(list(expression = values, probe_groups = lapply(groups,
+      function(rows) rownames(filtered$expression)[rows]), source = input$source), path, compress = TRUE)
+  }
+  result <- readRDS(path)
+  if (anyNA(match(rownames(input$metadata), colnames(result$expression))))
+    stop("The median-probe measurements omit required visits.")
+  result$expression <- result$expression[, rownames(input$metadata), drop = FALSE]
+  result
+}
+
+empirical_median_base <- function(input, training_rows, filter_size) {
+  median <- empirical_gene_medians(input)
+  order <- unlist(input$rule$module_order, use.names = FALSE)
+  scores <- matrix(NA_real_, nrow(input$metadata), length(order),
+    dimnames = list(rownames(input$metadata), paste0("module__", order)))
+  audit <- list()
+  for (j in seq_along(order)) {
+    members <- input$members[input$members$module_id == order[j], ]
+    kind <- unique(members$member_type)
+    if (length(kind) != 1L) stop("Module members have inconsistent measurement types.")
+    values <- if (kind == "gene_symbol") {
+      median$expression[match(members$member_id, rownames(median$expression)), , drop = FALSE]
+    } else input$expression[match(members$member_id, rownames(input$expression)), , drop = FALSE]
+    if (any(!is.finite(values)) || max(abs(members$weight - 1 / nrow(members))) > 1e-12)
+      stop("The frozen module membership is incomplete under median-probe processing.")
+    scores[, j] <- as.numeric(crossprod(members$weight, values))
+    audit[[j]] <- data.frame(module_id = order[j], member_type = kind,
+      source_members = nrow(members), observed_members = nrow(values))
+  }
+  center <- colMeans(scores[training_rows, , drop = FALSE])
+  scale <- apply(scores[training_rows, , drop = FALSE], 2L, sd)
+  if (any(!is.finite(scale)) || any(scale <= 0)) stop("The training module variation is insufficient.")
+  module_scores <- sweep(sweep(scores, 2L, center, "-"), 2L, scale, "/")
+  gene <- NULL
+  genes <- matrix(numeric(), nrow(input$metadata), 0L)
+  if (filter_size > 0L) {
+    selected <- filter_top_training_mad_v2(median$expression, rownames(input$metadata)[training_rows], filter_size)
+    gene <- scale_from_training_v2(t(selected$expression), training_rows)
+    genes <- gene$X
+    colnames(genes) <- paste0("gene__", colnames(genes))
+    if (ncol(genes) != filter_size) stop("The median-probe gene filter has insufficient finite variation.")
+  }
+  list(clinical = list(A = prepare_clinical_design_split_v2(input$metadata, training_rows, FALSE),
+    B = prepare_clinical_design_split_v2(input$metadata, training_rows, TRUE)),
+    module_scores = module_scores, genes = genes, training_rows = as.integer(training_rows),
+    training_subjects = unique(as.character(input$metadata$subject_id[training_rows])),
+    sample_ids = rownames(input$metadata), processing = "processed_median_across_mapped_probes",
+    source = input$source, gene_preprocessing = list(probe_groups = median$probe_groups),
+    highdim_preprocessing = if (is.null(gene)) NULL else
+      list(filter_size = filter_size, gene_ids = colnames(genes), center = gene$center, scale = gene$scale),
+    module_preprocessing = list(raw_scores = scores, center = center, scale = scale,
+      audit = do.call(rbind, audit), score_members = input$members))
+}
+
+empirical_processing_module_base <- function(input, processing, omitted = NA_character_, index = 0L) {
+  key <- if (index == 0L) "module_full_sample" else sprintf("module_delete_subject_%04d", index)
+  path <- empirical_base_path(processing, key)
+  keep <- if (is.na(omitted)) rep(TRUE, nrow(input$metadata)) else input$metadata$subject_id != omitted
+  expected <- rownames(input$metadata)[keep]
+  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+  lock <- filelock::lock(paste0(path, ".lock"), timeout = 60000)
+  if (is.null(lock)) stop("Unable to acquire the module preprocessing lock.")
+  on.exit(filelock::unlock(lock), add = TRUE)
+  if (!file.exists(path)) {
+    input$metadata <- input$metadata[keep, , drop = FALSE]
+    input$expression <- input$expression[, keep, drop = FALSE]
+    base <- empirical_prepare_base(input, seq_len(nrow(input$metadata)), processing, filter_size = 0L)
+    base$omitted_subject <- omitted
+    submission_atomic_rds(base, path, compress = TRUE)
+  }
+  base <- readRDS(path)
+  if (!identical(base$omitted_subject, omitted) || !identical(base$processing, processing) ||
+      !identical(base$sample_ids, expected) ||
+      length(base$training_rows) != length(base$sample_ids) || anyDuplicated(base$sample_ids))
+    stop("The module deletion preprocessing differs from the declared role.")
+  base
 }
 
 empirical_exploratory_base <- function(input, processing, role) {
