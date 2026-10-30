@@ -32,7 +32,7 @@ run <- function() {
     prior <- read.csv(status_path, stringsAsFactors = FALSE)
     if (!identical(prior$job_id, jobs$job_id)) stop("The empirical status identities changed.")
     for (i in which(prior$state == "running")) {
-      if (!is.na(prior$pid[i]) && ps::ps_pid_exists(prior$pid[i])) {
+      if (!is.na(prior$pid[i]) && prior$pid[i] %in% ps::ps_pids()) {
         handle <- ps::ps_handle(prior$pid[i])
         arguments <- ps::ps_cmdline(handle)
         position <- match("--args", arguments)

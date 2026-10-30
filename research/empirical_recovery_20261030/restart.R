@@ -1,7 +1,7 @@
 library(ps)
 root <- "results/raw/application/empirical_recovery_20261030"
 record <- read.csv(file.path(root, "active_dispatcher.csv"))
-if (nrow(record) != 1L || !ps::ps_pid_exists(record$pid)) stop("The recorded empirical dispatcher is unavailable.")
+if (nrow(record) != 1L || !record$pid %in% ps::ps_pids()) stop("The recorded empirical dispatcher is unavailable.")
 handle <- ps::ps_handle(record$pid)
 if (!"--file=research/empirical_recovery_20261030/dispatch.R" %in% ps::ps_cmdline(handle) ||
     !identical(ps::ps_cwd(handle), normalizePath("."))) stop("The dispatcher process identity differs.")
