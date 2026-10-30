@@ -33,10 +33,11 @@ result = downloader.start(
     arguments.url,
     file_path=str(arguments.destination),
     segments=4,
-    retries=0,
+    retries=3,
     etag_validation=False,
     display=False,
     block=True,
+    headers={"If-Unmodified-Since": source_identity["last_modified"]},
     timeout=aiohttp.ClientTimeout(total=7200, sock_connect=30, sock_read=120),
 )
 if not result or downloader.failed or not arguments.destination.is_file():

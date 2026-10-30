@@ -15,9 +15,10 @@ logs <- file.path("results/scratch/empirical_recovery_20261030", paste0("downloa
 dir.create(logs, recursive = TRUE, showWarnings = FALSE)
 environment <- Sys.getenv()
 environment[["PYTHONPATH"]] <- normalizePath("results/scratch/python_dependencies")
-processx::run("python3", c(normalizePath("research/empirical_recovery_20261030/download_file.py"),
+transfer <- processx::run("python3", c(normalizePath("research/empirical_recovery_20261030/download_file.py"),
   url, file.path(normalizePath(dirname(partial)), basename(partial))), wd = normalizePath(logs), env = environment,
-  stdout = file.path(normalizePath(logs), "transfer.log"), stderr = "2>&1")
+  stdout = file.path(normalizePath(logs), "transfer.log"), stderr = "2>&1", error_on_status = FALSE)
+if (transfer$status != 0L) stop("The raw acquisition failed; see ", file.path(logs, "transfer.log"))
 if (system2("gzip", c("-t", shQuote(partial))) != 0L) stop("The downloaded gzip file is incomplete.")
 if (!file.rename(partial, path)) stop("Unable to publish the downloaded input.")
 write.csv(data.frame(release = release, url = url, path = path,

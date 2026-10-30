@@ -1,8 +1,8 @@
 phase,processing,completed_fits,records,maximum_difference
-exploratory,reference,42,126,0
-exploratory,processed_median_across_mapped_probes,42,126,0
-prediction,reference,121,22849,0
-prediction,processed_median_across_mapped_probes,42,7938,0
+exploratory,reference,72,216,0
+exploratory,processed_median_across_mapped_probes,72,216,0
+prediction,reference,198,36756,0
+prediction,processed_median_across_mapped_probes,67,12415,0
 processing_modules,processed_median_across_mapped_probes,6,30,0
-comparators,reference,7,1414,0
-slope_prediction,reference,41,7745,0
+comparators,reference,11,2222,0
+slope_prediction,reference,66,12252,0

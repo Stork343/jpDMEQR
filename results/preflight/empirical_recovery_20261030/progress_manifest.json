@@ -1,13 +1,13 @@
 {
   "passed": true,
-  "inspected": "2026-10-30 20:55:02.332858",
-  "prediction_fits": 204,
+  "inspected": "2026-10-30 21:31:10.437294",
+  "prediction_fits": 331,
   "prediction_required": 900,
-  "exploratory_fits": 84,
+  "exploratory_fits": 144,
   "exploratory_required": 360,
   "processing_workflows": 6,
   "processing_required": 12,
-  "comparator_fits": 7,
+  "comparator_fits": 11,
   "comparator_required": 1350,
   "maximum_numerical_difference": 0
 }
