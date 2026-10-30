@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "implementation_commit": "7b3da82afce7818bc4c35d65c7e552a454aa90d5",
+  "interval_difference": 0,
+  "tuning_difference": 0,
+  "runtime_seconds": 18.204,
+  "numerical_specification": "submission_comparator_numerics_20261030"
+}

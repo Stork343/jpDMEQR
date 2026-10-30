@@ -1,0 +1,5 @@
+experiment_id,replicate,reference_seconds,candidate_seconds,speedup,interval_difference,tuning_difference,coefficient_difference,source
+A01,1,179.205,24.27,7.38380716934487,0,0,0,results/scratch/sqr_acceleration_20261030/full_A01_1_certified_bounds
+A04,556,15965.682,247.746,64.4437528759294,0,0,0,results/scratch/sqr_acceleration_20261030/full_A04_556_certified_bounds
+A04,779,729.827000000005,782.466,0.93272678940683,0,0,0,results/scratch/sqr_acceleration_20261030/full_A04_779_certified_bounds
+A05,737,1944.83300000001,84.668,22.9701067699723,0,0,0,results/scratch/sqr_acceleration_20261030/full_A05_737_certified_bounds
