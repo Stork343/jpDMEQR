@@ -112,6 +112,7 @@ empirical_prepare_base <- function(input, training_rows, processing,
   if (processing == "processed_median_across_mapped_probes")
     return(empirical_median_base(input, training_rows, filter_size))
   if (processing == "official_R1_R2_normexp_training_quantile") {
+    Sys.setenv(R_THREADS = "1")
     raw_path <- "data/interim/GSE65391/raw_calibrated_20261030.rds"
     raw <- readRDS(raw_path)
     values <- raw$expression[, rownames(input$metadata), drop = FALSE]
