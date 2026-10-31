@@ -1,0 +1,12 @@
+{
+  "analysis_role": "supplementary_interpretation",
+  "new_high_dimensional_fits": 0,
+  "source_cases": ["reference_q25", "reference_q50", "reference_q75"],
+  "coordinate_interval_family": 3,
+  "contrast_interval_family": 3,
+  "covariance_standard_error_error": 4.9960036108132e-16,
+  "contrast_variance_identity_error": 9.0205620750794e-17,
+  "source_fit_commits": "aa80e5c5fc6803325cc88737da01efc09d54c03f",
+  "source_commit": "4ecac57c9ecb21a61dfd86eba2f4efb90f4e519e",
+  "computed": "2026-10-31 13:30:11 CST"
+}

@@ -1,0 +1,11 @@
+{
+  "maximum_bandwidth_change": 0.0314877459601655,
+  "paired_median_estimate": -0.247999589943312,
+  "paired_median_lower": -0.590173155866567,
+  "paired_median_upper": 0.0941739759799425,
+  "all_registered_intervals_include_zero": true,
+  "single_control_mean": 2.90097986279867,
+  "two_control_mean": 2.63568577332569,
+  "marginal_A1_median": 2.50589092972835,
+  "marginal_A2_median": 2.40053792895074
+}

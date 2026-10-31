@@ -55,11 +55,19 @@ for name, heading, rows in (
                 if f"{float(row[field]):.3f}" not in application:
                     raise ValueError("A contrast value is absent from the compiled supplement.")
                 extra_checks += 1
+        caption = "observed somatic cell score distributions"
+        if caption not in normalised:
+            raise ValueError("The observed-distribution table caption is absent.")
+        descriptive_text = normalised[normalised.index(caption):]
+        group_labels = {"all": "all eligible cows", "A1": "a1 milk type", "A2": "a2 milk type",
+                        "single_control": "one milk control", "two_controls": "two milk controls"}
         for row in descriptive:
-            for field in ("cow_weighted_mean", "cow_weighted_q25", "cow_weighted_q50", "cow_weighted_q75"):
-                if f"{float(row[field]):.3f}" not in application:
-                    raise ValueError("An observed-distribution value is absent from the compiled supplement.")
-                extra_checks += 1
+            values = [group_labels[row["group"]], row["cows"], row["samples"]]
+            values.extend(f"{float(row[field]):.3f}" for field in
+                          ("cow_weighted_mean", "cow_weighted_q25", "cow_weighted_q50", "cow_weighted_q75"))
+            if " ".join(values) not in descriptive_text:
+                raise ValueError("A complete observed-distribution row is absent from the compiled supplement.")
+            extra_checks += 4
     overflow = []
     for page_number, page in enumerate(document, start=1):
         for word in page.get_text("words"):

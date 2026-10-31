@@ -1,0 +1,6 @@
+question,source,conclusion
+adjusted_milk_type_association,../inference.csv,三个同时区间均包括零，关联方向尚未确定
+variation_across_quantiles,quantile_contrasts.csv;quantile_equality_test.csv,整体检验与全部成对区间未检出分位数差异
+bandwidth_sensitivity,interpretation_values.json,报告带宽变化引起的最大系数变化
+two_control_population,observed_distribution.csv;../inference.csv,同时报告估计中心变化和奶牛样本的结局分布
+computational_feasibility,../completion_manifest.json,实际数据上完成完整高维坐标推断并报告运行时间

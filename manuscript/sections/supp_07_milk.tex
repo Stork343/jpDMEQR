@@ -29,6 +29,12 @@ farms contain both indicator values. The twelve farm and milk-control
 indicators and the milk-type indicator have full column rank in
 each outer selection sample and its inner training samples.
 
+Table~\ref{tab:milk-descriptive} summarises the observed score
+distributions. Means and empirical quantiles give each cow total
+weight one by assigning weight $1/m_i$ to each of its records.
+
+\input{generated/milk_profile/descriptive}
+
 \subsection{Sample roles and the high dimensional design}
 
 Seed 20261031 generates a random ordering of the retained cow
@@ -93,6 +99,41 @@ $n^{-1}(\sum_f\sum_{i\in I_f}(V_{ik}-\bar V_{fk})^2)^{1/2}$.
 The saved influence values reproduce this quantity to numerical
 precision. Pointwise intervals use $z_{0.975}$; simultaneous
 intervals use $z_{1-0.05/6}$ for the three quantiles within a setting.
+
+\subsection{Supplementary comparisons across quantiles}
+
+Write $\widehat\theta=(\widehat\theta_{0.25},
+\widehat\theta_{0.50},\widehat\theta_{0.75})^T$ and collect the
+corresponding saved cow influence contributions into the vector
+$V_i$. Cow identifiers align these contributions across quantiles.
+The joint covariance estimate is
+\[
+ \widehat\Sigma=\frac1{n^2}\sum_f\sum_{i\in I_f}
+ (V_i-\bar V_f)(V_i-\bar V_f)^T.
+\]
+Its diagonal reproduces the three reported coordinate variances.
+For a contrast $d$, the estimate is $d^T\widehat\theta$ and its
+standard error is $(d^T\widehat\Sigma d)^{1/2}$. The three rows
+$(-1,1,0)$, $(-1,0,1)$ and $(0,-1,1)$ define all pairwise differences.
+Their intervals use a separate Bonferroni family of three.
+This supplementary calculation uses the saved reference fits.
+
+For the joint equality hypothesis, let $G$ contain the first two
+contrast rows. The Wald statistic is
+\[
+ W=(G\widehat\theta)^T(G\widehat\Sigma G^T)^{-1}G\widehat\theta.
+\]
+The finite vector of influence expansions gives a joint normal
+approximation under the stated moment and learning conditions.
+With nonsingular limiting contrast covariance, the null reference
+distribution is $\chi^2_2$. The observed statistic is
+$\MilkQuantileEqualityWald{}$, giving $p=\MilkQuantileEqualityP{}$.
+The upper-minus-lower contrast is $\MilkUpperLowerDifference{}$,
+with simultaneous interval $\MilkUpperLowerDifferenceInterval{}$.
+
+\input{generated/milk_profile/contrasts}
+
+\subsection{Sensitivity to the analysis settings}
 
 Table~\ref{tab:milk-sensitivity} includes every registered setting.
 The two-control cohort has its own sampling population, and each

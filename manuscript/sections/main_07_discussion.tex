@@ -21,14 +21,24 @@ covariance of the combined estimator. This construction supports
 practical calculation while preserving a complete profile target
 defined independently of the numerical bandwidth.
 
-The milk analysis estimates a fixed milk-type coordinate with the
-complete spectrum available for adjustment. Its three simultaneous
-intervals include zero, while retaining uncertainty about associations
-of either sign. Strong correlations between adjacent spectral variables
-make stable computation consequential: the weighted QR calculation
-preserves the declared profile and returns the coefficient to its
-original units. Interpretation conditions on the measured spectrum
-and the observed farm and milk-control combinations.
+The milk analysis finds no statistically resolved A2 association with
+SCS after complete-spectrum adjustment, and the supplementary joint
+comparison does not detect variation across the three quantiles
+($p=\MilkQuantileEqualityP{}$). The width of the intervals leaves
+increases and decreases in SCS compatible with the observations.
+Restriction to cows with two milk controls changes the observed
+outcome distribution and moves the median coefficient towards
+negative values; bandwidth changes have a smaller numerical effect.
+The population being sampled is consequently relevant to the
+substantive interpretation of the fitted profile parameter.
+
+The application demonstrates that the complete high-dimensional
+procedure is computationally feasible for this repeated-measurement
+design. The full spectral block contains strongly correlated
+measurements, and a weighted QR representation permits the selected
+fits to be solved while preserving their objective and original
+coefficient units. Coordinate uncertainty and sample-specific
+sensitivity remain visible in the reported results.
 
 The theory uses independent clusters, bounded cluster sizes and a
 fixed positive-definite nuisance matrix. Learning that matrix for an
