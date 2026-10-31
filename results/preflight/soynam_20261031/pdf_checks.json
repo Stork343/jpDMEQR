@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "documents": [
+    {
+      "file": "/Users/houjian/Projects/jpDMEQR/manuscript/sjs_profile_quantile_main.pdf",
+      "pages": 24,
+      "characters": 56900,
+      "out_of_page_words": 0
+    },
+    {
+      "file": "/Users/houjian/Projects/jpDMEQR/manuscript/sjs_profile_quantile_supplement.pdf",
+      "pages": 48,
+      "characters": 118108,
+      "out_of_page_words": 0
+    }
+  ],
+  "inference_rows": 42,
+  "joint_parameters": 11,
+  "prediction_rows": 6,
+  "mode": "joint",
+  "inspection": "PDF text and page coordinates"
+}

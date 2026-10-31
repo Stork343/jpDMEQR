@@ -1,10 +1,10 @@
 \section{Introduction}\label{sec:introduction}
 
 Longitudinal quantile regression can involve thousands of predictors and
-only a few measurements on each subject. Repeated milk spectra provide
-one setting: each sample contains many correlated absorbance measurements,
-while persistent animal variation links samples from the same cow
-\cite{chirife2025data}. Mixed-effects models represent that
+only a few measurements on each subject. Genomic field trials provide
+one setting: thousands of marker variables accompany yield observations
+from a small number of growing seasons for each genetic line
+\cite{xavier2017canopy}. Mixed-effects models represent persistent
 heterogeneity through a small number of subject-specific effects
 \cite{pinheiro2000,jiang2007}. When the number of subjects increases but
 their visit counts remain bounded, each subject effect continues to be
@@ -83,7 +83,9 @@ developed through quasi-likelihood \cite{li2022}. Our construction
 addresses the complete quantile profile target and the first-order
 smoothing effect created by its nuisance optimisation. Numerical
 calculations examine the target approximation and the behaviour of the
-implemented intervals. The application uses repeated milk spectra and
-somatic cell counts \cite{chirife2025data}. It estimates a prespecified
-milk-type coordinate while the complete spectral design supplies the
-high-dimensional adjustment variables.
+implemented intervals. The application uses repeated soybean field
+trials \cite{xavier2017canopy}. It estimates year-specific canopy
+associations with yield while the complete marker design and its year
+interactions supply the high-dimensional genomic adjustment. A
+held-out-line calculation measures the additional prediction information
+provided by canopy coverage.

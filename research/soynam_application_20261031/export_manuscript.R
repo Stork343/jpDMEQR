@@ -2,21 +2,27 @@ library(data.table)
 library(yaml)
 library(jsonlite)
 config <- read_yaml("config/application_soynam_20261031.yml")
+arguments <- commandArgs(trailingOnly = TRUE)
+mode <- if (length(arguments)) arguments[1L] else "all"
+if (!mode %in% c("all", "joint")) stop("Unknown manuscript export mode.")
 source <- "results/tables/soynam_20261031"
+prediction_source <- if (mode == "all") source else "results/preflight/soynam_20261031/joint_prediction"
 destination <- "manuscript/generated/soynam_profile"
 dir.create(destination, recursive = TRUE, showWarnings = FALSE)
 effects <- fread(file.path(source, "inference.csv"))
 contrasts <- fread(file.path(source, "reference_contrasts.csv"))
 all_contrasts <- fread(file.path(source, "all_setting_contrasts.csv"))
 diagnostics <- fread(file.path(source, "diagnostics.csv"), integer64 = "double")
-metrics <- fread(file.path(source, "prediction_metrics.csv"))
-comparisons <- fread(file.path(source, "prediction_comparisons.csv"))
-year_metrics <- fread(file.path(source, "prediction_year_metrics.csv"))
+metrics <- fread(file.path(prediction_source, "prediction_metrics.csv"))
+comparisons <- fread(file.path(prediction_source, "prediction_comparisons.csv"))
+year_metrics <- fread(file.path(prediction_source, "prediction_year_metrics.csv"))
 descriptive <- fread(file.path(source, "descriptive.csv"))
 audit <- read_json("results/preflight/soynam_20261031/data_audit.json", simplifyVector = TRUE)
 manifest <- read_json("results/preflight/soynam_20261031/input_manifest.json", simplifyVector = TRUE)
 input <- readRDS(file.path(config$results_directory, "input.rds"))
-if (nrow(effects) != 42L || nrow(contrasts) != 11L || nrow(metrics) != 9L || nrow(comparisons) != 12L)
+expected_methods <- if (mode == "all") 3L else 2L
+if (nrow(effects) != 42L || nrow(contrasts) != 11L || nrow(metrics) != 3L * expected_methods ||
+    nrow(comparisons) != 6L * (expected_methods - 1L))
   stop("The complete empirical table set is required for manuscript export.")
 fmt <- function(x, digits = 2L) sprintf(paste0("%.", digits, "f"), x)
 interval <- function(lower, upper, digits = 2L) paste0("$[", fmt(lower, digits), ",\\ ", fmt(upper, digits), "]$")
@@ -61,7 +67,7 @@ values$SpatialYearContrastInterval <- interval(spatial_contrast$lower, spatial_c
 labels <- c(joint_canopy = "Joint profile with canopy", joint_genomic = "Joint profile without canopy",
   pooled_quantile_lasso = "Pooled quantile Lasso")
 quantile_names <- c("Lower", "Median", "Upper")
-for (q in seq_along(config$quantiles)) for (comparator_id in c("joint_genomic", "pooled_quantile_lasso")) {
+for (q in seq_along(config$quantiles)) for (comparator_id in unique(comparisons$comparator)) {
   row <- comparisons[tau == config$quantiles[[q]] & comparator == comparator_id & calibrated == TRUE]
   if (nrow(row) != 1L) stop("A prediction comparison is not unique.")
   name <- paste0(if (comparator_id == "joint_genomic") "Genomic" else "Pooled", quantile_names[q])
@@ -121,11 +127,22 @@ table("contrast_sensitivity", "The 2014 minus 2013 canopy coefficient contrast a
   "tab:soy-contrast-sensitivity", "lrrr", "Setting & Estimate & Standard error & Simultaneous interval", rows)
 rows <- vapply(unlist(config$quantiles), function(tau_value) {
   current <- metrics[tau == tau_value]
-  paste(fmt(tau_value), fmt(current[method == "joint_canopy", loss], 3),
-    fmt(current[method == "joint_genomic", loss], 3), fmt(current[method == "pooled_quantile_lasso", loss], 3), sep = " & ")
+  cells <- c(fmt(tau_value), fmt(current[method == "joint_canopy", loss], 3),
+    fmt(current[method == "joint_genomic", loss], 3))
+  if (mode == "all") cells <- c(cells, fmt(current[method == "pooled_quantile_lasso", loss], 3))
+  paste(cells, collapse = " & ")
 }, character(1))
 table("prediction", "Mean pinball loss on the same held-out lines, in bu/ac. Each line receives equal weight across its two observations. Every predictor uses calibration estimated from training validation residuals.",
-  "tab:soy-prediction", "rrrr", "$\\tau$ & Joint with canopy & Joint without canopy & Pooled with canopy", rows)
+  "tab:soy-prediction", if (mode == "all") "rrrr" else "rrr",
+  paste0("$\\tau$ & Joint with canopy & Joint without canopy", if (mode == "all") " & Pooled with canopy" else ""), rows)
+if (mode == "all") {
+  pooled <- comparisons[comparator == "pooled_quantile_lasso" & calibrated == TRUE]
+  rows <- vapply(seq_len(nrow(pooled)), function(i) paste(fmt(pooled$tau[i]),
+    fmt(pooled$improvement[i], 3), interval(pooled$lower[i], pooled$upper[i], 3),
+    fmt(pooled$relative_percent[i], 2), interval(pooled$relative_lower[i], pooled$relative_upper[i], 2), sep = " & "), character(1))
+  table("pooled_comparison", "Held-out prediction comparison between joint profile and pooled quantile Lasso, both with canopy and genomic variables. Positive improvements favour the joint predictor. Absolute values have bu/ac units, and relative values are percentages. Intervals allocate 5\\% across the six registered method and quantile comparisons.",
+    "tab:soy-pooled-comparison", "rrrrr", "$\\tau$ & Improvement & Simultaneous interval & Relative improvement & Simultaneous interval", rows)
+}
 rows <- vapply(seq_len(nrow(metrics)), function(i) paste(labels[[metrics$method[i]]], fmt(metrics$tau[i]),
   fmt(metrics$raw_loss[i], 3), fmt(metrics$loss[i], 3), fmt(metrics$raw_calibration[i], 3),
   fmt(metrics$calibration[i], 3), sep = " & "), character(1))
@@ -133,6 +150,6 @@ table("prediction_details", "Raw and training-calibrated predictions on held-out
   "tab:soy-prediction-details", "lrrrrr", "Method & $\\tau$ & Raw loss & Calibrated loss & Raw coverage & Calibrated coverage", rows, "\\footnotesize")
 writeLines(c("\\begin{figure}[t]", "\\centering",
   "\\includegraphics[width=\\textwidth]{generated/soynam_profile/results.pdf}",
-  "\\caption{Canopy information in the soybean trials. Panel A gives the year-specific profile coefficients per ten percentage points of coverage, with 95\\% Bonferroni simultaneous intervals for the eleven prespecified coordinate and contrast parameters. Panel B gives the percentage reduction in held-out pinball loss from the joint predictor with canopy relative to each comparator. Its intervals use paired complete-line losses and a six-comparison Bonferroni adjustment. Positive values in panel B indicate lower loss for the joint canopy predictor. The prediction comparison uses training-only intercept calibration.}",
+  "\\caption{Canopy information in the soybean trials. Panel A gives the year-specific profile coefficients per ten percentage points of coverage, with 95\\% Bonferroni simultaneous intervals for the eleven prespecified coordinate and contrast parameters. Panel B gives the percentage reduction in held-out pinball loss when canopy is added to the joint predictor using genomic and field information. Its intervals use paired complete-line losses and the registered six-comparison Bonferroni adjustment. The prediction comparison uses training-only intercept calibration.}",
   "\\label{fig:soy-results}", "\\end{figure}"), file.path(destination, "figure.tex"))
-cat("Generated manuscript values and tables from the complete empirical results.\n")
+cat("Generated manuscript values and tables for mode:", mode, "\n")

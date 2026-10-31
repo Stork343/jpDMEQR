@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Raw and training-calibrated predictions on held-out lines. Coverage is the fraction of observed yields at or below the predicted quantile. The nominal fractions are the corresponding values of $\tau$.}
+\label{tab:soy-prediction-details}
+\begin{tabular}{lrrrrr}
+\toprule
+Method & $\tau$ & Raw loss & Calibrated loss & Raw coverage & Calibrated coverage \\
+\midrule
+Joint profile with canopy & 0.25 & 2.704 & 2.670 & 0.301 & 0.269 \\
+Joint profile with canopy & 0.50 & 3.240 & 3.240 & 0.501 & 0.503 \\
+Joint profile with canopy & 0.75 & 2.550 & 2.545 & 0.714 & 0.773 \\
+Joint profile without canopy & 0.25 & 2.740 & 2.711 & 0.298 & 0.262 \\
+Joint profile without canopy & 0.50 & 3.291 & 3.292 & 0.514 & 0.517 \\
+Joint profile without canopy & 0.75 & 2.606 & 2.604 & 0.728 & 0.768 \\
+\bottomrule
+\end{tabular}
+\end{table}

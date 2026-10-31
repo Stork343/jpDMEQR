@@ -1,5 +1,6 @@
 import csv
 import json
+import sys
 from pathlib import Path
 
 import pymupdf
@@ -7,6 +8,10 @@ import pymupdf
 
 root = Path(__file__).resolve().parents[2]
 tables = root / "results/tables/soynam_20261031"
+mode = sys.argv[1] if len(sys.argv) > 1 else "all"
+if mode not in ("all", "joint"):
+    raise ValueError("Unknown PDF verification mode")
+prediction_tables = tables if mode == "all" else root / "results/preflight/soynam_20261031/joint_prediction"
 manuscript = root / "manuscript"
 
 
@@ -56,10 +61,12 @@ for row in read_rows("reference_contrasts.csv"):
         if value not in supplement:
             raise ValueError(f"A coordinate or contrast value is absent: {row['parameter']} {column} {value}")
 
-for row in read_rows("prediction_metrics.csv"):
+with (prediction_tables / "prediction_metrics.csv").open(newline="", encoding="utf-8") as handle:
+    prediction_rows = list(csv.DictReader(handle))
+for row in prediction_rows:
     value = f"{float(row['loss']):.3f}"
-    if value not in texts["sjs_profile_quantile_main"]:
-        raise ValueError(f"A prediction loss is absent from the article: {row['method']} {row['tau']} {value}")
+    if value not in supplement:
+        raise ValueError(f"A prediction loss is absent from the supplement: {row['method']} {row['tau']} {value}")
 
 figure = pymupdf.open(manuscript / "generated/soynam_profile/results.pdf")
 figure_text = normalise(figure[0].get_text())
@@ -68,7 +75,7 @@ for phrase in ("Canopy association", "Held-out prediction", "Quantile", "2013", 
         raise ValueError(f"A figure label is absent: {phrase}")
 
 result = {"status": "passed", "documents": records, "inference_rows": 42,
-          "joint_parameters": 11, "prediction_rows": 9,
+          "joint_parameters": 11, "prediction_rows": len(prediction_rows), "mode": mode,
           "inspection": "PDF text and page coordinates"}
 destination = root / "results/preflight/soynam_20261031/pdf_checks.json"
 destination.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
