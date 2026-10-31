@@ -59,6 +59,7 @@ Suggests:
     processx,
     purrr,
     readr,
+    readxl,
     rcmdcheck,
     rqPen,
     statmod,

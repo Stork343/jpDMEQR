@@ -1,0 +1,24 @@
+{
+  "dataset_doi": "10.34810/data2338",
+  "metadata_url": "https://dataverse.csuc.cat/api/datasets/:persistentId?persistentId=doi:10.34810/data2338",
+  "version": "1.0",
+  "release_time": "2025-06-25T14:15:27Z",
+  "license": "CC BY-NC-ND 4.0",
+  "files": [
+    {
+      "file_id": 296867,
+      "filename": "Database_MIR_A2_milk.xlsx",
+      "local_path": "data/raw/candidate_datasets_20261030/Database_MIR_A2_milk.xlsx",
+      "bytes": 21859858,
+      "url": "https://dataverse.csuc.cat/api/access/datafile/296867"
+    },
+    {
+      "file_id": 320914,
+      "filename": "README.txt",
+      "local_path": "data/raw/candidate_datasets_20261030/milk_README.txt",
+      "bytes": 7512,
+      "url": "https://dataverse.csuc.cat/api/access/datafile/320914"
+    }
+  ],
+  "verified_utc": "2026-10-31T03:42:39.650883+00:00"
+}

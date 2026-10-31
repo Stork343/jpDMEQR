@@ -14,7 +14,7 @@ install_optional <- as_bool(get_arg("optional", "true"))
 cran_required <- c(
   "quantreg", "CVXR", "clarabel", "testthat", "pkgload", "withr",
   "data.table", "yaml", "ps",
-  "jsonlite", "ggplot2", "dplyr", "tidyr", "readr", "purrr",
+  "jsonlite", "ggplot2", "dplyr", "tidyr", "readr", "readxl", "purrr",
   "matrixStats", "digest", "lqmm", "Matrix", "quadprog", "nloptr",
   "Rcpp", "RcppArmadillo", "RcppEigen", "glmnet", "filelock", "processx", "rcmdcheck", "statmod", "geeVerse",
   "osqp", "igraph", "knitr", "kableExtra"

@@ -1,0 +1,25 @@
+R version 4.3.2 (2023-10-31)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS 15.4.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
+
+locale:
+[1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8
+
+time zone: Asia/Shanghai
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base
+
+other attached packages:
+[1] readxl_1.4.5      data.table_1.17.8
+
+loaded via a namespace (and not attached):
+ [1] compiler_4.3.2   magrittr_2.0.4   cli_3.6.5        tools_4.3.2
+ [5] pillar_1.11.1    glue_1.8.0       tibble_3.3.0     cellranger_1.1.0
+ [9] vctrs_0.6.5      jsonlite_2.0.0   lifecycle_1.0.4  pkgconfig_2.0.3
+[13] rlang_1.1.6

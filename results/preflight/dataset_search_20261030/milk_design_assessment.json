@@ -1,0 +1,46 @@
+{
+  "target_variable": "A2_milk",
+  "target_definition": "A2A2 versus A1A1 or A1A2",
+  "always_included_columns": ["farm_controlF1.1", "farm_controlF2.1", "farm_controlF3.1", "farm_controlF4.1", "farm_controlF5.1", "farm_controlF6.1", "farm_controlF1.2", "farm_controlF2.2", "farm_controlF3.2", "farm_controlF4.2", "farm_controlF5.2", "farm_controlF6.2", "A2_milk"],
+  "always_included_rank": 13,
+  "spectral_variables": 1060,
+  "total_design_columns": 1073,
+  "spectral_adjacent_correlation_quantiles": {
+    "0%": 0.46227700334645,
+    "25%": 0.992826335168024,
+    "50%": 0.998617865344151,
+    "75%": 0.99985689341589,
+    "100%": 0.999997517564013
+  },
+  "cow_counts_by_milk_type": [
+    {
+      "Milk_typology": "A1",
+      "cows": 519
+    },
+    {
+      "Milk_typology": "A2",
+      "cows": 830
+    }
+  ],
+  "eligible_SCC_units": "cells per microliter",
+  "score_formula": "log2(SCC/100)+3",
+  "eligible_score_quantiles": {
+    "0%": -0.321928094887362,
+    "25%": 1.21412480535285,
+    "50%": 2.42223300068305,
+    "75%": 3.84799690655495,
+    "100%": 10.725741156504
+  },
+  "score_distinct_values": 572,
+  "score_modal_fraction": 0.0350643586329339,
+  "repeated_interval_days_quantiles": {
+    "0%": 28,
+    "25%": 30,
+    "50%": 56,
+    "75%": 60,
+    "100%": 66
+  },
+  "sampling_dates": ["2023-05-24", "2023-07-31"],
+  "model_fitting_executed": false,
+  "audited": "2026-10-31 11:40:04 CST"
+}
