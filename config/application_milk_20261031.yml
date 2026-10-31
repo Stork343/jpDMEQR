@@ -25,7 +25,8 @@ settings:
   - {setting: penalty_050, cohort: eligible, lambda: 0.5, h_multiplier: 1}
   - {setting: penalty_200, cohort: eligible, lambda: 2, h_multiplier: 1}
 method_version: joint_profile_design_20261026
-execution_version: covariance_20261031
+execution_version: covariance_qr_20261031
+selected_solver: cluster_weighted_qr_newton
 nodewise_solver: glmnet_covariance
 nodewise_tolerance: 1.0e-13
 nodewise_max_iterations: 10000000

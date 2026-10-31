@@ -21,6 +21,8 @@ options(error = function() {
 })
 source("research/score_validity_20261026/load_joint.R")
 source("research/milk_application_20261031/nodewise.R")
+source("research/milk_application_20261031/weighted_solver.R")
+ds_fit_small <- milk_fit_small
 milk_design_cache <- readRDS(file.path(config$results_directory, "design_cache.rds"))
 pc_nodewise <- milk_nodewise_cached
 cohort <- readRDS(file.path(config$results_directory, "cohorts.rds"))[[job$cohort]]
@@ -49,12 +51,15 @@ diagnostics <- rbindlist(lapply(1:2, function(fold) {
     profile <- ds_profile(model$data, current$beta, job$tau, fitted_bandwidth,
       matrix(job$lambda, 1L, 1L), current$gamma)
     eigenvalues <- eigen(current$hessian, symmetric = TRUE, only.values = TRUE)$values
+    basis_eigenvalues <- eigen(current$basis_hessian, symmetric = TRUE, only.values = TRUE)$values
     data.table(case_id = job$case_id, fold = fold, bandwidth = bandwidth,
       selected_dimension = length(model$support), estimation_cows = model$data$n,
       kkt = current$kkt, iterations = current$iterations,
       nuisance_gradient = max(profile$gradient_max),
       hessian_minimum = min(eigenvalues), hessian_maximum = max(eigenvalues),
       hessian_condition = max(eigenvalues) / min(eigenvalues),
+      basis_condition = max(basis_eigenvalues) / min(basis_eigenvalues),
+      prediction_identity_error = current$prediction_error,
       cluster_score_variance = var(current$projected_scores))
   }))
 }))
