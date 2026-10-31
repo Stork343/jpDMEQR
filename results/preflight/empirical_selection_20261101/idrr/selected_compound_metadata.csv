@@ -1,0 +1,5 @@
+drug,cid,drug_class,moa,target,moa_source
+AZ628,11676786,Kinase Inhibitors,RAF inhibitor,"BRAF, RAF1",Drug Repurposing Hub
+Dabrafenib,44462760,Kinase Inhibitors,RAF inhibitor,"BRAF, LIMK1, NEK11, RAF1, SIK1",Drug Repurposing Hub
+PLX4720,24180719,Kinase Inhibitors,RAF inhibitor,"BRAF, KDR",Drug Repurposing Hub
+SB590885,11316960,Kinase Inhibitors,RAF inhibitor,BRAF,Drug Repurposing Hub

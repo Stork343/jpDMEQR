@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "native_basis_identity_error": 0,
+  "training_evaluation_overlap": 0,
+  "genes": 12768,
+  "expanded_variables": 63980,
+  "actual_observations_used": true
+}

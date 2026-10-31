@@ -1,10 +1,11 @@
 import argparse
 import json
+import logging
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
 from aiohttp import ClientTimeout
-from pypdl import Pypdl
 
 parser = argparse.ArgumentParser()
 parser.add_argument("url")
@@ -17,8 +18,16 @@ destination = args.destination.resolve()
 if destination.exists():
     raise FileExistsError(destination)
 destination.parent.mkdir(parents=True, exist_ok=True)
+runtime_dir = Path(__file__).resolve().parents[2] / "results/scratch/runtime"
+runtime_dir.mkdir(parents=True, exist_ok=True)
+os.chdir(runtime_dir)
+from pypdl import Pypdl
+
 partial = destination.with_name(destination.name + ".pypdl.part")
-downloader = Pypdl()
+logger = logging.getLogger(str(destination))
+logger.setLevel(logging.WARNING)
+logger.addHandler(logging.FileHandler(destination.with_name(destination.name + ".download.log")))
+downloader = Pypdl(logger=logger)
 result = downloader.start(
     args.url,
     file_path=str(partial),
@@ -26,7 +35,7 @@ result = downloader.start(
     retries=0,
     display=False,
     proxy=args.proxy,
-    timeout=ClientTimeout(total=None, connect=45, sock_read=90),
+    timeout=ClientTimeout(total=None, connect=45, sock_read=180),
 )
 if not result or not downloader.completed or downloader.failed:
     raise RuntimeError("数据下载未完成")

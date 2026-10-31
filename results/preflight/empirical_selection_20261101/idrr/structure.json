@@ -1,0 +1,17 @@
+{
+  "status": "structure_audited",
+  "source_file": "data/raw/idrr_20261101/iDRR_data.rds",
+  "source_rows": 9474371,
+  "candidate_rows": 124841,
+  "response_association_fitted": false,
+  "validation_results_used": false,
+  "manuscript_adoption": false,
+  "description": {
+    "title": "iDRR - Integrated Drug Response Resource",
+    "version": "1.1",
+    "date": "2026-02-25",
+    "contents": ["dose_response: Raw dose-response measurements (dose, viability) from 15 datasets", "metrics: Harmonized drug response metrics per drug-cell pair", "drugs: Drug metadata with CID and drug class", "drugs/metrics now also carry: moa (mechanism of action), target (gene symbols), moa_source"],
+    "metrics_description": ["DRS: Drug Response Score (integrated metric)", "AUC: Area Under Curve", "IC50: Half-maximal inhibitory concentration", "AAC: Activity Area over Curve", "DSS: Drug Sensitivity Score", "SEE: Standard Error of Estimate (cross-study consistency)", "SLOPE, MAX, MIN: Curve fit parameters", "Min_Conc, Max_Conc: Dose range tested"],
+    "annotation_note": "MoA and target annotations added 2026-09-17. Primary source: Broad Drug Repurposing Hub (via PRISM Repurposing 20Q2 compound metadata); gaps filled from ChEMBL mechanism records. drug_class is unchanged from v1.0. MoA available for 614/760 compounds, target for 574/760; NA elsewhere."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "status": "prepared",
+  "source_rows": 5976183,
+  "quality_removed_rows": 0,
+  "genes_with_protein_annotation": 19986,
+  "expression_models": 1047,
+  "preprocessing": "gdscIC50_0.99.4_NC0_B_trim_FALSE",
+  "validation_response_associations_used": false,
+  "manuscript_adoption": false
+}

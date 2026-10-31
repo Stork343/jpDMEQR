@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "role": "adapter_fidelity",
+  "prediction_identity_error": 0,
+  "penalty_identity_error": 0,
+  "deterministic_error": 0,
+  "zero_penalty_prediction_error": 2.04503081135954e-13,
+  "experimental_id_fold_integrity": true,
+  "native_sample_rows": 408,
+  "native_sample_genes": 1000,
+  "formal_comparison_completed": false,
+  "package_version": "0.1.0",
+  "grpreg_version": "3.5.0"
+}

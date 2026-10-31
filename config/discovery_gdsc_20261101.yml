@@ -1,0 +1,29 @@
+phase: discovery
+manuscript_adoption: false
+drugs: [Dabrafenib, PLX-4720, HG6-64-1, SB590885, AZ628]
+quantiles: [0.25, 0.5, 0.75]
+unit: patient_id
+curve: earliest_complete_experiment_by_date_scan_library
+remaining_experiments: repeatability_evaluation
+exploration_training_fraction: 0.75
+exploration_seed: 20261104
+inner_folds: 3
+gene_filter:
+  protein_annotation: UniProt
+  observed_training_fraction: 0.95
+  training_fpkm_above_one_fraction: 0.10
+  transformation: log2_FPKM_plus_1
+  missing_values: training_median
+  standardization: training_mean_sd
+dose_basis:
+  coordinate: affine_scaled_square_root_concentration
+  degree: 3
+  degrees_of_freedom: 5
+joint_prediction:
+  solver: clarabel_selected_qp
+  Lambda: [0.5, 1, 2]
+  gap_tolerance: 1.0e-8
+  maximum_iterations: 200
+comparators: [FBIO-GSCAD-CLUSTER-CV, POOLED-QUANTILE-LASSO, QRF]
+calibration: training_fold_residual_quantiles_by_dose
+evaluation: patient_mean_pinball_loss

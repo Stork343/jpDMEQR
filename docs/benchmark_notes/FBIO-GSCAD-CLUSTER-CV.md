@@ -1,0 +1,9 @@
+# FBIO GSCAD CLUSTER CV
+
+This application comparator uses Koukouli, Wang, Dondelinger and Park, “A regularized functional regression model enabling transcriptome-wide dosage-dependent association study of cancer drug response”, PLoS Computational Biology 17, e1008066, DOI 10.1371/journal.pcbi.1008066. The implementation is `fbioSelectr` 0.1.0 from `https://github.com/koukoulEv/fbioSelect`, revision `200aeafc41373bf5ac7924a80600074f9119e6c0`, under the MIT license.
+
+The author package supplies the marginal functional screening, cubic B-spline expansion and group SCAD fit. The screening size is `floor(2*n/log(n))`, where `n` counts training patient groups. Five complete patient folds choose the penalty. The adapter supplies these folds through `grpreg::cv.grpreg` and retains the package's estimation routines. The source code uses observation weights in the screening regressions; `grpreg` 3.5.0 does not use its additional `weights` argument. With equal five-point or nine-point curves, inverse cluster-size weights are constant.
+
+The target is a dose-varying conditional mean. Quantile predictions add dose-specific residual quantiles estimated from three training patient folds. Formal evaluation uses patients excluded from every training step. Permitted metrics are prediction loss and runtime. Profile coefficient coverage is evaluated using the proposed estimator's own target.
+
+`research/drug_response_application_20261101/check_fbio_adapter.R` checks predictions against the author's basis implementation, agreement with direct penalty selection on the same folds, deterministic output, complete experimental groups, and the zero-penalty least-squares limit. These checks use actual observations from the author's GDSC example. The results are stored under `results/preflight/empirical_selection_20261101/fbio_adapter/`.

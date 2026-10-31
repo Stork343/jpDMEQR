@@ -1,0 +1,8 @@
+{
+  "status": "prepared",
+  "response_associations_used": false,
+  "formal_validation_used": false,
+  "seed": 20261104,
+  "curve_rule": "earliest_complete_experiment_by_date_scan_library",
+  "remaining_experiments": "repeatability_evaluation"
+}

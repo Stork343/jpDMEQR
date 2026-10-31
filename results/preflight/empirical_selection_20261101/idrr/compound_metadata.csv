@@ -1,0 +1,762 @@
+drug,cid,drug_class,moa,target,moa_source
+(-)-Parthenolide,5420804,Differentiating/Epigenetic Modifiers,,,
+"1,9-Pyrazoloanthrone",8515,Kinase Inhibitors,,,
+10-Hydroxycamptothecin,97226,Topoisomerase Inhibitors,topoisomerase inhibitor,TOP1,Drug Repurposing Hub
+17-AAG,6505803,HSP Inhibitors,HSP inhibitor,HSP90AA1,Drug Repurposing Hub
+2-NITRO-5-P-TOLUENESULFONYLFURAN,394449,Other,ubiquitin-conjugating enzyme inhibitor,UBE2N,Drug Repurposing Hub
+2-Piperazinyl-8-phenyl-4H-1-benzopyran-4-one,3971,Kinase Inhibitors,"casein kinase inhibitor, mTOR inhibitor, PI3K inhibitor","BRD2, BRD3, BRD4",Drug Repurposing Hub
+2-Pyridinecarboxylic acid,1018,Metabolic Modifiers,chelating agent,,Drug Repurposing Hub
+3-aminobenzamide,1645,PARP inhibitor,PARP inhibitor,PARP1,Drug Repurposing Hub
+5-Fluoro-2-Deoxycytidine,240980,Differentiating/Epigenetic Modifiers,DNA methyltransferase inhibitor,,Drug Repurposing Hub
+5-Fluorouracil,3385,Antimetabolites,thymidylate synthase inhibitor,"DPYD, TYMS",Drug Repurposing Hub
+5Z-7-OXOZEAENOL,9863776,Kinase Inhibitors,,,
+"6,6'-Dithiodinicotinic acid",85040,Other,,,
+7-Hydroxystaurosporine,72271,Kinase Inhibitors,"CDK inhibitor, CHK inhibitor, PKC inhibitor","CHEK1, MARK3, PDPK1",Drug Repurposing Hub
+8-Hydroxyquinoline,1923,Anti-Infective Agents,chelating agent,METAP2,Drug Repurposing Hub
+A-484954,14998470,Kinase Inhibitors,,,
+A3622,57390074,Kinase Inhibitors,ALK tyrosine kinase receptor inhibitor,"ALK, EGFR",Drug Repurposing Hub
+A770041,9549184,Kinase Inhibitors,,,
+Abemaciclib,46220502,Kinase Inhibitors,CDK inhibitor,"CDK4, CDK6",Drug Repurposing Hub
+Abexinostat,11749858,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC2, HDAC3, HDAC6",Drug Repurposing Hub
+Abiraterone,132971,Hormone Therapy,Cytochrome P450 17A1 inhibitor; Androgen Receptor antagonist; Steroid 5-alpha-reductase inhibitor,"CYP17A1, AR, SRD5A1, SRD5A2, SRD5A3",ChEMBL
+ABT-199,49846579,Apoptotic Modulators,BCL inhibitor,BCL2,Drug Repurposing Hub
+Abt-737,11228183,Apoptotic Modulators,BCL inhibitor,"BCL2, BCL2L1, BCL2L2",Drug Repurposing Hub
+AC-480,10437018,Kinase Inhibitors,"EGFR inhibitor, protein tyrosine kinase inhibitor","EGFR, ERBB2, ERBB4",Drug Repurposing Hub
+Acetalax,8269,Other,Unknown,,ChEMBL
+Acivicin,294641,Antimetabolites,gamma glutamyltransferase Inhibitors,CTPS1,Drug Repurposing Hub
+ACY-1215,53340666,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC2, HDAC3, HDAC6, HDAC8",Drug Repurposing Hub
+AEE788,10297043,Kinase Inhibitors,"EGFR inhibitor, VEGFR inhibitor","EGFR, ERBB2, ERBB4, FGFR2, FGFR3, KDR",Drug Repurposing Hub
+AEW-541,11476171,Kinase Inhibitors,IGF-1 inhibitor,"IGF1R, INSR",Drug Repurposing Hub
+Afatinib,10184653,Kinase Inhibitors,EGFR inhibitor,"EGFR, ERBB2, ERBB4",Drug Repurposing Hub
+Afuresertib,46843057,Kinase Inhibitors,AKT inhibitor,"AKT1, AKT2, AKT3",Drug Repurposing Hub
+AG1478,2051,Kinase Inhibitors,EGFR inhibitor,"EGFR, MAPK14",Drug Repurposing Hub
+AGI-6780,71299339,Kinase Inhibitors,,,
+Albendazole,2082,Anti-Infective Agents,tubulin polymerization inhibitor,"TUBA1A, TUBB, TUBB4B",Drug Repurposing Hub
+Alectinib,49806720,Kinase Inhibitors,ALK tyrosine kinase receptor inhibitor,"ALK, MET",Drug Repurposing Hub
+Alisertib,24771867,Kinase Inhibitors,Aurora kinase inhibitor,AURKA,Drug Repurposing Hub
+Altretamine,2123,Alkylating Agents,DNA synthesis inhibitor,DNA,Drug Repurposing Hub
+Alvocidib,5287969,Kinase Inhibitors,CDK inhibitor,"CDK1, CDK2, CDK4, CDK5, CDK6, CDK7, CDK8, CDK9, EGFR, PYGM",Drug Repurposing Hub
+AM-580,2126,Differentiating/Epigenetic Modifiers,retinoid receptor agonist,RARA,Drug Repurposing Hub
+AMG-208,24864821,Kinase Inhibitors,tyrosine kinase inhibitor,MET,Drug Repurposing Hub
+AMG-232,58573469,Kinase Inhibitors,MDM inhibitor,MDM2,Drug Repurposing Hub
+AMG-319,68947304,Kinase Inhibitors,PI3-kinase p110-delta subunit inhibitor,PIK3CD,ChEMBL
+AMG-458,24764449,Kinase Inhibitors,MET inhibitor,MET,Drug Repurposing Hub
+AMG-900,24856041,Kinase Inhibitors,Aurora kinase inhibitor,"AURKA, AURKB, AURKC",Drug Repurposing Hub
+AMINACRINE,7019,Anti-Infective Agents,acetylcholinesterase inhibitor,"ACHE, BCHE",Drug Repurposing Hub
+Aminoglutethimide,2145,Hormone Therapy,glucocorticoid receptor antagonist,"CYP11A1, CYP19A1",Drug Repurposing Hub
+Amonafide,50515,Topoisomerase Inhibitors,topoisomerase inhibitor,"TOP2A, TOP2B",Drug Repurposing Hub
+Amsacrine,2179,Topoisomerase Inhibitors,topoisomerase inhibitor,"KCNH2, TOP2A",Drug Repurposing Hub
+Amuvatinib,11282283,Kinase Inhibitors,Hepatocyte growth factor receptor inhibitor; Platelet-derived growth factor receptor alpha inhibitor; Stem cell growth factor receptor inhibitor; Tyrosine-protein kinase receptor FLT3 inhibitor,"FLT3, KIT, MET, PDGFRA",ChEMBL
+Anastrozole,2187,Hormone Therapy,aromatase inhibitor,CYP19A1,Drug Repurposing Hub
+Anguidin,422111,Protein Synthesis Inhibitors,protein synthesis inhibitor,SLC5A1,Drug Repurposing Hub
+Anisomycin,253602,Anti-Infective Agents,DNA synthesis inhibitor,"NHP2L1, RPL10L, RPL11, RPL13A, RPL15, RPL19, RPL23, RPL23A, RPL26L1, RPL3, RPL37, RPL8, RSL24D1",Drug Repurposing Hub
+Apatinib,11315474,Kinase Inhibitors,RET tyrosine kinase inhibitor,"CSK, KDR, KIT, RET",Drug Repurposing Hub
+Aphidicolin,2210,Differentiating/Epigenetic Modifiers,RNA synthesis inhibitor,,Drug Repurposing Hub
+Apitolisib,25254071,Kinase Inhibitors,"mTOR inhibitor, PI3K inhibitor","FGR, MAP3K9, MTOR, PIK3CA, PIK3CB, PIK3CD, PIK3CG, SYK",Drug Repurposing Hub
+AR-42,6918848,Differentiating/Epigenetic Modifiers,HDAC inhibitor,HDAC1,Drug Repurposing Hub
+ARRY-380,51039094,Kinase Inhibitors,EGFR inhibitor,ERBB2,Drug Repurposing Hub
+AS601245,11422035,Kinase Inhibitors,,,
+AS605240,5289247,Kinase Inhibitors,,,
+Aspirin,2244,Other,cyclooxygenase inhibitor,"AKR1C1, ASIC3, EDNRA, HSPA5, IKBKB, NFKB1, NFKB2, NFKBIA, PRKAA1, PRKAA2, PRKAB1, PRKAB2, PRKAG1, PRKAG2, PRKAG3, PTGS1, PTGS2, RPS6KA3, TP53",Drug Repurposing Hub
+AST-1306,24739943,Kinase Inhibitors,EGFR inhibitor,"EGFR, ERBB2",Drug Repurposing Hub
+Astemizole,2247,GPCR Modulators,histamine receptor antagonist,"HRH1, KCNH1, KCNH2",Drug Repurposing Hub
+AT-406,25022340,Apoptotic Modulators,,,
+AT-7519,11338033,Kinase Inhibitors,CDK inhibitor,"CDK1, CDK2, CDK4, CDK5, CDK6, CDK9",Drug Repurposing Hub
+AT13148,24905401,Kinase Inhibitors,Rho-associated protein kinase inhibitor; MAP kinase-activated protein kinase 2 inhibitor,"ROCK1, ROCK2, MAPKAPK2",ChEMBL
+AT7867,11175137,Kinase Inhibitors,AKT inhibitor,"AKT2, GSK3B, PKIA, PRKACA",Drug Repurposing Hub
+AT9283,135398495,Kinase Inhibitors,"Aurora kinase inhibitor, JAK inhibitor","AURKA, AURKB, JAK2, JAK3, RPS6KA6, STK17A",Drug Repurposing Hub
+Austocystin D,5470400,DNA-Targeting Agents,,,
+AV-412,11700696,Other,protein tyrosine kinase inhibitor,"EGFR, ERBB2",Drug Repurposing Hub
+Avagacestat,46883536,Protease/Proteasome Inhibitors,Gamma-secretase inhibitor,"APH1A, APH1B, NCSTN, PSEN1, PSEN2, PSENEN",ChEMBL
+AVN944,9918559,Antimetabolites,inosine monophosphate dehydrogenase inhibitor,"IMPDH1, IMPDH2",Drug Repurposing Hub
+Axitinib,6450551,Kinase Inhibitors,"PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor","CSF1, FLT1, FLT4, KDR, PLK4",Drug Repurposing Hub
+AZ3146,56973724,Kinase Inhibitors,monopolar spindle 1 kinase inhibitor,,Drug Repurposing Hub
+AZ505,24961094,Differentiating/Epigenetic Modifiers,,,
+AZ628,11676786,Kinase Inhibitors,RAF inhibitor,"BRAF, RAF1",Drug Repurposing Hub
+AZ960,25099184,Kinase Inhibitors,JAK inhibitor,JAK2,Drug Repurposing Hub
+Azacitidine,9444,Differentiating/Epigenetic Modifiers,DNA methyltransferase inhibitor,"DNMT1, DNMT3A",Drug Repurposing Hub
+Azathioprine,2265,Immunomodulatory Agents,dehydrogenase inhibitor,"HPRT1, IMPDH1, PPAT",Drug Repurposing Hub
+Azd-1480,16659841,Kinase Inhibitors,JAK inhibitor,"JAK1, JAK2, JAK3",Drug Repurposing Hub
+AZD-5363,25227436,Kinase Inhibitors,AKT inhibitor,"AKT1, AKT2, AKT3",Drug Repurposing Hub
+AZD0156,118502708,Kinase Inhibitors,,,
+AZD1208,58423153,Kinase Inhibitors,,,
+AZD1390,126689157,Kinase Inhibitors,,,
+AZD1775,24856436,Kinase Inhibitors,WEE1 kinase inhibitor,WEE1,Drug Repurposing Hub
+AZD2014,25262792,Kinase Inhibitors,mTOR inhibitor,MTOR,Drug Repurposing Hub
+AZD2461,44199317,Kinase Inhibitors,PARP inhibitor,,Drug Repurposing Hub
+AZD2811,16007391,Kinase Inhibitors,Aurora kinase inhibitor,AURKB,Drug Repurposing Hub
+AZD3463,56599293,Kinase Inhibitors,"ALK tyrosine kinase receptor inhibitor, insulin growth factor receptor inhibitor","ALK, IGF1R",Drug Repurposing Hub
+AZD3759,78209992,Kinase Inhibitors,Epidermal growth factor receptor erbB1 inhibitor,EGFR,ChEMBL
+AZD4320,86661883,Apoptotic Modulators,,,
+AZD4547,51039095,Kinase Inhibitors,FGFR inhibitor,"FGFR1, FGFR2, FGFR3, FGFR4, IGF1R, KDR",Drug Repurposing Hub
+AZD5153,118693659,Differentiating/Epigenetic Modifiers,,,
+AZD5438,16747683,Kinase Inhibitors,CDK inhibitor,KCNH2,Drug Repurposing Hub
+AZD5582,49847690,Apoptotic Modulators,,,
+AZD5991,131634760,Apoptotic Modulators,,,
+AZD6482,44137675,Kinase Inhibitors,PI3K inhibitor,"PIK3CA, PIK3CB, PIK3CD, PIK3CG",Drug Repurposing Hub
+AZD6738,54761306,Kinase Inhibitors,Serine-protein kinase ATR inhibitor,ATR,ChEMBL
+AZD7648,135151360,Kinase Inhibitors,,,
+AZD7762,11152667,Kinase Inhibitors,CHK inhibitor,"CHEK1, CHEK2",Drug Repurposing Hub
+AZD8055,25262965,Kinase Inhibitors,mTOR inhibitor,MTOR,Drug Repurposing Hub
+AZD8186,52913813,Kinase Inhibitors,PI3-kinase p110-beta subunit inhibitor; PI3-kinase p110-delta subunit inhibitor,"PIK3CB, PIK3CD",ChEMBL
+AZD8330,16666708,Kinase Inhibitors,MEK inhibitor,"MAP2K1, MAP2K2",Drug Repurposing Hub
+B-7100,16736529,Kinase Inhibitors,HSP inhibitor,HSP90AA1,Drug Repurposing Hub
+Bafetinib,11387605,Kinase Inhibitors,"Bcr-Abl kinase inhibitor, LYN tyrosine kinase inhibitor","ABL1, BCR, LYN",Drug Repurposing Hub
+Baicalein,5281605,Immunomodulatory Agents,lipoxygenase inhibitor,"ALOX5, GLO1, PREP, SELL, SELP, TNF, XDH",Drug Repurposing Hub
+BAM7,3101542,Apoptotic Modulators,BAX activator,BAX,Drug Repurposing Hub
+Barasertib,11497983,Kinase Inhibitors,Aurora kinase inhibitor,"AURKA, AURKB",Drug Repurposing Hub
+BAY-87-2243,67377767,Differentiating/Epigenetic Modifiers,hypoxia inducible factor inhibitor,HIF1A,Drug Repurposing Hub
+BAY61-3606,10200390,Kinase Inhibitors,,,
+Belinostat,6918638,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC10, HDAC11, HDAC2, HDAC3, HDAC4, HDAC5, HDAC6, HDAC7, HDAC8, HDAC9",Drug Repurposing Hub
+Bendamustine,65628,Alkylating Agents,DNA inhibitor,,Drug Repurposing Hub
+beta-Lapachone,3885,Apoptotic Modulators,topoisomerase inhibitor,TOP1,Drug Repurposing Hub
+Betulinic acid,64971,Apoptotic Modulators,"apoptosis stimulant, NFkB pathway inhibitor",GPBAR1,Drug Repurposing Hub
+Bexarotene,82146,Differentiating/Epigenetic Modifiers,retinoid receptor agonist,"RXRA, RXRB, RXRG",Drug Repurposing Hub
+BEZ235,11977753,Kinase Inhibitors,"mTOR inhibitor, PI3K inhibitor","ATR, MTOR, PIK3CA, PIK3CD, PIK3CG",Drug Repurposing Hub
+BGB324,46215462,Kinase Inhibitors,Tyrosine-protein kinase receptor UFO inhibitor,AXL,ChEMBL
+BGJ398,53235510,Kinase Inhibitors,Fibroblast growth factor receptor inhibitor,"FGFR1, FGFR2, FGFR3, FGFR4",ChEMBL
+BGT-226,11978790,Kinase Inhibitors,PI3K inhibitor,"MTOR, PIK3CA, PIK3CB, PIK3CG",Drug Repurposing Hub
+BHG712,16747388,Kinase Inhibitors,ephrin inhibitor,EPHB4,Drug Repurposing Hub
+BI-2536,11364421,Kinase Inhibitors,PLK inhibitor,"BRD4, PLK1, PLK2, PLK3",Drug Repurposing Hub
+BI-D1870,25023738,Kinase Inhibitors,,,
+BIBF-1120,135423438,Kinase Inhibitors,"FGFR inhibitor, PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor","FGFR1, FGFR2, FGFR3, FGFR4, FLT1, FLT4, KDR, PDGFRA, PDGFRB",Drug Repurposing Hub
+BIBR-1532,9927531,Telomerase Inhibitors,telomerase inhibitor,TERT,Drug Repurposing Hub
+Bicalutamide,2375,Hormone Therapy,androgen receptor antagonist,AR,Drug Repurposing Hub
+Bimiralisib,58507717,Kinase Inhibitors,PI3K inhibitor,,Drug Repurposing Hub
+Binimetinib,10288191,Kinase Inhibitors,MEK inhibitor,"MAP2K1, MAP2K2",Drug Repurposing Hub
+Biochanin A,5280373,Metabolic Modifiers,protein tyrosine kinase inhibitor,"CYP19A1, ESRRA, ESRRB, ESRRG, FASN",Drug Repurposing Hub
+Birinapant,49836020,Apoptotic Modulators,XIAP inhibitor,"BIRC2, XIAP",Drug Repurposing Hub
+Bisacodyl,2391,Other,laxative,,Drug Repurposing Hub
+Bisindolylmaleimide IX,5083,Kinase Inhibitors,PKC inhibitor,"AKT1, GSK3B, LCK, MAPK1, MAPK11, MAPK12, MAPK14, MAPK8, PRKCA, ROCK1, RPS6KB1, SIRT1",Drug Repurposing Hub
+BIX01294,25150857,Differentiating/Epigenetic Modifiers,histone lysine methyltransferase inhibitor,"EHMT1, EHMT2",Drug Repurposing Hub
+BIX02189,46931012,Kinase Inhibitors,,,
+Blebbistatin,3476986,Other,ATPase inhibitor,MYH2,Drug Repurposing Hub
+Bleomycin a2,5460769,DNA-Targeting Agents,,,
+BMS-345541,9926054,Kinase Inhibitors,IKK inhibitor,"CHUK, IKBKB",Drug Repurposing Hub
+BMS-690514,11349170,Kinase Inhibitors,"EGFR inhibitor, VEGFR inhibitor","EGFR, ERBB2, FLT3, KDR",Drug Repurposing Hub
+Bms-754807,24785538,Kinase Inhibitors,IGF-1 inhibitor,"AKT1, IGF1R",Drug Repurposing Hub
+Bortezomib,387447,Protease/Proteasome Inhibitors,"NFkB pathway inhibitor, proteasome inhibitor","PSMA1, PSMA2, PSMA3, PSMA4, PSMA5, PSMA6, PSMA7, PSMA8, PSMB1, PSMB10, PSMB11, PSMB2, PSMB3, PSMB4, PSMB5, PSMB6, PSMB7, PSMB8, PSMB9, PSMD1, PSMD2, RELA",Drug Repurposing Hub
+Bosutinib,5328940,Kinase Inhibitors,"Abl kinase inhibitor, Bcr-Abl kinase inhibitor, src inhibitor","ABL1, BCR, CAMK1D, CAMK2G, CDK2, FRK, FYN, HCK, LYN, MAP2K1, MAP2K2, MAP3K2, MAP4K5, SRC, STK10, STK24, STK4, TNK2, TXK",Drug Repurposing Hub
+BRD-K71781559,246676,Other,,,
+Brefeldin A,5287620,Anti-Infective Agents,protein synthesis inhibitor,"ARF1, CYTH2",Drug Repurposing Hub
+Brequinar,23223059,Antimetabolites,dihydroorotate dehydrogenase inhibitor,DHODH,Drug Repurposing Hub
+Brigatinib,68165256,Kinase Inhibitors,"ALK tyrosine kinase receptor inhibitor, EGFR inhibitor","ALK, EGFR",Drug Repurposing Hub
+Brilliant green,12449,Anti-Infective Agents,,,
+Brivanib,11234052,Kinase Inhibitors,"FGFR inhibitor, VEGFR inhibitor","CYP3A4, FGFR1, FLT1, KCNH2, KDR",Drug Repurposing Hub
+Bromopyruvate,70684,Metabolic Modifiers,,,
+BROXYQUINOLINE,2453,Anti-Infective Agents,antiprotozoal agent,,Drug Repurposing Hub
+Bruceantin,5281304,Protein Synthesis Inhibitors,protein synthesis inhibitor,,Drug Repurposing Hub
+Bryostatin 1,5477635,Kinase Inhibitors,,,
+Buparlisib,16654980,Kinase Inhibitors,PI3K inhibitor,"PIK3CA, PIK3CG",Drug Repurposing Hub
+Busulfan,2478,Alkylating Agents,DNA inhibitor,DNA,Drug Repurposing Hub
+Butyl 4-aminobenzoate,2482,Other,sodium channel blocker|acetylcholine receptor agonist|local anesthetic,CHRM2,Drug Repurposing Hub
+BX-912,11754511,Kinase Inhibitors,pyruvate dehydrogenase kinase inhibitor,"CDK2, CHEK1, GSK3B, KDR, PDK1, PDPK1",Drug Repurposing Hub
+BX 795,10077147,Kinase Inhibitors,,,
+BYL-719,56649450,Kinase Inhibitors,PI3K inhibitor,"PIK3CA, PIK3CB, PIK3CD, PIK3CG",Drug Repurposing Hub
+C-75,4248455,Metabolic Modifiers,,,
+Cabazitaxel,9854073,Mitotic Inhibitors,microtubule inhibitor,"TUBA4A, TUBB, TUBB1",Drug Repurposing Hub
+Cabozantinib,25102847,Kinase Inhibitors,"RET tyrosine kinase inhibitor, VEGFR inhibitor","KDR, MET",Drug Repurposing Hub
+Caffeic acid,689043,Metabolic Modifiers,"HIV integrase inhibitor, lipoxygenase inhibitor, nitric oxide production inhibitor, tumor necrosis factor production inhibitor","ALOX5, MIF",Drug Repurposing Hub
+Camptothecin,24360,Topoisomerase Inhibitors,topoisomerase inhibitor,TOP1,Drug Repurposing Hub
+Canertinib,156414,Kinase Inhibitors,EGFR inhibitor,"AKT1, EGFR, ERBB2, ERBB4",Drug Repurposing Hub
+CAP-232,6918265,Other,,,
+Capmatinib,25145656,Kinase Inhibitors,c-Met inhibitor,MET,Drug Repurposing Hub
+Carboplatin,426756,Alkylating Agents,"DNA alkylating agent, DNA inhibitor",,Drug Repurposing Hub
+Carboxyamidotriazole,108144,Ion Transport Modulators,calcium channel blocker,CXCL8,Drug Repurposing Hub
+Carfilzomib,11556711,Protease/Proteasome Inhibitors,proteasome inhibitor,"PSMA1, PSMA2, PSMA3, PSMA4, PSMA5, PSMA6, PSMA7, PSMA8, PSMB1, PSMB10, PSMB11, PSMB2, PSMB3, PSMB4, PSMB5, PSMB6, PSMB7, PSMB8, PSMB9",Drug Repurposing Hub
+Carmofur,2577,Antimetabolites,thymidylate synthase inhibitor,TYMS,Drug Repurposing Hub
+Carmustine,2578,Alkylating Agents,"DNA alkylating agent, DNA inhibitor",GSR,Drug Repurposing Hub
+CAY10566,16732433,Metabolic Modifiers,,,
+CCT-128930,17751819,Kinase Inhibitors,AKT inhibitor,"PKIA, PRKACA",Drug Repurposing Hub
+CCT007093,2314623,Other,,,
+CD-437,2758573,Kinase Inhibitors,retinoid receptor agonist,RARG,Drug Repurposing Hub
+"CDDO-ME
+",400769,Immunomodulatory Agents,Inhibitor of nuclear factor kappa B kinase beta subunit inhibitor; Keap1/Nrf2 inhibitor; Peroxisome proliferator-activated receptor gamma antagonist,"IKBKB, KEAP1, NFE2L2, PPARG",ChEMBL
+Cediranib,9933475,Kinase Inhibitors,"KIT inhibitor, VEGFR inhibitor","CSF1R, FLT1, FLT3, FLT4, KDR, KIT, PDGFRA, PDGFRB",Drug Repurposing Hub
+CEP-32496,56846693,Kinase Inhibitors,RAF inhibitor,"BRAF, RAF1",Drug Repurposing Hub
+Cep-37440,71721648,Kinase Inhibitors,ALK tyrosine kinase receptor inhibitor,ALK,Drug Repurposing Hub
+Cerdulatinib,44595079,Kinase Inhibitors,"JAK inhibitor, syk inhibitor",SYK,Drug Repurposing Hub
+Cerulenin,5282054,Anti-Infective Agents,,,
+Cetuximab,85668777,Other,,,
+Ch-55,6184667,Differentiating/Epigenetic Modifiers,,,
+CH5132799,49784945,Kinase Inhibitors,PI3K inhibitor,"MTOR, PIK3CA, PIK3CB, PIK3CD, PIK3CG",Drug Repurposing Hub
+CHIR-124,135399748,Kinase Inhibitors,CHK inhibitor,CHEK1,Drug Repurposing Hub
+Chir-99021,9956119,Kinase Inhibitors,glycogen synthase kinase inhibitor,"CDK1, GSK3A, GSK3B, MAPK1",Drug Repurposing Hub
+Chlorambucil,2708,Alkylating Agents,DNA inhibitor,DNA,Drug Repurposing Hub
+Chloroquine,2719,Anti-Infective Agents,,,
+Chloroxine,2722,Anti-Infective Agents,opioid receptor antagonist,OPRK1,Drug Repurposing Hub
+CHM-1,375860,Other,,,
+CI-1040,6918454,Kinase Inhibitors,MEK inhibitor,"MAP2K1, MAP3K1, MAP3K2",Drug Repurposing Hub
+Ciclopirox,2749,Anti-Infective Agents,membrane integrity inhibitor,ATP1A1,Drug Repurposing Hub
+CIL56,654092,Other,,,
+Cimetidine,2756,GPCR Modulators,histamine receptor antagonist,"HRH2, SLC29A4, SLC47A1, SLC47A2",Drug Repurposing Hub
+Cisplatin,24191118,Alkylating Agents,"DNA alkylating agent, DNA synthesis inhibitor",XIAP,Drug Repurposing Hub
+Clofarabine,119182,Antimetabolites,ribonucleotide reductase inhibitor,"POLA1, POLD1, POLE, RRM1, RRM2, RRM2B",Drug Repurposing Hub
+Clofazimine,2794,Anti-Infective Agents,GK0582 inhibitor,,Drug Repurposing Hub
+Clofibrate,2796,Metabolic Modifiers,PPAR receptor agonist,"LPL, PPARA",Drug Repurposing Hub
+Clofoctol,2799,Anti-Infective Agents,protein synthesis inhibitor,,Drug Repurposing Hub
+Clotrimazole,2812,Anti-Infective Agents,"cytochrome P450 inhibitor, imidazoline receptor ligand","CYP3A4, KCNN4, NR1I2, NR1I3, TRPM2, TRPM4, TRPM8",Drug Repurposing Hub
+Cobimetinib,16222096,Kinase Inhibitors,MEK inhibitor,"MAP2K1, MAP2K2",Drug Repurposing Hub
+Colchicine,6167,Mitotic Inhibitors,microtubule inhibitor,"GLRA1, GLRA2, TUBA1A, TUBA1B, TUBA1C, TUBA3C, TUBA3D, TUBA3E, TUBA4A, TUBB, TUBB1, TUBB2A, TUBB2B, TUBB3, TUBB4A, TUBB4B, TUBB6, TUBB8",Drug Repurposing Hub
+Combretastatin A4,5351344,Mitotic Inhibitors,tubulin polymerization inhibitor,,Drug Repurposing Hub
+CP724714,9874913,Kinase Inhibitors,"EGFR inhibitor, protein tyrosine kinase inhibitor",ERBB2,Drug Repurposing Hub
+CPI-613,24770514,Metabolic Modifiers,,,
+Crenolanib,10366136,Kinase Inhibitors,PDGFR tyrosine kinase receptor inhibitor,"CSF1R, FLT3, KIT, PDGFRA, PDGFRB",Drug Repurposing Hub
+Crizotinib,54613769,Kinase Inhibitors,ALK tyrosine kinase receptor inhibitor,"ALK, MET",Drug Repurposing Hub
+Cucurbitacin I,5281321,Kinase Inhibitors,,,
+Cudc-101,24756910,Kinase Inhibitors,EGFR inhibitor,"EGFR, ERBB2",Drug Repurposing Hub
+Curcumin,969516,Immunomodulatory Agents,"cyclooxygenase inhibitor, histone acetyltransferase inhibitor, lipoxygenase inhibitor, NFkB pathway inhibitor","APP, CA1, CA12, CA14, CA2, CA4, CA6, CA9, CYP3A4, DNMT3B, EP300, MMP13, MMP9, NOS2, PTGS1, PTGS2, XDH",Drug Repurposing Hub
+CX-5461,25257557,Differentiating/Epigenetic Modifiers,RNA polymerase inhibitor,,Drug Repurposing Hub
+CYC-116,6420138,Kinase Inhibitors,Aurora kinase inhibitor,"AURKA, AURKB, KDR",Drug Repurposing Hub
+Cycloheximide,6197,Protein Synthesis Inhibitors,protein synthesis inhibitor,RPL3,Drug Repurposing Hub
+Cyclopamine,442972,Hedgehog Inhibitors,,,
+Cyclophosphamide,2907,Alkylating Agents,DNA alkylating agent,"CYP2A6, CYP2B6, CYP2C18, CYP2C19, CYP2C8, CYP2C9, CYP2D6, CYP3A4, CYP3A5, CYP3A7",Drug Repurposing Hub
+Cyclosporin A,5280754,Immunomodulatory Agents,,,
+Cyqualon,1550234,Other,breast cancer resistance protein inhibitor,ABCG2,Drug Repurposing Hub
+Cytarabine,5351180,Antimetabolites,ribonucleotide reductase inhibitor,"POLA1, POLB, POLD1, POLE",Drug Repurposing Hub
+Cytochalasin B,5311281,Other,microtubule inhibitor,ACTB,Drug Repurposing Hub
+Dabrafenib,44462760,Kinase Inhibitors,RAF inhibitor,"BRAF, LIMK1, NEK11, RAF1, SIK1",Drug Repurposing Hub
+Dacarbazine,5353562,Alkylating Agents,DNA alkylating agent,"PGD, POLA2",Drug Repurposing Hub
+Dacinostat,6445533,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC2, HDAC3, HDAC4, HDAC5, HDAC6, HDAC7, HDAC8, HDAC9",Drug Repurposing Hub
+DANUSERTIB,11442891,Kinase Inhibitors,"Aurora kinase inhibitor, growth factor receptor inhibitor","AURKA, AURKB, AURKC, FGFR1, NTRK1, RET, SLK",Drug Repurposing Hub
+Daporinad,6914657,Metabolic Modifiers,niacinamide phosphoribosyltransferase inhibitor,NAMPT,Drug Repurposing Hub
+Darinaparsin,11683005,Other,Unknown,,ChEMBL
+Dasatinib,3062316,Kinase Inhibitors,"Bcr-Abl kinase inhibitor, ephrin inhibitor, KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, src inhibitor, tyrosine kinase inhibitor","ABL1, ABL2, BLK, EPHA2, FGR, FRK, FYN, HCK, KIT, LCK, LYN, PDGFRB, SRC, SRMS, STAT5B, YES1",Drug Repurposing Hub
+Daunorubicin,30323,DNA-Targeting Agents,"RNA synthesis inhibitor, topoisomerase inhibitor","TOP2A, TOP2B",Drug Repurposing Hub
+Decitabine,451668,Differentiating/Epigenetic Modifiers,DNA methyltransferase inhibitor,"DNMT1, DNMT3A",Drug Repurposing Hub
+Defactinib,25117126,Kinase Inhibitors,focal adhesion kinase inhibitor,PTK2,Drug Repurposing Hub
+Degrasyn,11222830,Protease/Proteasome Inhibitors,deubiquitinase inhibitor,"JAK2, UCHL5, USP14, USP9X",Drug Repurposing Hub
+Delanzomib,24800541,Protease/Proteasome Inhibitors,proteasome inhibitor,"CMA1, CTSG, CYP3A4, ELANE",Drug Repurposing Hub
+Dexamethasone,5743,Immunomodulatory Agents,Glucocorticoid receptor agonist,NR3C1,ChEMBL
+Dexrazoxane,71384,Other,"chelating agent, topoisomerase inhibitor","TOP2A, TOP2B",Drug Repurposing Hub
+Dianhydrogalactitol,31789,Alkylating Agents,DNA alkylating agent,,Drug Repurposing Hub
+Dichloroacetic acid,6597,Metabolic Modifiers,,,
+Digitoxigenin,4369270,Ion Transport Modulators,ATPase inhibitor,ATP1A1,Drug Repurposing Hub
+Dihydrorotenone,243725,Metabolic Modifiers,,,
+Dinaciclib,46926350,Kinase Inhibitors,CDK inhibitor,"CDK1, CDK2, CDK5, CDK9",Drug Repurposing Hub
+Disulfiram,3117,Metabolic Modifiers,"aldehyde dehydrogenase inhibitor, DNA methyltransferase inhibitor, TRPV agonist","ALDH2, DBH",Drug Repurposing Hub
+DM3189,25195294,Other,,,
+Docetaxel,148124,Mitotic Inhibitors,tubulin polymerization inhibitor,"BCL2, MAP2, MAP4, MAPT, NR1I2, TUBB, TUBB1",Drug Repurposing Hub
+Dofetilide,71329,Ion Transport Modulators,potassium channel blocker,"KCNH1, KCNH2, KCNJ12, KCNK2",Drug Repurposing Hub
+Domperidone,3151,GPCR Modulators,dopamine receptor antagonist,"DRD2, DRD3",Drug Repurposing Hub
+Doramapimod,156422,Kinase Inhibitors,MAP kinase p38 alpha inhibitor,MAPK14,ChEMBL
+Dovitinib,9886808,Kinase Inhibitors,"EGFR inhibitor, FGFR inhibitor, FLT3 inhibitor, PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor","CSF1R, EGFR, FGFR1, FGFR2, FGFR3, FLT1, FLT3, FLT4, INSR, KDR, KIT, PDGFRA, PDGFRB",Drug Repurposing Hub
+Doxorubicin,32874,Topoisomerase Inhibitors,topoisomerase inhibitor,TOP2A,Drug Repurposing Hub
+E-7449,135565981,Apoptotic Modulators,PARP inhibitor,"PARP1, PARP2, TNKS, TNKS2",Drug Repurposing Hub
+Echinomycin,3197,DNA-Targeting Agents,DNA intercalating agent,,Drug Repurposing Hub
+EHT 1864,9938202,Other,,,
+Elaiophylin,155816671,Apoptotic Modulators,bacterial 50S ribosomal subunit inhibitor,,Drug Repurposing Hub
+Elesclomol,300471,Kinase Inhibitors,oxidative stress inducer,HSPA1A,Drug Repurposing Hub
+Embelin,3218,Apoptotic Modulators,"HCV inhibitor, XIAP inhibitor",XIAP,Drug Repurposing Hub
+Encorafenib,50922675,Kinase Inhibitors,RAF inhibitor,BRAF,Drug Repurposing Hub
+ENMD-2076,16041424,Kinase Inhibitors,"Aurora kinase inhibitor, FLT3 inhibitor, VEGFR inhibitor","AURKA, FLT3, KDR, PDGFRA, PTK2, SRC",Drug Repurposing Hub
+Entinostat,4261,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC2, HDAC3, HDAC9",Drug Repurposing Hub
+Entospletinib,59473233,Kinase Inhibitors,syk inhibitor,SYK,Drug Repurposing Hub
+Enzalutamide,15951529,Hormone Therapy,androgen receptor antagonist,AR,Drug Repurposing Hub
+Enzastaurin,176167,Kinase Inhibitors,Protein kinase C beta inhibitor,PRKCB,ChEMBL
+Epirubicin,41867,Topoisomerase Inhibitors,topoisomerase inhibitor,"CHD1, TOP2A",Drug Repurposing Hub
+Epothilone A,448799,Mitotic Inhibitors,microtubule stabilizing agent,,Drug Repurposing Hub
+Epothilone B,448013,Mitotic Inhibitors,"microtubule stabilizing agent, tubulin polymerization inhibitor","TUBA1A, TUBA1B, TUBA1C, TUBA3C, TUBA4A, TUBA8, TUBB, TUBB1, TUBB3, TUBB4A, TUBB4B",Drug Repurposing Hub
+Epothilone D,447865,Mitotic Inhibitors,"microtubule stabilizing agent, tubulin polymerization inhibitor","TUBA1A, TUBA1B, TUBA1C, TUBA3C, TUBA4A, TUBA8, TUBB, TUBB1, TUBB3, TUBB4A, TUBB4B",Drug Repurposing Hub
+EPZ004777,56962336,Differentiating/Epigenetic Modifiers,,,
+EPZ5676,57345410,Differentiating/Epigenetic Modifiers,histone lysine methyltransferase inhibitor,DOT1L,Drug Repurposing Hub
+Erastin,11214940,Metabolic Modifiers,ion channel antagonist,VDAC2,Drug Repurposing Hub
+Erdafitinib,67462786,Kinase Inhibitors,FGFR inhibitor,"FGFR1, FGFR2, FGFR3, FGFR4",Drug Repurposing Hub
+Erlotinib,176871,Kinase Inhibitors,EGFR inhibitor,"EGFR, NR1I2",Drug Repurposing Hub
+Estradiol cypionate,9403,Hormone Therapy,estrogen receptor agonist,ESR1,Drug Repurposing Hub
+Ethinyl estradiol,5991,Hormone Therapy,"estrogen receptor agonist, estrogenic hormone","ESR1, ESR2, NR1I2",Drug Repurposing Hub
+Etomoxir,123823,Metabolic Modifiers,carnitine palmitoyltransferase inhibitor,CPT1A,Drug Repurposing Hub
+Etoposide,36462,Topoisomerase Inhibitors,DNA topoisomerase II inhibitor,"TOP2A, TOP2B",ChEMBL
+ETP-45835,71755761,Other,,,
+ETP-46464,72199292,Kinase Inhibitors,ATR kinase inhibitor,,Drug Repurposing Hub
+Everolimus,6442177,Rapalogs,mTOR inhibitor,MTOR,Drug Repurposing Hub
+EX-527,5113032,Differentiating/Epigenetic Modifiers,,,
+Exatecan,151115,Topoisomerase Inhibitors,topoisomerase inhibitor,TOP1,Drug Repurposing Hub
+Exemestane,60198,Hormone Therapy,aromatase inhibitor,CYP19A1,Drug Repurposing Hub
+Fedratinib,16722836,Kinase Inhibitors,"FLT3 inhibitor, JAK inhibitor","BRD4, JAK1, JAK2, JAK3, TYK2",Drug Repurposing Hub
+Fenbendazole,3334,Anti-Infective Agents,tubulin polymerization inhibitor,TUBB,Drug Repurposing Hub
+Fenretinide,5288209,Apoptotic Modulators,"apoptosis stimulant, retinoid receptor agonist",RARA,Drug Repurposing Hub
+FG-4592,11256664,Other,hypoxia inducible factor prolyl hydroxylase inhibitor,EGLN2,Drug Repurposing Hub
+FH535,3463933,Other,,,
+Filanesib,44224257,Kinesin Inhibitors,"kinesin inhibitor, kinesin-like spindle protein inhibitor",KIF11,Drug Repurposing Hub
+Fimepinostat,54575456,Differentiating/Epigenetic Modifiers,PI3K inhibitor,"HDAC2, PIK3R1",Drug Repurposing Hub
+Floxuridine,5790,Antimetabolites,DNA synthesis inhibitor,TYMS,Drug Repurposing Hub
+Flubendazole,35802,Anti-Infective Agents,tubulin polymerization inhibitor,TUBB,Drug Repurposing Hub
+Fludarabine,657237,Antimetabolites,ribonucleotide reductase inhibitor,"ADA, RRM1, RRM2",Drug Repurposing Hub
+Flumatinib,46848036,Kinase Inhibitors,Bcr-Abl kinase inhibitor,"ABL1, PDGFRB",Drug Repurposing Hub
+Fluocinolone acetonide,6215,Immunomodulatory Agents,glucocorticoid receptor agonist,"NR3C1, SERPINA6",Drug Repurposing Hub
+Fluorometholone,9878,Immunomodulatory Agents,glucocorticoid receptor agonist,NR3C1,Drug Repurposing Hub
+Fluvastatin,446155,Metabolic Modifiers,HMGCR inhibitor,HMGCR,Drug Repurposing Hub
+Foretinib,42642645,Kinase Inhibitors,VEGFR inhibitor,"FLT1, FLT4, KDR, MET",Drug Repurposing Hub
+Formestane,11273,Hormone Therapy,aromatase inhibitor,CYP19A1,Drug Repurposing Hub
+Fostamatinib,11984591,Kinase Inhibitors,SYK inhibitor,"RET, SYK",Drug Repurposing Hub
+FTY720,107970,GPCR Modulators,,,
+Fulvestrant,104741,Hormone Therapy,estrogen receptor antagonist,"ESR1, ESR2, GPER1",Drug Repurposing Hub
+FUMONISIN B1,3431,Metabolic Modifiers,,,
+Gallibiscoquinazole,353472,Other,,,
+Galunisertib,10090485,Kinase Inhibitors,TGF-beta receptor type I inhibitor,TGFBR1,ChEMBL
+Gambogic acid,11599836,Apoptotic Modulators,caspase activator,BCL2,Drug Repurposing Hub
+Gandotinib,46213929,Kinase Inhibitors,JAK inhibitor,"JAK2, JAK3",Drug Repurposing Hub
+Ganetespib,135564985,HSP Inhibitors,HSP inhibitor,HSP90AA1,Drug Repurposing Hub
+GDC-0032,51001932,Kinase Inhibitors,PI3K inhibitor,PIK3CA,Drug Repurposing Hub
+GDC-0068,24788740,Kinase Inhibitors,AKT inhibitor,"AKT1, AKT2, AKT3, PRKG1",Drug Repurposing Hub
+GDC-0152,46940575,Apoptotic Modulators,XIAP inhibitor,"BIRC2, BIRC3, BIRC7, XIAP",Drug Repurposing Hub
+GDC-0349,59239165,Kinase Inhibitors,Pim kinase inhibitor,PIK3CA,Drug Repurposing Hub
+GDC-0449,24776445,Hedgehog Inhibitors,"hedgehog pathway inhibitor, smoothened receptor antagonist",SMO,Drug Repurposing Hub
+GDC-0879,11717001,Kinase Inhibitors,RAF inhibitor,BRAF,Drug Repurposing Hub
+GDC0810,56941241,Apoptotic Modulators,Estrogen receptor degrader,ESR1,ChEMBL
+GEDATOLISIB,44516953,Kinase Inhibitors,"mTOR inhibitor, PI3K inhibitor","MTOR, PIK3CA",Drug Repurposing Hub
+Gefitinib,123631,Kinase Inhibitors,EGFR inhibitor,EGFR,Drug Repurposing Hub
+Geldanamycin,5288382,HSP Inhibitors,,,
+Gemcitabine,356653,Antimetabolites,ribonucleotide reductase inhibitor,"CMPK1, RRM1, RRM2, TYMS",Drug Repurposing Hub
+Genz-644282,10294813,Topoisomerase Inhibitors,topoisomerase inhibitor,TOP1,Drug Repurposing Hub
+GILTERITINIB,49803313,Kinase Inhibitors,FLT3 inhibitor,FLT3,Drug Repurposing Hub
+GM 6001,132519,Differentiating/Epigenetic Modifiers,matrix metalloprotease inhibitor,"ACAN, ADAM28, MMP1, MMP12, MMP13, MMP14, MMP2, MMP3, MMP8, MMP9",Drug Repurposing Hub
+GOLVATINIB,16118392,Kinase Inhibitors,VEGFR inhibitor,"KDR, MET",Drug Repurposing Hub
+Gossypol,3503,Apoptotic Modulators,"BCL inhibitor, MCL1 inhibitor",BCL2,Drug Repurposing Hub
+GSK-1904529A,25124816,Kinase Inhibitors,"IGF-1 inhibitor, insulin growth factor receptor inhibitor, insulin receptor ligand","IGF1R, INSR",Drug Repurposing Hub
+GSK-3 inhibitor IX,448949,Kinase Inhibitors,"glycogen synthase kinase inhibitor, lipoxygenase inhibitor","GSK3A, GSK3B",Drug Repurposing Hub
+Gsk-461364,15983966,Kinase Inhibitors,PLK inhibitor,PLK1,Drug Repurposing Hub
+GSK-J4,71729975,Differentiating/Epigenetic Modifiers,histone lysine demethylase inhibitor,"KDM6A, KDM6B",Drug Repurposing Hub
+GSK1059615,23582824,Kinase Inhibitors,PI3-kinase class I inhibitor,"PIK3CA, PIK3CB, PIK3CD, PIK3CG, PIK3R1, PIK3R2, PIK3R3, PIK3R5",ChEMBL
+GSK1070916,46885626,Kinase Inhibitors,Aurora kinase inhibitor,"AURKA, AURKB, AURKC, CYP2D6, CYP3A4",Drug Repurposing Hub
+GSK126,68210102,Differentiating/Epigenetic Modifiers,Histone-lysine N-methyltransferase EZH2 inhibitor,EZH2,ChEMBL
+GSK1838705,25182616,Kinase Inhibitors,insulin growth factor receptor inhibitor,"ALK, IGF1R, INSR, RPS6KA1",Drug Repurposing Hub
+GSK2606414,53469448,Kinase Inhibitors,,,
+GSK2636771,56949517,Kinase Inhibitors,PI3-kinase p110-beta subunit inhibitor,PIK3CB,ChEMBL
+GSK269962,16095342,Kinase Inhibitors,,,
+GSK429286A,11373846,Kinase Inhibitors,rho associated kinase inhibitor,ROCK1,Drug Repurposing Hub
+GSK650394,25022668,Kinase Inhibitors,serum/glucocorticoid regulated kinase inhibitor,"SGK1, SGK2",Drug Repurposing Hub
+GSK690693,16725726,Kinase Inhibitors,Serine/threonine-protein kinase AKT inhibitor; cAMP-dependent protein kinase (PKA) inhibitor; Protein kinase C (PKC) inhibitor,"AKT1, AKT2, AKT3, PRKACA, PRKACB, PRKACG, PRKCA, PRKCB, PRKCD, PRKCE, PRKCG, PRKCH, PRKCI, PRKCQ, PRKCZ, PRKD1, PRKD3",ChEMBL
+GSK923295,46898058,Kinesin Inhibitors,centromere associated protein inhibitor,CENPE,Drug Repurposing Hub
+GW-2580,11617559,Kinase Inhibitors,cFMS kinase inhibitor,CSF1R,Drug Repurposing Hub
+GW-405833,9911463,GPCR Modulators,cannabinoid receptor agonist,CNR2,Drug Repurposing Hub
+GW 441756,9943465,Kinase Inhibitors,growth factor receptor inhibitor,NTRK1,Drug Repurposing Hub
+GW5074,5924208,Kinase Inhibitors,,,
+GW843682X,9826308,Kinase Inhibitors,PLK inhibitor,"PLK1, PLK3",Drug Repurposing Hub
+HA14-1,3549,Apoptotic Modulators,BCL inhibitor,BCL2,Drug Repurposing Hub
+Halofuginone,400772,Other,collagenase inhibitor,"COL1A1, MMP2",Drug Repurposing Hub
+Harringtonine,276389,Protein Synthesis Inhibitors,protein synthesis inhibitor,,Drug Repurposing Hub
+Hexachlorophene,3598,Anti-Infective Agents,potassium channel activator,"GLUD1, SDHD",Drug Repurposing Hub
+Hexylresorcinol,3610,Anti-Infective Agents,local anesthetic,TYR,Drug Repurposing Hub
+HG-5-88-01,25226117,Other,,,
+HMN-214,9888590,Kinase Inhibitors,PLK inhibitor,PLK1,Drug Repurposing Hub
+Hydrocortisone,5754,Hormone Therapy,glucocorticoid receptor agonist,,Drug Repurposing Hub
+Hydroxyurea,3657,Antimetabolites,ribonucleotide reductase inhibitor,"RRM1, RRM2, RRM2B",Drug Repurposing Hub
+Hypericin,3663,Kinase Inhibitors,tyrosine kinase inhibitor,,Drug Repurposing Hub
+I-BET-151,52912189,Differentiating/Epigenetic Modifiers,bromodomain inhibitor,"BRD2, BRD3, BRD4",Drug Repurposing Hub
+Ibrutinib,24821094,Kinase Inhibitors,Bruton's tyrosine kinase (BTK) inhibitor,"BLK, BMX, BTK",Drug Repurposing Hub
+IC-87114,9908783,Kinase Inhibitors,,,
+ICG-001,11238147,Other,beta-catenin inhibitor,CTNNB1,Drug Repurposing Hub
+Idasanutlin,53358942,Apoptotic Modulators,MDM inhibitor,"MDM2, TP53",Drug Repurposing Hub
+Idelalisib,11625818,Kinase Inhibitors,PI3K inhibitor,"PIK3CA, PIK3CB, PIK3CD, PIK3CG",Drug Repurposing Hub
+IDH-C35,56645356,Kinase Inhibitors,,,
+Ifosfamide,3690,Alkylating Agents,DNA alkylating agent,"CYP2A6, CYP2B6, CYP2C18, CYP2C19, CYP2C8, CYP2C9, CYP3A4, CYP3A5, CYP3A7, PTGS1",Drug Repurposing Hub
+Imatinib,5291,Kinase Inhibitors,"Bcr-Abl kinase inhibitor, KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor","ABL1, CSF1R, DDR1, KIT, NTRK1, PDGFRA, PDGFRB, RET",Drug Repurposing Hub
+IMD-0354,5081913,Kinase Inhibitors,"IKK inhibitor, NFkB pathway inhibitor",IKBKB,Drug Repurposing Hub
+Imiquimod,57469,Immunomodulatory Agents,"interferon inducer, toll-like receptor agonist","TLR7, TLR8",Drug Repurposing Hub
+Incb8761(PF-4136309),11192346,GPCR Modulators,CC chemokine receptor antagonist,,Drug Repurposing Hub
+Indibulin,2929,Mitotic Inhibitors,tubulin polymerization inhibitor,"TUBA1A, TUBA1B, TUBA1C, TUBA3C, TUBA3E, TUBA4A, TUBB, TUBB1, TUBB2A, TUBB2B, TUBB3, TUBB4A, TUBB4B, TUBB6, TUBB8",Drug Repurposing Hub
+Indisulam,216468,Differentiating/Epigenetic Modifiers,CDK inhibitor,"CA1, CA12, CA14, CA2, CA6, CA7, CA9",Drug Repurposing Hub
+Indole-3-carbinol,3712,Immunomodulatory Agents,"aryl hydrocarbon receptor agonist, indoleamine 2,3-dioxygenase inhibitor",AHR,Drug Repurposing Hub
+"Indolo[2,1-b]quinazoline-6,12-dione",73549,Other,cyclooxygenase inhibitor,IDO1,Drug Repurposing Hub
+IPA-3,521106,Kinase Inhibitors,,,
+Irinotecan,60838,Topoisomerase Inhibitors,topoisomerase inhibitor,"TOP1, TOP1MT",Drug Repurposing Hub
+Ispinesib,6851740,Kinesin Inhibitors,kinesin inhibitor,KIF11,Drug Repurposing Hub
+Istradefylline,5311037,GPCR Modulators,adenosine receptor antagonist,"ADORA1, ADORA2A, ADORA2B, ADORA3",Drug Repurposing Hub
+Itraconazole,14179013,Anti-Infective Agents,cytochrome P450 inhibitor,CYP51A1,Drug Repurposing Hub
+IWR-1-endo,44483163,Other,PARP inhibitor,"TNKS, TNKS2",Drug Repurposing Hub
+Ixabepilone,6445540,Mitotic Inhibitors,microtubule stabilizing agent,"TUBA1A, TUBA1B, TUBA1C, TUBA3C, TUBA3D, TUBA3E, TUBA4A, TUBB, TUBB1, TUBB2A, TUBB2B, TUBB3, TUBB4A, TUBB4B, TUBB6, TUBB8",Drug Repurposing Hub
+Ixazomib,25183872,Protease/Proteasome Inhibitors,proteasome inhibitor,"ADRM1, PSMA1, PSMA2, PSMA3, PSMA4, PSMA5, PSMA6, PSMA7, PSMA8, PSMB1, PSMB10, PSMB11, PSMB2, PSMB3, PSMB4, PSMB5, PSMB6, PSMB7, PSMB8, PSMB9, PSMC1, PSMC2, PSMC3, PSMC4, PSMC5, PSMC6, PSMD1, PSMD11, PSMD12, PSMD13, PSMD14, PSMD2, PSMD3, PSMD4, PSMD6, PSMD7, PSMD8, SEM1",Drug Repurposing Hub
+JNJ38877605,46911863,Kinase Inhibitors,Hepatocyte growth factor receptor inhibitor,MET,ChEMBL
+JQ1,46907787,Differentiating/Epigenetic Modifiers,bromodomain inhibitor,"BRD4, BRDT",Drug Repurposing Hub
+JQ1 compound,71300862,Differentiating/Epigenetic Modifiers,,,
+JZL-184,25021165,Metabolic Modifiers,monoacylglucerol lipase inhibitor,MGLL,Drug Repurposing Hub
+kb NB 142-70,45258277,Kinase Inhibitors,,,
+Kenpaullone,3820,Kinase Inhibitors,"CDK inhibitor, glycogen synthase kinase inhibitor","CCNB1, CDK1, CDK5, GSK3B",Drug Repurposing Hub
+Ki8751,11317348,Kinase Inhibitors,"KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor",KDR,Drug Repurposing Hub
+KIN001-135,117560,Kinase Inhibitors,,,
+KIN001-266,44143370,Kinase Inhibitors,,,
+Kobe2602,3827738,Other,,,
+KPT-276,71496742,Kinase Inhibitors,exportin antagonist,XPO1,Drug Repurposing Hub
+KPT185,53495165,Apoptotic Modulators,exportin antagonist,XPO1,Drug Repurposing Hub
+Ku-0063794,16736978,Kinase Inhibitors,mTOR inhibitor,MTOR,Drug Repurposing Hub
+KU-55933,5278396,Kinase Inhibitors,,,
+KU-60019,15953870,Kinase Inhibitors,,,
+KW-2449,11427553,Kinase Inhibitors,"Abl kinase inhibitor, Aurora kinase inhibitor, FLT3 inhibitor","ABL1, AURKA, AURKB, FLT3",Drug Repurposing Hub
+KX2-391,23635314,Kinase Inhibitors,"src inhibitor, tubulin polymerization inhibitor",SRC,Drug Repurposing Hub
+L-685458,5479543,Other,,,
+l-Buthionine sulfoximine,119565,Metabolic Modifiers,glutathione transferase inhibitor,GCLM,Drug Repurposing Hub
+Lapatinib,208908,Kinase Inhibitors,EGFR inhibitor,"EGFR, ERBB2",Drug Repurposing Hub
+LCL161,24737642,Apoptotic Modulators,XIAP inhibitor,"BIRC2, XIAP",Drug Repurposing Hub
+LE-135,10410894,Differentiating/Epigenetic Modifiers,retinoid receptor agonist,RARB,Drug Repurposing Hub
+Leflunomide,3899,Immunomodulatory Agents,Dihydroorotate dehydrogenase inhibitor,DHODH,ChEMBL
+Lenalidomide,216326,Immunomodulatory Agents,anticancer agent,"CDH5, CRBN, PTGS2, TNF, TNFSF11",Drug Repurposing Hub
+Lenvatinib,9823820,Kinase Inhibitors,"FGFR inhibitor, KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor","FLT4, KDR",Drug Repurposing Hub
+Leptomycin B,6917907,Other,,,
+Lestaurtinib,126565,Kinase Inhibitors,"FLT3 inhibitor, growth factor receptor inhibitor, JAK inhibitor","FLT3, NTRK1",Drug Repurposing Hub
+Letrozole,3902,Hormone Therapy,aromatase inhibitor,CYP19A1,Drug Repurposing Hub
+Lexibulin,11351021,Mitotic Inhibitors,tubulin polymerization inhibitor,TUBB,Drug Repurposing Hub
+LGK974,46926973,Kinase Inhibitors,Probable protein-cysteine N-palmitoyltransferase porcupine inhibitor,PORCN,ChEMBL
+Linifanib,11485656,Kinase Inhibitors,"PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor","CSF1, CSF1R, FLT1, FLT3, FLT4, KDR, KIT, PDGFRB, RET, TEK",Drug Repurposing Hub
+Linsitinib,11640390,Kinase Inhibitors,IGF-1 inhibitor,"IGF1R, INSR, INSRR",Drug Repurposing Hub
+Litronesib,25167017,Kinesin Inhibitors,kinesin-like spindle protein inhibitor,KIF11,Drug Repurposing Hub
+Lomeguatrib,3025944,Differentiating/Epigenetic Modifiers,,,
+Lonafarnib,148195,Farnesyltransferase Inhibitors,farnesyltransferase inhibitor,"FNTA, HRAS, KRAS, NRAS",Drug Repurposing Hub
+Lorlatinib,71731823,Kinase Inhibitors,ALK tyrosine kinase receptor inhibitor,ALK,Drug Repurposing Hub
+Lovastatin,53232,Metabolic Modifiers,HMGCR inhibitor,"HDAC2, HMGCR, ITGAL, NR1I2",Drug Repurposing Hub
+Lucitanib,25031915,Kinase Inhibitors,"FGFR inhibitor, VEGFR inhibitor","FGFR1, FLT1, KDR, KIT, PDGFRA, PDGFRB, RET",Drug Repurposing Hub
+Luminespib,10096043,HSP Inhibitors,HSP inhibitor,"HSP90AA1, HSP90AB1",Drug Repurposing Hub
+LY-2090314,10029385,Kinase Inhibitors,glycogen synthase kinase inhibitor,GSK3B,Drug Repurposing Hub
+LY-2109761,11655119,Kinase Inhibitors,TGF beta receptor inhibitor,"TGFBR1, TGFBR2",Drug Repurposing Hub
+LY-2183240,11507802,GPCR Modulators,"FAAH inhibitor, FAAH reuptake inhibitor",FAAH,Drug Repurposing Hub
+LY-2874455,46944259,Kinase Inhibitors,FGFR antagonist,"FGFR1, FGFR2, FGFR3, FGFR4, KDR",Drug Repurposing Hub
+LY-3023414,57519748,Kinase Inhibitors,"PI3K inhibitor, mTOR inhibitor",MTOR,Drug Repurposing Hub
+Malonoben,5614,Kinase Inhibitors,"protein tyrosine kinase inhibitor, tyrosine kinase inhibitor",,Drug Repurposing Hub
+Marinopyrrole A,24797083,Apoptotic Modulators,,,
+Masitinib,10074640,Kinase Inhibitors,"KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, src inhibitor","FGFR3, KIT, PDGFRA, PDGFRB",Drug Repurposing Hub
+Mebendazole,4030,Anti-Infective Agents,tubulin polymerization inhibitor,"TUBA1A, TUBB, TUBB4B",Drug Repurposing Hub
+Mechlorethamine HCl (nitrogen mustard),5935,Alkylating Agents,DNA inhibitor,,Drug Repurposing Hub
+Melphalan,460612,Alkylating Agents,"DNA alkylating agent, DNA inhibitor",DNA,Drug Repurposing Hub
+Menadione,4055,Apoptotic Modulators,"mitochondrial DNA polymerase inhibitor, phosphatase inhibitor","AOX1, BGLAP, F10, F2, F7, F9, GGCX, NQO1, NQO2, PROC, PROS1, PROZ, VKORC1, VKORC1L1",Drug Repurposing Hub
+Merestinib,44603533,Kinase Inhibitors,MET inhibitor,MET,Drug Repurposing Hub
+Mesoridazine,4078,GPCR Modulators,dopamine receptor antagonist,"DRD2, HTR2A",Drug Repurposing Hub
+Met Kinase Inhibitor,9549297,Kinase Inhibitors,,,
+Metformin,4091,Metabolic Modifiers,,,
+Methotrexate,126941,Antimetabolites,dihydrofolate reductase inhibitor,DHFR,Drug Repurposing Hub
+Methylprednisolone,6741,Immunomodulatory Agents,glucocorticoid receptor agonist,NR3C1,Drug Repurposing Hub
+Mevastatin,64715,Metabolic Modifiers,HMGCR inhibitor,HMGCR,Drug Repurposing Hub
+MGCD-265 analog,24901704,Kinase Inhibitors,VEGFR inhibitor,"AXL, MET",Drug Repurposing Hub
+MI-2,54765302,Differentiating/Epigenetic Modifiers,,,
+Midostaurin,24202429,Kinase Inhibitors,"FLT3 inhibitor, KIT inhibitor, PKC inhibitor","FLT3, PRKCG",Drug Repurposing Hub
+MILCICLIB,16718576,Kinase Inhibitors,"CDK inhibitor, growth factor receptor inhibitor","CDK2, CDK4, CDK7, NTRK1",Drug Repurposing Hub
+MIM1,135691163,Apoptotic Modulators,,,
+Mirin,1206243,Differentiating/Epigenetic Modifiers,,,
+Mitomycin,5746,Alkylating Agents,"DNA alkylating agent, DNA synthesis inhibitor",DNA,Drug Repurposing Hub
+Mitoxantrone,4212,Topoisomerase Inhibitors,topoisomerase inhibitor,TOP2A,Drug Repurposing Hub
+MK-0752,9803433,Differentiating/Epigenetic Modifiers,,,
+MK-2206,46930998,Kinase Inhibitors,AKT inhibitor,"AKT1, AKT2, AKT3",Drug Repurposing Hub
+MK-2461,44137946,Kinase Inhibitors,"FGFR inhibitor, VEGFR inhibitor","FGFR1, FGFR2, FGFR3, FLT1, FLT3, FLT4, KDR, MERTK, MET, MST1R, NTRK1, NTRK2, PDGFRB",Drug Repurposing Hub
+MK-5108,24748204,Kinase Inhibitors,Aurora kinase inhibitor,"AURKA, AURKB, AURKC",Drug Repurposing Hub
+MK-8033,45142457,Kinase Inhibitors,Hepatocyte growth factor receptor inhibitor; Macrophage-stimulating protein receptor inhibitor,"MET, MST1R",ChEMBL
+MK-8669,11520894,Rapalogs,mTOR inhibitor,MTOR,Drug Repurposing Hub
+MK-8776,16224745,Kinase Inhibitors,,,
+ML311,3384730,Apoptotic Modulators,,,
+MLN2480,25161177,Kinase Inhibitors,RAF serine/threonine protein kinase inhibitor,"ARAF, BRAF, RAF1",ChEMBL
+Mocetinostat,9865515,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC11, HDAC2, HDAC3",Drug Repurposing Hub
+Molibresib,46943432,Differentiating/Epigenetic Modifiers,bromodomain inhibitor,"BRD2, BRD3, BRD4",Drug Repurposing Hub
+MOMELOTINIB,25062766,Kinase Inhibitors,Tyrosine-protein kinase JAK1 inhibitor; Tyrosine-protein kinase JAK2 inhibitor,"JAK1, JAK2, JAK3",ChEMBL
+Morin,5281670,Metabolic Modifiers,cytochrome P450 inhibitor,"ADORA2A, ESR2, FASN, MCL1, SLC22A12",Drug Repurposing Hub
+Motesanib,11667893,Kinase Inhibitors,"KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor","FLT1, FLT4, KDR, KIT",Drug Repurposing Hub
+Mycophenolate mofetil,5281078,Immunomodulatory Agents,"dehydrogenase inhibitor, inositol monophosphatase inhibitor","IMPDH1, IMPDH2",Drug Repurposing Hub
+Mycophenolic acid,446541,Immunomodulatory Agents,"dehydrogenase inhibitor, inositol monophosphatase inhibitor","IMPDH1, IMPDH2",Drug Repurposing Hub
+Myricetin,5281672,Metabolic Modifiers,,,
+N-Phthalyl-L-tryptophan,344265,Other,DNA methyltransferase inhibitor,"DNMT1, DNMT3B",Drug Repurposing Hub
+N4411;NU6027;S7114;SC-215591,398148,Kinase Inhibitors,CDK inhibitor,"CCNA2, CDK2",Drug Repurposing Hub
+Nakiterpiosin,54613361,Mitotic Inhibitors,,,
+Napabucasin,10331844,Other,STAT inhibitor,STAT3,Drug Repurposing Hub
+Narciclasine,72376,Protein Synthesis Inhibitors,,,
+Navitoclax,24978538,Apoptotic Modulators,BCL inhibitor,"BCL2, BCL2L1, BCL2L2",Drug Repurposing Hub
+Nelarabine,3011155,Antimetabolites,"DNA synthesis inhibitor, T cell inhibitor",POLA1,Drug Repurposing Hub
+Nelfinavir,64143,Protease/Proteasome Inhibitors,,,
+Neratinib,9915743,Kinase Inhibitors,EGFR inhibitor,"EGFR, ERBB2, KDR",Drug Repurposing Hub
+Niclosamide,4477,Anti-Infective Agents,"DNA replication inhibitor, STAT inhibitor",STAT3,Drug Repurposing Hub
+Nilotinib,644241,Kinase Inhibitors,"Abl kinase inhibitor, Bcr-Abl kinase inhibitor","ABL1, KIT",Drug Repurposing Hub
+Niraparib,24958200,PARP inhibitor,PARP inhibitor,PARP1,Drug Repurposing Hub
+Nitisinone,115355,Metabolic Modifiers,hydroxyphenylpyruvate dioxygenase inhibitor,HPD,Drug Repurposing Hub
+Nitroxoline,19103,Anti-Infective Agents,HDAC inhibitor,HDAC1,Drug Repurposing Hub
+NMS-1286937,49792852,Kinase Inhibitors,PLK inhibitor,"FLT3, PLK1, PLK2, PLK3",Drug Repurposing Hub
+Nobiletin,72344,Differentiating/Epigenetic Modifiers,MEK inhibitor,MAP2K1,Drug Repurposing Hub
+Nocodazole,4122,Mitotic Inhibitors,tubulin polymerization inhibitor,HPGDS,Drug Repurposing Hub
+NONOXYNOL-9,72385,Other,membrane integrity inhibitor,Cell membrane,Drug Repurposing Hub
+NPK76-II-72-1,46843648,Other,,,
+NSC-207895,42640,Apoptotic Modulators,,,
+NSC-87877,5459322,Kinase Inhibitors,,,
+NSC 74859,252682,Other,,,
+NSC19630,227681,Other,,,
+NSC23766,409805,Other,Ras GTPase inhibitor,,Drug Repurposing Hub
+NSC30930,81146,Other,,,
+NSC319726,5351307,Apoptotic Modulators,p53 activator,,Drug Repurposing Hub
+NSC48300,241158,Other,,,
+NSC632839,5351362,Protease/Proteasome Inhibitors,ubiquitin specific protease inhibitor,"SENP2, USP1, USP2, USP7",Drug Repurposing Hub
+NSC663284,379077,Differentiating/Epigenetic Modifiers,CDC inhibitor,"CDC25A, CDC25B, CDC25C",Drug Repurposing Hub
+NSC95397,262093,Differentiating/Epigenetic Modifiers,,,
+NU7441,11327430,Kinase Inhibitors,,,
+nuelin,2153,Other,adenosine receptor antagonist,,Drug Repurposing Hub
+Nutlin,216345,Apoptotic Modulators,MDM inhibitor,"MDM2, TP53",Drug Repurposing Hub
+Nutlin-3a (-),11433190,Apoptotic Modulators,,,
+NVP-ADW742,9825149,Kinase Inhibitors,,,
+Nvp-cgm097,53240420,Apoptotic Modulators,MDM inhibitor,MDM2,Drug Repurposing Hub
+NVP-TAE684,16038120,Kinase Inhibitors,ALK tyrosine kinase receptor inhibitor,"ALK, INSR",Drug Repurposing Hub
+o6-Benzylguanine,4578,Differentiating/Epigenetic Modifiers,,,
+Obatoclax,16681698,Apoptotic Modulators,BCL inhibitor,BCL2,Drug Repurposing Hub
+Odanacatib,10152654,Protease/Proteasome Inhibitors,cathepsin inhibitor,CTSK,Drug Repurposing Hub
+Olaparib,23725625,PARP inhibitor,PARP inhibitor,"PARP1, PARP2",Drug Repurposing Hub
+Oligomycin A,5472285,Ion Transport Modulators,"ATP synthase inhibitor, ATPase inhibitor",ATP5A1,Drug Repurposing Hub
+Olomoucine II,10067756,Kinase Inhibitors,,,
+Oltipraz,47318,Metabolic Modifiers,"nuclear factor erythroid derived, like (NRF2) activator",ANG,Drug Repurposing Hub
+Omipalisib,25167777,Kinase Inhibitors,"mTOR inhibitor, PI3K inhibitor","MTOR, PIK3CA, PIK3CB, PIK3CD, PIK3CG",Drug Repurposing Hub
+Onalespib,11955716,HSP Inhibitors,HSP antagonist,HSP90AA1,Drug Repurposing Hub
+Oprozomib,25067547,Protease/Proteasome Inhibitors,proteasome inhibitor,"ADRM1, PSMA1, PSMA2, PSMA3, PSMA4, PSMA5, PSMA6, PSMA7, PSMA8, PSMB1, PSMB10, PSMB11, PSMB2, PSMB3, PSMB4, PSMB5, PSMB6, PSMB7, PSMB8, PSMB9, PSMC1, PSMC2, PSMC3, PSMC4, PSMC5, PSMC6, PSMD1, PSMD11, PSMD12, PSMD13, PSMD14, PSMD2, PSMD3, PSMD4, PSMD6, PSMD7, PSMD8, SEM1",Drug Repurposing Hub
+Orantinib,5329099,Kinase Inhibitors,"FGFR inhibitor, PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor","AURKA, AURKB, EGFR, FGFR1, FGFR2, KDR, PDGFRA, PDGFRB",Drug Repurposing Hub
+Osi-027,44224160,Kinase Inhibitors,mTOR inhibitor,MTOR,Drug Repurposing Hub
+Osi-930,9868037,Kinase Inhibitors,"KIT inhibitor, VEGFR inhibitor","KDR, KIT",Drug Repurposing Hub
+Osimertinib,71496458,Kinase Inhibitors,EGFR inhibitor,EGFR,Drug Repurposing Hub
+OSU-03012,10027278,Kinase Inhibitors,phosphoinositide dependent kinase inhibitor,PDPK1,Drug Repurposing Hub
+Otssp167,135398499,Kinase Inhibitors,maternal embryonic leucine zipper kinase inhibitor,MELK,Drug Repurposing Hub
+OTX015,9936746,Differentiating/Epigenetic Modifiers,bromodomain inhibitor,"BRD2, BRD3, BRD4",Drug Repurposing Hub
+Ouabain,439501,Ion Transport Modulators,ATPase inhibitor,ATP1A1,Drug Repurposing Hub
+Oxaliplatin,24197464,Alkylating Agents,DNA inhibitor,,Drug Repurposing Hub
+OXIBENDAZOLE (USAN),4622,Anti-Infective Agents,tubulin polymerization inhibitor,"TUBB, TUBB4B",Drug Repurposing Hub
+Oxiperomide,68634,GPCR Modulators,dopamine receptor antagonist,,Drug Repurposing Hub
+P-276-00,23643976,Kinase Inhibitors,CDK inhibitor,"CDK1, CDK4, CDK9",Drug Repurposing Hub
+P22077,46931953,Apoptotic Modulators,ubiquitin specific protease inhibitor,USP7,Drug Repurposing Hub
+Pac-1,6851947,Apoptotic Modulators,caspase activator,CASP3,Drug Repurposing Hub
+Paclitaxel,36314,Mitotic Inhibitors,tubulin polymerization inhibitor,"BCL2, MAP2, MAP4, MAPT, NR1I2, TLR4, TUBB, TUBB1",Drug Repurposing Hub
+Pacritinib,46216796,Kinase Inhibitors,"FLT3 inhibitor, JAK inhibitor","FLT3, JAK1, JAK2, JAK3",Drug Repurposing Hub
+Palbociclib,5330286,Kinase Inhibitors,CDK inhibitor,"CDK4, CDK6",Drug Repurposing Hub
+Palomid 529,11998575,Kinase Inhibitors,"AKT inhibitor, mTOR inhibitor",MTOR,Drug Repurposing Hub
+Panobinostat,6918837,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC2, HDAC3, HDAC4, HDAC6, HDAC7, HDAC8, HDAC9",Drug Repurposing Hub
+Paraplatin,38904,Alkylating Agents,,,
+Parbendazole,26596,Anti-Infective Agents,tubulin polymerization inhibitor,TUBB,Drug Repurposing Hub
+Pazopanib,11525740,Kinase Inhibitors,"KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor","CSF1R, FGF1, FGFR1, FGFR3, FLT1, FLT4, ITK, KDR, KIT, PDGFRA, PDGFRB, SH2B3",Drug Repurposing Hub
+PCI-34051,24753719,Differentiating/Epigenetic Modifiers,,,
+PD 153035,4705,Kinase Inhibitors,EGFR inhibitor,"EGFR, KDR",Drug Repurposing Hub
+PD173074,1401,Kinase Inhibitors,"FGFR inhibitor, VEGFR inhibitor","FGFR1, FGFR2, FGFR3, FGFR4, FLT1, FLT4, KDR, PDGFRA, PDGFRB",Drug Repurposing Hub
+PD318088,10231331,Kinase Inhibitors,MEK inhibitor,MAP2K1,Drug Repurposing Hub
+PD325901,9826528,Kinase Inhibitors,MEK inhibitor,MAP2K1,Drug Repurposing Hub
+PD98059,4713,Kinase Inhibitors,MEK inhibitor,"AKT1, CHEK1, GSK3B, LCK, MAP2K1, MAPK1, MAPK11, MAPK12, MAPK14, MAPK8, PRKCA, RAF1, ROCK1, RPS6KB1, SGK1",Drug Repurposing Hub
+Pelitinib,6445562,Kinase Inhibitors,EGFR inhibitor,EGFR,Drug Repurposing Hub
+Pemetrexed,446556,Antimetabolites,Dihydrofolate reductase inhibitor; Thymidylate synthase inhibitor; GAR transformylase inhibitor,"DHFR, TYMS, GART",ChEMBL
+Penfluridol,33630,GPCR Modulators,T-type calcium channel blocker,CACNA1G,Drug Repurposing Hub
+Pentamidine,4735,Anti-Infective Agents,anti-pneumocystis agent,TRDMT1,Drug Repurposing Hub
+Perifosine,148177,Kinase Inhibitors,,,
+Pevonedistat,71729979,Protease/Proteasome Inhibitors,nedd activating enzyme inhibitor,"NAE1, UBA3",Drug Repurposing Hub
+PF-00299804,11511120,Kinase Inhibitors,EGFR inhibitor,"EGFR, ERBB2, ERBB4",Drug Repurposing Hub
+PF-04217903,17754438,Kinase Inhibitors,c-Met inhibitor,MET,Drug Repurposing Hub
+PF-04691502,25033539,Kinase Inhibitors,"mTOR inhibitor, PI3K inhibitor","MTOR, PIK3CA",Drug Repurposing Hub
+PF-3758309,25227462,Kinase Inhibitors,p21 activated kinase inhibitor,PAK4,Drug Repurposing Hub
+PF-4708671,51371303,Kinase Inhibitors,,,
+PF-477736,135565545,Kinase Inhibitors,CHK inhibitor,"CHEK1, CHEK2",Drug Repurposing Hub
+PF-543,66577038,Kinase Inhibitors,,,
+PF-562271,11713159,Kinase Inhibitors,focal adhesion kinase inhibitor,"PTK2, PTK2B",Drug Repurposing Hub
+PF-573228,11612883,Kinase Inhibitors,focal adhesion kinase inhibitor,"CDK1, CDK2, CDK7, GSK3B, IKBKB",Drug Repurposing Hub
+PFI-1,71271629,Differentiating/Epigenetic Modifiers,bromodomain inhibitor,BRD4,Drug Repurposing Hub
+PFI-3,78243717,Differentiating/Epigenetic Modifiers,,,
+Pha-665752,10461815,Kinase Inhibitors,c-Met inhibitor,MET,Drug Repurposing Hub
+Pha-793887,46191454,Kinase Inhibitors,CDK inhibitor,"CDK1, CDK2, CDK4, CDK5, CDK7, CDK9",Drug Repurposing Hub
+Phenylmercuric acetate,16682730,Other,other antifungal,,Drug Repurposing Hub
+Phloretin,24135,Metabolic Modifiers,,,
+Physcion,10639,Metabolic Modifiers,protein tyrosine kinase inhibitor,PTPN1,Drug Repurposing Hub
+PI-103,9884685,Kinase Inhibitors,"mTOR inhibitor, PI3K inhibitor","MTOR, PIK3CA, PIK3CB, PIK3CD, PIK3CG, PRKDC",Drug Repurposing Hub
+Pictilisib,17755052,Kinase Inhibitors,PI3K inhibitor,"PIK3CA, PIK3CB, PIK3CD, PIK3CG",Drug Repurposing Hub
+PIK-93,6852167,Kinase Inhibitors,,,
+Pilaralisib,56599306,Kinase Inhibitors,PI3K inhibitor,"PIK3CA, PIK3CB, PIK3CD, PIK3CG, PIK3R1, PIK3R2, PIK3R3, PIK3R5",Drug Repurposing Hub
+PIMASERTIB,44187362,Kinase Inhibitors,MEK inhibitor,"MAP2K1, MAP2K2",Drug Repurposing Hub
+Pimozide,16362,GPCR Modulators,Serotonin 2a (5-HT2a) receptor antagonist; Dopamine receptor antagonist,"HTR2A, DRD1, DRD2, DRD3, DRD4, DRD5",ChEMBL
+Piperlongumine,637858,Apoptotic Modulators,,,
+Piroxicam,54676228,Immunomodulatory Agents,cyclooxygenase inhibitor,"PTGS1, PTGS2",Drug Repurposing Hub
+Plinabulin,9949641,Kinase Inhibitors,tubulin polymerization inhibitor,"TUBA1A, TUBA1B, TUBA1C, TUBA3C, TUBA3E, TUBA4A, TUBB, TUBB1, TUBB2A, TUBB2B, TUBB3, TUBB4A, TUBB4B, TUBB6, TUBB8",Drug Repurposing Hub
+Pluripotin,12003241,Kinase Inhibitors,,,
+PLX4720,24180719,Kinase Inhibitors,RAF inhibitor,"BRAF, KDR",Drug Repurposing Hub
+Podofilox,10607,Mitotic Inhibitors,"microtubule inhibitor, tubulin polymerization inhibitor","IGF1R, TOP2A, TUBA4A, TUBB",Drug Repurposing Hub
+Podophyllotoxin bromide,234820,Topoisomerase Inhibitors,,,
+Pomalidomide,134780,Immunomodulatory Agents,"angiogenesis inhibitor, tumor necrosis factor production inhibitor","CRBN, PTGS2, TNF",Drug Repurposing Hub
+Ponatinib,24826799,Kinase Inhibitors,"Bcr-Abl kinase inhibitor, FLT3 inhibitor, PDGFR tyrosine kinase receptor inhibitor","ABL1, BCR, FGFR1, FGFR2, FGFR3, FGFR4, FLT3, KDR, KIT, LCK, LYN, PDGFRA, RET, SRC, TEK",Drug Repurposing Hub
+Poziotinib,25127713,Kinase Inhibitors,EGFR inhibitor,"EGFR, ERBB2, ERBB4",Drug Repurposing Hub
+PP242,135565635,Kinase Inhibitors,mTOR inhibitor,"MTOR, PASK",Drug Repurposing Hub
+Pralatrexate,148121,Antimetabolites,dihydrofolate reductase inhibitor,"DHFR, TYMS",Drug Repurposing Hub
+Prexasertib,46700756,Kinase Inhibitors,CHK inhibitor,CHEK1,Drug Repurposing Hub
+Prima-1,322968,Apoptotic Modulators,,,
+PRIMA-1MET,52918385,Apoptotic Modulators,p53 activator,TP53,Drug Repurposing Hub
+Proscillaridin A,222154,Ion Transport Modulators,,,
+PRT062607,44462758,Kinase Inhibitors,syk inhibitor,"FGR, MAP3K9, SYK",Drug Repurposing Hub
+PU-H71,54613037,HSP Inhibitors,HSP inhibitor,HSP90AA1,Drug Repurposing Hub
+Pyr-41,5335621,Protease/Proteasome Inhibitors,,,
+Pyrimethamine,4993,Anti-Infective Agents,dihydrofolate reductase inhibitor,"DHFR, SLC47A1",Drug Repurposing Hub
+Pyroxamide,4996,Differentiating/Epigenetic Modifiers,HDAC inhibitor,HDAC1,Drug Repurposing Hub
+QNZ,509554,Immunomodulatory Agents,NFkB pathway inhibitor,,Drug Repurposing Hub
+QS11,42623900,Other,,,
+Quisinostat,11538455,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC10, HDAC11, HDAC2, HDAC3, HDAC4, HDAC5, HDAC6, HDAC7, HDAC8, HDAC9, MDM2",Drug Repurposing Hub
+Quizartinib,24889392,Kinase Inhibitors,FLT3 inhibitor,"CSF1R, FLT3, KIT, PDGFRA, PDGFRB, RET",Drug Repurposing Hub
+R-306465,10309899,Differentiating/Epigenetic Modifiers,HDAC inhibitor,,Drug Repurposing Hub
+R-406,11213558,Kinase Inhibitors,Tyrosine-protein kinase SYK inhibitor,SYK,ChEMBL
+R547,6918852,Kinase Inhibitors,CDK inhibitor,"CDK1, CDK2, CDK4, CDK7",Drug Repurposing Hub
+Rabusertib,11955855,Kinase Inhibitors,CHK inhibitor,CHEK1,Drug Repurposing Hub
+RAF265,11656518,Kinase Inhibitors,"RAF inhibitor, VEGFR inhibitor",BRAF,Drug Repurposing Hub
+Raloxifene,5035,Hormone Therapy,"estrogen receptor antagonist, selective estrogen receptor modulator (SERM)","ESR1, ESR2",Drug Repurposing Hub
+Raltitrexed,135400182,Antimetabolites,thymidylate synthase inhibitor,"FPGS, TYMS",Drug Repurposing Hub
+Refametinib,44182295,Kinase Inhibitors,MEK inhibitor,"MAP2K1, MAP2K2",Drug Repurposing Hub
+Regorafenib,11167602,Kinase Inhibitors,"FGFR inhibitor, KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, RAF inhibitor, RET tyrosine kinase inhibitor, VEGFR inhibitor","ABL1, BRAF, DDR2, EPHA2, FGFR1, FGFR2, FLT1, FLT4, FRK, KDR, KIT, MAPK11, NTRK1, PDGFRA, PDGFRB, RAF1, RET, TEK",Drug Repurposing Hub
+RepSox,449054,Kinase Inhibitors,TGF beta receptor inhibitor,TGFBR1,Drug Repurposing Hub
+Resatorvid,11703255,Immunomodulatory Agents,toll-like receptor antagonist,TLR4,Drug Repurposing Hub
+Ribavirin,37542,Anti-Infective Agents,antiviral,"ADK, ENPP1, IMPDH1, IMPDH2, NT5C2",Drug Repurposing Hub
+Ribociclib,44631912,Kinase Inhibitors,CDK inhibitor,"CDK4, CDK6",Drug Repurposing Hub
+Rigosertib,6918736,Kinase Inhibitors,"cell cycle inhibitor, PLK inhibitor",PLK1,Drug Repurposing Hub
+Rita,374536,Apoptotic Modulators,MDM inhibitor,MDM2,Drug Repurposing Hub
+RO-3306,71433937,Kinase Inhibitors,,,
+RO-4987655,11548630,Kinase Inhibitors,MEK inhibitor,MAP2K1,Drug Repurposing Hub
+RO-5126766,16719221,Kinase Inhibitors,Dual specificity mitogen-activated protein kinase kinase 1 inhibitor; Dual specificity mitogen-activated protein kinase kinase 2 inhibitor,"MAP2K1, MAP2K2",ChEMBL
+RO4929097,49867930,Differentiating/Epigenetic Modifiers,Gamma-secretase inhibitor,"APH1A, APH1B, NCSTN, PSEN1, PSEN2, PSENEN",ChEMBL
+ROCILETINIB,57335384,Kinase Inhibitors,EGFR inhibitor,EGFR,Drug Repurposing Hub
+Romidepsin,5352062,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC2, HDAC3, HDAC4, HDAC5, HDAC6, HDAC7, HDAC8, HDAC9",Drug Repurposing Hub
+RU-SKI 43,46006640,Kinase Inhibitors,,,
+Ruboxistaurin,153999,Kinase Inhibitors,Protein kinase C beta inhibitor,PRKCB,ChEMBL
+Ruxolitinib,25126798,Kinase Inhibitors,JAK inhibitor,"JAK1, JAK2, JAK3, TYK2|JAK1, JAK2",Drug Repurposing Hub
+S-Trityl-L-cysteine,7058066,Kinesin Inhibitors,,,
+S1515;SB939,49855250,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC10, HDAC3, HDAC4, HDAC5, HDAC9",Drug Repurposing Hub
+Sabutoclax,46236925,Apoptotic Modulators,,,
+Salinomycin,3085092,Anti-Infective Agents,,,
+Salubrinal,5717801,Apoptotic Modulators,,,
+Sapanisertib,45375953,Kinase Inhibitors,mTOR inhibitor,"MTOR, PIK3CA, PIK3CD, PIK3CG",Drug Repurposing Hub
+Sapitinib,11488320,Kinase Inhibitors,EGFR inhibitor,"EGFR, ERBB2, ERBB3",Drug Repurposing Hub
+Saracatinib,10302451,Kinase Inhibitors,src inhibitor,"ABL1, LCK, SRC, YES1",Drug Repurposing Hub
+Savolitinib,68289010,Kinase Inhibitors,Hepatocyte growth factor receptor inhibitor,MET,ChEMBL
+SB-225002,3854666,GPCR Modulators,CC chemokine receptor antagonist,CXCR2,Drug Repurposing Hub
+SB-2343,46912230,Other,"mTOR inhibitor, PI3K inhibitor","MTOR, PIK3CA, PIK3CB, PIK3CD, PIK3CG",Drug Repurposing Hub
+SB-239063,5166,Kinase Inhibitors,p38 MAPK inhibitor,"MAPK11, MAPK14, PTGS2",Drug Repurposing Hub
+SB-431542,4521392,Kinase Inhibitors,TGF beta receptor inhibitor,"ACVR1C, TGFBR1",Drug Repurposing Hub
+SB-525334,9967941,Kinase Inhibitors,TGF beta receptor inhibitor,TGFBR1,Drug Repurposing Hub
+SB-743921,9936388,Kinase Inhibitors,kinesin-like spindle protein inhibitor,KIF11,Drug Repurposing Hub
+SB216763,176158,Kinase Inhibitors,,,
+SB505124,9858940,Kinase Inhibitors,ALK tyrosine kinase receptor inhibitor,TGFBR1,Drug Repurposing Hub
+SB52334,97489,Other,,,
+SB590885,11316960,Kinase Inhibitors,RAF inhibitor,BRAF,Drug Repurposing Hub
+SCH772984,24866313,Kinase Inhibitors,,,
+SCH900776,46239015,Kinase Inhibitors,CHK inhibitor,"CDK2, CHEK1",Drug Repurposing Hub
+Seliciclib,160355,Kinase Inhibitors,Cyclin-dependent kinase 2 inhibitor; Cyclin-dependent kinase 7 inhibitor; Cyclin-dependent kinase 9 inhibitor; Cyclin-dependent kinase 1 inhibitor; Cyclin-dependent kinase 5 inhibitor,"CDK2, CDK7, CDK9, CDK1, CDK5",ChEMBL
+Selinexor,71481097,Apoptotic Modulators,exportin antagonist,XPO1,Drug Repurposing Hub
+Selumetinib,10127622,Kinase Inhibitors,MEK inhibitor,MAP2K1,Drug Repurposing Hub
+Semagacestat,9843750,Differentiating/Epigenetic Modifiers,Gamma-secretase inhibitor,"APH1A, APH1B, NCSTN, PSEN1, PSEN2, PSENEN",ChEMBL
+Semaxanib,5329098,Kinase Inhibitors,VEGFR inhibitor,"FGFR1, FLT1, KDR, KIT, PDGFRA, PDGFRB, RET",Drug Repurposing Hub
+Serdemetan,11609586,Apoptotic Modulators,MDM inhibitor,MDM2,Drug Repurposing Hub
+SGI-1027,24858111,Differentiating/Epigenetic Modifiers,DNA methyltransferase inhibitor,"DNMT1, DNMT3A, DNMT3B",Drug Repurposing Hub
+SGI-1776,24795070,Kinase Inhibitors,Pim kinase inhibitor,"FLT3, PIM1, PIM2, PIM3",Drug Repurposing Hub
+Sgx-523,24779724,Kinase Inhibitors,hepatocyte growth factor receptor inhibitor,MET,Drug Repurposing Hub
+Shikonin,479503,Immunomodulatory Agents,,,
+Silmitasertib,24748573,Kinase Inhibitors,casein kinase inhibitor,"CSNK2A1, CSNK2A2, DAPK3, HIPK3",Drug Repurposing Hub
+Simvastatin,54454,Metabolic Modifiers,HMGCR inhibitor,"HMGCR, ITGB2",Drug Repurposing Hub
+Sirolimus,5284616,Rapalogs,mTOR inhibitor,"FGF2, FKBP1A, MTOR",Drug Repurposing Hub
+Skepinone-L,45279963,Kinase Inhibitors,p38 MAPK inhibitor,MAPK14,Drug Repurposing Hub
+SKI-II,753704,Kinase Inhibitors,sphingosine kinase inhibitor,SPHK1,Drug Repurposing Hub
+SN-38,104842,Topoisomerase Inhibitors,topoisomerase inhibitor,TOP1,Drug Repurposing Hub
+SNS-032,3025986,Kinase Inhibitors,"CDK inhibitor, cell cycle inhibitor, MCL1 inhibitor","CDK2, CDK7, CDK9",Drug Repurposing Hub
+SNS-314,24995524,Kinase Inhibitors,Aurora kinase inhibitor,"AURKA, AURKB, AURKC",Drug Repurposing Hub
+Snx-2112,24772860,HSP Inhibitors,HSP inhibitor,,Drug Repurposing Hub
+Snx-5422,44195571,HSP Inhibitors,HSP inhibitor,HSP90AA1,Drug Repurposing Hub
+Sonidegib,24775005,Hedgehog Inhibitors,smoothened receptor antagonist,SMO,Drug Repurposing Hub
+Sorafenib,216239,Kinase Inhibitors,"FLT3 inhibitor, KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, RAF inhibitor, RET tyrosine kinase inhibitor, VEGFR inhibitor","BRAF, DDR2, FGFR1, FLT1, FLT3, FLT4, KDR, KIT, PDGFRB, RAF1, RET",Drug Repurposing Hub
+Sotrastaurin,10296883,Kinase Inhibitors,Protein kinase C (PKC) inhibitor,"PRKCA, PRKCB, PRKCD, PRKCE, PRKCG, PRKCH, PRKCI, PRKCQ, PRKCZ, PRKD1, PRKD3",ChEMBL
+Spebrutinib,59174488,Kinase Inhibitors,Bruton's tyrosine kinase (BTK) inhibitor,"BTK, YES1",Drug Repurposing Hub
+SRA737,72165232,Kinase Inhibitors,,,
+SRT-1720,24180125,Metabolic Modifiers,SIRT activator,SIRT1,Drug Repurposing Hub
+Staurosporine,44259,Kinase Inhibitors,,,
+StemRegenin 1,46199207,Differentiating/Epigenetic Modifiers,aryl hydrocarbon receptor antagonist,AHR,Drug Repurposing Hub
+STF-118804,20916937,Metabolic Modifiers,NAMPT inhibitor,NAMPT,Drug Repurposing Hub
+STF-62247,704473,Other,,,
+Strophanthidin,6185,Ion Transport Modulators,ATPase inhibitor,ATP1A1,Drug Repurposing Hub
+SU-14813,10138259,Kinase Inhibitors,"PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor",KDR,Drug Repurposing Hub
+Sunitinib,5329102,Kinase Inhibitors,"FLT3 inhibitor, KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, RET tyrosine kinase inhibitor, VEGFR inhibitor","CSF1R, FGFR1, FLT1, FLT3, FLT4, KDR, KIT, PDGFRA, PDGFRB, RET",Drug Repurposing Hub
+T0901317,447912,Metabolic Modifiers,,,
+Tacedinaline,2746,Differentiating/Epigenetic Modifiers,HDAC inhibitor,HDAC1,Drug Repurposing Hub
+Tacrolimus,445643,Immunomodulatory Agents,calcineurin inhibitor,FKBP1A,Drug Repurposing Hub
+TAE-226,9934347,Kinase Inhibitors,protein tyrosine kinase inhibitor,PTK2,Drug Repurposing Hub
+Tak-285,11620908,Kinase Inhibitors,EGFR inhibitor,ERBB2,Drug Repurposing Hub
+TAK-632,46209401,Kinase Inhibitors,RAF inhibitor,BRAF,Drug Repurposing Hub
+Tak-715,9952773,Kinase Inhibitors,p38 MAPK inhibitor,MAPK14,Drug Repurposing Hub
+TAK-733,24963252,Kinase Inhibitors,MEK inhibitor,MAP2K1,Drug Repurposing Hub
+Tak-901,16124208,Kinase Inhibitors,Aurora kinase inhibitor,AURKB,Drug Repurposing Hub
+Talazoparib,44819241,PARP inhibitor,PARP inhibitor,PARP2,Drug Repurposing Hub
+Talmapimod,9871074,Kinase Inhibitors,p38 MAPK inhibitor,"MAPK11, MAPK14",Drug Repurposing Hub
+Tamibarotene,108143,Differentiating/Epigenetic Modifiers,retinoid receptor agonist,"RARA, RARB",Drug Repurposing Hub
+Tamoxifen,25010734,Hormone Therapy,"estrogen receptor antagonist, selective estrogen receptor modulator (SERM)","EBP, ESR1, ESR2, GPER1, PRKCA, PRKCB, PRKCD, PRKCE, PRKCG, PRKCI, PRKCQ, PRKCZ",Drug Repurposing Hub
+Tandutinib,3038522,Kinase Inhibitors,"FLT3 inhibitor, KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor","CSF1R, FLT3, KIT, PDGFD, PDGFRB",Drug Repurposing Hub
+Taurine,1123,Metabolic Modifiers,antioxidant,,Drug Repurposing Hub
+Tazemetostat,66558664,Differentiating/Epigenetic Modifiers,histone lysine methyltransferase inhibitor,EZH2,Drug Repurposing Hub
+TELATINIB,9808844,Kinase Inhibitors,"KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor",KDR,Drug Repurposing Hub
+Telomerase Inhibitor IX,10385095,Telomerase Inhibitors,,,
+Temozolomide,5394,Alkylating Agents,DNA alkylating agent,MGMT,Drug Repurposing Hub
+Temsirolimus,6918289,Rapalogs,mTOR inhibitor,MTOR,Drug Repurposing Hub
+Teniposide,452548,Topoisomerase Inhibitors,topoisomerase inhibitor,"TOP2A, TOP2B",Drug Repurposing Hub
+Tenovin-6,24772043,Differentiating/Epigenetic Modifiers,SIRT inhibitor,"SIRT1, SIRT2, SIRT3",Drug Repurposing Hub
+Terfenadine,5405,GPCR Modulators,histamine receptor antagonist,"CHRM1, CHRM2, CHRM3, CHRM4, CHRM5, HRH1, KCNH1, KCNH2",Drug Repurposing Hub
+Teriflunomide,54684141,Antimetabolites,dihydroorotate dehydrogenase inhibitor,DHODH,Drug Repurposing Hub
+Tesevatinib,10458325,Kinase Inhibitors,"EGFR inhibitor, VEGFR inhibitor","EGFR, EPHB4, ERBB2, FLT4, KDR",Drug Repurposing Hub
+TETRAHYDROURIDINE,270480,Metabolic Modifiers,cytidine deaminase inhibitor,CDA,Drug Repurposing Hub
+Tetrandrine,73078,Ion Transport Modulators,calcium channel blocker,SLC6A3,Drug Repurposing Hub
+TG-100-115,10427712,Kinase Inhibitors,PI3K inhibitor,"PIK3CA, PIK3CB, PIK3CD, PIK3CG",Drug Repurposing Hub
+TG-100572,11712625,Kinase Inhibitors,"src inhibitor, VEGFR inhibitor","KDR, SRC",Drug Repurposing Hub
+TGX221,9907093,Kinase Inhibitors,,,
+Thalidomide,5426,Immunomodulatory Agents,CRL4(CRBN) E3 ubiquitin ligase inhibitor,"CRBN, CUL4A, DDB1, RBX1",ChEMBL
+Thioguanine,667490,Antimetabolites,"immunosuppressant, protein synthesis inhibitor, purine antagonist","HPRT1, IMPDH1, IMPDH2, PPAT",Drug Repurposing Hub
+THIOGUANINE (USAN),2723601,Antimetabolites,Inosine-5'-monophosphate dehydrogenase (IMPDH) inhibitor; DNA inhibitor,"IMPDH1, IMPDH2, DNA",ChEMBL
+Thiostrepton,16129666,Protein Synthesis Inhibitors,"FOXM1 inhibitor, protein synthesis inhibitor",FOXM1,Drug Repurposing Hub
+Thiram,5455,Anti-Infective Agents,,JAK2,
+Tipifarnib,159324,Farnesyltransferase Inhibitors,farnesyltransferase inhibitor,"FNTA, FNTB",Drug Repurposing Hub
+Tirapazamine,54724399,Apoptotic Modulators,DNA inhibitor,,Drug Repurposing Hub
+Tivantinib,11494412,Kinase Inhibitors,tyrosine kinase inhibitor,MET,Drug Repurposing Hub
+Tivozanib,9911830,Kinase Inhibitors,VEGFR inhibitor,"FLT1, FLT4, KDR, KIT, PDGFRA, PDGFRB",Drug Repurposing Hub
+Topotecan,11972519,Topoisomerase Inhibitors,topoisomerase inhibitor,"TOP1, TOP1MT",Drug Repurposing Hub
+Torin 2,51358113,Kinase Inhibitors,mTOR inhibitor,MTOR,Drug Repurposing Hub
+Tosedostat,15547703,Protease/Proteasome Inhibitors,peptidase inhibitor,"ANPEP, LAP3, NPEPPS",Drug Repurposing Hub
+Tozasertib,5494449,Kinase Inhibitors,"Aurora kinase inhibitor, Bcr-Abl kinase inhibitor, FLT3 inhibitor, JAK inhibitor","AURKA, AURKB, AURKC, LCK",Drug Repurposing Hub
+TPCA-1,9903786,Kinase Inhibitors,IKK inhibitor,IKBKB,Drug Repurposing Hub
+Trametinib,11707110,Kinase Inhibitors,MEK inhibitor,"MAP2K1, MAP2K2",Drug Repurposing Hub
+Tretinoin,444795,Differentiating/Epigenetic Modifiers,Retinoic acid receptor agonist,"RARA, RARB, RARG",ChEMBL
+Triamcinolone,31307,Immunomodulatory Agents,glucocorticoid receptor agonist,"NR3C1, SERPINA6",Drug Repurposing Hub
+Triapine,9571836,Antimetabolites,ribonucleotide reductase inhibitor,"RRM1, RRM2",Drug Repurposing Hub
+Triciribine,65399,Kinase Inhibitors,AKT inhibitor,"AKT1, AKT2, AKT3",Drug Repurposing Hub
+Triglycidyl isocyanurate,17142,Other,DNA inhibitor,,Drug Repurposing Hub
+Triptolide,107985,Apoptotic Modulators,RNA polymerase inhibitor,RELA,Drug Repurposing Hub
+Tubastatin A,49850262,Differentiating/Epigenetic Modifiers,,,
+TW 37,11455910,Apoptotic Modulators,BCL inhibitor,"BCL2, BCL2L1, MCL1",Drug Repurposing Hub
+TWS119,9549289,Kinase Inhibitors,glycogen synthase kinase inhibitor,"GSK3B, JUN, MYC",Drug Repurposing Hub
+Ubenimex,72172,Protease/Proteasome Inhibitors,leukotriene synthesis inhibitor,"LTA4H, RNPEP",Drug Repurposing Hub
+Ulixertinib,11719003,Kinase Inhibitors,MAP kinase inhibitor,"MAPK3, MAPK1",Drug Repurposing Hub
+UMI-77,992586,Apoptotic Modulators,,,
+UNC0638,46224516,Differentiating/Epigenetic Modifiers,,,
+UNC0642,53315878,Differentiating/Epigenetic Modifiers,,,
+Unii-40E3azg1MX,10390396,Kinase Inhibitors,,,
+Uprosertib,51042438,Kinase Inhibitors,AKT inhibitor,"AKT1, AKT2, AKT3",Drug Repurposing Hub
+Uracil,1174,Metabolic Modifiers,,"DPYD, UCKL1",
+Valproic acid,3121,Differentiating/Epigenetic Modifiers,Succinate semialdehyde dehydrogenase inhibitor,ALDH5A1,ChEMBL
+Vandetanib,3081361,Kinase Inhibitors,"EGFR inhibitor, RET tyrosine kinase inhibitor, VEGFR inhibitor","EGFR, EPHA1, EPHA10, EPHA2, EPHA3, EPHA4, EPHA5, EPHA6, EPHA7, EPHA8, EPHB1, EPHB2, EPHB3, EPHB4, EPHB6, ERBB2, ERBB3, ERBB4, FLT1, FLT4, KDR, PTK6, RET, SRC, TEK, VEGFA",Drug Repurposing Hub
+Varlitinib,42642648,Kinase Inhibitors,EGFR inhibitor,ERBB2,Drug Repurposing Hub
+Vatalanib,151194,Kinase Inhibitors,"KIT inhibitor, PDGFR tyrosine kinase receptor inhibitor, VEGFR inhibitor","EGFR, FLT1, FLT4, KDR, PDGFRB",Drug Repurposing Hub
+VE-822,59472121,Kinase Inhibitors,ATR kinase inhibitor,"ATM, ATR, MTOR, PIK3CG",Drug Repurposing Hub
+VE821,51000408,Kinase Inhibitors,ATR kinase inhibitor,ATR,Drug Repurposing Hub
+Veliparib,11960529,PARP inhibitor,"PARP 1, 2 and 3 inhibitor","PARP1, PARP2, PARP3",ChEMBL
+Vemurafenib,42611257,Kinase Inhibitors,RAF inhibitor,"BRAF, RAF1",Drug Repurposing Hub
+Verubulin,11414799,Mitotic Inhibitors,tubulin polymerization inhibitor,TUBB,Drug Repurposing Hub
+Vinblastine,241902,Mitotic Inhibitors,,,
+Vinblastine,13342,Mitotic Inhibitors,"microtubule inhibitor, tubulin polymerization inhibitor","JUN, TUBA1A, TUBB, TUBD1, TUBE1, TUBG1",Drug Repurposing Hub
+Vincristine,5978,Mitotic Inhibitors,tubulin polymerization inhibitor,"TUBA4A, TUBB",Drug Repurposing Hub
+Vinorelbine,25136944,Mitotic Inhibitors,tubulin polymerization inhibitor,"TUBA1A, TUBA1B, TUBA1C, TUBA3C, TUBA3D, TUBA3E, TUBA4A, TUBB, TUBB1, TUBB2A, TUBB2B, TUBB3, TUBB4A, TUBB4B, TUBB6, TUBB8",Drug Repurposing Hub
+Volasertib,10461508,Kinase Inhibitors,PLK inhibitor,PLK1,Drug Repurposing Hub
+Vosaroxin,9952884,Topoisomerase Inhibitors,topoisomerase inhibitor,TOP2A,Drug Repurposing Hub
+Voxtalisib,16123056,Kinase Inhibitors,"mTOR inhibitor, PI3K inhibitor","MTOR, PIK3CA",Drug Repurposing Hub
+VS-4718,25073775,Kinase Inhibitors,focal adhesion kinase inhibitor,PTK2,Drug Repurposing Hub
+VX-11e,11634725,Kinase Inhibitors,,,
+VX-702,10341154,Kinase Inhibitors,p38 MAPK inhibitor,"MAPK11, MAPK12, MAPK14",Drug Repurposing Hub
+Wnt-C59,57519544,Other,,,
+WYE-125132,25260757,Kinase Inhibitors,mTOR inhibitor,MTOR,Drug Repurposing Hub
+WZ4002,44607530,Kinase Inhibitors,EGFR inhibitor,"EGFR, ERBB2",Drug Repurposing Hub
+WZ8040,44607531,Kinase Inhibitors,EGFR inhibitor,EGFR,Drug Repurposing Hub
+XAV939,2726824,Differentiating/Epigenetic Modifiers,,,
+XL765,49867926,Kinase Inhibitors,,,
+XL888,57748689,HSP Inhibitors,HSP inhibitor,,Drug Repurposing Hub
+XMD13-2,68234129,Other,,,
+XMD14-99,73265211,Other,,,
+XMD8-85,46844147,Kinase Inhibitors,,,
+Y-27632 Dihydrochloride,448042,Kinase Inhibitors,rho associated kinase inhibitor,"PKIA, PKN2, PRKACA, PRKCE, ROCK1, ROCK2",Drug Repurposing Hub
+Y39983,9810884,Kinase Inhibitors,rho associated kinase inhibitor,"ROCK1, ROCK2",Drug Repurposing Hub
+YM155,11178236,Apoptotic Modulators,survivin inhibitor,BIRC5,Drug Repurposing Hub
+YM201636,9956222,Kinase Inhibitors,PI3K inhibitor,,Drug Repurposing Hub
+Z-Leu-leu-leu-al,462382,Protease/Proteasome Inhibitors,proteasome inhibitor,PSMB1,Drug Repurposing Hub
+Zebularine,16760709,Differentiating/Epigenetic Modifiers,,,
+Zibotentan,9910224,GPCR Modulators,endothelin receptor antagonist,EDNRA,Drug Repurposing Hub
+ZM447439,9914412,Kinase Inhibitors,Aurora kinase inhibitor,"AURKA, AURKB",Drug Repurposing Hub
+Zolendronic Acid,68740,Metabolic Modifiers,,,
+Zolinza,5311,Differentiating/Epigenetic Modifiers,HDAC inhibitor,"HDAC1, HDAC10, HDAC11, HDAC2, HDAC3, HDAC5, HDAC6, HDAC8, HDAC9",Drug Repurposing Hub
+Zotiraciclib,16739650,Kinase Inhibitors,"CDK inhibitor, FLT3 inhibitor, JAK inhibitor","CDK1, CDK2, CDK7, CDK9, FLT3, JAK2",Drug Repurposing Hub
+ZSTK474,11647372,Kinase Inhibitors,PI3K inhibitor,"PIK3CB, PIK3CD, PIK3CG",Drug Repurposing Hub

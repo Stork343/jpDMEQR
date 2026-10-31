@@ -1,0 +1,11 @@
+DRUG_NAME,role,rows,patients,models,experiments
+AZ628,discovery,3501,275,275,389
+AZ628,validation,1467,124,124,163
+Dabrafenib,validation,1590,270,270,318
+Dabrafenib,discovery,3990,624,624,798
+HG6-64-1,validation,2565,263,263,285
+HG6-64-1,discovery,6048,613,613,672
+PLX-4720,validation,7363,282,282,1167
+PLX-4720,discovery,17866,654,654,2882
+SB590885,validation,3303,270,270,367
+SB590885,discovery,7533,628,628,837

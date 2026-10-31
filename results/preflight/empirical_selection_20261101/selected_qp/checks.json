@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "actual_observations_used": true,
+  "objective": "complete_joint_profile_with_prediction_ridge",
+  "solver": "clarabel_selected_qp"
+}

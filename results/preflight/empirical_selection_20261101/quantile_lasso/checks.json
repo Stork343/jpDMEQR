@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "actual_observations_used": true,
+  "maximum_objective_error": 8.35512214969469e-14,
+  "reference": "quantreg::rq.fit.lasso",
+  "implementation": "HiGHS_certified_pooled_path"
+}
