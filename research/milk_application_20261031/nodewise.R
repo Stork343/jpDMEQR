@@ -81,3 +81,36 @@ milk_nodewise_cached <- function(factor, rows, coordinate) {
     stop("The requested design is absent from the verified nodewise cache.")
   milk_design_cache[[index]]$fit
 }
+
+milk_curvature_supports <- function(factor, n, coordinate, ratios) {
+  p <- ncol(factor)
+  other <- setdiff(seq_len(p), coordinate)
+  diagonal <- sqrt(colSums(factor^2) / n)
+  if (any(!is.finite(diagonal)) || any(diagonal <= 1e-10)) stop("Unidentified profile coordinate.")
+  if (!length(other)) return(rep(list(integer()), length(ratios)))
+  standardised <- sweep(factor, 2L, diagonal, "/")
+  design <- standardised[, other, drop = FALSE] * sqrt(nrow(factor) / n)
+  response <- standardised[, coordinate] * sqrt(nrow(factor) / n)
+  maximum <- max(abs(drop(crossprod(design, response)))) / nrow(factor)
+  if (maximum == 0) return(rep(list(integer()), length(ratios)))
+  if (length(other) == 1L) {
+    coefficient <- matrix(vapply(maximum * ratios, function(lambda) {
+      soft_threshold_weighted_v2(sum(design[, 1L] * response) / nrow(factor), lambda) /
+        mean(design[, 1L]^2)
+    }, numeric(1)), nrow = 1L)
+  } else {
+    path <- glmnet::glmnet(design, response, lambda = maximum * ratios,
+      family = "gaussian", intercept = FALSE, standardize = FALSE, alpha = 1,
+      thresh = 1e-13, maxit = 10000000L, type.gaussian = "covariance")
+    if (path$jerr != 0L || ncol(path$beta) != length(ratios)) stop("Incomplete curvature path.")
+    coefficient <- as.matrix(path$beta)
+  }
+  gradient <- -crossprod(design, response - design %*% coefficient) / nrow(factor)
+  defects <- vapply(seq_along(ratios), function(j) {
+    max(ifelse(abs(coefficient[, j]) > 1e-10,
+      abs(gradient[, j] + maximum * ratios[j] * sign(coefficient[, j])),
+      pmax(abs(gradient[, j]) - maximum * ratios[j], 0)))
+  }, numeric(1))
+  if (max(defects) > 1e-6) stop("The curvature path failed its KKT check.")
+  lapply(seq_along(ratios), function(j) other[abs(coefficient[, j]) > 1e-10])
+}

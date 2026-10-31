@@ -25,6 +25,7 @@ source("research/milk_application_20261031/weighted_solver.R")
 ds_fit_small <- milk_fit_small
 milk_design_cache <- readRDS(file.path(config$results_directory, "design_cache.rds"))
 pc_nodewise <- milk_nodewise_cached
+sb_lasso_supports <- milk_curvature_supports
 cohort <- readRDS(file.path(config$results_directory, "cohorts.rds"))[[job$cohort]]
 request <- list(job = job, configuration = config,
   source_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE), started = as.character(started))
