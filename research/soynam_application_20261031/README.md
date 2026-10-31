@@ -22,6 +22,8 @@ The reproduction order is:
 
 The preparation and individual run directories are immutable. Completed runs are reused by the queue. Any existing incomplete case requires inspection before resuming. Prediction queue arguments may identify an already running case and its process identifier; the queue verifies that process before monitoring it.
 
+`finalise_when_complete.R` waits for all nine registered predictions, then generates the complete summaries and manuscript tables, compiles both PDFs, verifies their numbers and page coordinates, copies the delivery to the independent backup, and commits and pushes the aggregate outputs to `recovery/research-20261028`. A failed prediction or a stale queue record stops this process. Its current stage is recorded in `results/raw/application/soynam_yield_20261031/finalisation/progress.json`.
+
 The inference output contains all 21 settings and quantiles, with eight coefficient systems per fit. The prediction output contains three methods at each of three quantiles. Complete lines, sample roles and internal validation predictions are retained. All reported intervals and losses are computed from these saved objects. The manuscript export requires the complete set of results.
 
 The independent numerical checks use actual field observations. `check_pair_qp.R` compares the structured solver with Clarabel. `check_basis_precision.R` verifies original-coordinate gradients on saved selected models. `check_pooled_compiled.R` checks the pooled LP against quantreg and the R/HiGHS path in `pooled_lp.R`, including deterministic repetition and coefficient mapping. Details are recorded in `docs/benchmark_notes/SOYNAM-POOLED-LASSO.md`.

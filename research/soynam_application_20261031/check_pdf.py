@@ -68,6 +68,19 @@ for row in prediction_rows:
     if value not in supplement:
         raise ValueError(f"A prediction loss is absent from the supplement: {row['method']} {row['tau']} {value}")
 
+if mode == "all":
+    if "Held-out prediction comparison between joint profile" not in supplement:
+        raise ValueError("The pooled comparison table is absent")
+    comparison_rows = [row for row in read_rows("prediction_comparisons.csv")
+                       if row["comparator"] == "pooled_quantile_lasso" and row["calibrated"] == "TRUE"]
+    if len(comparison_rows) != 3:
+        raise ValueError("The pooled comparison family is incomplete")
+    for row in comparison_rows:
+        for column in ("improvement", "lower", "upper"):
+            value = f"{float(row[column]):.3f}"
+            if value not in supplement:
+                raise ValueError(f"A pooled comparison value is absent: {row['tau']} {column} {value}")
+
 figure = pymupdf.open(manuscript / "generated/soynam_profile/results.pdf")
 figure_text = normalise(figure[0].get_text())
 for phrase in ("Canopy association", "Held-out prediction", "Quantile", "2013", "2014"):

@@ -77,10 +77,10 @@ for (q in seq_along(config$quantiles)) for (comparator_id in unique(comparisons$
 }
 writeLines(vapply(names(values), function(name) paste0("\\newcommand{\\Soy", name, "}{", values[[name]], "}"), character(1)),
   file.path(destination, "values.tex"))
-table <- function(filename, caption, label, alignment, header, rows, size = "\\small") {
+table <- function(filename, caption, label, alignment, header, rows, size = "\\small", after = character()) {
   writeLines(c("\\begin{table}[t]", "\\centering", size, paste0("\\caption{", caption, "}"),
     paste0("\\label{", label, "}"), paste0("\\begin{tabular}{", alignment, "}"), "\\toprule",
-    paste0(header, " \\\\"), "\\midrule", paste0(rows, " \\\\"), "\\bottomrule", "\\end{tabular}", "\\end{table}"),
+    paste0(header, " \\\\"), "\\midrule", paste0(rows, " \\\\"), "\\bottomrule", "\\end{tabular}", "\\end{table}", after),
     file.path(destination, paste0(filename, ".tex")))
 }
 ref <- effects[setting == "reference"]
@@ -147,7 +147,8 @@ rows <- vapply(seq_len(nrow(metrics)), function(i) paste(labels[[metrics$method[
   fmt(metrics$raw_loss[i], 3), fmt(metrics$loss[i], 3), fmt(metrics$raw_calibration[i], 3),
   fmt(metrics$calibration[i], 3), sep = " & "), character(1))
 table("prediction_details", "Raw and training-calibrated predictions on held-out lines. Coverage is the fraction of observed yields at or below the predicted quantile. The nominal fractions are the corresponding values of $\\tau$.",
-  "tab:soy-prediction-details", "lrrrrr", "Method & $\\tau$ & Raw loss & Calibrated loss & Raw coverage & Calibrated coverage", rows, "\\footnotesize")
+  "tab:soy-prediction-details", "lrrrrr", "Method & $\\tau$ & Raw loss & Calibrated loss & Raw coverage & Calibrated coverage", rows, "\\footnotesize",
+  after = if (mode == "all") "\\input{generated/soynam_profile/pooled_comparison}" else character())
 writeLines(c("\\begin{figure}[t]", "\\centering",
   "\\includegraphics[width=\\textwidth]{generated/soynam_profile/results.pdf}",
   "\\caption{Canopy information in the soybean trials. Panel A gives the year-specific profile coefficients per ten percentage points of coverage, with 95\\% Bonferroni simultaneous intervals for the eleven prespecified coordinate and contrast parameters. Panel B gives the percentage reduction in held-out pinball loss when canopy is added to the joint predictor using genomic and field information. Its intervals use paired complete-line losses and the registered six-comparison Bonferroni adjustment. The prediction comparison uses training-only intercept calibration.}",
