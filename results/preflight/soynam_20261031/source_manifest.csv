@@ -1,0 +1,3 @@
+package,version,revision,object_path,destination,bytes
+NAM,1.8.0,e2980d8fc7be457e0a5e65abead7b96a1ce01111,data/met.RData,met.RData,932380
+SoyNAM,1.6.2,34b1c01912ba6b95b67b78d98667b50d0602904b,data/soyin.RData,soyin_reference.RData,1005312

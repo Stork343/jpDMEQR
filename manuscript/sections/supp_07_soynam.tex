@@ -1,0 +1,187 @@
+\section{Soybean field trial construction and analysis}\label{supp:soynam}
+\input{generated/soynam_profile/values}
+
+\subsection{Released data and plot identifiers}
+
+The analysis uses \texttt{NAM} version 1.8.0, object \texttt{met},
+and \texttt{SoyNAM} version 1.6.2, object \texttt{soyin}. The first
+release supplies the recorded canopy values, yields and genotype
+matrix. The second supplies family labels, field check plots and the
+yield-unit dictionary. The two releases agree on yield to within
+0.05 bu/ac at all 11088 matched 2013--2014 plot coordinates. Maturity
+records agree exactly. Plot coordinates identify 277 records whose
+strain-name prefixes differ between releases; the analysis retains
+the \texttt{NAM} identifiers that match its genotype rows.
+
+The released panel contains \SoyOriginalLines{} lines and
+\SoyOriginalRecords{} records across three years. We use the two
+years in which the complete family panel was planted
+\cite{xavier2017canopy}. Requiring a complete pair retains
+\SoyLines{} lines and \SoyRecords{} observations. The 2015 trial
+contains selected families under a different sampling design.
+The five duplicate marker columns are removed before analysis;
+all remaining \SoyMarkers{} released genotype columns are observed.
+The deposited matrix supplies the processed genotype calls.
+
+\input{generated/soynam_profile/descriptive}
+
+Yield is divided by ten for calculation and restored to bu/ac in
+every reported coefficient, interval and prediction loss. The two
+canopy columns are $ACC_{ij}1\{Year_{ij}=2013\}/10$ and
+$ACC_{ij}1\{Year_{ij}=2014\}/10$. Each SNP dosage similarly has two
+year-specific columns. Family adjustment uses 39 contrasts; the eight
+block indicators include the year intercepts. Maturity uses natural
+cubic splines with knots at 120 and 130 days and boundary knots at
+100 and 160 days, interacted with year. The reference analysis retains
+all recorded maturity values, including the two values above 180 days.
+
+\subsection{Check plot calibration and sample roles}
+
+The spatial calibration includes \SoyCheckPlots{} check plots and
+90 check-strain--year combinations. It uses a Gaussian additive model
+with strain--year and block effects, and a tensor product cubic
+regression spline in row and column within each block. Each marginal
+basis has dimension five. REML chooses the smoothing parameters,
+with shrinkage permitted. Only the fitted spatial terms supply the
+analysed lines' check-surface covariate. Physical plot coordinates
+verify that these check plots and the analysed line plots are disjoint.
+The inference conditions on the supplied calibration surface.
+
+Seed 20261031 orders lines randomly within each family. Alternating
+positions define the two complementary inference samples. Three
+inner groups within each selection sample choose the outcome-search
+size and the profile-adjustment penalties. Training samples alone
+supply the scales used by their numerical subproblems. The complete
+genomic block remains eligible for selection at each stage.
+
+A separate cyclic allocation assigns approximately one fifth of
+each family's lines to the prediction test set. Both observations
+of a line have the same role. This yields \SoyTrainingLines{} training
+and \SoyTestLines{} test lines. Internal prediction validation uses
+three complete-line groups from the training set. The two inference
+samples and the prediction training sample serve different statistical
+calculations; test outcomes never enter prediction selection or
+calibration.
+
+\subsection{Certified convex fits for paired observations}
+
+The outcome search uses a weighted orthogonal basis. For a selected
+design $U$ and line-specific intercepts $\gamma_i$, its convex problem,
+before division by the number of lines, is
+\[
+ \min_{a,\gamma}\left\{
+ \frac12\lVert a\rVert^2+\frac\lambda2\sum_i\gamma_i^2
+ +\frac12\sum_{i,j}\rho_\tau(Y_{ij}-U_{ij}^Ta-\gamma_i)
+ \right\}.
+\]
+The coefficient ridge equals the registered prediction ridge under
+the weighted change of coordinates. Let $W=I/2$ and let $C$ contain
+the within-line row means of $U$ as columns. In a two-block ADMM
+update with augmentation $\eta$, elimination of the line intercepts
+gives the coefficient matrix
+\[
+ I+\eta U^TWU-\frac{\eta^2}{\lambda+\eta}CC^T.
+\]
+Its dimension is the selected coefficient dimension, and its
+factorisation is shared by all iterations of that selected fit.
+The check-loss proximal map is exact. The implementation fixes
+$\eta=1$ and relaxation 1.6. Equality-constrained refinement on the
+residual active face supplies a candidate solution when its linear
+system is identified.
+
+For dual scores $s_{ij}\in[(\tau-1)/2,\tau/2]$, the dual value is
+\[
+ D(s)=Y^Ts-\frac12\lVert U^Ts\rVert^2
+      -\frac1{2\lambda}\sum_i(s_{i1}+s_{i2})^2.
+\]
+Every returned candidate satisfies the original primal--dual gap
+criterion after division by the number of lines. Independent
+Clarabel calculations on actual observations check the objective
+and fitted values across all three quantiles and penalties
+$\lambda=0.5,1,2$, with additional selected dimensions up to 419.
+
+The final smoothed fits use weighted QR coordinates. Writing
+$W_0^{1/2}X_AP=QR$ with $W_{0,jj}=1/(2n_f)$ gives
+$U=W_0^{-1/2}Q$ and $a=RP^T\beta_A$. Thus $Ua=X_A\beta_A$ and
+the prediction ridge becomes $a^Ta$. Newton iteration retains the
+complete profile curvature. Additional precision iterations enforce
+the original-coordinate gradient criterion after transforming back.
+The maximum original-coordinate KKT residual among the reported
+systems is \texttt{\SoyMaxKKT{}}.
+
+\subsection{Joint coordinate and contrast intervals}
+
+Collect the six year-specific quantile estimates in $\widehat\theta$.
+Line identifiers align their saved influence vectors $V_i$ across
+the three quantiles. Within each estimation group $I_f$, the
+contributions are centred before constructing
+\[
+ \widehat\Sigma=\frac1{n^2}\sum_f\sum_{i\in I_f}
+ (V_i-\bar V_f)(V_i-\bar V_f)^T.
+\]
+The diagonal reproduces the six reported standard errors. A contrast
+$c$ has estimate $c^T\widehat\theta$ and standard error
+$(c^T\widehat\Sigma c)^{1/2}$. The six coordinates, two within-year
+upper-minus-lower contrasts and three between-year contrasts share
+critical value $z_{1-0.05/(2\times11)}$.
+
+\input{generated/soynam_profile/reference}
+\input{generated/soynam_profile/contrasts}
+
+\subsection{Sensitivity calculations}
+
+All seven settings use the same three quantiles. Bandwidth
+multipliers 0.75 and 1.25 retain the reference target. The settings
+$\Lambda=0.5$ and $2$ define their respective profile parameters.
+The maturity setting excludes the complete pair for each of the two
+lines with maturity above 180 days. The spatial setting adds row,
+column, squared row, squared column and their product separately
+within each block. Its scales are fixed functions of plot position.
+
+\input{generated/soynam_profile/sensitivity}
+
+\subsection{Prediction methods and uncertainty}
+
+Prediction compares the joint profile with canopy, the same procedure
+without canopy, and pooled quantile Lasso with canopy. Family and
+field adjustments are common to all methods. Maturity is excluded.
+Each joint predictor uses the unsmoothed convex outcome-search path
+with $\Lambda=1$, selecting the model size by complete-line validation
+pinball loss. The final predictor uses the fixed-effect component for
+a line absent from training.
+
+The pooled method uses native \texttt{hqreg} 1.4-1 with
+$\alpha=1$, 40 geometric penalty ratios from 1 to 0.01,
+\texttt{eps} $=10^{-8}$ and at most 100000 iterations. Genomic
+variables receive the Lasso penalty; the prespecified adjustment
+variables are unpenalised. The package uses a Huber continuation
+internally \cite{yi2017}. Its source-specific objective is verified
+against an independent convex formulation, including the zero-penalty
+case, and its intercept mapping is checked by equality of predictions.
+Evaluation uses the original check loss.
+
+For each method and year, the empirical $\tau$ quantile of internal
+validation residuals supplies an intercept calibration. We use the
+inverse empirical distribution, R quantile type 1. The fitted model
+and calibration are saved before test losses are calculated.
+Raw and calibrated results are both retained. The calibrated
+comparison is the registered prediction assessment.
+
+Let $A_i$ and $B_i$ be the two-year average check losses for the
+canopy joint predictor and a comparator on test line $i$. The
+reported improvement is $\bar B-\bar A$, with standard error
+$s_{B-A}/\sqrt{n_{test}}$. Relative improvement is
+$100(1-\bar A/\bar B)$; its delta-method standard error uses the
+paired line contributions
+\[
+ 100\left\{-\frac{A_i-\bar A}{\bar B}
+ +\frac{\bar A(B_i-\bar B)}{\bar B^2}\right\}.
+\]
+The three quantiles and two method comparisons use critical value
+$z_{1-0.05/(2\times6)}$. These intervals describe held-out-line
+variation conditional on the training models and field calibration.
+
+\input{generated/soynam_profile/prediction_details}
+
+\bibliography{references}
+\end{document}
