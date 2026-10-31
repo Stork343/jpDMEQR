@@ -1,0 +1,29 @@
+application_id: milk_scs_20261031
+dataset_doi: 10.34810/data2338
+source_file: data/raw/candidate_datasets_20261030/Database_MIR_A2_milk.xlsx
+eligible_identifiers: data/interim/candidate_datasets_20261030/milk_eligible_identifiers.csv
+paired_identifiers: data/interim/candidate_datasets_20261030/milk_paired_identifiers.csv
+outcome_field: SCC (cell/microL)
+outcome_transform: log2(SCC/100)+3
+coordinate: A2_milk
+coordinate_definition: A2A2 versus A1A1 or A1A2
+spectral_columns: [240, 1299]
+always_included: [A2_milk, farm_control]
+nuisance_design: cow_intercept
+quantiles: [0.25, 0.50, 0.75]
+reference_lambda: 1
+reference_h_multiplier: 1
+confidence: 0.95
+family_size: 3
+split_seed: 20261031
+budget_multiplier: 1
+settings:
+  - {setting: reference, cohort: eligible, lambda: 1, h_multiplier: 1}
+  - {setting: paired, cohort: paired, lambda: 1, h_multiplier: 1}
+  - {setting: bandwidth_075, cohort: eligible, lambda: 1, h_multiplier: 0.75}
+  - {setting: bandwidth_125, cohort: eligible, lambda: 1, h_multiplier: 1.25}
+  - {setting: penalty_050, cohort: eligible, lambda: 0.5, h_multiplier: 1}
+  - {setting: penalty_200, cohort: eligible, lambda: 2, h_multiplier: 1}
+method_version: joint_profile_design_20261026
+results_directory: results/raw/application/milk_scs_20261031
+backup_directory: /Users/houjian/jpDMEQR-backups/milk_scs_20261031

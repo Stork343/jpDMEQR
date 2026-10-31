@@ -1,0 +1,13 @@
+{
+  "application_id": "milk_scs_20261031",
+  "method_version": "joint_profile_design_20261026",
+  "n": {
+    "eligible": 1349,
+    "paired": 904
+  },
+  "p": 1073,
+  "cases": 18,
+  "split_seed": 20261031,
+  "source_commit": "ebca81c57e7bbc2a852d5bec1de6cf5de329e6a9",
+  "created": "2026-10-31 12:12:58 CST"
+}

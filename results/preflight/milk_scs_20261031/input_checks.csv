@@ -1,0 +1,5 @@
+cohort,fold,training_cows,estimation_cows,p,always_included,overlap
+eligible,1,674,675,1073,13,0
+eligible,2,675,674,1073,13,0
+paired,1,452,452,1073,13,0
+paired,2,452,452,1073,13,0
