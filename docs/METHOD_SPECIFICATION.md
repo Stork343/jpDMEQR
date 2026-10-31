@@ -4,7 +4,7 @@ The current manuscript method is `JOINT-PROFILE`, implemented by the research es
 
 ## Observations and target
 
-Independent clusters are `D_i=(Y_i,X_i,Z_i,m_i)`, for `i=1,...,n`. Cluster sizes are bounded in the asymptotic model, the fixed effect dimension may exceed `n`, and the nuisance dimension is fixed. The working nuisance matrix `Lambda` is positive definite and fixed during coordinate inference.
+Independent clusters are `D_i=(Y_i,X_i,Z_i,m_i)`, for `i=1,...,n`. Cluster sizes satisfy `1 <= m_i <= m_max` in the asymptotic model, the fixed effect dimension may exceed `n`, and the nuisance dimension is fixed. The working nuisance matrix `Lambda` is positive definite and fixed during coordinate inference.
 
 Define
 
@@ -28,6 +28,20 @@ At the nuisance minimiser, write `r_i=Y_i-X_i beta-Z_i gamma_i,b(beta)`,
 \]
 
 The equivalent residualised-design expression contains `A_i^T Lambda A_i`. This term remains part of every curvature calculation. Each constituent Hessian is positive semidefinite. The reference kernel is Epanechnikov.
+
+For a single observation, let `x=X_i^T`, `z=Z_i^T`,
+`a=z^T Lambda^(-1) z` and `w=K_b(r_i)`.
+Nuisance stationarity gives `gamma=Lambda^(-1) z psi_b(r_i)` and
+`grad_beta r_i=-x/(1+a*w)`. Its profile gradient is `-x psi_b(r_i)` and
+its Hessian is `x x^T*w/(1+a*w)`. The nuisance criterion remains strongly
+convex because `Lambda` is positive definite. In the population expansion,
+the active dual chart has either zero or one interior coordinate. The
+existing section-density bounds and finite chart count apply to both;
+the empirical envelopes and cluster variance calculations use the same
+within-cluster average. Single observations therefore use the same target,
+paired coefficients and influence formula. Supporting Information states
+these identities, and the actual singleton cows are checked by
+`research/milk_application_20261031/check_singleton_geometry.R`.
 
 ## Selection on independent clusters
 

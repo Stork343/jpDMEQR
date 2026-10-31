@@ -72,6 +72,28 @@ $A_i^{\mathsf T}B_iA_i=X_i^{\mathsf T}W_iZ_iB_i^{-1}Z_i^{\mathsf T}W_iX_i$
 proves the result.
 \end{proof}
 
+\subsection{Single observation clusters}
+
+For $m_i=1$, write $x=X_{i1}$, $z=Z_{i1}$,
+$a=z^T\Lambda^{-1}z$ and $w=K_h(r_i)$. Nuisance stationarity gives
+$\widehat\gamma_i=\Lambda^{-1}z\psi_{\tau,h}(r_i)$, so
+$r_i=Y_{i1}-x^T\beta-a\psi_{\tau,h}(r_i)$. Differentiation yields
+\[
+ \nabla_\beta r_i=-\frac{x}{1+aw},\qquad
+ g_{i,h}=-x\psi_{\tau,h}(r_i),\qquad
+ H_{i,h}=\frac{w}{1+aw}xx^T.
+\]
+The Hessian is precisely the Schur complement in
+\eqref{eq:supp-hessian}. The fixed positive-definite nuisance penalty
+ensures a unique nuisance minimiser for this cluster as well.
+In the population argument of Section~\ref{supp:primitive}, the
+active set is empty or contains the single dual coordinate. Both
+charts satisfy the same section bounds, with the empty-minor
+convention already used there. Averaging over the bounded set of
+possible cluster sizes preserves those bounds. The score envelopes
+and independent-cluster variance argument therefore include
+single-observation clusters under the stated population conditions.
+
 \subsection{Dual profile scores with bounded cluster sizes}
 
 Write $\mathcal C_\tau=[\tau-1,\tau]$ and let
