@@ -7,6 +7,7 @@ destination <- "manuscript/generated/soynam_profile"
 dir.create(destination, recursive = TRUE, showWarnings = FALSE)
 effects <- fread(file.path(source, "inference.csv"))
 contrasts <- fread(file.path(source, "reference_contrasts.csv"))
+all_contrasts <- fread(file.path(source, "all_setting_contrasts.csv"))
 diagnostics <- fread(file.path(source, "diagnostics.csv"), integer64 = "double")
 metrics <- fread(file.path(source, "prediction_metrics.csv"))
 comparisons <- fread(file.path(source, "prediction_comparisons.csv"))
@@ -50,6 +51,13 @@ values$BandwidthChange <- fmt(joined[setting %in% c("bandwidth_075", "bandwidth_
   max(abs(estimate_bu_ac - reference))], 3)
 values$CoefficientMinimum <- fmt(min(reference$reference))
 values$CoefficientMaximum <- fmt(max(reference$reference))
+year_contrasts <- all_contrasts[parameter == "year_2014_minus_2013_q75"]
+if (nrow(year_contrasts) != 7L) stop("The sensitivity contrast family is incomplete.")
+values$YearContrastMinimum <- fmt(min(year_contrasts$estimate))
+values$YearContrastMaximum <- fmt(max(year_contrasts$estimate))
+spatial_contrast <- year_contrasts[setting == "spatial_polynomial"]
+values$SpatialYearContrast <- fmt(spatial_contrast$estimate)
+values$SpatialYearContrastInterval <- interval(spatial_contrast$lower, spatial_contrast$upper)
 labels <- c(joint_canopy = "Joint profile with canopy", joint_genomic = "Joint profile without canopy",
   pooled_quantile_lasso = "Pooled quantile Lasso")
 quantile_names <- c("Lower", "Median", "Upper")
@@ -106,6 +114,11 @@ for (setting_id in names(setting_names)) for (tau_value in unlist(config$quantil
 }
 table("sensitivity", "Complete registered sensitivity calculations. Entries are estimates and simultaneous intervals in bu/ac per ten percentage points. Each setting uses the eleven-parameter critical value; the working penalty belongs to its profile target.",
   "tab:soy-sensitivity", "lrrr", "Setting & $\\tau$ & 2013 & 2014", rows, "\\footnotesize")
+rows <- vapply(seq_len(nrow(year_contrasts)), function(i) paste(setting_names[[year_contrasts$setting[i]]],
+  fmt(year_contrasts$estimate[i], 3), fmt(year_contrasts$se[i], 3),
+  interval(year_contrasts$lower[i], year_contrasts$upper[i], 3), sep = " & "), character(1))
+table("contrast_sensitivity", "The 2014 minus 2013 canopy coefficient contrast at the upper quartile across all registered settings. Units are bu/ac per ten percentage points of coverage; intervals use the eleven-parameter critical value within each setting.",
+  "tab:soy-contrast-sensitivity", "lrrr", "Setting & Estimate & Standard error & Simultaneous interval", rows)
 rows <- vapply(unlist(config$quantiles), function(tau_value) {
   current <- metrics[tau == tau_value]
   paste(fmt(tau_value), fmt(current[method == "joint_canopy", loss], 3),

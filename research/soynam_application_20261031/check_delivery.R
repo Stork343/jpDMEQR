@@ -42,6 +42,19 @@ for (method in unlist(config$prediction$methods)) for (tau in unlist(config$quan
       any(!is.finite(model$oof))) stop("The prediction output is incomplete: ", case_id)
   recalculated <- (data$observed - data$prediction) * (tau - (data$observed < data$prediction))
   if (max(abs(recalculated - data$loss)) > 1e-10) stop("The prediction loss differs from its recorded values.")
+  if (method == "pooled_quantile_lasso") {
+    paths <- c(paste0("training_path_", 1:3, ".rds"), "training_path_final.rds")
+    if (!all(file.exists(file.path(directory, paths)) & file.exists(file.path(backup, paths))))
+      stop("A pooled training path or its backup is missing.")
+    for (path in paths) {
+      fitted <- readRDS(file.path(directory, path))
+      if (length(fitted$lambda) != config$prediction$pooled_nlambda ||
+          max(abs(fitted$diagnostics$primal_dual_gap)) > config$prediction$pooled_gap_tolerance ||
+          max(fitted$diagnostics$dual_violation) > config$prediction$pooled_dual_tolerance ||
+          max(fitted$diagnostics$mapping_error) > 1e-9)
+        stop("A pooled training path fails its complete certificate.")
+    }
+  }
   records[[length(records) + 1L]] <- data.table(case_id, kind = "prediction", status = "complete", backup = TRUE,
     n = uniqueN(data$cluster_id), systems = NA_integer_, maximum_kkt = NA_real_)
 }

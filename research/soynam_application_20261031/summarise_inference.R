@@ -13,16 +13,17 @@ complete <- file.exists(file.path(root, registry$case_id, "completion.json"))
 if (!all(complete)) stop("Incomplete registered fits: ", paste(registry$case_id[!complete], collapse = ", "))
 estimates <- rbindlist(lapply(registry$case_id, function(id) fread(file.path(root, id, "inference.csv"))))
 diagnostics <- rbindlist(lapply(registry$case_id, function(id) fread(file.path(root, id, "diagnostics.csv"), integer64 = "double")))
+compute_contrasts <- function(selected_setting) {
 influences <- list()
 betas <- standard_errors <- numeric()
 labels <- character()
 ids <- NULL
 for (tau in unlist(config$quantiles)) {
-  fit <- readRDS(file.path(root, sprintf("reference_q%02d", round(100 * tau)), "fit.rds"))
+  fit <- readRDS(file.path(root, sprintf("%s_q%02d", selected_setting, round(100 * tau)), "fit.rds"))
   current_ids <- unlist(lapply(fit$prepared$folds, `[[`, "validation_subjects"), use.names = FALSE)
   if (anyDuplicated(current_ids) || length(current_ids) != fit$prepared$n) stop("Invalid influence identifiers.")
   if (is.null(ids)) ids <- sort(current_ids)
-  if (!setequal(ids, current_ids)) stop("The reference quantiles use different lines.")
+  if (!setequal(ids, current_ids)) stop("The setting's quantiles use different lines.")
   for (k in seq_along(config$coordinates)) {
     influence <- fit$details[[k]]$influence[match(ids, current_ids)] * config$response_divisor
     reconstructed <- sqrt(sum(influence^2)) / length(ids)
@@ -62,10 +63,16 @@ contrasts <- data.table(parameter = rownames(C), estimate = theta, se = se,
   lower = theta - critical * se, upper = theta + critical * se,
   p_unadjusted = 2 * pnorm(-abs(theta / se)),
   p_bonferroni = pmin(1, config$family_size * 2 * pnorm(-abs(theta / se))))
+contrasts[, setting := selected_setting]
+saveRDS(list(cluster_id = ids, influences = V, covariance = covariance, contrasts = C),
+  file.path(config$results_directory, paste0(selected_setting, "_joint_inference.rds")))
+list(table = contrasts, covariance = data.table(parameter = labels, covariance))
+}
+summaries <- setNames(lapply(unique(registry$setting), compute_contrasts), unique(registry$setting))
+contrasts <- summaries$reference$table
 fwrite(estimates, file.path(destination, "inference.csv"))
 fwrite(diagnostics, file.path(destination, "diagnostics.csv"))
 fwrite(contrasts, file.path(destination, "reference_contrasts.csv"))
-fwrite(data.table(parameter = labels, covariance), file.path(destination, "reference_covariance.csv"))
-saveRDS(list(cluster_id = ids, influences = V, covariance = covariance, contrasts = C),
-  file.path(config$results_directory, "reference_joint_inference.rds"))
+fwrite(summaries$reference$covariance, file.path(destination, "reference_covariance.csv"))
+fwrite(rbindlist(lapply(summaries, `[[`, "table")), file.path(destination, "all_setting_contrasts.csv"))
 print(contrasts)

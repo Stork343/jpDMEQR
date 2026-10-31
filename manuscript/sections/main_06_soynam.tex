@@ -15,7 +15,9 @@ The analysis uses the released \texttt{NAM::met} panel. Its 2013 and 2014
 trials retain \SoyLines{} lines from \SoyFamilies{} families, with one
 observed plot per line in each year, giving \SoyRecords{} records.
 Each line forms a cluster of size two. The response is grain yield in
-bushels per acre (bu/ac). Average canopy coverage is recorded as a
+bushels per acre (bu/ac). Fitting expresses yield in units of ten bu/ac;
+reported coefficients and prediction losses are transformed back to bu/ac.
+Average canopy coverage is recorded as a
 percentage and enters the model in units of ten percentage points.
 The recorded yield means are \SoyYieldMeanThirteen{} and
 \SoyYieldMeanFourteen{} bu/ac in 2013 and 2014, respectively.
@@ -34,7 +36,8 @@ The spatial covariate is estimated from \SoyCheckPlots{} separate
 check plots. A smooth field surface adjusts for row and column position
 within each block, with check-strain and year effects included in its
 calibration model. The analysed lines' yields do not enter that fit.
-The profile criterion uses a line intercept with fixed $\Lambda=1$.
+The profile criterion uses a line intercept with fixed $\Lambda=1$
+on the stated working response scale.
 We estimate the two canopy coordinates at $\tau=0.25,0.50,0.75$ using
 $h=n^{-3/10}$. Complete lines exchange the selection and estimation
 roles, with random ordering within families.
@@ -89,6 +92,11 @@ Changing the bandwidth by factors of $0.75$ and $1.25$ changes a canopy
 coefficient by at most \SoyBandwidthChange{} bu/ac. Separate settings
 use $\Lambda=0.5$ and $2$, exclude the two lines with recorded maturity
 above 180 days, and add block-specific quadratic spatial terms.
+The upper-quartile year contrast ranges from \SoyYearContrastMinimum{}
+to \SoyYearContrastMaximum{} bu/ac, with a positive simultaneous
+interval in every setting. With the additional spatial terms, the
+contrast is \SoySpatialYearContrast{}, with interval
+\SoySpatialYearContrastInterval{}.
 Supporting Information reports every interval and the numerical
 diagnostics for these settings.
 
@@ -98,7 +106,7 @@ elimination of line intercepts in the unsmoothed convex search,
 followed by a reusable factorisation in the selected dimension.
 Each solution retains its primal--dual certificate. The three
 reference fits take \SoyReferenceMinMinutes{}--\SoyReferenceMaxMinutes{}
-minutes each on the study computer, including variable selection and
+minutes each on an Apple M3 Max computer with 36 GB memory, including variable selection and
 both bandwidth fits. Their influence values and original-coordinate
 gradients are retained with the results.
 

@@ -52,7 +52,7 @@ repeat {
   for (i in which(jobs$state == "pending")) {
     if (length(active) >= 3L) break
     process <- processx::process$new(file.path(R.home("bin"), "Rscript"),
-      c("research/soynam_application_20261031/run_prediction.R", jobs$method[i], as.character(jobs$tau[i])),
+      c("-e", "source('research/soynam_application_20261031/run_prediction.R')", jobs$method[i], as.character(jobs$tau[i])),
       cleanup = FALSE, stdout = file.path(root, paste0(jobs$case_id[i], ".log")), stderr = "2>&1")
     active[[as.character(i)]] <- list(handle = ps::ps_handle(process$get_pid()), process = process)
     jobs$state[i] <- "running"

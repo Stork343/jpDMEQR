@@ -26,7 +26,10 @@ The deposited matrix supplies the processed genotype calls.
 \input{generated/soynam_profile/descriptive}
 
 Yield is divided by ten for calculation and restored to bu/ac in
-every reported coefficient, interval and prediction loss. The two
+every reported coefficient, interval and prediction loss. The working
+penalty $\Lambda=1$ is defined on this response scale, equivalently
+$\Lambda=0.1$ when the complete check-loss criterion is expressed in
+bu/ac. The two
 canopy columns are $ACC_{ij}1\{Year_{ij}=2013\}/10$ and
 $ACC_{ij}1\{Year_{ij}=2014\}/10$. Each SNP dosage similarly has two
 year-specific columns. Family adjustment uses 39 contrasts; the eight
@@ -139,6 +142,7 @@ column, squared row, squared column and their product separately
 within each block. Its scales are fixed functions of plot position.
 
 \input{generated/soynam_profile/sensitivity}
+\input{generated/soynam_profile/contrast_sensitivity}
 
 \subsection{Prediction methods and uncertainty}
 
