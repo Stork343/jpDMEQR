@@ -1,0 +1,12 @@
+{
+  "status": "prepared",
+  "original_strains": 1008,
+  "expression_matched_strains": 979,
+  "expression_variables": 5720,
+  "genotype_variables": 11623,
+  "source_mean_identity_error": 4.9738e-14,
+  "grouping": "one_segregant_per_tetrad",
+  "phenotype_values_imputed": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

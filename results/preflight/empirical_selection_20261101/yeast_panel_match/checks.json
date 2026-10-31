@@ -1,0 +1,10 @@
+{
+  "status": "genotype_matching_completed",
+  "original_panel_rows": 1008,
+  "shared_markers": 27156,
+  "verified_2015_rows": 348,
+  "minimum_verified_concordance": 0.995,
+  "outcome_associations_used": false,
+  "independent_panel_source": "10.1038/nature11867",
+  "expression_source": "10.7554/eLife.35471"
+}
