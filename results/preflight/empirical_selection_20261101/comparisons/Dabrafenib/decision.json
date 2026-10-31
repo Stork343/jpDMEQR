@@ -1,0 +1,12 @@
+{
+  "drug": "Dabrafenib",
+  "phase": "discovery",
+  "reference": "FBIO_all",
+  "joint_runs": ["JOINT_tau025", "JOINT_qp_tau050", "JOINT_qp_tau075"],
+  "comparison_unit": "patient_id",
+  "bootstrap_repetitions": 10000,
+  "prediction_advantage_demonstrated": false,
+  "scientific_increment_validated": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

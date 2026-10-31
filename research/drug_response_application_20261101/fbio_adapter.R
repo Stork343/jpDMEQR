@@ -1,3 +1,5 @@
+library(grpreg)
+
 drug_fbio_fit <- function(y, genes, dose, Z, cluster_id, weights = NULL,
                           threshold = floor(2 * length(unique(cluster_id)) /
                                               log(length(unique(cluster_id)))),

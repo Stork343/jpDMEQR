@@ -13,6 +13,7 @@ parser.add_argument("destination", type=Path)
 parser.add_argument("--bytes", type=int)
 parser.add_argument("--segments", type=int, default=8)
 parser.add_argument("--proxy", default="http://127.0.0.1:7897")
+parser.add_argument("--preserve-http-encoding", action="store_true")
 args = parser.parse_args()
 destination = args.destination.resolve()
 if destination.exists():
@@ -35,6 +36,7 @@ result = downloader.start(
     retries=0,
     display=False,
     proxy=args.proxy,
+    auto_decompress=not args.preserve_http_encoding,
     timeout=ClientTimeout(total=None, connect=45, sock_read=180),
 )
 if not result or not downloader.completed or downloader.failed:

@@ -1,3 +1,5 @@
+library(splines)
+
 drug_clinical <- function(rows) {
   stopifnot(all(rows$expression_source %in% c("Sanger RNASeq", "Broad (CCLE) RNASeq")),
             all(rows$ASSAY %in% c("a", "s")))
