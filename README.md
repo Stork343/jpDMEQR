@@ -12,7 +12,8 @@
 | --- | --- |
 | `research/score_validity_20261026` | 估计方法和推断程序 |
 | `research/submission_completion_20261027` | 登记实验、比较方法、结果汇总与检查 |
-| `research/joint_profile_manuscript_20261026` | GSE65391 分析和手稿材料生成 |
+| `research/milk_application_20261031` | 乳样实证分析及手稿表格生成 |
+| `research/joint_profile_manuscript_20261026` | 固定设计计算和生成程序 |
 | `R` | 数据生成、数值计算及比较方法接口 |
 | `config` | 实验设计、随机种子和数值设置 |
 | `manuscript` | 手稿和 Supporting Information |
@@ -76,6 +77,6 @@ Rscript research/submission_completion_20261027/launch_simulation.R main joint 8
 
 手稿入口为 `manuscript/sjs_profile_quantile_main.tex`，Supporting Information 入口为 `manuscript/sjs_profile_quantile_supplement.tex`。图表生成程序读取已经保存的计算结果。
 
-GSE65391 的数据准备和受试者划分见 [数据说明](data/README.md)及 [研究方案](docs/EMPIRICAL_PROTOCOL_GSE65391.md)。比较方法的原始参考程序保存在 `data/raw/public_methods`，其来源说明位于 `docs/benchmark_notes`。
+乳样实证已经完成 18 项登记计算。数据来源见 [乳样核查](research/dataset_search_20261030/README_zh.md)，完整分析见 [实证方案](research/milk_application_20261031/PROTOCOL_zh.md)和 [实证结果](research/milk_application_20261031/RESULTS_zh.md)。比较方法的原始参考程序保存在 `data/raw/public_methods`，其来源说明位于 `docs/benchmark_notes`。
 
 软件许可为 GPL version 3 或更高版本，引用信息见 `inst/CITATION`。

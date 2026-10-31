@@ -1,0 +1,20 @@
+{
+  "verified_utc": "2026-10-31T04:59:20.971809+00:00",
+  "completed_cases": 18,
+  "backed_up_fits": 18,
+  "documents": [
+    {
+      "file": "manuscript/sjs_profile_quantile_main.pdf",
+      "pages": 23,
+      "verified_result_rows": 3,
+      "out_of_page_text": 0
+    },
+    {
+      "file": "manuscript/sjs_profile_quantile_supplement.pdf",
+      "pages": 46,
+      "verified_result_rows": 18,
+      "out_of_page_text": 0
+    }
+  ],
+  "review_method": "PDF text extraction and page coordinates"
+}

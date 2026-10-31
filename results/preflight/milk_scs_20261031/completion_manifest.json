@@ -1,0 +1,16 @@
+{
+  "cases_registered": 18,
+  "cases_completed": 18,
+  "coefficient_systems": 72,
+  "maximum_kkt": 5.17496133287938e-09,
+  "maximum_nuisance_gradient": 9.98712779143318e-11,
+  "maximum_prediction_identity_error": 8.94025298237011e-09,
+  "maximum_hessian_condition": 3.37072963682925e+15,
+  "maximum_basis_condition": 124.873677028137,
+  "minimum_selected_dimension": 27,
+  "maximum_selected_dimension": 163,
+  "median_runtime_seconds": 17.0135,
+  "maximum_runtime_seconds": 26.703,
+  "execution_version": "covariance_qr_20261031_v2",
+  "summarised": "2026-10-31 12:42:17 CST"
+}

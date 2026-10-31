@@ -1,5 +1,12 @@
 # Empirical analysis freeze decisions
 
+The current manuscript application is the milk spectra study. Its registered
+design is in `research/milk_application_20261031/PROTOCOL_zh.md` and
+`config/application_milk_20261031.yml`; its complete results are in
+`results/preflight/milk_scs_20261031/`. The GSE65391 specification below is
+retained with the archived study records. Its execution control remains
+`terminated`.
+
 **Application:** GSE65391 longitudinal paediatric SLE transcriptomic study  
 **Primary provisional outcome:** contemporaneous complement C3  
 **Status:** data download, construction, and audit are authorised; confirmatory/full fitting is **not** authorised until every empirical gate in this document passes  

@@ -16,7 +16,7 @@ for (i in seq_len(nrow(registry))) {
   if (abs(sqrt(sum(influence^2)) / job$n - table$se) > 1e-12)
     stop("The saved uncertainty differs from the cluster influence calculation.")
   tables[[i]] <- table
-  diagnostics[[i]] <- fread(file.path(directory, "diagnostics.csv"))
+  diagnostics[[i]] <- fread(file.path(directory, "diagnostics.csv"), integer64 = "double")
   selections[[i]] <- rbindlist(lapply(1:2, function(fold) {
     current <- fit$prepared$folds[[fold]]
     if (length(intersect(current$training_subjects, current$validation_subjects)))

@@ -21,14 +21,14 @@ covariance of the combined estimator. This construction supports
 practical calculation while preserving a complete profile target
 defined independently of the numerical bandwidth.
 
-The SLE analysis finds negative plasma-cell module associations with
-median C3 in both clinical adjustment models and with lower-quartile
-C3 in Model A. Repeating expression construction within every
-subject deletion retains these associations. Model B conditions on
-a disease-activity composite that includes complement information,
-which changes the clinical interpretation of that adjustment.
-The heldout prediction results also distinguish a useful fixed-part
-predictor from calibration of quantiles for a new subject.
+The milk analysis estimates a fixed milk-type coordinate with the
+complete spectrum available for adjustment. Its three simultaneous
+intervals include zero, while retaining uncertainty about associations
+of either sign. Strong correlations between adjacent spectral variables
+make stable computation consequential: the weighted QR calculation
+preserves the declared profile and returns the coefficient to its
+original units. Interpretation conditions on the measured spectrum
+and the observed farm and milk-control combinations.
 
 The theory uses independent clusters, bounded cluster sizes and a
 fixed positive-definite nuisance matrix. Learning that matrix for an
@@ -38,6 +38,4 @@ selected-model argument permits imperfect outcome selection and
 growing dimension through explicit approximation rates. Extending
 the coordinate process to an increasing number of targets would
 require a uniform Gaussian approximation and a matching simultaneous
-variance construction. Prediction-tuned working matrices and
-role-specific exploratory gene models provide distinct statistical
-tasks within the same complete-profile computation.
+variance construction.

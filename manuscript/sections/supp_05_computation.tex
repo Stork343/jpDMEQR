@@ -77,12 +77,11 @@ initialisation of the enlarged convex problem.
 A change of nuisance coordinates can balance observed units.
 For a positive diagonal matrix $S$, replace $Z$ by $ZS^{-1}$,
 $\gamma$ by $S\gamma$ and $\Lambda$ by $S^{-1}\Lambda S^{-1}$.
-Both the predictor and the nuisance penalty are unchanged. The
-application prediction solver uses cluster-weighted RMS scales for
-this numerical transformation, which is useful when time is recorded
-in days.
+Both the predictor and the nuisance penalty are unchanged.
+Cluster-weighted RMS scales provide one such numerical transformation
+when nuisance covariates have different observed units.
 
-For the random-slope prediction calculation, we use a sparse
+For an unsmoothed joint fit with a random slope, we use a sparse
 quadratic programme on the same selected orthogonal basis. Introduce
 nonnegative residual parts $r^+,r^-$ with
 $B_Sa+Z\gamma+r^+-r^-=Y$. The objective is
@@ -218,10 +217,7 @@ generalised inverse is applied through a LAPACK singular-value
 decomposition with the source relative threshold
 $1.490116\times10^{-8}$. Each failed penalty has infinite HBIC;
 the minimum finite HBIC selects the fit, whose convergence is then
-checked. Clinical variables in the application retain their
-training-defined units and receive zero penalty factors. Its
-screening dimensions are 100, 200 and 400, selected by five inner
-subject folds.
+checked.
 
 The quadratic inference function retains the ordinary inverse
 specified in its covariance formula. With $B$ basis matrices and

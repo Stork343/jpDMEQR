@@ -1,10 +1,10 @@
 \section{Introduction}\label{sec:introduction}
 
 Longitudinal quantile regression can involve thousands of predictors and
-only a few measurements on each subject. Repeated transcriptomic studies
-provide one setting: expression measurements describe a large molecular
-system, while persistent subject heterogeneity links the visits at which
-clinical outcomes are observed. Mixed-effects models represent that
+only a few measurements on each subject. Repeated milk spectra provide
+one setting: each sample contains many correlated absorbance measurements,
+while persistent animal variation links samples from the same cow
+\cite{chirife2025data}. Mixed-effects models represent that
 heterogeneity through a small number of subject-specific effects
 \cite{pinheiro2000,jiang2007}. When the number of subjects increases but
 their visit counts remain bounded, each subject effect continues to be
@@ -83,7 +83,7 @@ developed through quasi-likelihood \cite{li2022}. Our construction
 addresses the complete quantile profile target and the first-order
 smoothing effect created by its nuisance optimisation. Numerical
 calculations examine the target approximation and the behaviour of the
-implemented intervals. The application uses repeated complement C3
-and whole-blood expression measurements in GSE65391
-\cite{banchereau2016}, with prespecified immune modules and independently
-selected exploratory gene designs.
+implemented intervals. The application uses repeated milk spectra and
+somatic cell counts \cite{chirife2025data}. It estimates a prespecified
+milk-type coordinate while the complete spectral design supplies the
+high-dimensional adjustment variables.

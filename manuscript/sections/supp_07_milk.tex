@@ -1,0 +1,114 @@
+\section{Milk spectra construction and analysis}\label{supp:milk}
+\input{generated/milk_profile/values}
+
+\subsection{Recorded measurements and cow identifiers}
+
+The dataset \cite{chirife2025data} contains \MilkOriginalSamples{}
+milk samples from \MilkOriginalCows{} cow identifiers. The Excel
+columns numbered 240 through 1299 contain the \MilkSpectra{} MIR
+absorbance measurements. Somatic cell count is recorded in cells
+per microlitre and transformed as $\log_2(\mathrm{SCC}/100)+3$.
+All retained spectral values and counts are finite, and every count
+is positive.
+
+Eligibility requires each cow identifier to have a consistent farm
+and milk-protein genotype, with one record per recorded milk control
+and distinct sampling dates for repeated observations. This rule
+excludes \MilkInvalidSamples{} records belonging to
+\MilkInvalidCows{} identifiers and retains \MilkSamples{} samples
+from \MilkCows{} cows. The original records are preserved. The
+paired cohort contains \MilkRepeatSamples{} observations from
+\MilkRepeatCows{} cows. Recorded sampling dates span 24 May through
+31 July 2023, and the intervals between repeated measurements range
+from 28 to 66 days.
+
+The milk-type coordinate is the recorded A2 indicator, equal to one
+for A2A2 and zero for A1A1 or A1A2. Its definition agrees with the
+deposited milk-type field for every retained observation. All six
+farms contain both indicator values. The twelve farm and milk-control
+indicators and the milk-type indicator have full column rank in
+each outer selection sample and its inner training samples.
+
+\subsection{Sample roles and the high dimensional design}
+
+Seed 20261031 generates a random ordering of the retained cow
+identifiers. Alternating positions in that ordering define the
+two complementary groups. Each group performs selection for the
+other group's coefficient estimation. Inner selection and validation
+roles also contain complete cows. The paired cohort applies the
+same deterministic fold rule to its retained identifiers.
+
+The full design has \MilkDimension{} columns. The spectral block
+enters the outcome and adjustment searches at its recorded resolution.
+RMS scales in the Gaussian and outcome-search subproblems are
+calculated from their own training observations. The final milk-type
+coefficient is expressed for a change from indicator zero to one.
+All 13 prespecified coordinates remain included in the selected
+profile. Outcome search size and graph penalties follow the method's
+cluster validation rules; their losses and selected supports are
+saved for each estimation group.
+
+The outcome search and curvature graphs depend on the quantile and
+working parameters. The conditional design regression uses only the
+covariates and cluster identifiers. Its four combinations of cohort
+and estimation group are computed once and shared across settings.
+Each reuse verifies the complete design matrix and the ordered cow
+identifiers. Gaussian Lasso paths use the covariance algorithm in
+\texttt{glmnet}, with convergence threshold $10^{-13}$ and a maximum
+of $10^7$ iterations. Every path point must have KKT residual at most
+$10^{-6}$. The ratio grids and validation losses retain the
+definitions in the method specification.
+
+\subsection{Equivalent coordinates for the selected fit}
+
+Let $W_0$ be diagonal with entries $1/(n_fm_i)$ on an estimation
+sample, and write the weighted selected design as
+$W_0^{1/2}X_AP=QR$, where $P$ is the QR column permutation.
+The design $U=W_0^{-1/2}Q$ and coefficient
+$a=RP^T\beta_A$ satisfy $X_A\beta_A=Ua$. Moreover,
+\[
+ \beta_A^T(X_A^TW_0X_A)\beta_A=a^Ta.
+\]
+Thus the prediction ridge and complete profile objective are
+preserved. Newton iterations use $a$, and the reported coefficient
+is $\beta_A=PR^{-1}a$.
+
+For a target coordinate $k$, define
+$c_k=R^{-T}P^Te_k$. If $H_a$ is the fitted curvature including the
+prediction ridge in the transformed coordinates, the original
+inverse direction is $PR^{-1}H_a^{-1}c_k$. Cluster projected scores
+are obtained by multiplying $-U_iH_a^{-1}c_k$ elementwise by the
+within-cow scores and averaging over that cow. This computes the
+same inverse row and influence quantity as the original selected
+criterion. The numerical checks compare original-coordinate gradients
+and linear predictions. An actual-data reference calculation also
+compares coefficients, objectives, Hessians and projected cluster
+scores under the two coordinate representations.
+
+\subsection{Intervals and sensitivity calculations}
+
+For each quantile, the estimate combines both groups' paired
+coefficients with their cow-count weights. The standard error is
+$n^{-1}(\sum_f\sum_{i\in I_f}(V_{ik}-\bar V_{fk})^2)^{1/2}$.
+The saved influence values reproduce this quantity to numerical
+precision. Pointwise intervals use $z_{0.975}$; simultaneous
+intervals use $z_{1-0.05/6}$ for the three quantiles within a setting.
+
+Table~\ref{tab:milk-sensitivity} includes every registered setting.
+The two-control cohort has its own sampling population, and each
+working penalty is part of its profile parameter definition.
+Bandwidth sensitivity retains the same population target and
+changes the numerical smoothing scale.
+
+\input{generated/milk_profile/sensitivity}
+
+Across the \MilkSystems{} coefficient systems, the maximum
+original-coordinate KKT residual is \texttt{\MilkMaxKKT{}} and the
+maximum nuisance gradient is \texttt{\MilkMaxNuisance{}}.
+Selection roles, every chosen variable, curvature diagnostics and
+all fitted cluster influence values are retained with the
+application output. Each completed case is copied to the separate
+backup directory before the queue advances.
+
+\bibliography{references}
+\end{document}

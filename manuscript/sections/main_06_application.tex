@@ -1,171 +1,106 @@
-\section{Longitudinal SLE transcriptomic study}\label{sec:application}
+\section{Milk spectra and somatic cell score}\label{sec:application}
 
-\subsection{Cohort and scientific question}\label{subsec:data-source}
+\subsection{Repeated measurements and the coordinate of interest}
 
-GEO accession GSE65391 records repeated whole-blood expression and
-clinical measurements in paediatric systemic lupus erythematosus
-\cite{banchereau2016}. The source study followed 158 patients and
-obtained 924 SLE expression samples on the Illumina HumanHT-12 V4.0
-array. The present outcome is log-transformed complement C3 at the
-same visit as the expression measurement. Requiring positive observed
-C3, usable expression and at least two visits retains
-\SLEEligibleSubjects{} subjects and \SLEEligibleVisits{} visits.
-Table~\ref{tab:data-audit} gives the observed cohort construction.
+The public milk dataset \cite{chirife2025data} combines mid-infrared (MIR)
+spectra, milk protein genotypes and somatic cell counts from six
+commercial Holstein-Friesian farms in Catalonia. Each spectrum
+contains \MilkSpectra{} recorded absorbance variables. A MilkoScan
+7RM measured the spectrum, and a separate Fossomatic instrument
+measured somatic cell count. The cow identifier links observations
+across two routine milk controls.
 
-The question is whether immune expression associations with C3 vary
-across its distribution after clinical adjustment. Subjects are the
-independent sampling units. The complete profile averages within each
-subject before averaging across subjects, so visit-rich subjects
-receive the same total weight as other subjects. The analysis uses
-$\tau=0.25,0.50,0.75$, with the lower decile examined at bandwidths
-that satisfy its local outcome-information checks.
+We study the association of A2 milk type with somatic cell score
+after adjustment for the complete recorded spectrum and the sampling
+conditions. Associations between milk protein genotypes and somatic
+cell score have previously been examined with repeated-measurement
+mixed models \cite{citek2022}. Here the coefficient is a coordinate
+of the full high-dimensional profile target at each quantile.
+The indicator $A2_i$ equals one for genotype A2A2 and zero for
+A1A1 or A1A2. With count recorded in cells per microlitre, the
+response is
+\[
+ Y_{ij}=\log_2(\mathrm{SCC}_{ij}/100)+3.
+\]
+This transformation retains the recorded measurement precision.
 
-\input{generated/tab_profile_pair_cohort}
+Requiring consistent cow identifiers, genotypes and sampling occasions
+retains \MilkCows{} cows and \MilkSamples{} milk samples. Of these,
+\MilkRepeatCows{} cows contribute two observations; the remaining cows
+contribute one. Counts and all spectral measurements are observed for
+every retained record. There are \MilkATwoCows{} A2 cows and
+\MilkAOneCows{} A1 cows, with both milk types represented at every farm.
+The profile criterion gives each cow the same total weight.
 
-\subsection{Expression construction and adjustment}\label{subsec:preprocessing}
+\subsection{Full spectrum adjustment and inference}
 
-The reference expression input is the processed GEO Series Matrix.
-Controls, unannotated probes and probes with ambiguous gene mappings
-are removed. Among probes mapping uniquely to the same gene, the
-training sample selects the probe with the largest median absolute
-deviation. Training visits also determine feature filtering and
-standardisation. Prediction considers 5000 genes, with 2000 and
-10000 examined as sensitivity values. Each inner training set
-repeats these transformations using its own subjects.
+The fixed design contains $A2_i$, twelve indicators for the observed
+farm and milk-control combinations, and all \MilkSpectra{} spectral
+variables. Its dimension is \MilkDimension{}. The milk-type indicator
+and sampling-condition indicators are always included. We use a cow
+intercept, $Z_{ij}=1$, with fixed $\Lambda=1$ and
+$h=n^{-3/10}$ at $\tau=0.25,0.50,0.75$.
 
-Model A adjusts for centred follow-up time, age, sex, race or ancestry
-categories, treatment indicators and source batch. Model B adds
-contemporaneous SLEDAI. Its low-complement component assigns two
-points when C3, C4 or CH50 is below the laboratory reference range
-\cite{torontoSLEDAI2K}. Model B consequently addresses a conditional
-association with a clinical composite that partly incorporates
-complement. The nuisance design contains a subject intercept; a
-centred-time slope is included in sensitivity calculations.
+A fixed random ordering assigns complete cows to two groups. For each
+estimation group, the complementary cows supply the outcome search,
+profile-curvature adjustment and conditional covariate adjustment of
+Section~\ref{sec:inference}. The resulting selected model is fitted
+at $h$ and $h/2$. The two groups contain 674 and 675 cows, so the full
+design dimension exceeds the number of cows in either estimation
+group. All spectral variables remain available to the selection
+procedure. The interval addresses the complete-spectrum population
+coordinate under the target-approximation conditions of
+Section~\ref{sec:theory}.
 
-Two expression-processing sensitivities use the same biological
-visits. One begins with the official non-normalised R1/R2 arrays,
-uses healthy technical pairs to calibrate their releases and estimates
-a quantile-normalisation target within each SLE training sample.
-The other takes the median across uniquely mapped probes for a gene.
-Supporting Information specifies these transformations and their
-repetition within validation and subject deletion.
+Adjacent spectral measurements are strongly related: their median
+correlation is \MilkSpectralCorrelation{}. Gaussian Lasso subproblems
+use covariance updates and retain the declared validation grids.
+The selected convex fits use a cluster-weighted QR representation,
+with the coefficient and inverse direction transformed back to the
+recorded covariate units. This invertible transformation preserves
+the profile objective and its prediction ridge. All fitted gradients
+are checked in the original coordinates.
 
-\subsection{Module parameters and uncertainty}\label{subsec:estimands}
+\subsection{Estimated milk type associations}
 
-Five immune modules from the public G2 repertoire
-\cite{chaussabel2014,banchereau2016} were fixed before fitting C3
-associations. M1.2, M3.4 and M5.12 represent interferon responses;
-M4.11 represents plasma cells, and M5.15 represents neutrophils.
-Table~\ref{tab:immune-modules} gives their measured membership.
-The first four scores average their complete gene sets, whereas
-M5.15 averages its original probe set. Each score is centred and
-divided by its training-sample standard deviation. The resulting
-clinical and module designs have \SLEModelADimension{} coordinates
-in Model A and \SLEModelBDimension{} in Model B.
+\input{generated/milk_profile/reference}
 
-\input{generated/tab_profile_pair_modules}
+The median A2 coefficient is $\MilkMedianEstimate{}$, with simultaneous
+interval $\MilkMedianInterval{}$. The lower-quartile estimate is
+$\MilkLowerEstimate{}$ and the upper-quartile estimate is
+$\MilkUpperEstimate{}$. All three simultaneous intervals include zero.
+Table~\ref{tab:milk-inference} reports their standard errors and both
+interval families. The simultaneous intervals allocate 5\% across
+the three prespecified quantiles and use the joint cluster
+contributions of both bandwidths. Their widths retain uncertainty
+about the magnitude and direction of the adjusted association.
 
-Each module coefficient is a coordinate of the population complete
-profile for that clinical and module design, with fixed $\Lambda=I$.
-The fixed-design case of Section~\ref{subsec:paired-fit} fits both
-convex profiles at $h=n^{-3/10}$ and $h/2$ and combines their
-coefficients. The cluster-score covariance uses both fitted inverse
-rows and the within-subject covariance of their score contributions.
-A second calculation deletes each complete subject, repeats
-preprocessing and estimation, and forms the delete-one covariance.
-It holds the full-sample bandwidth fixed and retains each repeated
-estimator's sample-standardised module units.
+The estimates describe the A2 association conditional on the measured
+spectrum. This adjustment includes compositional information recorded
+in the same milk sample as the response. The resulting profile
+coordinate therefore answers a question about milk type after
+accounting for those observed milk characteristics.
 
-The score interval describes variation conditional on the fitted
-feature construction. The complete-workflow interval also includes
-variation from probe selection, centring and standardisation. Each
-procedure uses Bonferroni allocation across the 30 module coordinates
-formed by two models and three quantiles. The lower-decile family
-contains ten coordinates. All reference and sensitivity workflows
-complete their full-sample fit and every subject deletion.
+\subsection{Sensitivity and numerical behaviour}
 
-\subsection{Immune module associations}\label{subsec:module-results}
+The prespecified calculations repeat the analysis among cows with two
+milk controls and examine bandwidth multipliers $0.75$ and $1.25$.
+Working penalties $0.5$ and $2$ define additional profile targets.
+Supporting Information gives every estimate and interval, using a
+three-coordinate family within each setting.
 
-The M4.11 plasma-cell coefficient is negative in all model and
-quantile combinations. In Model A, its lower-quartile estimate is
-\JointPlasmaALowerEstimate{}, with simultaneous score interval
-\JointPlasmaALowerScoreInterval{} and complete-workflow interval
-\JointPlasmaALowerWorkflowInterval{}. Its median estimate is
-\JointPlasmaAMedianEstimate{}, with intervals
-\JointPlasmaAMedianScoreInterval{} and
-\JointPlasmaAMedianWorkflowInterval{}. Model B gives median estimate
-\JointPlasmaBMedianEstimate{} and corresponding intervals
-\JointPlasmaBMedianScoreInterval{} and
-\JointPlasmaBMedianWorkflowInterval{}.
+All \MilkFits{} registered fits and their \MilkSystems{} constituent
+coefficient systems are available. Selected dimensions range from
+\MilkMinSelected{} to \MilkMaxSelected{} across the estimation
+groups. Median coordinate-fitting time is \MilkMedianRuntime{}
+seconds after the common design regressions have been computed.
+The numerical records retain original-coordinate gradients and
+nuisance gradients, together with the selected sets and the influence
+values used to reconstruct every standard error.
 
-Figure~\ref{fig:joint-modules} displays the full reference family.
-The upper-quartile plasma-cell intervals include zero, as do the
-interferon and neutrophil intervals across the three quantiles.
-Both processing sensitivities retain the negative plasma-cell
-associations at the lower quartile and median in Model A and at
-the median in Model B under both uncertainty calculations.
-Their numerical intervals and the working-penalty, bandwidth and
-random-slope sensitivities appear in Supporting Information.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{generated/figures/fig_joint_modules.pdf}
-\caption{Profile associations between immune modules and log C3.
-Each coefficient is per training-sample standard deviation of its
-module score. Blue circles use the paired cluster-score covariance;
-orange triangles use the complete-workflow delete-subject covariance.
-Both use Bonferroni allocation over the same 30 coordinates.
-All intervals and all subject deletion fits are available.
-OpenAI Codex assisted the R code used to plot the saved results.}
-\label{fig:joint-modules}
-\end{figure}
-
-\subsection{Prediction for heldout subjects}\label{subsec:application-reporting}
-
-Five repetitions of five-fold validation assign complete subjects to
-folds. Within each outer training sample, five inner subject folds
-select the outcome-search size and the nuisance penalty from
-$\{0.5I,I,2I\}$ by equal-subject pinball loss. Clinical covariates
-and the five modules remain included throughout the search.
-The selected unsmoothed joint fit supplies the fixed-part predictor
-for heldout subjects. Its statistical task is prediction with a
-training-selected working matrix; the module intervals retain their
-fixed matrix.
-
-All \JointPredictionFits{} prediction fits across the reference,
-feature-count, random-slope and processing settings are complete.
-Each setting predicts every retained subject in each of the five
-repetitions. Table~\ref{tab:joint-prediction} reports equal-subject
-pinball loss and calibration, the proportion of outcomes below the
-predicted quantile. The upper-quartile fixed-part predictions have
-calibration below their nominal quantile in both adjustment models.
-Persistent subject variation therefore remains relevant when
-interpreting these predictions for a previously unobserved subject.
-
-\input{generated/joint_profile/prediction}
-
-Sensitivity comparisons average the five loss differences within a
-subject and then across subjects. Complete-subject resampling gives
-a 95\% range conditional on the fitted fold models. Supporting
-Information reports these comparisons and the available paired
-predictions from pooled quantile Lasso, longitudinal SCAD estimating
-equations and a low-dimensional linear quantile mixed model
-\cite{zu2023,geraci2014jss}, together with their actual fold counts.
-
-\subsection{Independent exploratory gene designs}\label{subsec:exploratory-results}
-
-Ten subject splits, each used in both role assignments, separate
-gene selection from inference. The selection group supplies all
-preprocessing and exactly three additions along the joint profile
-search path. The other group fits the complete clinical and
-three-gene design at both bandwidths. Each interval addresses the
-profile parameter of its own selected design.
-
-Every role completes selection and inference under all three
-processing routes. Under reference processing, the lower-quartile
-search selects \JointLowerGeneA{} in \JointLowerGeneCountA{} of
-20 Model A assignments and \JointLowerGeneB{} in
-\JointLowerGeneCountB{} Model B assignments. The selections at other
-quantiles are more dispersed. Supporting Information reports their
-frequencies and descriptive coefficient distributions across the
-designs in which each gene is selected.
+Inference treats cows as independent conditional on the farm and
+milk-control indicators. The six farms define the observed sampling
+conditions. The public file does not record days in milk, parity or
+pedigree, so these variables are outside the observed adjustment set.
+The complete workflow and its numerical checks are available with
+the replication files.
