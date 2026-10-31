@@ -39,7 +39,7 @@ prediction:
   hqreg_lambda_min: 0.01
   hqreg_eps: 1.0e-8
   hqreg_max_iterations: 100000
-  calibration: inner_validation_quantile_intercept
+  calibration: inner_validation_quantile_intercept_by_year
   comparison_family_size: 6
 method_version: joint_profile_design_20261026
 execution_version: paired_qp_20261031

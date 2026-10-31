@@ -1,6 +1,8 @@
 source("research/score_validity_20261026/load_joint.R")
 source("research/milk_application_20261031/nodewise.R")
 source("research/milk_application_20261031/weighted_solver.R")
+source("research/soynam_application_20261031/refine_basis.R")
+milk_reference_fit_small <- soy_refined_basis_fit
 source("research/soynam_application_20261031/data.R")
 load_soy_solver <- function() {
   lock <- filelock::lock("results/scratch/soynam_20261031/pair_qp_compile.lock", timeout = 60000)
