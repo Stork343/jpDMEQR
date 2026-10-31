@@ -26,7 +26,8 @@ left <- ggplot(effects, aes(tau, estimate_bu_ac, colour = year, shape = year)) +
   scale_shape_manual(values = c(16, 17)) +
   scale_x_continuous(breaks = c(.25, .5, .75), labels = c("0.25", "0.50", "0.75"), limits = c(.15, .85)) +
   scale_y_continuous(limits = c(0, max(effects$simultaneous_upper) * 1.08), expand = expansion(mult = c(0, .01))) +
-  labs(title = "A  Canopy association", x = "Quantile", y = "Yield association per 10 percentage points (bu/ac)") + style
+  labs(title = "A  Canopy association", x = "Quantile", y = "Yield association (bu/ac)\nper 10 percentage points") +
+  style + guides(colour = guide_legend(nrow = 2, byrow = TRUE), shape = guide_legend(nrow = 2, byrow = TRUE))
 right <- ggplot(comparison, aes(tau, relative_percent, colour = comparator, shape = comparator)) +
   geom_hline(yintercept = 0, colour = "#777777", linewidth = .35) +
   geom_errorbar(aes(ymin = relative_lower, ymax = relative_upper), position = dodge, width = .025, linewidth = .55) +

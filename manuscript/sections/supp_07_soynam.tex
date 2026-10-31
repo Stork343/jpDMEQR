@@ -147,18 +147,24 @@ without canopy, and pooled quantile Lasso with canopy. Family and
 field adjustments are common to all methods. Maturity is excluded.
 Each joint predictor uses the unsmoothed convex outcome-search path
 with $\Lambda=1$, selecting the model size by complete-line validation
-pinball loss. The final predictor uses the fixed-effect component for
+pinball loss. The candidate sizes range from zero to
+$\min_f\lfloor n_{train,f}/\log(n_{train,f})\rfloor$ additional
+genomic variables beyond the retained adjustment terms. The final predictor uses the fixed-effect component for
 a line absent from training.
 
-The pooled method uses native \texttt{hqreg} 1.4-1 with
-$\alpha=1$, 40 geometric penalty ratios from 1 to 0.01,
-\texttt{eps} $=10^{-8}$ and at most 100000 iterations. Genomic
-variables receive the Lasso penalty; the prespecified adjustment
-variables are unpenalised. The package uses a Huber continuation
-internally \cite{yi2017}. Its source-specific objective is verified
-against an independent convex formulation, including the zero-penalty
-case, and its intercept mapping is checked by equality of predictions.
-Evaluation uses the original check loss.
+The pooled method minimises the complete check loss with a Lasso
+penalty on standardised genomic variables; the prespecified
+adjustment variables are unpenalised. Each training sample uses
+40 geometric penalty ratios from 1 to 0.01. The entry value is the
+largest absolute standardised genomic score from a dual solution of
+the unpenalised adjustment model, divided by the number of observations.
+HiGHS solves the dual linear programme, retaining its basis along
+the path. Constraints are added whenever a complete genomic scan
+finds a violation. Every returned point has normalised primal--dual
+gap at most $10^{-7}$ and dual-constraint error at most $10^{-8}$.
+An independent \texttt{quantreg} calculation checks the objective,
+including the zero-penalty limit. Both fitting and evaluation use
+the unsmoothed check loss.
 
 For each method and year, the empirical $\tau$ quantile of internal
 validation residuals supplies an intercept calibration. We use the

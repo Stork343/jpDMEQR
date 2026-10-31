@@ -71,12 +71,12 @@ evaluation. Their measurements from both years are withheld from
 training. The remaining \SoyTrainingLines{} lines select model sizes
 or penalties in three internal groups. All methods use the same
 genomic and field information. The joint profile predictor is fitted
-with and without the canopy variables; a pooled quantile Lasso fitted
-with \texttt{hqreg} \cite{yi2017} provides an additional comparator
-with canopy information. Actual maturity is excluded from every
-prediction model because it becomes available later in the growing
-season. Year-specific intercept calibration uses internal validation
-residuals only.
+with and without the canopy variables; pooled quantile Lasso provides
+an additional comparator with canopy information. Its complete convex
+objective is solved with primal--dual certification. The prediction setting supplies the completed
+check-plot calibration to every method. At the line level, the available
+measurements are genotype and canopy; recorded maturity is excluded.
+Year-specific intercept calibration uses internal validation residuals only.
 
 \input{generated/soynam_profile/prediction}
 

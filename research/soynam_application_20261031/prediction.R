@@ -36,56 +36,33 @@ soy_joint_prediction <- function(outer, inner, tau, lambda = 1) {
     final_gap = fitted$fitted$duality_gap, method_version = "joint_profile_prediction_paired_qp")
 }
 
-soy_pooled_path <- function(data, tau, options, lambda = NULL) {
-  omitted <- match("Block1", colnames(data$X))
-  if (is.na(omitted)) stop("The pooled intercept mapping lacks its reference block.")
-  keep <- setdiff(seq_len(ncol(data$X)), omitted)
-  args <- list(X = data$X[, keep, drop = FALSE], y = data$y, method = "quantile", tau = tau,
-    alpha = 1, nlambda = options$hqreg_nlambda, lambda.min = options$hqreg_lambda_min,
-    eps = options$hqreg_eps, max.iter = options$hqreg_max_iterations,
-    preprocess = "standardize", penalty.factor = data$penalty_factor[keep], screen = "ASR",
-    message = isTRUE(options$hqreg_message))
-  if (!is.null(lambda)) args$lambda <- lambda
-  fitted <- do.call(hqreg::hqreg, args)
-  expected <- if (is.null(lambda)) options$hqreg_nlambda else length(lambda)
-  if (!is.matrix(fitted$beta) || ncol(fitted$beta) != expected || fitted$saturated ||
-      any(fitted$iter >= options$hqreg_max_iterations) || any(!is.finite(fitted$beta)))
-    stop("The native pooled quantile path did not complete.")
-  beta <- matrix(0, ncol(data$X), expected, dimnames = list(colnames(data$X), NULL))
-  beta[keep, ] <- fitted$beta[-1L, , drop = FALSE]
-  blocks <- grep("^Block[0-9]+$", colnames(data$X))
-  beta[blocks, ] <- sweep(beta[blocks, , drop = FALSE], 2L, fitted$beta[1L, ], "+")
-  mapped <- data$X %*% beta
-  native <- sweep(args$X %*% fitted$beta[-1L, , drop = FALSE], 2L, fitted$beta[1L, ], "+")
-  if (max(abs(mapped - native)) > 1e-9) stop("The pooled coefficient mapping changed its predictions.")
-  list(beta = beta, lambda = fitted$lambda, iterations = fitted$iter,
-    native = fitted, mapping_error = max(abs(mapped - native)))
-}
-
 soy_pooled_prediction <- function(outer, inner, tau, options) {
-  losses <- numeric(options$hqreg_nlambda)
+  losses <- numeric(options$pooled_nlambda)
   predictions <- vector("list", length(inner))
   diagnostics <- list()
-  ratios <- exp(seq(0, log(options$hqreg_lambda_min), length.out = options$hqreg_nlambda))
+  ratios <- exp(seq(0, log(options$pooled_lambda_min), length.out = options$pooled_nlambda))
   for (f in seq_along(inner)) {
     soy_progress("pooled_prediction_search", list(fold = f))
-    path <- soy_pooled_path(inner[[f]]$train, tau, options)
+    path <- soy_pooled_compiled_path(inner[[f]]$train, tau, options$pooled_nlambda,
+      options$pooled_lambda_min, progress = TRUE)
+    saveRDS(path, file.path(soy_context$directory, paste0("training_path_", f, ".rds")), compress = FALSE)
     if (max(abs(path$lambda / path$lambda[1L] - ratios)) > 1e-8)
-      stop("The native penalty ratios differ from the registered grid.")
+      stop("The pooled penalty ratios differ from the registered grid.")
     validation <- inner[[f]]$validation
     predictions[[f]] <- validation$X %*% path$beta
     residual <- validation$y - predictions[[f]]
     losses <- losses + colSums(residual * (tau - (residual < 0)) * validation$weight)
-    diagnostics[[f]] <- data.table(fold = f, maximum_iterations = max(path$iterations), mapping_error = path$mapping_error)
+    diagnostics[[f]] <- copy(path$diagnostics)[, fold := f]
   }
   selected <- which.min(losses)
   oof <- rep(NA_real_, length(outer$y))
   for (f in seq_along(inner)) oof[inner[[f]]$validation$original_rows] <- predictions[[f]][, selected]
   if (any(!is.finite(oof))) stop("The pooled validation predictions are incomplete.")
   soy_progress("pooled_prediction_final_fit", list(selected_ratio = ratios[selected]))
-  fitted <- soy_pooled_path(outer, tau, options)
+  fitted <- soy_pooled_compiled_path(outer, tau, options$pooled_nlambda, options$pooled_lambda_min, progress = TRUE)
+  saveRDS(fitted, file.path(soy_context$directory, "training_path_final.rds"), compress = FALSE)
   list(beta = fitted$beta[, selected], oof = oof,
     tuning = data.table(ratio = ratios, loss = losses / outer$n), selected = ratios[selected],
-    diagnostics = rbindlist(diagnostics), final_iterations = fitted$iterations[selected],
-    method_version = "pooled_quantile_lasso_hqreg_1.4-1")
+    diagnostics = rbindlist(diagnostics), final_diagnostics = fitted$diagnostics[selected],
+    method_version = "pooled_quantile_lasso_highs_1.15.1")
 }

@@ -45,16 +45,18 @@ for (method in unlist(config$prediction$methods)) for (tau in unlist(config$quan
   records[[length(records) + 1L]] <- data.table(case_id, kind = "prediction", status = "complete", backup = TRUE,
     n = uniqueN(data$cluster_id), systems = NA_integer_, maximum_kkt = NA_real_)
 }
-pooled <- fread("results/preflight/soynam_20261031/pooled_benchmark_checks.csv")
+pooled <- fread("results/preflight/soynam_20261031/pooled_lp_checks.csv")
+pooled_path <- fread("results/preflight/soynam_20261031/pooled_lp_path_checks.csv")
 paired <- fread("results/preflight/soynam_20261031/pair_qp_checks.csv")
-if (nrow(pooled) != 9L || max(pooled$convex_objective_difference) > 2e-6 ||
+if (nrow(pooled) != 9L || max(pooled$objective_difference) > 2e-6 ||
     max(pooled$mapping_error) > 1e-9) stop("The pooled implementation checks do not pass.")
 fwrite(rbindlist(records), "results/preflight/soynam_20261031/delivery_checks.csv")
 manifest <- list(status = "complete", inference_cases = nrow(registry), prediction_cases = 9L,
   original_coordinate_systems = sum(rbindlist(records)$systems, na.rm = TRUE),
   all_backups_present = TRUE, source_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE),
-  hqreg_version = as.character(packageVersion("hqreg")), pooled_check_cases = nrow(pooled),
-  pooled_maximum_objective_difference = max(pooled$convex_objective_difference),
+  pooled_solver = "HiGHS 1.15.1", pooled_check_cases = nrow(pooled),
+  pooled_maximum_objective_difference = max(pooled$objective_difference),
+  pooled_full_path_checks = pooled_path$path_points,
   paired_solver_check_cases = nrow(paired), checked = format(Sys.time(), tz = "Asia/Shanghai", usetz = TRUE))
 write_json(manifest, "results/preflight/soynam_20261031/delivery_manifest.json", auto_unbox = TRUE, pretty = TRUE)
 writeLines(trimws(capture.output(sessionInfo()), which = "right"), "results/preflight/soynam_20261031/session.txt")

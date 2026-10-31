@@ -9,6 +9,7 @@ for (case_id in c("reference_q50", "bandwidth_075_q50")) {
   request <- readRDS(file.path(root, case_id, "request.rds"))
   tau <- request$job$tau
   h <- request$job$h_multiplier * prepared$n^(-.3)
+  reference <- if (case_id == "reference_q50") readRDS(file.path(root, case_id, "fit.rds")) else NULL
   for (fold in seq_along(prepared$folds)) for (coordinate in seq_along(config$coordinates)) {
     model <- prepared$folds[[fold]]$models[[coordinate]]
     fit <- ds_pair_small(model$data, model$initial, tau, h,
@@ -17,9 +18,19 @@ for (case_id in c("reference_q50", "bandwidth_075_q50")) {
       current <- fit[[bandwidth]]
       if (current$kkt > 1e-8 || current$prediction_error > 1e-7)
         stop("The refined coefficient system fails its original-coordinate checks.")
+      coefficient_difference <- objective_difference <- influence_difference <- NA_real_
+      if (!is.null(reference)) {
+        previous <- reference$details[[coordinate]]$fits[[fold]][[bandwidth]]
+        coefficient_difference <- max(abs(current$beta - previous$beta))
+        objective_difference <- abs(current$objective - previous$objective)
+        influence_difference <- max(abs(current$projected_scores - previous$projected_scores))
+        if (coefficient_difference > 1e-5 || objective_difference > 1e-8 || influence_difference > 1e-5)
+          stop("The precision calculation changed the fitted reference beyond numerical tolerance.")
+      }
       checks[[length(checks) + 1L]] <- data.table(case_id, fold, coordinate, bandwidth,
         original_kkt = current$kkt, basis_kkt = current$basis_kkt,
-        prediction_error = current$prediction_error, iterations = current$iterations)
+        prediction_error = current$prediction_error, iterations = current$iterations,
+        coefficient_difference, objective_difference, influence_difference)
     }
   }
 }
