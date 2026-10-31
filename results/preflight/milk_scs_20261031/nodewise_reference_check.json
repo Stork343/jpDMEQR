@@ -1,0 +1,7 @@
+{
+  "coefficient_error": 0,
+  "validation_loss_error": 0,
+  "matching_selected_ratio": true,
+  "actual_observations": 1128,
+  "reference_columns": 43
+}

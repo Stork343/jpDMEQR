@@ -25,5 +25,9 @@ settings:
   - {setting: penalty_050, cohort: eligible, lambda: 0.5, h_multiplier: 1}
   - {setting: penalty_200, cohort: eligible, lambda: 2, h_multiplier: 1}
 method_version: joint_profile_design_20261026
+execution_version: covariance_20261031
+nodewise_solver: glmnet_covariance
+nodewise_tolerance: 1.0e-13
+nodewise_max_iterations: 10000000
 results_directory: results/raw/application/milk_scs_20261031
 backup_directory: /Users/houjian/jpDMEQR-backups/milk_scs_20261031

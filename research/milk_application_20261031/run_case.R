@@ -6,10 +6,10 @@ if (length(arguments) != 1L) stop("Provide exactly one registered case identifie
 registry <- fread(file.path(config$results_directory, "registry.csv"))
 job <- registry[case_id == arguments[1L]]
 if (nrow(job) != 1L) stop("The case identifier is not unique in the registry.")
-directory <- file.path(config$results_directory, job$case_id)
+directory <- file.path(config$results_directory, config$execution_version, job$case_id)
 if (dir.exists(directory)) stop("The case directory already exists.")
-dir.create(directory)
-backup <- file.path(config$backup_directory, job$case_id)
+dir.create(directory, recursive = TRUE)
+backup <- file.path(config$backup_directory, config$execution_version, job$case_id)
 dir.create(backup, recursive = TRUE, showWarnings = FALSE)
 started <- Sys.time()
 options(error = function() {
@@ -20,6 +20,9 @@ options(error = function() {
   quit(save = "no", status = 1L, runLast = FALSE)
 })
 source("research/score_validity_20261026/load_joint.R")
+source("research/milk_application_20261031/nodewise.R")
+milk_design_cache <- readRDS(file.path(config$results_directory, "design_cache.rds"))
+pc_nodewise <- milk_nodewise_cached
 cohort <- readRDS(file.path(config$results_directory, "cohorts.rds"))[[job$cohort]]
 request <- list(job = job, configuration = config,
   source_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE), started = as.character(started))
@@ -42,17 +45,22 @@ diagnostics <- rbindlist(lapply(1:2, function(fold) {
   model <- fit$prepared$folds[[fold]]$models[[1L]]
   rbindlist(lapply(c("full", "half"), function(bandwidth) {
     current <- detail[[bandwidth]]
+    fitted_bandwidth <- if (bandwidth == "full") job$h else job$h / 2
+    profile <- ds_profile(model$data, current$beta, job$tau, fitted_bandwidth,
+      matrix(job$lambda, 1L, 1L), current$gamma)
     eigenvalues <- eigen(current$hessian, symmetric = TRUE, only.values = TRUE)$values
     data.table(case_id = job$case_id, fold = fold, bandwidth = bandwidth,
       selected_dimension = length(model$support), estimation_cows = model$data$n,
       kkt = current$kkt, iterations = current$iterations,
+      nuisance_gradient = max(profile$gradient_max),
       hessian_minimum = min(eigenvalues), hessian_maximum = max(eigenvalues),
       hessian_condition = max(eigenvalues) / min(eigenvalues),
       cluster_score_variance = var(current$projected_scores))
   }))
 }))
 if (any(!is.finite(diagnostics$hessian_condition)) || any(diagnostics$hessian_minimum <= 0) ||
-    any(diagnostics$kkt > 1e-8)) stop("The fit failed its numerical checks.")
+    any(diagnostics$kkt > 1e-8) || any(diagnostics$nuisance_gradient > 1e-8))
+  stop("The fit failed its numerical checks.")
 saveRDS(fit, file.path(directory, "fit.rds"), compress = FALSE)
 fwrite(table, file.path(directory, "inference.csv"))
 fwrite(diagnostics, file.path(directory, "diagnostics.csv"))
