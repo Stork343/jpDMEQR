@@ -1,0 +1,6 @@
+trait,method,run,maximum_error
+Cadmium_Chloride,ENET,ENET_cv,4.9737991503207e-14
+Cadmium_Chloride,JOINT,JOINT_qp_tau025,4.79616346638068e-14
+Cadmium_Chloride,JOINT,JOINT_qp_tau050,4.79616346638068e-14
+Cadmium_Chloride,JOINT,JOINT_qp_tau075,4.79616346638068e-14
+Cadmium_Chloride,POOLED,POOLED_tau025,4.79616346638068e-14

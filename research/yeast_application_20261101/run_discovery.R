@@ -9,11 +9,12 @@ method <- args[2L]
 run_id <- args[3L]
 implementation_directory <- normalizePath(args[5L], mustWork = TRUE)
 source(file.path(implementation_directory, "prediction.R"))
-stopifnot(method %in% c("JOINT", "ENET"), grepl("^[A-Za-z0-9_]+$", run_id))
+stopifnot(method %in% c("JOINT", "ENET", "POOLED", "FOREST"), grepl("^[A-Za-z0-9_]+$", run_id))
+if (method %in% c("POOLED", "FOREST")) source(file.path(implementation_directory, "comparators.R"))
 config <- read_yaml(file.path(implementation_directory, "config.yml"))
-tau <- if (method == "JOINT") as.numeric(args[4L]) else NA_real_
-if (method == "JOINT") stopifnot(tau %in% config$quantiles)
-data <- readRDS("data/derived/yeast_20261101/growth_discovery.rds")
+tau <- if (method %in% c("JOINT", "POOLED")) as.numeric(args[4L]) else NA_real_
+if (method %in% c("JOINT", "POOLED")) stopifnot(tau %in% config$quantiles)
+data <- readRDS(config$input_growth)
 stopifnot(trait_name %in% data$trait, all(data$role == "discovery"))
 data <- data[trait == trait_name]
 stopifnot(uniqueN(data$trait) == 1L, identical(unique(data$trait), trait_name))
@@ -21,8 +22,8 @@ training <- data[exploration_role == "training"]
 evaluation <- data[exploration_role == "evaluation"]
 stopifnot(uniqueN(training$strain_id) >= 100L, uniqueN(evaluation$strain_id) >= 50L,
           !length(intersect(training$strain_id, evaluation$strain_id)))
-panel <- readRDS("data/derived/yeast_20261101/panel.rds")
-directory <- file.path("results/raw/application/yeast_20261101/discovery", trait_name, paste0(method, "_", run_id))
+panel <- readRDS(config$input_panel)
+directory <- file.path(config$output_root, trait_name, paste0(method, "_", run_id))
 if (dir.exists(directory)) stop("运行目录已经存在")
 dir.create(directory, recursive = TRUE)
 progress <- function(stage, details = list()) {
@@ -45,8 +46,19 @@ if (method == "JOINT") {
   result <- yeast_profile_prediction(training, evaluation, panel, config, tau, progress, directory)
   quantiles <- tau
   predicted <- matrix(result$prediction, ncol = 1L)
-} else {
+} else if (method == "ENET") {
   result <- yeast_enet_prediction(training, evaluation, panel, config, progress, directory)
+  quantiles <- unlist(config$quantiles)
+  predicted <- result$prediction
+} else if (method == "POOLED") {
+  source("research/score_validity_20261026/load_joint.R")
+  source("research/soynam_application_20261031/load_pooled_lp.R")
+  result <- yeast_pooled_prediction(training, evaluation, panel, config, tau, progress, directory)
+  quantiles <- tau
+  predicted <- matrix(result$prediction, ncol = 1L)
+} else {
+  library(grf)
+  result <- yeast_forest_prediction(training, evaluation, panel, config, progress, directory)
   quantiles <- unlist(config$quantiles)
   predicted <- result$prediction
 }

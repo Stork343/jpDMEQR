@@ -1,0 +1,8 @@
+{
+  "stage": "discovery",
+  "conditions": 7,
+  "positive_point_gain": 3,
+  "pointwise_lower_bound_above_zero": 0,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

@@ -3,13 +3,13 @@ library(jsonlite)
 library(processx)
 
 args <- commandArgs(trailingOnly = TRUE)
-stopifnot(length(args) == 2L)
+stopifnot(length(args) %in% c(2L, 3L))
 implementation_directory <- normalizePath(args[1L], mustWork = TRUE)
 workers <- as.integer(args[2L])
 stopifnot(is.finite(workers), workers >= 1L, workers <= 4L)
-directory <- "results/raw/application/yeast_20261101/screening_20261101"
+directory <- if (length(args) == 3L) args[3L] else "results/raw/application/yeast_20261101/screening_20261101"
 jobs <- fread(file.path(directory, "jobs.csv"))
-log_directory <- "results/logs/yeast_20261101/screening"
+log_directory <- file.path(directory, "logs")
 dir.create(log_directory, recursive = TRUE, showWarnings = FALSE)
 jobs[, `:=`(pid = NA_integer_, exit_code = NA_integer_)]
 for (j in seq_len(nrow(jobs))) {

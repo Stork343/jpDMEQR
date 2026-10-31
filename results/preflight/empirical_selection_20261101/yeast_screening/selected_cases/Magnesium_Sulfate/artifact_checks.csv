@@ -1,0 +1,5 @@
+trait,method,run_id,maximum_error
+Magnesium_Sulfate,JOINT,qp_tau025,5.32907051820075e-15
+Magnesium_Sulfate,JOINT,qp_tau050,5.32907051820075e-15
+Magnesium_Sulfate,JOINT,qp_tau075,5.32907051820075e-15
+Magnesium_Sulfate,ENET,cv,5.32907051820075e-15

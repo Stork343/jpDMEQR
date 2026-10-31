@@ -45,6 +45,7 @@ Suggests:
     glmmLasso,
     glmnet,
     grpreg,
+    grf,
     highs (>= 1.15.1-1),
     hqreg,
     illuminaHumanv4.db,

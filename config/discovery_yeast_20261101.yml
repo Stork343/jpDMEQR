@@ -1,4 +1,7 @@
 phase: discovery
+input_panel: data/derived/yeast_20261101/panel.rds
+input_growth: data/derived/yeast_20261101/growth_discovery.rds
+output_root: results/raw/application/yeast_20261101/discovery
 manuscript_adoption: false
 response_source: Bloom_2013_replicate_growth
 expression_source: Albert_Bloom_2018_log2_TPM

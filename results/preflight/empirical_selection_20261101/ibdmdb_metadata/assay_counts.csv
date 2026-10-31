@@ -1,0 +1,12 @@
+data_type,rows,samples,participants,calprotectin_records
+biopsy_16S,178,178,81,0
+host_genome,92,92,92,0
+host_transcriptomics,252,252,90,0
+metabolomics,546,546,106,349
+metagenomics,1638,1638,130,456
+metatranscriptomics,835,835,109,304
+methylome,449,449,94,0
+proteomics,450,450,89,386
+serology,210,210,67,0
+stool_16S,180,180,36,179
+viromics,703,703,105,209

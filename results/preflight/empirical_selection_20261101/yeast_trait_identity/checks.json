@@ -1,0 +1,5 @@
+{
+  "status": "verified_from_source_table",
+  "source_label_preserved": true,
+  "source_table": "data/raw/yeast_bloom_2013/supplementary_table_1.xls"
+}

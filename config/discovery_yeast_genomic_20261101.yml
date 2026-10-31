@@ -1,0 +1,24 @@
+phase: discovery
+manuscript_adoption: false
+input_panel: data/derived/yeast_genomic_20261101/panel.rds
+input_growth: data/derived/yeast_genomic_20261101/growth_discovery.rds
+output_root: results/raw/application/yeast_genomic_20261101/discovery
+response_source: Bloom_2013_replicate_growth
+genotype_source: Bloom_2013_Rqtl_cross
+unit: original_segregant_one_per_tetrad
+initial_trait: Ethanol
+decision_quantile: 0.25
+quantiles: [0.25, 0.5, 0.75]
+inner_folds: 3
+working_penalties: [0.5, 1, 2]
+solver: clarabel_selected_qp
+gap_tolerance: 1.0e-8
+covariates: genetic_markers_and_replicate_position
+gene_standardization: training_mean_sd
+response_standardization: training_cluster_weighted_mean_sd
+mean_comparator: elastic_net
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+calibration: training_fold_residual_quantile_by_replicate
+evaluation: strain_mean_pinball_loss

@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "actual_observations_used": true,
+  "strains": 60,
+  "equal_cluster_weights": true,
+  "deterministic_error": 0,
+  "quantiles_ordered": true,
+  "package_version": "2.6.1"
+}

@@ -1,0 +1,16 @@
+{
+  "stage": "metadata_audit",
+  "metabolomics_records": 546,
+  "matched_calprotectin_records": 349,
+  "matched_participants": 85,
+  "participants_with_repeats": 79,
+  "duplicate_metabolomics_sample_ids": 0,
+  "nonpositive_calprotectin": 0,
+  "distinct_calprotectin_values": 348,
+  "calprotectin_minimum": 3.45,
+  "calprotectin_maximum": 420.94,
+  "largest_tied_fraction": 0.0057306590257879654,
+  "maximum_measurements": 7,
+  "outcome_associations_fitted": false,
+  "manuscript_adoption": false
+}

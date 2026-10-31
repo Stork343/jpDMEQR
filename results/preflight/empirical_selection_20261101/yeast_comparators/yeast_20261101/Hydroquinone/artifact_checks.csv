@@ -1,0 +1,6 @@
+trait,method,run,maximum_error
+Hydroquinone,ENET,ENET_cv,1.4210854715202e-14
+Hydroquinone,JOINT,JOINT_qp_tau025,1.4210854715202e-14
+Hydroquinone,JOINT,JOINT_qp_tau050,1.4210854715202e-14
+Hydroquinone,JOINT,JOINT_qp_tau075,1.4210854715202e-14
+Hydroquinone,POOLED,POOLED_tau025,1.4210854715202e-14

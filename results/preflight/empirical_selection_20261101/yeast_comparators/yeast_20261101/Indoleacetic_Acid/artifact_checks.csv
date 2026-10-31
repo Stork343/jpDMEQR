@@ -1,0 +1,6 @@
+trait,method,run,maximum_error
+Indoleacetic_Acid,ENET,ENET_cv,5.10702591327572e-15
+Indoleacetic_Acid,JOINT,JOINT_qp_tau025,5.10702591327572e-15
+Indoleacetic_Acid,JOINT,JOINT_qp_tau050,4.88498130835069e-15
+Indoleacetic_Acid,JOINT,JOINT_qp_tau075,4.88498130835069e-15
+Indoleacetic_Acid,POOLED,POOLED_tau025,5.10702591327572e-15

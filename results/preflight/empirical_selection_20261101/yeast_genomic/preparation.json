@@ -1,0 +1,10 @@
+{
+  "status": "prepared",
+  "strains": 1008,
+  "genetic_markers": 11623,
+  "grouping": "one_segregant_per_tetrad",
+  "role_assignments_preserved": true,
+  "phenotype_values_imputed": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
