@@ -33,7 +33,7 @@ upper <- gain[tau == .75]
 text <- c("# 冠层信息与大豆产量分布", "",
   sprintf("SoyNAM田间试验提供了%s个家系的%s个大豆品系。每个品系在2013年和2014年各有一条记录，合计%s个小区观测。%s个基因组标记分别与年份交互，连同冠层及其他调整变量，构成%s列设计矩阵。样本单位是品系，每个品系具有两次测量；这与我们的方法所处理的高维混合效应分位数模型相符。",
     count(audit$families), count(manifest$lines), count(manifest$records), count(manifest$genomic_markers), count(manifest$total_columns)), "",
-  "冠层覆盖度在全基因组调整后仍与产量正相关。模型同时控制家系和田间条件，并调整记录中的成熟期。下表表示冠层覆盖度每增加10个百分点所对应的 profile 产量关联，单位为 bu/ac，即蒲式耳每英亩。区间共同控制六个年度分位数系数和五项预定差异的95%同时置信水平。", "",
+  "调整全部记录的基因组标记及其年度交互后，冠层覆盖度仍与产量正相关。模型同时控制家系和田间条件，并调整记录中的成熟期。下表表示冠层覆盖度每增加10个百分点所对应的profile产量关联，单位为bu/ac，即蒲式耳每英亩。区间共同控制六个年度分位数系数和五项预定差异的95%同时置信水平。", "",
   "| 年份 | 分位数 | 产量关联 | 同时置信区间 |", "| --- | --- | --- | --- |", effect_rows, "",
   sprintf("2014年的上四分位数关联比2013年高%.2f bu/ac，同时置信区间为%s。七项设置中的差异估计介于%.2f至%.2f bu/ac，所有相应区间均为正。增加田间空间项之后，这项年度差异继续得到支持。",
     year$estimate, interval(year$lower, year$upper), min(year_sensitivity$estimate), max(year_sensitivity$estimate)), "",

@@ -36,7 +36,7 @@ for (case_id in c("joint_canopy_q75", "joint_genomic_q75")) {
   write_json(list(stage = "output_materialisation", model_and_predictions_reconstructed = TRUE,
     coefficients_refitted = FALSE, completed = as.character(Sys.time())),
     file.path(directory, "output_verification.json"), auto_unbox = TRUE, pretty = TRUE)
-  write_json(list(case_id, status = "complete", method = request$method, tau = request$tau,
+  write_json(list(case_id = case_id, status = "complete", method = request$method, tau = request$tau,
     training_lines = length(request$training_lines), test_lines = length(request$test_lines),
     wall_seconds = as.numeric(difftime(file.info(file.path(directory, "model.rds"))$mtime,
       as.POSIXct(request$started), units = "secs")), completed = as.character(Sys.time())),
