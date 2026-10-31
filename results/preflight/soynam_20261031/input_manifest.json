@@ -1,0 +1,19 @@
+{
+  "lines": 5533,
+  "records": 11066,
+  "genomic_markers": 4235,
+  "marker_by_year_columns": 8470,
+  "fixed_columns": 56,
+  "total_columns": 8526,
+  "check_records": 1643,
+  "check_strain_years": 90,
+  "check_model_rank": 288,
+  "check_model_edf": 215.390914742383,
+  "check_model_deviance_explained": 0.792781104733138,
+  "check_surface_range": [-1.77911291767621, 1.46327092945873],
+  "registered_inference_cases": 21,
+  "inference_family_size": 11,
+  "response_unit": "bushels_per_acre",
+  "response_divisor": 10,
+  "prepared": "2026-10-31 19:00:18 CST"
+}

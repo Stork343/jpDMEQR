@@ -1,0 +1,23 @@
+{
+  "observations": 12762,
+  "lines": 5555,
+  "markers": 4240,
+  "source_matched_records": 11088,
+  "yield_maximum_difference": 0.0500000000000007,
+  "yield_within_source_rounding": 1,
+  "maturity_difference_records": 0,
+  "canopy_maximum_difference": 16.92,
+  "source_identifier_alias_records": 277,
+  "missing_genotype_calls": 0,
+  "extreme_maturity_records": 2,
+  "source_version": "NAM 1.8.0",
+  "source_commit": "e2980d8fc7be457e0a5e65abead7b96a1ce01111",
+  "two_year_lines": 5533,
+  "two_year_observations": 11066,
+  "families": 40,
+  "constant_markers": 0,
+  "duplicate_markers": 5,
+  "complementary_marker_aliases": 0,
+  "valid_markers": 4235,
+  "year_range": [2013, 2014]
+}

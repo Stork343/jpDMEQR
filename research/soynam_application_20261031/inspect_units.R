@@ -1,0 +1,6 @@
+environment <- new.env()
+loaded <- load("results/scratch/soynam_20261031/SoyNAM_source/data/soyin.RData", envir = environment)
+print(loaded)
+print(lapply(mget(loaded, envir = environment), dim))
+print(names(environment$data.line.in))
+print(head(environment$data.line.in, 6L))

@@ -1,0 +1,46 @@
+application_id: soynam_yield_20261031
+source_file: data/raw/soynam_20261031/met.RData
+reference_file: data/raw/soynam_20261031/soyin_reference.RData
+audited_panel: data/interim/soynam_20261031/audited_two_year_panel.rds
+years: [2013, 2014]
+response: YLD
+response_unit: bushels_per_acre
+response_divisor: 10
+canopy_divisor: 10
+coordinates: [ACC10_2013, ACC10_2014]
+genomic_design: marker_by_year
+quantiles: [0.25, 0.50, 0.75]
+reference_lambda: 1
+confidence: 0.95
+family_size: 11
+contrasts: [upper_minus_lower_each_year, year_2014_minus_2013_each_quantile]
+maturity_knots: [120, 130]
+maturity_boundary: [100, 160]
+spatial_calibration: independent_check_plots
+spatial_basis_dimensions: [5, 5]
+split_seed: 20261031
+budget_multiplier: 1
+settings:
+  - {setting: reference, cohort: full, lambda: 1, h_multiplier: 1}
+  - {setting: bandwidth_075, cohort: full, lambda: 1, h_multiplier: 0.75}
+  - {setting: bandwidth_125, cohort: full, lambda: 1, h_multiplier: 1.25}
+  - {setting: penalty_050, cohort: full, lambda: 0.5, h_multiplier: 1}
+  - {setting: penalty_200, cohort: full, lambda: 2, h_multiplier: 1}
+  - {setting: maturity_records, cohort: maturity_records, lambda: 1, h_multiplier: 1}
+  - {setting: spatial_polynomial, cohort: spatial_polynomial, lambda: 1, h_multiplier: 1}
+prediction:
+  heldout_fold: 1
+  folds: 5
+  inner_folds: 3
+  working_lambda: 1
+  methods: [joint_canopy, joint_genomic, pooled_quantile_lasso]
+  outcome_maturity_available: false
+  hqreg_nlambda: 40
+  hqreg_lambda_min: 0.01
+  hqreg_eps: 1.0e-8
+  hqreg_max_iterations: 100000
+  calibration: inner_validation_quantile_intercept
+  comparison_family_size: 6
+method_version: joint_profile_design_20261026
+results_directory: results/raw/application/soynam_yield_20261031
+backup_directory: /Users/houjian/jpDMEQR-backups/soynam_yield_20261031
