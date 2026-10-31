@@ -1,0 +1,10 @@
+{
+  "source_url": "https://static-content.springer.com/esm/art%3A10.1038%2Fncomms9712/MediaObjects/41467_2015_BFncomms9712_MOESM729_ESM.zip",
+  "paper_doi": "10.1038/ncomms9712",
+  "genotype_dimensions": [4390, 28220],
+  "phenotype_count": 20,
+  "genotype_missing": 0,
+  "strain_identifier_examples": ["01_01", "01_02", "01_03", "01_04", "01_06", "01_07", "01_08", "01_09", "01_10", "01_11", "01_12", "01_14", "01_15", "01_16", "01_17", "01_18", "01_19", "01_20", "01_21", "01_22", "01_23", "01_24", "01_25", "01_26"],
+  "marker_identifier_examples": ["33070_chrI_33070_A_T", "33147_chrI_33147_G_T", "33152_chrI_33152_T_C", "33200_chrI_33200_C_T", "33293_chrI_33293_A_T", "33328_chrI_33328_C_A", "33348_chrI_33348_G_C", "33403_chrI_33403_C_T", "33502_chrI_33502_A_G", "33548_chrI_33548_A_C", "33612_chrI_33612_A_G", "33892_chrI_33892_C_G"],
+  "outcome_associations_inspected": false
+}

@@ -1,0 +1,21 @@
+{
+  "status": "author_example_completed",
+  "role": "implementation_feasibility_only",
+  "rows": 408,
+  "experimental_ids": 50,
+  "genes": 1000,
+  "drugs": ["PLX-4720", "SB590885"],
+  "observations_per_id": {
+    "0": 3763,
+    "6": 23,
+    "10": 27
+  },
+  "runtime_sec": 4.204,
+  "selected_genes": ["ENSG00000011465", "ENSG00000067248", "ENSG00000005249", "ENSG00000040731", "ENSG00000064300", "ENSG00000039123", "ENSG00000062485", "ENSG00000012211", "ENSG00000054611"],
+  "native_cv_unit": "row",
+  "validation_comparison_completed": false,
+  "manuscript_adoption": false,
+  "source_repository": "https://github.com/koukoulEv/fbioSelect",
+  "package_version": "0.1.0",
+  "source_commit": "200aeafc41373bf5ac7924a80600074f9119e6c0"
+}

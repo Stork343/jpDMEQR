@@ -1,0 +1,9 @@
+{
+  "status": "roles_fixed_before_response_analysis",
+  "seed": 20261101,
+  "grouping": "patient_id",
+  "parent_consistency_checked": true,
+  "response_used": false,
+  "model_metadata_source": "https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz",
+  "created_utc": "2026-10-31 19:27:24 UTC"
+}

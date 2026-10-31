@@ -1,0 +1,12 @@
+{
+  "role": "numerical_feasibility_only",
+  "method": "joint_profile_design_20261026",
+  "tau": 0.5,
+  "Lambda": 1,
+  "seed": 20261102,
+  "experimental_ids": 50,
+  "rows": 408,
+  "columns": 1006,
+  "coordinates": "ENSG00000000003",
+  "manuscript_adoption": false
+}

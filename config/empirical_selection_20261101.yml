@@ -10,7 +10,8 @@ requirements:
   closest_method_comparison: required
   scientific_question_checked_against_prior_work: required
   independent_validation: required
-  novelty_or_method_advantage: required
+  verified_method_advantage: required
+  substantive_scientific_increment: required
 discovery:
   split_before_outcome_analysis: true
   record_all_attempts: true
