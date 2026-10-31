@@ -11,6 +11,13 @@ output = root / "results/preflight/milk_scs_20261031"
 completion = json.loads((output / "completion_manifest.json").read_text())
 with (output / "inference.csv").open(newline="") as stream:
     inference = list(csv.DictReader(stream))
+interpretation = output / "interpretation"
+with (interpretation / "quantile_contrasts.csv").open(newline="") as stream:
+    contrasts = list(csv.DictReader(stream))
+with (interpretation / "quantile_equality_test.csv").open(newline="") as stream:
+    global_test = list(csv.DictReader(stream))[0]
+with (interpretation / "observed_distribution.csv").open(newline="") as stream:
+    descriptive = list(csv.DictReader(stream))
 if len(inference) != completion["cases_registered"] or len(inference) != 18:
     raise ValueError("The empirical result matrix is incomplete.")
 run = completion["execution_version"]
@@ -39,6 +46,20 @@ for name, heading, rows in (
             value = f"{float(row[field]):.3f}"
             if value not in application:
                 raise ValueError(f"A saved empirical value is absent from {name}: {value}")
+    if f"{float(global_test['p_value']):.3f}" not in application:
+        raise ValueError("The quantile comparison p value is absent from the compiled text.")
+    extra_checks = 0
+    if name == "sjs_profile_quantile_supplement":
+        for row in contrasts:
+            for field in ("estimate", "se", "simultaneous_lower", "simultaneous_upper", "bonferroni_p"):
+                if f"{float(row[field]):.3f}" not in application:
+                    raise ValueError("A contrast value is absent from the compiled supplement.")
+                extra_checks += 1
+        for row in descriptive:
+            for field in ("cow_weighted_mean", "cow_weighted_q25", "cow_weighted_q50", "cow_weighted_q75"):
+                if f"{float(row[field]):.3f}" not in application:
+                    raise ValueError("An observed-distribution value is absent from the compiled supplement.")
+                extra_checks += 1
     overflow = []
     for page_number, page in enumerate(document, start=1):
         for word in page.get_text("words"):
@@ -47,7 +68,8 @@ for name, heading, rows in (
     if overflow:
         raise ValueError("Extracted PDF text extends beyond its page boundary.")
     documents.append({"file": str(path.relative_to(root)), "pages": len(document),
-                      "verified_result_rows": len(rows), "out_of_page_text": 0})
+                      "verified_result_rows": len(rows), "additional_values_checked": extra_checks,
+                      "out_of_page_text": 0})
 report = {"verified_utc": datetime.now(timezone.utc).isoformat(), "completed_cases": len(inference),
           "backed_up_fits": backed_up, "documents": documents, "review_method": "PDF text extraction and page coordinates"}
 (output / "delivery_checks.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
