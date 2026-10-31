@@ -1,0 +1,10 @@
+method,tau,case_id,state,pid,exit_status,priority
+joint_canopy,0.5,joint_canopy_q50,complete,,0,1
+joint_genomic,0.5,joint_genomic_q50,complete,,0,1
+pooled_quantile_lasso,0.5,pooled_quantile_lasso_q50,terminated_not_adopted,25766,143,1
+joint_canopy,0.25,joint_canopy_q25,complete,,0,2
+joint_genomic,0.25,joint_genomic_q25,complete,,0,2
+pooled_quantile_lasso,0.25,pooled_quantile_lasso_q25,terminated_not_adopted,26911,143,2
+joint_canopy,0.75,joint_canopy_q75,complete,,0,3
+joint_genomic,0.75,joint_genomic_q75,complete,,0,3
+pooled_quantile_lasso,0.75,pooled_quantile_lasso_q75,terminated_not_adopted,26912,143,3

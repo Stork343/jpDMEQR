@@ -1,0 +1,21 @@
+selection_id: empirical_selection_20261101
+status: discovery
+adopted_dataset: null
+requirements:
+  observed_continuous_response: true
+  genuine_cluster_identifiers: true
+  bounded_repeated_measurements: true
+  high_dimensional_adjustment: true
+  lawful_reproducible_access: true
+  closest_method_comparison: required
+  scientific_question_checked_against_prior_work: required
+  independent_validation: required
+  novelty_or_method_advantage: required
+discovery:
+  split_before_outcome_analysis: true
+  record_all_attempts: true
+validation:
+  lock_question_and_methods_before_access: true
+  whole_clusters: true
+  repeated_validation_attempt_alpha: 0.05_over_k_times_k_plus_1
+manuscript_update: after_adoption
