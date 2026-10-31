@@ -42,5 +42,7 @@ prediction:
   calibration: inner_validation_quantile_intercept
   comparison_family_size: 6
 method_version: joint_profile_design_20261026
+execution_version: paired_qp_20261031
+search_solver: paired_structured_qp
 results_directory: results/raw/application/soynam_yield_20261031
 backup_directory: /Users/houjian/jpDMEQR-backups/soynam_yield_20261031

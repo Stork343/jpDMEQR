@@ -2,6 +2,26 @@ source("research/score_validity_20261026/load_joint.R")
 source("research/milk_application_20261031/nodewise.R")
 source("research/milk_application_20261031/weighted_solver.R")
 source("research/soynam_application_20261031/data.R")
+load_soy_solver <- function() {
+  lock <- filelock::lock("results/scratch/soynam_20261031/pair_qp_compile.lock", timeout = 60000)
+  if (is.null(lock)) stop("The paired solver compilation lock was unavailable.")
+  on.exit(filelock::unlock(lock), add = TRUE)
+  Rcpp::sourceCpp("research/soynam_application_20261031/pair_qp.cpp",
+    cacheDir = "results/scratch/soynam_20261031/pair_qp_cache", rebuild = FALSE, env = .GlobalEnv)
+}
+load_soy_solver()
+rm(load_soy_solver)
+soy_original_initial_preparation <- pc_prepare_initial
+soy_original_path <- pc_orthogonal_path
+pc_prepare_initial <- function(y, X, Z, cluster_id, tau, Lambda, penalty_factor,
+                               max_iterations = 30000L, fit_always_included = FALSE) {
+  soy_original_initial_preparation(y, X, Z, cluster_id, tau, Lambda, penalty_factor,
+    max_iterations = max_iterations, fit_always_included = FALSE)
+}
+pc_orthogonal_path <- function(prepared, tau, sizes, gap_tolerance = 1e-8,
+                               max_iterations = 30000L, solver = soy_pair_qp_cpp) {
+  soy_original_path(prepared, tau, sizes, gap_tolerance, max_iterations, solver = solver)
+}
 soy_original_initial <- sb_initial
 soy_original_prepare <- ds_prepare
 ds_fit_small <- milk_fit_small
@@ -26,6 +46,9 @@ sb_initial <- function(data, tau, Lambda, penalty_factor, budget_multiplier = 1)
   key <- sprintf("%s_tau%02d_lambda%03d_fold%d", soy_context$cohort,
     as.integer(round(100 * tau)), as.integer(round(100 * Lambda[1L])), fold)
   path <- file.path(soy_context$cache, paste0("outcome_", key, ".rds"))
+  handle <- filelock::lock(paste0(path, ".lock"), timeout = 600000)
+  if (is.null(handle)) stop("The outcome-search cache lock was unavailable.")
+  on.exit(filelock::unlock(handle), add = TRUE)
   request <- list(subjects = names(data$rows), response = data$y, columns = colnames(data$X),
     penalty_factor = penalty_factor, Lambda = Lambda, budget_multiplier = budget_multiplier)
   if (file.exists(path)) {
@@ -52,6 +75,9 @@ pc_nodewise <- function(factor, rows, coordinate) {
   fold <- soy_fold_number(names(rows))
   key <- sprintf("%s_coordinate%d_fold%d", soy_context$cohort, coordinate, fold)
   path <- file.path(soy_context$cache, paste0("design_", key, ".rds"))
+  handle <- filelock::lock(paste0(path, ".lock"), timeout = 600000)
+  if (is.null(handle)) stop("The design-regression cache lock was unavailable.")
+  on.exit(filelock::unlock(handle), add = TRUE)
   request <- list(subjects = names(rows), coordinate = coordinate, columns = colnames(factor),
     dimensions = dim(factor), rms = sqrt(colSums(factor^2) / length(rows)))
   if (file.exists(path)) {

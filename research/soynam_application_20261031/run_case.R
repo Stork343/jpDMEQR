@@ -6,10 +6,10 @@ if (length(arguments) != 1L) stop("Provide one registered inference case.")
 registry <- fread(file.path(config$results_directory, "registry.csv"))
 job <- registry[case_id == arguments[1L]]
 if (nrow(job) != 1L) stop("The requested inference case is not unique.")
-directory <- file.path(config$results_directory, "inference", job$case_id)
+directory <- file.path(config$results_directory, "inference", config$execution_version, job$case_id)
 if (dir.exists(directory)) stop("The requested inference directory already exists.")
 dir.create(directory, recursive = TRUE)
-backup <- file.path(config$backup_directory, "inference", job$case_id)
+backup <- file.path(config$backup_directory, "inference", config$execution_version, job$case_id)
 dir.create(backup, recursive = TRUE, showWarnings = FALSE)
 started <- Sys.time()
 options(error = function() {
@@ -24,8 +24,8 @@ input <- readRDS(file.path(config$results_directory, "input.rds"))
 data <- soy_design(input, job$cohort)
 index <- cluster_index_v2(data$cluster_id)$rows
 assignment <- pc_folds(index, 2L)
-cache <- file.path(config$results_directory, "cache")
-dir.create(cache, showWarnings = FALSE)
+cache <- file.path(config$results_directory, "cache", config$execution_version)
+dir.create(cache, recursive = TRUE, showWarnings = FALSE)
 soy_context <- list(case_id = job$case_id, cohort = job$cohort, directory = directory,
   cache = cache, selection_subjects = lapply(1:2, function(fold) names(index)[assignment != fold]))
 request <- list(job = job, configuration = config, n = data$n, p = data$p,
