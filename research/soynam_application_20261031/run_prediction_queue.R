@@ -15,6 +15,8 @@ adopted <- if (length(arguments)) setNames(as.integer(arguments[seq(2L, length(a
 jobs <- CJ(method = unlist(config$prediction$methods), tau = unlist(config$quantiles), sorted = FALSE)
 jobs[, `:=`(case_id = paste0(method, "_q", sprintf("%02d", round(100 * tau))),
   state = "pending", pid = NA_integer_, exit_status = NA_integer_)]
+jobs[, priority := match(tau, c(.5, .25, .75))]
+setorder(jobs, priority, method)
 active <- list()
 for (i in seq_len(nrow(jobs))) {
   directory <- file.path(root, jobs$case_id[i])
@@ -48,7 +50,7 @@ repeat {
     if (jobs$state[i] == "failed") stop("A prediction case failed: ", jobs$case_id[i])
   }
   for (i in which(jobs$state == "pending")) {
-    if (length(active) >= 2L) break
+    if (length(active) >= 3L) break
     process <- processx::process$new(file.path(R.home("bin"), "Rscript"),
       c("research/soynam_application_20261031/run_prediction.R", jobs$method[i], as.character(jobs$tau[i])),
       cleanup = FALSE, stdout = file.path(root, paste0(jobs$case_id[i], ".log")), stderr = "2>&1")
