@@ -13,6 +13,7 @@ parser.add_argument("destination", type=Path)
 parser.add_argument("--bytes", type=int)
 parser.add_argument("--segments", type=int, default=8)
 parser.add_argument("--proxy", default="http://127.0.0.1:7897")
+parser.add_argument("--direct", action="store_true")
 parser.add_argument("--preserve-http-encoding", action="store_true")
 args = parser.parse_args()
 destination = args.destination.resolve()
@@ -35,7 +36,7 @@ result = downloader.start(
     segments=args.segments,
     retries=0,
     display=False,
-    proxy=args.proxy,
+    proxy=None if args.direct else args.proxy,
     auto_decompress=not args.preserve_http_encoding,
     timeout=ClientTimeout(total=None, connect=45, sock_read=180),
 )

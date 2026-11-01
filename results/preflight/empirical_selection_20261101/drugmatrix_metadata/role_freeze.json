@@ -1,0 +1,9 @@
+{
+  "role_seed": 20261204,
+  "compounds": 258,
+  "animals": 2097,
+  "dose_metadata_consistent": true,
+  "outcome_associations_fitted": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

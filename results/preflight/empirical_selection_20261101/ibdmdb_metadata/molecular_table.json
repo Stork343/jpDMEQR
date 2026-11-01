@@ -1,0 +1,18 @@
+{
+  "features": 81867,
+  "samples": 546,
+  "stored_nonzero_values": 27348904,
+  "samples_with_embedded_metadata": 0,
+  "sample_metadata_fields": null,
+  "feature_metadata_fields": [
+    "HMDB (*Representative ID)",
+    "Metabolite",
+    "Method",
+    "Pooled QC sample CV",
+    "RT",
+    "m/z"
+  ],
+  "biom_version": "2.1.18",
+  "nonnegative_finite_values": true,
+  "outcome_associations_fitted": false
+}

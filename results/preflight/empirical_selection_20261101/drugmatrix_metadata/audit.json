@@ -1,0 +1,17 @@
+{
+  "clinical_animals": 10605,
+  "codelink_arrays": 12921,
+  "liver_in_vivo_arrays": 5265,
+  "arrays_matched_to_clinical_animals": 2941,
+  "treated_arrays_with_positive_alt": 2721,
+  "eligible_unique_animals": 2721,
+  "compounds": 340,
+  "studies": 69,
+  "maximum_animals_per_compound": 30,
+  "maximum_animals_per_study": 118,
+  "compounds_observed_in_multiple_studies": 28,
+  "studies_with_multiple_compounds": 60,
+  "distinct_alt_values": 228,
+  "outcome_associations_fitted": false,
+  "manuscript_adoption": false
+}

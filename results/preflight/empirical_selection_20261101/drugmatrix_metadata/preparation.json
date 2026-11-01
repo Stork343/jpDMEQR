@@ -1,0 +1,15 @@
+{
+  "status": "prepared",
+  "arrays": 2097,
+  "probes": 8565,
+  "missing_predictor_fraction": 0.00980601927363501,
+  "expression_scale": "supplied_normalized_values",
+  "expression_minimum": 0.29190096,
+  "expression_maximum": 15.803095,
+  "adjustment_columns": ["(Intercept)", "log_dose", "log_duration", "study_year2002", "study_year2003", "study_year2004"],
+  "maximum_animals_per_compound": 24,
+  "actual_response": "natural_log_of_ALT_U_per_L",
+  "response_imputed": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

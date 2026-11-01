@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "source_array_identity_error": 0,
+  "arrays_independently_checked": 5,
+  "probes_checked_per_array": 8565,
+  "probes_in_platform_annotation": 8565,
+  "biological_probes": 8565,
+  "annotation_source": "GPL5425",
+  "platform_title": "GE Healthcare/Amersham Biosciences CodeLink UniSet Rat I Bioarray, layout EXP5280X2-613",
+  "gene_names_require_current_mapping_for_interpretation": true,
+  "formal_validation_used": false
+}

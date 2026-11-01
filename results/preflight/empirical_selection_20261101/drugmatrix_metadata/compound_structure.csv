@@ -1,0 +1,341 @@
+TEST_ARTICLE,animals,studies
+"1,1-Dichloroethene",6,1
+1-Naphthyl isothiocyanate,23,1
+17-Methyltestosterone,6,1
+"2,3,7,8-Tetrachlorodibenzo-p-dioxin",15,2
+2-Acetylaminofluorene,6,1
+"3,3',4',5-Tetrachlorosalicylanilide",3,1
+3-Acetamidophenol,6,1
+3-Methylcholanthrene,15,2
+"4,4'-Methylenedianiline",6,1
+4-Methylpyrazole,6,1
+4-Nonylphenol,6,1
+4-Octylphenol,6,1
+6-Mercaptopurine,6,1
+Abamectin,6,1
+Acemetacin,6,1
+Acetaminophen,17,2
+Acetazolamide,12,1
+Acyclovir,12,1
+Aflatoxin B1,6,1
+Albendazole,6,1
+Alfacalcidol,6,1
+Allyl Alcohol,30,2
+Alprazolam,6,1
+Altretamine,12,1
+Amantadine,3,1
+Aminoglutethimide,3,1
+Aminosalicylic acid,3,1
+Amiodarone,6,1
+Amitraz,6,1
+Amlodipine,12,1
+Amoxapine,6,1
+Amoxicillin,6,1
+Anastrozole,6,1
+Anisindione,5,1
+Artemether,6,1
+Artemisinin,6,1
+Aspirin,10,1
+Atorvastatin,12,1
+Atropine,12,1
+Azathioprine,15,2
+Azithromycin,12,1
+Balsalazide,6,1
+Benoxaprofen,12,1
+Benzethonium chloride,6,1
+Benzocaine,6,1
+Benzoic acid,6,1
+Benzothiazyl disulfide,6,1
+Betamethasone,6,1
+Bezafibrate,23,1
+Bis(2-ethylhexyl) phthalate,6,1
+Bisphenol A,18,2
+Bithionol,12,1
+Bromfenac,6,1
+Bromhexine,6,1
+Bromisovalum,5,1
+Bupropion,6,1
+Busulfan,11,2
+Butenafine,3,1
+Capsaicin,6,1
+Carbamazepine,6,1
+Carbimazole,6,1
+Carbon tetrachloride,24,1
+Carboplatin,12,1
+Carmustine,12,1
+Carvedilol,6,1
+Catechol,11,1
+Celecoxib,6,1
+Cerivastatin,6,1
+Cetraxate,6,1
+Cetylpyridinium bromide,3,1
+Chlorambucil,10,1
+Chloroform,11,2
+Chloroxylenol,6,1
+Chlorpromazine,12,1
+Chlortetracycline,6,1
+Chlorzoxazone,6,1
+Cholecalciferol,6,1
+Cholic acid,6,1
+Choline chloride,6,1
+Cinnarizine,6,1
+Ciprofloxacin,12,1
+Cisplatin,12,1
+Citalopram,12,1
+Citric acid,6,1
+Clarithromycin,11,1
+Clofibrate,24,1
+Clofibric acid,6,1
+Clomiphene,6,1
+Clomipramine,6,1
+Clonazepam,6,1
+Closantel,6,1
+Clotrimazole,16,2
+Colistin,6,1
+Cortisone,6,1
+Crotamiton,6,1
+Cycloheximide,6,1
+Cyclopropane carboxylic acid,6,1
+Cyclosporin A,12,1
+Cyproterone acetate,6,1
+Cytarabine,12,1
+Danazol,6,1
+Daunorubicin,5,1
+Deferiprone,5,1
+Dexamethasone,9,2
+Diazepam,5,1
+Dichlorvos,6,1
+Diclofenac,10,1
+Dicumarol,3,1
+Dideoxycytidine,6,1
+Diethylstilbestrol,12,1
+Digoxin,9,1
+Diisopropyl fluorophosphate,6,1
+Dimenhydrinate,6,1
+Dipyridamole,6,1
+Dipyrone,6,1
+Disulfiram,3,1
+Doxapram,6,1
+Doxorubicin,12,1
+Doxycycline,3,1
+Econazole,11,1
+Enoxacin,11,1
+Epalrestat,3,1
+Eperisone,6,1
+Epirubicin,6,1
+Ergocalciferol,3,1
+Erythromycin,6,1
+Estriol,6,1
+Ethanol,24,1
+Ethinylestradiol,11,1
+Ethisterone,6,1
+Ethylene glycol,11,1
+Ethylestrenol,6,1
+Etodolac,4,1
+Etoposide,11,2
+Famciclovir,11,1
+Fenbendazole,6,1
+Fenofibrate,24,3
+Ferulic acid,6,1
+Finasteride,12,1
+Flubendazole,6,1
+Fluconazole,12,1
+Fludrocortisone acetate,6,1
+Fluocinolone acetonide,6,1
+Fluoxetine,5,1
+Fluphenazine,11,1
+Fluvastatin,12,1
+Gemfibrozil,24,1
+Genistein,9,1
+Gentamicin,6,1
+Gentian violet,6,1
+Geraniol,6,1
+Glimepiride,6,1
+Glipizide,6,1
+Granisetron,6,1
+Griseofulvin,6,1
+Hexachlorophene,6,1
+Hydralazine,3,1
+Hydrazine,6,1
+Hydrocortisone,6,1
+Hydroxyurea,12,1
+Ibufenac,6,1
+Ibuprofen,12,1
+Idebenone,6,1
+Ifosfamide,11,1
+Imatinib,6,1
+Indomethacin,19,3
+Insulin,6,1
+"Interleukin 1 beta, rat",3,1
+"Interleukin 6, rat",3,1
+Ipriflavone,6,1
+Isoeugenol,6,1
+Isoniazid,6,1
+Isoprenaline,6,1
+Isotretinoin,11,1
+Itraconazole,9,1
+Ivermectin,6,1
+Ketoconazole,15,2
+Ketorolac,6,1
+Lamivudine,3,1
+Lansoprazole,6,1
+Lead (II) acetate,11,1
+Lead(IV) acetate,12,1
+Leflunomide,10,1
+Letrozole,6,1
+Levamisole,6,1
+Lipopolysaccharide E. coli O55:B5,4,1
+Lomefloxacin,6,1
+Lomustine,11,1
+Lorazepam,5,1
+Lovastatin,12,1
+Manganese (II) chloride,6,1
+Mebendazole,2,1
+Mefenamic acid,6,1
+Megestrol acetate,6,1
+Melatonin,6,1
+Meloxicam,12,1
+Mestranol,6,1
+Methapyrilene,6,1
+Methimazole,3,1
+Methocarbamol,5,1
+Methotrexate,9,2
+Methyl salicylate,6,1
+Methyldopa,6,1
+Methylparaben,6,1
+Metronidazole,2,1
+Mevastatin,6,1
+Miconazole,10,1
+Mifepristone,12,1
+Mitomycin C,12,1
+Modafinil,12,1
+"N,N'-Diphenyl-p-phenylenediamine",6,1
+"N,N-Dimethylformamide",24,2
+N-Nitrosodiethylamine,11,1
+Nafenopin,6,1
+Naloxone,6,1
+Naproxen,6,1
+Nateglinide,6,1
+Neomycin,10,1
+Neostigmine bromide,6,1
+Nevirapine,12,1
+Niacin,6,1
+Niacinamide,6,1
+Nimesulide,12,1
+Nimetazepam,6,1
+Nisoldipine,12,1
+Nitrazepam,6,1
+Nitrofurantoin,6,1
+Norethindrone,18,2
+Norethindrone acetate,6,1
+Nystatin,6,1
+Olanzapine,6,1
+Omeprazole,11,1
+Oxfendazole,6,1
+Oxiconazole,6,1
+Oxymetazoline,5,1
+Oxymetholone,6,1
+Oxyquinoline,6,1
+Oxytetracycline,6,1
+Pantoprazole,6,1
+Pemoline,6,1
+Penicillamine,12,1
+Pentobarbital,6,1
+Pergolide,6,1
+Perhexiline,6,1
+Phenacetin,6,1
+Phenobarbital,11,2
+Phenothiazine,11,1
+Phenylhydrazine,3,1
+Piclamilast,9,1
+Pioglitazone,9,2
+Pirinixic acid,6,1
+Pralidoxime chloride,6,1
+Pramoxine,6,1
+Pravastatin,5,1
+Praziquantel,6,1
+Prednisolone,6,1
+Primaquine,6,1
+Primidone,5,1
+Procarbazine,9,1
+Progesterone,12,1
+Proglumide,6,1
+Promazine,6,1
+Promethazine,12,1
+Propylene glycol,6,1
+Propylthiouracil,6,1
+Pyrazinamide,6,1
+Pyrogallol,5,1
+Quetiapine,6,1
+Rabeprazole,6,1
+Raloxifene,18,2
+Rifabutin,5,1
+Rifampin,6,1
+Rofecoxib,16,2
+Roflumilast,8,1
+Rolipram,9,1
+Rosiglitazone,12,1
+Roxithromycin,6,1
+SCH-351591,6,1
+Safrole,5,1
+Salicylamide,5,1
+Salicylic acid,6,1
+Secobarbital,6,1
+Sertraline,6,1
+Sildenafil,23,2
+Simvastatin,8,1
+Sodium arsenite,24,1
+Sotalol,6,1
+Sparfloxacin,12,1
+Spironolactone,6,1
+Stanozolol,3,1
+Stavudine,3,1
+Streptozotocin,5,1
+Sulconazole,6,1
+Sulfadiazine,6,1
+Sulfadoxine,8,1
+Sulfaphenazole,6,1
+Sulfathiazole,3,1
+Sulfisoxazole,3,1
+Sulindac,17,2
+"TNF-alpha, rat",3,1
+Tacrine,6,1
+Tamoxifen,15,2
+Temafloxacin,6,1
+Terbinafine,6,1
+Testosterone,6,1
+Tetracycline,6,1
+Thalidomide,6,1
+Thiabendazole,3,1
+Thioguanine,12,2
+Ticlopidine,6,1
+Ticrynafen,6,1
+Tinidazole,6,1
+Tocainide,12,1
+Tolazamide,6,1
+Torsemide,12,1
+Tosufloxacin,6,1
+Tranilast,9,1
+Tretinoin,6,1
+Triacetin,6,1
+Trichloroacetic acid,6,1
+Trichloroethane,3,1
+Troglitazone,12,1
+Tropisetron,6,1
+Trovafloxacin,6,1
+Valproic acid,23,3
+Vecuronium bromide,6,1
+Venlafaxine,6,1
+Vinblastine,6,1
+Vinorelbine,6,1
+Warfarin,6,1
+Zaleplon,4,1
+Zidovudine,6,1
+Zileuton,6,1
+Zirconium(IV) chloride,3,1
+Zomepirac,12,1
+Zopiclone,5,1
+alpha-Naphthoflavone,8,1
+beta-Estradiol,12,1
+beta-Estradiol 3-benzoate,9,2
+beta-Naphthoflavone,15,2

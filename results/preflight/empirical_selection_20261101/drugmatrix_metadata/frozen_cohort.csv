@@ -1,0 +1,4 @@
+role,exploration_role,animals,compounds
+discovery,evaluation,407,45
+discovery,training,1089,136
+validation,reserved,601,77
