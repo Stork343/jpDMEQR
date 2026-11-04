@@ -6,4 +6,4 @@
 
 先登记完整计算及评价规则。JOINT 与经训练残差校准的均值模型完成所有系列的比较。JOINT 的探索评价损失更低时，计算同一系列的 exact quantile Lasso；同时优于这两类模型的系列进入 clustered quantile forest 及相关公开 RF 方法的比较。完整记录每项已尝试比较，未经计算的方法保持未完成状态。选择任何正式验证候选前，固定候选顺序、科学问题及比较方法。
 
-原论文已开展 GWAS；2025 年预印本 Predictive models of the genetic bases underlying budding yeast fitness in multiple environments 使用同一资源建立 RF 等预测模型，并分析环境及基因型交互。新的结论需要具体的分位数差异和预留菌株中的方法优势。基因名称、一般的环境交互关系和单个较低的探索损失均不足以完成采纳。当前配置的 manuscript_adoption 为 false。
+原论文已开展 GWAS；Segura Abá 等人在 2026 年发表于 NAR Genomics and Bioinformatics 的 Predictive models of the genetic bases underlying budding yeast fitness in multiple environments 使用同一资源建立 RF 等预测模型，并分析环境及基因型交互。坐标估计对应既定 profile 目标，按照培养条件与分位数报告差异及区间。新的结论需要具体的分位数差异和预留菌株中的方法优势。当前配置的 manuscript_adoption 为 false。
