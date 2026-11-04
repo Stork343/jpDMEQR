@@ -4,13 +4,15 @@ library(yaml)
 library(glmnet)
 
 args <- commandArgs(trailingOnly = TRUE)
-stopifnot(length(args) == 5L, args[1L] == "NaCl")
+stopifnot(length(args) == 5L)
+assay_name <- args[1L]
 method <- args[2L]
 run_id <- args[3L]
 implementation <- normalizePath(args[5L], mustWork = TRUE)
 config <- read_yaml(file.path(implementation, "config.yml"))
 base <- read_yaml(file.path(implementation, "base_config.yml"))
-base$conditions <- base$assays$NaCl
+stopifnot(assay_name %in% names(base$assays))
+base$conditions <- base$assays[[assay_name]]
 stopifnot(method %in% c("JOINT_DIRECTION", "POOLED_DIRECTION", "PRESS_RIDGE", "JOINT_OFFSET", "POOLED_OFFSET"))
 tau <- if (method == "PRESS_RIDGE") NA_real_ else as.numeric(args[4L])
 source(file.path(implementation, "prediction_core.R"))
@@ -21,12 +23,14 @@ source("research/score_validity_20261026/load_joint.R")
 source("research/joint_profile_manuscript_20261026/conic_search.R")
 if (startsWith(method, "POOLED_")) source("research/soynam_application_20261031/load_pooled_lp.R")
 panel <- proteome_panel(config$input_directory)
-panel$direction_recipes <- readRDS(file.path(config$output_root, "recipes.rds"))
-rows <- fread(file.path(config$input_directory, "NaCl", "discovery.csv"))
+recipe_path <- if (isTRUE(config$recipes_by_assay)) file.path(config$output_root, assay_name, "recipes.rds") else
+  file.path(config$output_root, "recipes.rds")
+panel$direction_recipes <- readRDS(recipe_path)
+rows <- fread(file.path(config$input_directory, assay_name, "discovery.csv"))
 training <- rows[exploration_role == "training"]
 evaluation <- rows[exploration_role == "evaluation"]
 stopifnot(all(rows$role == "discovery"), !length(intersect(training$strain_id, evaluation$strain_id)))
-directory <- file.path(config$output_root, "NaCl", paste0(method, "_", run_id))
+directory <- file.path(config$output_root, assay_name, paste0(method, "_", run_id))
 if (dir.exists(directory)) stop("运行目录已经存在")
 dir.create(directory, recursive = TRUE)
 progress <- function(stage, details = list()) {
@@ -54,6 +58,7 @@ feature_function <- if (endsWith(method, "OFFSET")) {
 started <- proc.time()[["elapsed"]]
 if (method == "PRESS_RIDGE") {
   recipe <- panel$direction_recipes$training
+  if (!is.null(recipe$direction_recipe)) recipe <- recipe$direction_recipe
   background <- recipe$background
   quantiles <- unlist(config$quantiles)
   oof <- background$leave_out_prediction[training$sample_id] * recipe$y_scale + recipe$y_center
@@ -67,8 +72,9 @@ if (method == "PRESS_RIDGE") {
 } else {
   solver_method <- if (startsWith(method, "JOINT_")) "JOINT" else "POOLED"
   prediction_function <- if (endsWith(method, "OFFSET")) ep_predict_offset else ep_predict
+  calibration_mode <- if (isTRUE(config$calibrated_selection)) "training" else "oof"
   fit <- ep_fit_prediction(training, evaluation, panel, solver_method, tau, base, progress, directory,
-                           recipe_function, feature_function, "strain_id", "condition", prediction_function)
+                           recipe_function, feature_function, "strain_id", "condition", prediction_function, calibration_mode)
 }
 elapsed <- proc.time()[["elapsed"]] - started
 saveRDS(fit, file.path(directory, "fit.rds"))

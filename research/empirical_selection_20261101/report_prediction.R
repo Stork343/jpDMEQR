@@ -1,4 +1,6 @@
-ep_report_prediction <- function(config, queue, panel, feature_function, output) {
+ep_report_prediction <- function(config, queue, panel, feature_function, output,
+                                 target_method = "JOINT", stage = "discovery",
+                                 feature_functions = NULL, prediction_functions = NULL) {
   stopifnot(nrow(queue) > 0L, all(queue$status == "completed"), !anyDuplicated(queue$directory))
   records <- checks <- selections <- settings <- list()
   for (j in seq_len(nrow(queue))) {
@@ -10,8 +12,11 @@ ep_report_prediction <- function(config, queue, panel, feature_function, output)
     stopifnot(status$status == "completed", !request$formal_validation_used, all(evaluation$role == "discovery"))
     fit <- readRDS(file.path(directory, "fit.rds"))
     stopifnot(!length(intersect(fit$recipe$training_strains, evaluation$strain_id)))
-    features <- feature_function(evaluation, panel, fit$recipe)
-    base <- drop(ep_predict(features, fit$beta))
+    current_feature <- if (is.null(feature_functions)) feature_function else feature_functions[[request$method]]
+    current_prediction <- if (is.null(prediction_functions)) ep_predict else prediction_functions[[request$method]]
+    stopifnot(is.function(current_feature), is.function(current_prediction))
+    features <- current_feature(evaluation, panel, fit$recipe)
+    base <- drop(current_prediction(features, fit$beta))
     saved <- data.table::fread(file.path(directory, "predictions.csv"))
     error <- 0
     for (k in seq_along(fit$quantiles)) {
@@ -27,7 +32,7 @@ ep_report_prediction <- function(config, queue, panel, feature_function, output)
     losses <- saved[, .(loss = mean(loss)), by = .(strain_id, tau)]
     losses[, `:=`(assay = assay_name, method = request$method)]
     records[[j]] <- losses
-    if (request$method == "JOINT") {
+    if (request$method == target_method) {
       active <- which(abs(fit$beta) > 1e-10)
       selections[[length(selections) + 1L]] <- data.table::data.table(assay = assay_name, tau = request$tau,
         variable = names(fit$beta)[active], coefficient_scaled = fit$beta[active],
@@ -44,18 +49,19 @@ ep_report_prediction <- function(config, queue, panel, feature_function, output)
   set.seed(20261105L)
   comparisons <- list()
   for (assay_name in unique(queue$trait)) {
-    for (value in sort(unique(losses[assay == assay_name & method == "JOINT"]$tau))) {
+    for (value in sort(unique(losses[assay == assay_name & method == target_method]$tau))) {
       wide <- data.table::dcast(losses[assay == assay_name & tau == value], strain_id ~ method, value.var = "loss")
       stopifnot(!anyNA(wide), nrow(wide) > 1L)
       weights <- rmultinom(10000L, nrow(wide), rep(1 / nrow(wide), nrow(wide))) / nrow(wide)
-      for (method_name in setdiff(names(wide), c("strain_id", "JOINT"))) {
+      for (method_name in setdiff(names(wide), c("strain_id", target_method))) {
         reference <- wide[[method_name]]
-        difference <- reference - wide$JOINT
+        difference <- reference - wide[[target_method]]
         bootstrap <- drop(crossprod(weights, difference)) / drop(crossprod(weights, reference))
         comparisons[[length(comparisons) + 1L]] <- data.table::data.table(assay = assay_name, tau = value,
-          comparator = method_name, strains = nrow(wide), joint_loss = mean(wide$JOINT), comparator_loss = mean(reference),
+          target_method = target_method, comparator = method_name, strains = nrow(wide),
+          joint_loss = mean(wide[[target_method]]), comparator_loss = mean(reference),
           relative_gain = mean(difference) / mean(reference), lower = quantile(bootstrap, 0.025),
-          upper = quantile(bootstrap, 0.975), manuscript_adoption = FALSE)
+          upper = quantile(bootstrap, 0.975), phase = stage, manuscript_adoption = FALSE)
       }
     }
   }
@@ -67,7 +73,7 @@ ep_report_prediction <- function(config, queue, panel, feature_function, output)
   data.table::fwrite(data.table::rbindlist(settings, fill = TRUE), file.path(output, "settings.csv"))
   summary <- losses[, .(strains = .N, loss = mean(loss), se = sd(loss) / sqrt(.N)), by = .(assay, method, tau)]
   data.table::fwrite(summary, file.path(output, "summary.csv"))
-  jsonlite::write_json(list(stage = "discovery", completed_runs = nrow(queue), formal_validation_used = FALSE,
+  jsonlite::write_json(list(stage = stage, target_method = target_method, completed_runs = nrow(queue), formal_validation_used = FALSE,
                            manuscript_adoption = FALSE), file.path(output, "status.json"), auto_unbox = TRUE, pretty = TRUE)
   comparison
 }

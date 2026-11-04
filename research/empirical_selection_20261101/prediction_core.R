@@ -120,7 +120,9 @@ ep_calibrate <- function(rows, prediction, tau, cluster_column, calibration_colu
 
 ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, progress, directory,
                               recipe_function, feature_function, cluster_column, calibration_column = NULL,
-                              prediction_function = ep_predict) {
+                              prediction_function = ep_predict, calibration_mode = "oof") {
+  stopifnot(calibration_mode %in% c("oof", "training"))
+  if (calibration_mode == "training") stopifnot(method != "ENET")
   folds <- sort(unique(rows$inner_fold))
   recipes <- lapply(folds, function(fold) recipe_function(rows[inner_fold != fold], panel, config))
   counts <- vapply(folds, function(fold) uniqueN(rows[inner_fold != fold][[cluster_column]]), integer(1))
@@ -136,6 +138,16 @@ ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
     gc()
     fit <- ep_path(training, method, tau, config, maximum)
     predicted <- as.matrix(prediction_function(validation, fit$beta))
+    if (calibration_mode == "training") {
+      fitted_prediction <- as.matrix(prediction_function(training, fit$beta))
+      validation_groups <- if (is.null(calibration_column)) rep("all", nrow(predicted)) else
+        as.character(rows[inner_fold == folds[f]][[calibration_column]])
+      for (j in seq_len(ncol(predicted))) {
+        offset <- ep_calibrate(rows[inner_fold != folds[f]], fitted_prediction[, j], tau,
+                               cluster_column, calibration_column)
+        predicted[, j] <- predicted[, j] + offset[validation_groups]
+      }
+    }
     if (f == 1L) {
       grid <- fit$grid
       oof <- matrix(NA_real_, nrow(rows), ncol(predicted))
@@ -161,8 +173,10 @@ ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
   final_diagnostics <- final$diagnostics
   names(beta) <- colnames(training$X)
   quantiles <- if (method == "ENET") unlist(config$quantiles) else tau
+  calibration_prediction <- if (calibration_mode == "oof") oof[, choice] else
+    drop(prediction_function(training, beta))
   calibration <- lapply(quantiles, function(value)
-    ep_calibrate(rows, oof[, choice], value, cluster_column, calibration_column))
+    ep_calibrate(rows, calibration_prediction, value, cluster_column, calibration_column))
   rm(training, final)
   gc()
   test <- feature_function(evaluation, panel, recipe)
@@ -172,5 +186,5 @@ ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
   stopifnot(all(is.finite(prediction)))
   list(beta = beta, recipe = recipe, prediction = prediction, quantiles = quantiles,
        calibration = calibration, choice = choice, grid = grid, loss = loss,
-       oof = oof[, choice], final_diagnostics = final_diagnostics)
+       oof = oof[, choice], final_diagnostics = final_diagnostics, calibration_mode = calibration_mode)
 }

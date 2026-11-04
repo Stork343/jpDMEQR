@@ -1,0 +1,9 @@
+drug,clinical_numeric_records,full_file_maximum,reference_file_maximum,matched_full_values_above_100_with_reference_100,other_matched_numeric_differences,records_equal_to_full_file_maximum
+FPV,2006,400.0,100.0,110,0,21
+ATV,1491,700.0,100.0,174,0,23
+IDV,2052,500.0,100.0,111,0,15
+LPV,1796,500.0,100.0,251,0,33
+NFV,2087,600.0,100.0,190,0,38
+SQV,2050,1000.0,100.0,240,0,71
+TPV,1234,800.0,100.0,42,0,2
+DRV,1001,580.0,100.0,62,0,1

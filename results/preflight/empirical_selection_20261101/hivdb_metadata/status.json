@@ -1,0 +1,14 @@
+{
+  "stage": "metadata_audit",
+  "source_updated": "2026-04-22",
+  "reference_isolates": 2171,
+  "full_records": 4350,
+  "clinical_reference_matched_records": 2125,
+  "matched_patients": 2030,
+  "unambiguous_complete_sequence_patients": 807,
+  "unambiguous_complete_B_patients": 748,
+  "instrument_quantification_limit_flags_in_export": false,
+  "association_fitted": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
