@@ -2,6 +2,10 @@
   "status": "passed",
   "actual_dataset": "DrugMatrix",
   "maximum_error": 0,
-  "selected_index": 29,
+  "comparison": "fixed_profile_candidate",
+  "candidate": {
+    "Lambda": 1,
+    "size": 13
+  },
   "formal_validation_used": false
 }

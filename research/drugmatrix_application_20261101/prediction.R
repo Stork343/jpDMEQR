@@ -18,7 +18,7 @@ dm_recipe <- function(rows, panel) {
   y_center <- sum(rows$y * weight)
   y_scale <- sqrt(sum((rows$y - y_center)^2 * weight))
   stopifnot(y_scale > 0, is.finite(y_scale), low_columns[1L] == 1L)
-  list(variables = colnames(raw)[keep], medians = medians[keep],
+  list(variables = colnames(raw)[keep], search_dimension = sum(keep), medians = medians[keep],
        center = center[keep], scale = scale[keep], low_columns = low_columns,
        y_center = y_center, y_scale = y_scale, training_compounds = sort(unique(rows$compound_id)))
 }
@@ -52,8 +52,8 @@ dm_path <- function(features, method, tau, config, maximum) {
     fits <- lapply(config$elastic_net_alpha, function(alpha) yeast_enet_path(features, alpha, config))
     grid <- rbindlist(lapply(config$elastic_net_alpha, function(alpha)
       data.table(alpha = alpha, penalty_index = seq_len(config$elastic_net_path_length))))
-    list(beta = do.call(cbind, lapply(fits, stats::coef)), grid = grid,
-         diagnostics = lapply(fits, function(fit) list(jerr = fit$jerr, lambda = fit$lambda)))
+    list(beta = do.call(cbind, lapply(fits, `[[`, "beta")), grid = grid,
+         diagnostics = lapply(fits, `[[`, "diagnostics"))
   } else {
     stopifnot(method == "POOLED")
     fit <- yeast_pooled_path(features, tau)
@@ -74,7 +74,7 @@ dm_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
          validation = dm_features(rows[inner_fold == fold], panel, recipe))
   })
   maximum <- min(vapply(inner, function(fold)
-    max(0, floor(fold$train$n / log(fold$train$n)) - sum(fold$train$penalty_factor == 0)), numeric(1)))
+    min(sum(fold$train$penalty_factor > 0), floor(fold$train$n / log(fold$train$n))), numeric(1)))
   loss <- NULL
   oof <- NULL
   for (f in seq_along(folds)) {

@@ -7,6 +7,71 @@ ep_predict <- function(features, beta) {
   features$X %*% beta * features$recipe$y_scale + features$recipe$y_center
 }
 
+ep_mean_path <- function(features, alpha, config, lambda = NULL) {
+  unpenalized <- which(features$penalty_factor == 0)
+  penalized <- which(features$penalty_factor == 1)
+  stopifnot(identical(unpenalized, seq_along(unpenalized)), length(penalized) > 0L,
+            length(unpenalized) + length(penalized) == ncol(features$X),
+            all(features$X[, 1L] == 1), all(features$weight > 0))
+  N <- nrow(features$X)
+  p <- length(penalized)
+  model_variables <- ncol(features$X) - 1L
+  if (alpha > 0) {
+    native_lambda <- if (is.null(lambda)) NULL else lambda * p / model_variables
+    fit <- glmnet::glmnet(features$X[, -1L, drop = FALSE], features$y,
+      weights = features$weight, family = "gaussian", alpha = alpha,
+      lambda = native_lambda, nlambda = as.integer(config$elastic_net_path_length),
+      lambda.min.ratio = config$elastic_net_lambda_min_ratio,
+      penalty.factor = features$penalty_factor[-1L], intercept = TRUE, standardize = FALSE,
+      thresh = 1e-13, maxit = 1000000L)
+    stopifnot(fit$jerr == 0L, ncol(fit$beta) == config$elastic_net_path_length)
+    return(list(beta = stats::coef(fit), lambda = fit$lambda * model_variables / p,
+      diagnostics = list(solver = "glmnet", alpha = alpha, jerr = fit$jerr,
+                         native_lambda = fit$lambda, passes = fit$npasses)))
+  }
+  stopifnot(alpha == 0)
+  weight <- features$weight / sum(features$weight)
+  root_weight <- sqrt(N * weight)
+  low <- features$X[, unpenalized, drop = FALSE] * root_weight
+  decomposition <- qr(low)
+  stopifnot(decomposition$rank == length(unpenalized))
+  weighted_X <- features$X[, penalized, drop = FALSE] * root_weight
+  low_X <- qr.coef(decomposition, weighted_X)
+  low_y <- drop(qr.coef(decomposition, features$y * root_weight))
+  weighted_X <- qr.resid(decomposition, weighted_X)
+  weighted_y <- drop(qr.resid(decomposition, features$y * root_weight))
+  if (is.null(lambda)) {
+    if (!is.null(config$ridge_variance_ratio_max)) {
+      lambda <- p / features$n * exp(seq(log(config$ridge_variance_ratio_max),
+        log(config$ridge_variance_ratio_min), length.out = config$elastic_net_path_length))
+    } else {
+      maximum <- max(abs(crossprod(weighted_X, weighted_y))) / (N * 0.001)
+      stopifnot(is.finite(maximum), maximum > 0)
+      lambda <- maximum * exp(seq(0, log(config$elastic_net_lambda_min_ratio),
+                                   length.out = config$elastic_net_path_length))
+    }
+  }
+  stopifnot(length(lambda) == config$elastic_net_path_length, all(is.finite(lambda)), all(lambda > 0))
+  kernel <- tcrossprod(weighted_X) / N
+  decomposition <- eigen(kernel, symmetric = TRUE)
+  eigen_tolerance <- 10 * max(N, p) * .Machine$double.eps * max(1, decomposition$values[1L])
+  stopifnot(min(decomposition$values) >= -eigen_tolerance)
+  values <- pmax(decomposition$values, 0)
+  projected_y <- drop(crossprod(decomposition$vectors, weighted_y))
+  inverse_scores <- outer(projected_y, rep(1, length(lambda))) / outer(values, lambda, "+")
+  dual <- decomposition$vectors %*% inverse_scores
+  system_error <- apply(abs(kernel %*% dual + sweep(dual, 2L, lambda, "*") - weighted_y), 2L, max)
+  stopifnot(max(system_error) < 1e-8 * max(1, max(abs(weighted_y))))
+  high_beta <- crossprod(weighted_X, dual) / N
+  low_beta <- matrix(low_y, length(low_y), length(lambda)) - low_X %*% high_beta
+  beta <- rbind(Matrix::Matrix(low_beta, sparse = TRUE), Matrix::Matrix(high_beta, sparse = TRUE))
+  rownames(beta) <- colnames(features$X)
+  colnames(beta) <- paste0("s", seq_along(lambda) - 1L)
+  list(beta = beta, lambda = lambda,
+       diagnostics = list(solver = "weighted_qr_kernel_ridge", alpha = alpha, lambda = lambda,
+         linear_system_error = system_error, minimum_kernel_eigenvalue = min(decomposition$values)))
+}
+
 ep_path <- function(features, method, tau, config, maximum, setting = NULL) {
   if (method == "JOINT") {
     lambdas <- if (is.null(setting)) unlist(config$working_penalties) else setting$Lambda
@@ -23,27 +88,11 @@ ep_path <- function(features, method, tau, config, maximum, setting = NULL) {
   } else if (method == "ENET") {
     glmnet::glmnet.control(fdev = 0, devmax = 1)
     alphas <- if (is.null(setting)) unlist(config$elastic_net_alpha) else setting$alpha
-    fits <- lapply(alphas, function(alpha) {
-      lambda <- NULL
-      if (alpha == 0 && !is.null(config$ridge_variance_ratio_max)) {
-        penalized <- sum(features$penalty_factor > 0)
-        lambda <- penalized^2 / ((ncol(features$X) - 1L) * features$n) * exp(seq(
-          log(config$ridge_variance_ratio_max), log(config$ridge_variance_ratio_min),
-          length.out = as.integer(config$elastic_net_path_length)))
-      }
-      stopifnot(all(features$X[, 1L] == 1), features$penalty_factor[1L] == 0)
-      fit <- glmnet::glmnet(features$X[, -1L, drop = FALSE], features$y, weights = features$weight,
-        family = "gaussian", alpha = alpha, nlambda = as.integer(config$elastic_net_path_length),
-        lambda = lambda,
-        lambda.min.ratio = config$elastic_net_lambda_min_ratio, penalty.factor = features$penalty_factor[-1L],
-        intercept = TRUE, standardize = FALSE, thresh = 1e-13, maxit = 1000000L)
-      stopifnot(fit$jerr == 0L, ncol(fit$beta) == config$elastic_net_path_length)
-      fit
-    })
+    fits <- lapply(alphas, function(alpha) ep_mean_path(features, alpha, config))
     grid <- rbindlist(lapply(alphas, function(alpha)
       data.table(alpha = alpha, penalty_index = seq_len(config$elastic_net_path_length))))
-    beta <- do.call(cbind, lapply(fits, stats::coef))
-    diagnostics <- lapply(fits, function(fit) list(jerr = fit$jerr, lambda = fit$lambda))
+    beta <- do.call(cbind, lapply(fits, `[[`, "beta"))
+    diagnostics <- lapply(fits, `[[`, "diagnostics")
     chosen <- if (is.null(setting)) seq_len(ncol(beta)) else setting$penalty_index
   } else {
     stopifnot(method == "POOLED")
@@ -75,7 +124,7 @@ ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
   recipes <- lapply(folds, function(fold) recipe_function(rows[inner_fold != fold], panel, config))
   counts <- vapply(folds, function(fold) uniqueN(rows[inner_fold != fold][[cluster_column]]), integer(1))
   maximum <- min(vapply(seq_along(folds), function(j)
-    max(0, floor(counts[j] / log(counts[j])) - length(recipes[[j]]$low_columns)), numeric(1)))
+    min(recipes[[j]]$search_dimension, floor(counts[j] / log(counts[j]))), numeric(1)))
   loss <- NULL
   oof <- NULL
   for (f in seq_along(folds)) {

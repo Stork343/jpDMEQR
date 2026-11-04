@@ -1,5 +1,6 @@
 phase: discovery
 manuscript_adoption: false
+joint_run_prefix: prediction
 drugs: [Dabrafenib, PLX-4720, HG6-64-1, SB590885, AZ628]
 quantiles: [0.25, 0.5, 0.75]
 unit: patient_id

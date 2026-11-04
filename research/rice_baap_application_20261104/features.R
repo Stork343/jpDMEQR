@@ -73,7 +73,7 @@ rice_recipe <- function(rows, panel, config) {
   y_scale <- sqrt(sum((rows$y - y_center)^2 * weight) / n)
   interaction_scale <- sqrt(0.25 - interaction_center^2)
   stopifnot(is.finite(y_scale), y_scale > 0, all(interaction_scale > 1e-8), low_columns[1L] == 1L)
-  list(panel_key = keys, markers = markers, center = center, scale = scale,
+  list(panel_key = keys, markers = markers, search_dimension = 2L * p, center = center, scale = scale,
        interaction_center = interaction_center, interaction_scale = interaction_scale,
        loadings = loadings, low_columns = low_columns, y_center = y_center,
        y_scale = y_scale, training_accessions = ids)

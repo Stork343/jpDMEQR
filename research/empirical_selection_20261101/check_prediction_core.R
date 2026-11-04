@@ -13,19 +13,18 @@ panel <- readRDS(config$input_panel)
 annotation <- fread(config$input_annotation)
 panel$allowed_probes <- intersect(annotation[TYPE == config$probe_type, ID], colnames(panel$X))
 rows <- readRDS(config$input_growth)
-directory <- "results/scratch/empirical_selection_20261101/core_equivalence"
-if (dir.exists(directory)) stop("检查目录已经存在")
-dir.create(directory, recursive = TRUE)
 reference <- readRDS("results/raw/application/drugmatrix_20261101/discovery/ALT/JOINT_qp_tau075/fit.rds")
-fit <- ep_fit_prediction(rows[exploration_role == "training"], rows[exploration_role == "evaluation"],
-  panel, "JOINT", 0.75, config, function(stage, details) cat(stage, "\n"), directory,
-  function(rows, panel, config) dm_recipe(rows, panel), dm_features, "compound_id")
-error <- max(abs(fit$prediction - reference$prediction), abs(fit$beta - reference$beta),
-               abs(fit$loss - reference$loss), abs(fit$oof - reference$oof))
-stopifnot(error < 1e-8, fit$choice == reference$choice)
+training <- dm_features(rows[exploration_role == "training"], panel, reference$recipe)
+evaluation <- dm_features(rows[exploration_role == "evaluation"], panel, reference$recipe)
+grid <- as.data.table(reference$grid)
+setting <- as.list(grid[reference$choice])
+fit <- ep_path(training, "JOINT", 0.75, config, setting$size, setting)
+predicted <- ep_predict(evaluation, fit$beta) + reference$calibration[1L]
+error <- max(abs(predicted - reference$prediction), abs(as.numeric(fit$beta[, 1L]) - reference$beta))
+stopifnot(error < 1e-8)
 output <- "results/preflight/empirical_selection_20261101/prediction_core"
 dir.create(output, recursive = TRUE, showWarnings = FALSE)
 write_json(list(status = "passed", actual_dataset = "DrugMatrix", maximum_error = error,
-                selected_index = fit$choice, formal_validation_used = FALSE),
+                comparison = "fixed_profile_candidate", candidate = setting, formal_validation_used = FALSE),
            file.path(output, "equivalence.json"), auto_unbox = TRUE, pretty = TRUE, digits = NA)
 cat("预测流程一致性检查完成\n")

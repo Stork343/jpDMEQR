@@ -16,6 +16,7 @@ checks <- list()
 for (directory in directories) {
   request <- read_json(file.path(directory, "request.json"), simplifyVector = TRUE)
   if (request$method == "ENET" && basename(directory) != paste0("ENET_", config$mean_run_id)) next
+  if (request$method == "JOINT" && !startsWith(basename(directory), paste0("JOINT_", config$joint_run_prefix, "_"))) next
   status <- read_json(file.path(directory, "status.json"), simplifyVector = TRUE)
   stopifnot(status$status == "completed", !request$formal_validation_used)
   fit <- readRDS(file.path(directory, "fit.rds"))

@@ -9,6 +9,7 @@ method <- args[2L]
 run_id <- args[3L]
 implementation_directory <- normalizePath(args[5L], mustWork = TRUE)
 source(file.path(implementation_directory, "prediction.R"))
+if (method == "ENET") source(file.path(implementation_directory, "prediction_core.R"))
 stopifnot(method %in% c("JOINT", "ENET", "POOLED", "FOREST"), grepl("^[A-Za-z0-9_]+$", run_id))
 if (method %in% c("POOLED", "FOREST")) source(file.path(implementation_directory, "comparators.R"))
 config <- read_yaml(file.path(implementation_directory, "config.yml"))

@@ -18,8 +18,7 @@ drug_joint_prediction <- function(rows, evaluation, expression, config, tau, pro
   maximum <- min(vapply(folds, function(fold) {
     current <- rows[inner_fold != fold]
     n <- uniqueN(current$patient_id)
-    d0 <- qr(drug_clinical(current))$rank * config$dose_basis$degrees_of_freedom
-    max(0L, floor(n / log(n)) - d0)
+    floor(n / log(n))
   }, numeric(1)))
   sizes <- 0:as.integer(maximum)
   lambdas <- unlist(config$joint_prediction$Lambda)
@@ -32,6 +31,7 @@ drug_joint_prediction <- function(rows, evaluation, expression, config, tau, pro
     recipe <- drug_recipe(training_rows, expression, config)
     training <- drug_features(training_rows, expression, recipe)
     validation <- drug_features(validation_rows, expression, recipe)
+    stopifnot(sum(training$penalty_factor > 0) >= maximum)
     for (l in seq_along(lambdas)) {
       progress("joint_inner_fit", list(fold = fold, Lambda = lambdas[l],
                training_patients = training$n, variables = ncol(training$X), additions = maximum))
