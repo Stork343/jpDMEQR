@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "accessions": 970,
+  "source_variants": 10709949,
+  "training_union_variants": 1965709,
+  "checked_calls": 768,
+  "encoding": "PLINK_dosage_equals_twice_author_binary_code",
+  "allele_labels": "ONE_and_ZERO_identify_source_binary_states",
+  "outcomes_used_for_variant_filter": false,
+  "formal_validation_used": false
+}

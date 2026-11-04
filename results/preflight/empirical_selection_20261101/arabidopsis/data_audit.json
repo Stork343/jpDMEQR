@@ -1,0 +1,15 @@
+{
+  "source_FT10_records": 1163,
+  "source_FT16_records": 1123,
+  "source_genotyped_accessions": 1135,
+  "matched_accessions": 970,
+  "records": 1942,
+  "measurement": "published_mean_of_flowering_time_replicates",
+  "original_protocol_replicates": 4,
+  "genotype_source": "author_imputed_binary_SNP_matrix",
+  "source_units_retained_for_accession_8424": true,
+  "maximum_cluster_size": 4,
+  "response_imputed": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

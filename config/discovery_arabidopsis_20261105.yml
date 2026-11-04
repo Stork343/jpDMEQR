@@ -1,0 +1,33 @@
+phase: discovery
+manuscript_adoption: false
+source: Arabidopsis_1001_Genomes_2016
+input_directory: data/derived/arabidopsis_20261105
+output_root: results/raw/application/arabidopsis_20261105/discovery
+response: published_accession_mean_days_to_first_open_flower
+conditions: [FT10, FT16]
+cluster: accession_id
+role_seed: 20261105
+discovery_fraction: 0.70
+exploration_training_fraction: 0.75
+inner_folds: 3
+decision_quantile: 0.25
+quantiles: [0.25, 0.5, 0.75]
+marker_filter:
+  training_maf_minimum: 0.05
+  ld_window_kb: 250
+  ld_r_squared: 0.2
+genotype_panel_subdirectory: ld20
+population_components: 5
+genetic_design: SNP_and_SNP_by_temperature_interactions
+adjustment: temperature_five_PCs_and_PC_by_temperature_interactions
+nuisance_design: accession_intercept
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+calibration: training_fold_residual_quantile_by_temperature
+response_imputation: none
+formal_validation: after_question_and_comparator_freeze
