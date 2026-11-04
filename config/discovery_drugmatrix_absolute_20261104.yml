@@ -1,0 +1,18 @@
+phase: discovery
+manuscript_adoption: false
+input_panel: data/derived/drugmatrix_20261101/panel.rds
+input_growth: data/derived/drugmatrix_20261101/discovery.rds
+input_annotation: data/derived/drugmatrix_20261101/probe_annotation.csv
+output_root: results/raw/application/drugmatrix_absolute_20261104
+response: observed_ALT_U_per_L
+decision_quantile: 0.75
+quantiles: [0.25, 0.5, 0.75]
+normalization: training_compound_weighted_median_and_normal_equivalent_IQR
+inner_folds: 3
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+comparators: [raw_quantile_lasso, exponentiated_log_quantile_lasso, exponentiated_log_elastic_net]
+calibration: training_fold_residual_quantile
+evaluation: compound_mean_pinball_loss_in_U_per_L
+sample_roles: shared_with_drugmatrix_20261101
+formal_validation: after_question_and_comparator_freeze
