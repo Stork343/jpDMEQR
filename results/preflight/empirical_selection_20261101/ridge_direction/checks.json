@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "coefficient_error": 0,
+  "system_error": 6.10622663543836e-15,
+  "minimum_leave_out_margin": 0.0798057992090973,
+  "actual_training_clusters": 60,
+  "formal_validation_used": false
+}
