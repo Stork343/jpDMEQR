@@ -1,0 +1,3 @@
+assay,conditions,variables,interaction_error,contrast_error,maximum_gap
+Anisomycin,3,173025,0,1.11022302462516e-16,2.16904272321017e-12
+Caffeine,2,115350,0,0,3.59268170768701e-13

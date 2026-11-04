@@ -1,0 +1,34 @@
+{
+  "assays": {
+    "Anisomycin": [
+      "YPDANISO10",
+      "YPDANISO20",
+      "YPDANISO50"
+    ],
+    "Caffeine": [
+      "YPDCAFEIN40",
+      "YPDCAFEIN50"
+    ],
+    "Cycloheximide": [
+      "YPDCHX05",
+      "YPDCHX1"
+    ],
+    "Formamide": [
+      "YPDFORMAMIDE4",
+      "YPDFORMAMIDE5"
+    ],
+    "Temperature": [
+      "YPD40",
+      "YPD42"
+    ],
+    "Benomyl": [
+      "YPDBENOMYL200",
+      "YPDBENOMYL500"
+    ]
+  },
+  "roles_reused_without_changes": true,
+  "formal_validation_used": false,
+  "manuscript_adoption": false,
+  "minimum_cluster_size": 2,
+  "maximum_cluster_size": 3
+}

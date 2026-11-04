@@ -43,11 +43,10 @@ y1011_scores <- function(ids, panel, recipe) {
   result
 }
 
-y1011_recipe <- function(rows, panel, config) {
-  ids <- sort(unique(rows$strain_id))
+y1011_genomic_recipe <- function(ids, panel, config) {
+  ids <- sort(unique(ids))
   keys <- names(panel$groups)[vapply(panel$groups, function(group) identical(sort(group), ids), logical(1))]
-  stopifnot(length(keys) == 1L, all(table(rows$strain_id) == 2L),
-            all(rows[, .(value = sum(high_salt)), by = strain_id]$value == 1L))
+  stopifnot(length(keys) == 1L)
   markers <- colnames(panel$beds[[keys]])
   p <- length(markers)
   n <- length(ids)
@@ -74,8 +73,6 @@ y1011_recipe <- function(rows, panel, config) {
     loadings[j, ] <- sweep(crossprod(G, eig$vectors[, seq_len(count), drop = FALSE]),
                            2L, eig$values[seq_len(count)] * p, "/") * sqrt(n - 1L)
   }
-  scores <- eig$vectors[, seq_len(count), drop = FALSE] * sqrt(n - 1L)
-  dimnames(scores) <- list(ids, colnames(loadings))
   C <- panel$copy[ids, , drop = FALSE]
   observed <- colMeans(!is.na(C)) >= config$copy_observed_fraction_minimum
   C <- C[, observed, drop = FALSE]
@@ -86,17 +83,27 @@ y1011_recipe <- function(rows, panel, config) {
   c_scale <- sqrt(colMeans(sweep(C, 2L, c_center, "-")^2))
   variable <- is.finite(c_scale) & c_scale > 1e-8
   copy_names <- colnames(C)[variable]
+  stopifnot(length(copy_names) > 0L)
+  list(panel_key = keys, markers = markers, copy_names = copy_names,
+       base_dimension = p + length(copy_names), g_center = g_center, g_scale = g_scale,
+       c_median = c_median[variable], c_center = c_center[variable], c_scale = c_scale[variable],
+       loadings = loadings, training_strains = ids)
+}
+
+y1011_recipe <- function(rows, panel, config) {
+  ids <- sort(unique(rows$strain_id))
+  stopifnot(all(table(rows$strain_id) == 2L),
+            all(rows[, .(value = sum(high_salt)), by = strain_id]$value == 1L))
+  recipe <- y1011_genomic_recipe(ids, panel, config)
+  scores <- y1011_scores(ids, panel, recipe)
   low <- y1011_low(rows, scores)
   decomposition <- qr(low)
   low_columns <- sort(decomposition$pivot[seq_len(decomposition$rank)])
   y_center <- mean(rows$y)
   y_scale <- sqrt(mean((rows$y - y_center)^2))
-  stopifnot(length(copy_names) > 0L, is.finite(y_scale), y_scale > 0, low_columns[1L] == 1L)
-  list(panel_key = keys, markers = markers, copy_names = copy_names,
-       search_dimension = 2L * (p + length(copy_names)), g_center = g_center, g_scale = g_scale,
-       c_median = c_median[variable], c_center = c_center[variable], c_scale = c_scale[variable],
-       loadings = loadings, low_columns = low_columns, y_center = y_center, y_scale = y_scale,
-       training_strains = ids)
+  stopifnot(is.finite(y_scale), y_scale > 0, low_columns[1L] == 1L)
+  c(recipe, list(search_dimension = 2L * recipe$base_dimension,
+                 low_columns = low_columns, y_center = y_center, y_scale = y_scale))
 }
 
 y1011_features <- function(rows, panel, recipe) {

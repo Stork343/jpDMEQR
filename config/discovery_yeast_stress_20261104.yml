@@ -1,0 +1,29 @@
+phase: discovery
+manuscript_adoption: false
+input_directory: data/derived/yeast_stress_20261104
+genomic_directory: data/derived/yeast_1011_20261104
+output_root: results/raw/application/yeast_stress_20261104/discovery
+roles: inherited_yeast_1011_before_association_fitting
+decision_quantile: 0.25
+quantiles: [0.25, 0.5, 0.75]
+assays:
+  Anisomycin: [YPDANISO10, YPDANISO20, YPDANISO50]
+  Caffeine: [YPDCAFEIN40, YPDCAFEIN50]
+  Cycloheximide: [YPDCHX05, YPDCHX1]
+  Formamide: [YPDFORMAMIDE4, YPDFORMAMIDE5]
+  Temperature: [YPD40, YPD42]
+  Benomyl: [YPDBENOMYL200, YPDBENOMYL500]
+population_components: 5
+copy_observed_fraction_minimum: 0.90
+nuisance_design: strain_intercept
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+advancement:
+  exact_quantile_lasso: positive_discovery_gain_over_calibrated_mean
+  quantile_forest_and_published_RF: positive_discovery_gain_over_both_linear_comparators
+  formal_validation: after_question_and_comparator_freeze
