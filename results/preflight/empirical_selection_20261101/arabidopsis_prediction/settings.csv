@@ -1,0 +1,6 @@
+method,tau,runtime_sec,Lambda,size,alpha,penalty_index
+JOINT,0.25,459.92,2,1,,
+ENET,,529.267,,,0,100
+POOLED,0.25,939.116,,,,8
+JOINT,0.5,442.085,2,15,,
+JOINT,0.75,443.909,2,2,,

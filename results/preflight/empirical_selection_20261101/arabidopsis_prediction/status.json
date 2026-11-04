@@ -1,0 +1,7 @@
+{
+  "stage": "discovery",
+  "completed_runs": 5,
+  "decision_quantile": 0.25,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
