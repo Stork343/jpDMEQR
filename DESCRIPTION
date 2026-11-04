@@ -30,6 +30,7 @@ Imports:
     utils
 Suggests:
     AnnotationDbi,
+    BEDMatrix,
     BGLR,
     Biobase,
     CVXR,

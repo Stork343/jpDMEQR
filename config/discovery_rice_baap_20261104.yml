@@ -1,0 +1,37 @@
+phase: discovery
+manuscript_adoption: false
+source: Norton_2021_BAAP_grain_cadmium
+input_directory: data/derived/rice_baap_20261104
+output_root: results/raw/application/rice_baap_20261104/discovery
+response: log_cultivar_irrigation_year_mean_cadmium_ug_per_kg
+response_source: published_mean_of_at_least_three_field_replicates
+cluster: accession_id
+role_seed: 20261104
+discovery_fraction: 0.70
+exploration_training_fraction: 0.75
+inner_folds: 3
+decision_quantile: 0.75
+quantiles: [0.25, 0.5, 0.75]
+marker_filter:
+  training_maf_minimum: 0.05
+  training_missing_fraction_maximum: 0.10
+  ld_window_kb: 250
+  ld_r_squared: 0.8
+  ld_pruning_uses_outcomes: false
+population_components: 3
+genetic_design: marker_main_effects_and_marker_by_irrigation_interactions
+adjustment: environment_indicators_population_components_and_component_by_irrigation_interactions
+nuisance_design: accession_intercept_and_centered_year
+working_penalties: [0.5, 1, 2]
+solver: clarabel_selected_qp
+gap_tolerance: 1.0e-8
+comparators: [elastic_net, exact_quantile_lasso, clustered_quantile_forest]
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+calibration: training_fold_residual_quantile_by_environment
+evaluation: accession_mean_pinball_loss
+response_imputation: none
+formal_validation: after_question_and_comparator_freeze

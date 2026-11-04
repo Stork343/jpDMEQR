@@ -1,0 +1,15 @@
+{
+  "source_cultivars": 300,
+  "genotyped_accessions": 260,
+  "matched_accessions": 248,
+  "observed_matched_records": 898,
+  "source_missing_records": 194,
+  "minimum_cluster_size": 1,
+  "maximum_cluster_size": 4,
+  "repeated_accessions": 246,
+  "measurement_unit": "published_cultivar_irrigation_year_mean_of_at_least_three_field_replicates",
+  "concentration_unit": "microgram_per_kilogram",
+  "response_imputed": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

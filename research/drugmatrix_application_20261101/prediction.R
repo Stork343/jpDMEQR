@@ -52,7 +52,7 @@ dm_path <- function(features, method, tau, config, maximum) {
     fits <- lapply(config$elastic_net_alpha, function(alpha) yeast_enet_path(features, alpha, config))
     grid <- rbindlist(lapply(config$elastic_net_alpha, function(alpha)
       data.table(alpha = alpha, penalty_index = seq_len(config$elastic_net_path_length))))
-    list(beta = as.matrix(do.call(cbind, lapply(fits, function(fit) fit$beta))), grid = grid,
+    list(beta = do.call(cbind, lapply(fits, stats::coef)), grid = grid,
          diagnostics = lapply(fits, function(fit) list(jerr = fit$jerr, lambda = fit$lambda)))
   } else {
     stopifnot(method == "POOLED")
@@ -103,7 +103,7 @@ dm_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
   progress("training_fit", list(compounds = training$n, selected_index = choice))
   final <- dm_path(training, method, tau, config, maximum)
   stopifnot(identical(as.list(final$grid), as.list(grid)))
-  beta <- final$beta[, choice]
+  beta <- as.numeric(final$beta[, choice])
   names(beta) <- colnames(training$X)
   quantiles <- if (method == "ENET") unlist(config$quantiles) else tau
   calibration <- vapply(quantiles, function(value) {

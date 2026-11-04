@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "actual_genotypes_checked": 768,
+  "genotype_reader_error": 0,
+  "design_error": 0,
+  "population_component_center_error": 1.49880108324396e-16,
+  "population_component_scale_error": 2.22044604925031e-15,
+  "training_markers": 292005,
+  "prediction_columns": 584020,
+  "nuisance_dimensions": 2,
+  "formal_validation_used": false
+}

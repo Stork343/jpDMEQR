@@ -105,11 +105,12 @@ yeast_profile_prediction <- function(rows, evaluation, panel, config, tau, progr
 }
 
 yeast_enet_path <- function(features, alpha, config) {
-  fit <- glmnet::glmnet(features$X, features$y, weights = features$weight, family = "gaussian",
+  stopifnot(all(features$X[, 1L] == 1), features$penalty_factor[1L] == 0)
+  fit <- glmnet::glmnet(features$X[, -1L, drop = FALSE], features$y, weights = features$weight, family = "gaussian",
     alpha = alpha, nlambda = as.integer(config$elastic_net_path_length),
     lambda.min.ratio = config$elastic_net_lambda_min_ratio,
-    penalty.factor = features$penalty_factor, intercept = FALSE, standardize = FALSE,
-    thresh = 1e-10, maxit = 1000000L)
+    penalty.factor = features$penalty_factor[-1L], intercept = TRUE, standardize = FALSE,
+    thresh = 1e-13, maxit = 1000000L)
   stopifnot(fit$jerr == 0L, ncol(fit$beta) == config$elastic_net_path_length)
   fit
 }
@@ -127,7 +128,7 @@ yeast_enet_prediction <- function(rows, evaluation, panel, config, progress, dir
     for (a in seq_along(alphas)) {
       progress("enet_inner", list(fold = fold, alpha = alphas[a], variables = ncol(training$X)))
       fit <- yeast_enet_path(training, alphas[a], config)
-      predicted <- as.matrix(yeast_raw_prediction(validation, fit$beta))
+      predicted <- as.matrix(yeast_raw_prediction(validation, stats::coef(fit)))
       loss[a, ] <- loss[a, ] + colSums((validation$raw_y - predicted)^2 * validation$weight)
       oof[[a]][which(rows$inner_fold == fold), ] <- predicted
       saveRDS(list(fit = fit, recipe = recipe, prediction = predicted),
@@ -141,7 +142,7 @@ yeast_enet_prediction <- function(rows, evaluation, panel, config, progress, dir
   training <- yeast_features(rows, panel, recipe)
   progress("enet_training", list(alpha = alphas[choice[1L]], penalty_index = choice[2L]))
   fit <- yeast_enet_path(training, alphas[choice[1L]], config)
-  beta <- as.numeric(fit$beta[, choice[2L]])
+  beta <- as.numeric(stats::coef(fit)[, choice[2L]])
   names(beta) <- colnames(training$X)
   test <- yeast_features(evaluation, panel, recipe)
   mean_prediction <- drop(yeast_raw_prediction(test, beta))

@@ -17,6 +17,7 @@ covariates: genetic_markers_and_replicate_position
 gene_standardization: training_mean_sd
 response_standardization: training_cluster_weighted_mean_sd
 mean_comparator: elastic_net
+mean_run_id: native_cv
 elastic_net_alpha: [0, 0.5, 1]
 elastic_net_path_length: 100
 elastic_net_lambda_min_ratio: 0.01

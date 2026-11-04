@@ -33,6 +33,7 @@ working_penalties: [0.5, 1, 2]
 solver: clarabel_selected_qp
 gap_tolerance: 1.0e-8
 comparators: [elastic_net, exact_quantile_lasso, clustered_quantile_forest]
+mean_run_id: native_cv
 elastic_net_alpha: [0, 0.5, 1]
 elastic_net_path_length: 100
 elastic_net_lambda_min_ratio: 0.01

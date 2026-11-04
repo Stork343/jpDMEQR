@@ -1,9 +1,14 @@
 library(data.table)
 library(jsonlite)
+library(yaml)
 source("research/yeast_application_20261101/prediction.R")
 
 root <- "results/raw/application/yeast_20261101/screening_20261101"
 jobs <- fread(file.path(root, "progress.csv"))
+config <- read_yaml("config/discovery_yeast_20261101.yml")
+jobs[method == "ENET", `:=`(run_id = config$mean_run_id,
+  directory = file.path(config$output_root, trait, paste0("ENET_", config$mean_run_id)))]
+stopifnot(all(file.exists(file.path(jobs$directory, "status.json"))))
 complete <- jobs[, .(finished = all(status == "completed")), by = trait][finished == TRUE, trait]
 requested <- commandArgs(trailingOnly = TRUE)
 if (length(requested)) complete <- intersect(complete, requested)

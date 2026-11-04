@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "actual_dataset": "DrugMatrix",
+  "maximum_error": 0,
+  "selected_index": 29,
+  "formal_validation_used": false
+}

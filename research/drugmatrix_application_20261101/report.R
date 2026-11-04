@@ -15,6 +15,7 @@ records <- list()
 checks <- list()
 for (directory in directories) {
   request <- read_json(file.path(directory, "request.json"), simplifyVector = TRUE)
+  if (request$method == "ENET" && basename(directory) != paste0("ENET_", config$mean_run_id)) next
   status <- read_json(file.path(directory, "status.json"), simplifyVector = TRUE)
   stopifnot(status$status == "completed", !request$formal_validation_used)
   fit <- readRDS(file.path(directory, "fit.rds"))
@@ -70,7 +71,7 @@ if (length(comparisons)) {
   fwrite(table, file.path(output, "comparisons.csv"))
   print(table)
 }
-write_json(list(stage = "discovery", completed_runs = length(directories),
+write_json(list(stage = "discovery", completed_runs = length(records), mean_run_id = config$mean_run_id,
                 decision_quantile = config$decision_quantile,
                 formal_validation_used = FALSE, manuscript_adoption = FALSE),
            file.path(output, "status.json"), auto_unbox = TRUE, pretty = TRUE)
