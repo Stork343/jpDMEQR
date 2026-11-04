@@ -1,0 +1,17 @@
+phase: method_development
+manuscript_adoption: false
+base_config: config/discovery_yeast_proteome_20261105.yml
+source_recipes: results/raw/application/ridge_direction_20261105/recipes.rds
+assay: NaCl
+input_directory: data/derived/yeast_proteome_20261104
+output_root: results/raw/application/ridge_offset_20261105
+decision_quantile: 0.25
+quantiles: [0.25, 0.5, 0.75]
+offset: cluster_deleted_ridge_prediction
+correction: sparse_quantile_specific_covariate_and_ridge_direction_terms
+always_included_correction: condition_intercepts
+response_scale: training_cluster_deleted_residual_standard_deviation
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+methods: [JOINT_OFFSET, POOLED_OFFSET]
+formal_validation_used: false

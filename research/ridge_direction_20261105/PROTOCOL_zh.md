@@ -9,3 +9,5 @@
 比较包括采用相同预测方向的 exact quantile Lasso、使用相同 ridge 学习器并完成培养条件残差校准的 PRESS_RIDGE，以及已保存的原 JOINT 和 elastic net 结果。这样可区分 ridge 学习器、变量表示与 profile 估计对预测的贡献。原始数据和所有比较结果保留；本实验不自动触发手稿采纳。
 
 删除预测通过真实训练数据的逐菌株重新拟合检验，误差记录在 results/preflight/empirical_selection_20261101/ridge_direction。该检查验证固定参数下的删除公式。参数选择和分位数校准均在训练部分完成。
+
+另一个诊断以 ridge 预测作为 offset，直接学习分位数相对于均值预测的稀疏修正。该模型保留培养条件截距，其余调整变量和蛋白质变量均作为可选择的修正项，并允许 ridge 方向参与修正。响应按训练删除残差的标准差缩放。JOINT_OFFSET 与 POOLED_OFFSET 使用同一 offset 和候选变量，由此检验在共同均值背景下 profile 估计是否改善分位数预测。该模型记录于 config/development_ridge_offset_20261105.yml。

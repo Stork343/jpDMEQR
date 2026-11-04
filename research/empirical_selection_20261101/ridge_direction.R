@@ -95,6 +95,39 @@ ep_direction_features <- function(rows, panel, recipe, base_feature_function) {
   features$X <- cbind(features$X, directions)
   features$penalty_factor <- c(features$penalty_factor, rep(1, ncol(directions)))
   features$recipe <- recipe
+  features$ridge_prediction <- score * recipe$y_scale + recipe$y_center
   stopifnot(all(is.finite(features$X)))
   features
+}
+
+ep_offset_recipe <- function(rows, panel, direction_recipe, base_feature_function) {
+  features <- ep_direction_features(rows, panel, direction_recipe, base_feature_function)
+  always <- nrow(direction_recipe$base_recipe$contrasts)
+  penalized <- seq.int(always + 1L, ncol(features$X))
+  center <- colSums(features$X[, penalized, drop = FALSE] * features$weight) / features$n
+  centered <- sweep(features$X[, penalized, drop = FALSE], 2L, center, "-")
+  scale <- sqrt(colSums(centered^2 * features$weight) / features$n)
+  residual <- features$raw_y - features$ridge_prediction
+  residual_mean <- sum(residual * features$weight) / features$n
+  residual_scale <- sqrt(sum((residual - residual_mean)^2 * features$weight) / features$n)
+  stopifnot(all(is.finite(scale)), all(scale > 1e-8), residual_scale > 1e-8)
+  list(direction_recipe = direction_recipe, always = always, penalized = penalized, center = center,
+       scale = scale, y_center = 0, y_scale = residual_scale,
+       training_strains = direction_recipe$training_strains, search_dimension = length(penalized))
+}
+
+ep_offset_features <- function(rows, panel, recipe, base_feature_function) {
+  features <- ep_direction_features(rows, panel, recipe$direction_recipe, base_feature_function)
+  features$X[, recipe$penalized] <- sweep(sweep(features$X[, recipe$penalized, drop = FALSE],
+    2L, recipe$center, "-"), 2L, recipe$scale, "/")
+  features$offset <- features$ridge_prediction
+  features$y <- (features$raw_y - features$offset) / recipe$y_scale
+  features$penalty_factor <- c(rep(0, recipe$always), rep(1, length(recipe$penalized)))
+  features$recipe <- recipe
+  stopifnot(all(is.finite(features$X)), all(is.finite(features$y)), all(is.finite(features$offset)))
+  features
+}
+
+ep_predict_offset <- function(features, beta) {
+  ep_predict(features, beta) + features$offset
 }

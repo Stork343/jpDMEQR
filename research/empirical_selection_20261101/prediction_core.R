@@ -119,7 +119,8 @@ ep_calibrate <- function(rows, prediction, tau, cluster_column, calibration_colu
 }
 
 ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, progress, directory,
-                              recipe_function, feature_function, cluster_column, calibration_column = NULL) {
+                              recipe_function, feature_function, cluster_column, calibration_column = NULL,
+                              prediction_function = ep_predict) {
   folds <- sort(unique(rows$inner_fold))
   recipes <- lapply(folds, function(fold) recipe_function(rows[inner_fold != fold], panel, config))
   counts <- vapply(folds, function(fold) uniqueN(rows[inner_fold != fold][[cluster_column]]), integer(1))
@@ -134,7 +135,7 @@ ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
       variables = ncol(training$X), additions = maximum))
     gc()
     fit <- ep_path(training, method, tau, config, maximum)
-    predicted <- as.matrix(ep_predict(validation, fit$beta))
+    predicted <- as.matrix(prediction_function(validation, fit$beta))
     if (f == 1L) {
       grid <- fit$grid
       oof <- matrix(NA_real_, nrow(rows), ncol(predicted))
@@ -166,7 +167,7 @@ ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
   gc()
   test <- feature_function(evaluation, panel, recipe)
   groups <- if (is.null(calibration_column)) rep("all", nrow(evaluation)) else as.character(evaluation[[calibration_column]])
-  base <- drop(ep_predict(test, beta))
+  base <- drop(prediction_function(test, beta))
   prediction <- vapply(calibration, function(offset) base + offset[groups], numeric(nrow(evaluation)))
   stopifnot(all(is.finite(prediction)))
   list(beta = beta, recipe = recipe, prediction = prediction, quantiles = quantiles,

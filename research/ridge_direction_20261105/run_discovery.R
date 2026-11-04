@@ -11,7 +11,7 @@ implementation <- normalizePath(args[5L], mustWork = TRUE)
 config <- read_yaml(file.path(implementation, "config.yml"))
 base <- read_yaml(file.path(implementation, "base_config.yml"))
 base$conditions <- base$assays$NaCl
-stopifnot(method %in% c("JOINT_DIRECTION", "POOLED_DIRECTION", "PRESS_RIDGE"))
+stopifnot(method %in% c("JOINT_DIRECTION", "POOLED_DIRECTION", "PRESS_RIDGE", "JOINT_OFFSET", "POOLED_OFFSET"))
 tau <- if (method == "PRESS_RIDGE") NA_real_ else as.numeric(args[4L])
 source(file.path(implementation, "prediction_core.R"))
 source(file.path(implementation, "ridge_direction.R"))
@@ -19,7 +19,7 @@ source(file.path(implementation, "contrasts.R"))
 source(file.path(implementation, "features.R"))
 source("research/score_validity_20261026/load_joint.R")
 source("research/joint_profile_manuscript_20261026/conic_search.R")
-if (method == "POOLED_DIRECTION") source("research/soynam_application_20261031/load_pooled_lp.R")
+if (startsWith(method, "POOLED_")) source("research/soynam_application_20261031/load_pooled_lp.R")
 panel <- proteome_panel(config$input_directory)
 panel$direction_recipes <- readRDS(file.path(config$output_root, "recipes.rds"))
 rows <- fread(file.path(config$input_directory, "NaCl", "discovery.csv"))
@@ -46,7 +46,11 @@ recipe_function <- function(rows, panel, config) {
   stopifnot(length(keys) == 1L)
   panel$direction_recipes[[keys]]
 }
-feature_function <- function(rows, panel, recipe) ep_direction_features(rows, panel, recipe, proteome_features)
+feature_function <- if (endsWith(method, "OFFSET")) {
+  function(rows, panel, recipe) ep_offset_features(rows, panel, recipe, proteome_features)
+} else {
+  function(rows, panel, recipe) ep_direction_features(rows, panel, recipe, proteome_features)
+}
 started <- proc.time()[["elapsed"]]
 if (method == "PRESS_RIDGE") {
   recipe <- panel$direction_recipes$training
@@ -61,9 +65,10 @@ if (method == "PRESS_RIDGE") {
               calibration = calibration, oof = oof, choice = background$choice,
               grid = data.table(lambda = background$lambda), loss = background$loss)
 } else {
-  solver_method <- if (method == "JOINT_DIRECTION") "JOINT" else "POOLED"
+  solver_method <- if (startsWith(method, "JOINT_")) "JOINT" else "POOLED"
+  prediction_function <- if (endsWith(method, "OFFSET")) ep_predict_offset else ep_predict
   fit <- ep_fit_prediction(training, evaluation, panel, solver_method, tau, base, progress, directory,
-                           recipe_function, feature_function, "strain_id", "condition")
+                           recipe_function, feature_function, "strain_id", "condition", prediction_function)
 }
 elapsed <- proc.time()[["elapsed"]] - started
 saveRDS(fit, file.path(directory, "fit.rds"))
