@@ -1,0 +1,18 @@
+library(data.table)
+library(jsonlite)
+library(yaml)
+source("research/yeast_stress_application_20261104/features.R")
+source("research/yeast_proteome_application_20261105/features.R")
+source("research/empirical_selection_20261101/prediction_core.R")
+source("research/empirical_selection_20261101/report_prediction.R")
+
+args <- commandArgs(trailingOnly = TRUE)
+stopifnot(length(args) == 1L, args %in% c("screening", "exact"))
+config <- read_yaml("config/discovery_yeast_proteome_20261105.yml")
+queue <- fread("results/raw/application/yeast_proteome_20261105/screening_20261105/progress.csv")
+stopifnot(nrow(queue) == 14L)
+if (args == "exact") queue <- rbindlist(list(queue,
+  fread("results/raw/application/yeast_proteome_20261105/exact_comparisons_20261105/progress.csv")), fill = TRUE)
+output <- paste0("results/preflight/empirical_selection_20261101/yeast_proteome_", args)
+panel <- proteome_panel(config$input_directory)
+print(ep_report_prediction(config, queue, panel, proteome_features, output))

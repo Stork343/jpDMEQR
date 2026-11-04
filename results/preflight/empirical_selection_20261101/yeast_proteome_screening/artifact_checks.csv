@@ -1,0 +1,15 @@
+assay,method,run,maximum_error
+Anisomycin,JOINT,JOINT_prediction_tau025,5.55111512312578e-16
+Anisomycin,ENET,ENET_weighted_cv,3.77475828372553e-15
+Cycloheximide,JOINT,JOINT_prediction_tau025,5.55111512312578e-16
+Cycloheximide,ENET,ENET_weighted_cv,5.55111512312578e-16
+Temperature,JOINT,JOINT_prediction_tau025,5.55111512312578e-16
+Temperature,ENET,ENET_weighted_cv,2.44249065417534e-15
+Formamide,JOINT,JOINT_prediction_tau025,5.55111512312578e-16
+Formamide,ENET,ENET_weighted_cv,5.55111512312578e-16
+Caffeine,JOINT,JOINT_prediction_tau025,5.13478148889135e-16
+Caffeine,ENET,ENET_weighted_cv,5.55111512312578e-16
+Benomyl,JOINT,JOINT_prediction_tau025,5.27355936696949e-16
+Benomyl,ENET,ENET_weighted_cv,5.27355936696949e-16
+NaCl,JOINT,JOINT_prediction_tau025,5.27355936696949e-16
+NaCl,ENET,ENET_weighted_cv,5.55111512312578e-16

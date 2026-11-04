@@ -1,0 +1,15 @@
+assay,method,tau,runtime_sec,Lambda,size,alpha,penalty_index
+Anisomycin,JOINT,0.25,39.65,2,0,,
+Anisomycin,ENET,,123.613,,,0,42
+Cycloheximide,JOINT,0.25,20.984,2,0,,
+Cycloheximide,ENET,,60.64,,,0,38
+Temperature,JOINT,0.25,20.574,2,2,,
+Temperature,ENET,,57.69,,,0,38
+Formamide,JOINT,0.25,19.729,2,0,,
+Formamide,ENET,,60.66,,,0,35
+Caffeine,JOINT,0.25,21.673,2,0,,
+Caffeine,ENET,,42.054,,,1,26
+Benomyl,JOINT,0.25,20.866,2,1,,
+Benomyl,ENET,,57.004,,,0,38
+NaCl,JOINT,0.25,20.255,2,0,,
+NaCl,ENET,,48.833,,,0,40
