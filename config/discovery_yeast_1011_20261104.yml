@@ -1,0 +1,37 @@
+phase: discovery
+manuscript_adoption: false
+source: Peter_2018_1011_genomes
+input_directory: data/derived/yeast_1011_20261104
+output_root: results/raw/application/yeast_1011_20261104/discovery
+response: reported_growth_ratio_to_YPD_30C
+conditions: [YPDNACL1M, YPDNACL15M]
+cluster: strain_id
+cohort: HO_intact_with_recorded_numeric_ploidy_and_aneuploidy
+role_seed: 20261104
+discovery_fraction: 0.70
+exploration_training_fraction: 0.75
+inner_folds: 3
+decision_quantile: 0.25
+quantiles: [0.25, 0.5, 0.75]
+marker_filter:
+  training_maf_minimum: 0.05
+  training_missing_fraction_maximum: 0.10
+  ld_window_kb: 250
+  ld_r_squared: 0.8
+population_components: 5
+copy_number_transform: log2_one_plus
+copy_observed_fraction_minimum: 0.90
+genetic_design: SNP_and_copy_number_with_salt_concentration_interactions
+adjustment: ploidy_ploidy_squared_aneuploidy_five_PCs_and_salt_interactions
+nuisance_design: strain_intercept
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+calibration: training_fold_residual_quantile_by_salt_concentration
+evaluation: strain_mean_pinball_loss
+response_imputation: none
+formal_validation: after_question_and_comparator_freeze

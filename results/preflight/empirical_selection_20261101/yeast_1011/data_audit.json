@@ -1,0 +1,17 @@
+{
+  "source_phenotyped_strains": 971,
+  "source_genotyped_strains": 1011,
+  "eligible_strains": 848,
+  "records": 1696,
+  "cluster_size": 2,
+  "measurement": "reported_strain_condition_growth_ratio",
+  "raw_colony_replicates_available": false,
+  "copy_number_columns": 7796,
+  "copy_number_scale": "estimated_per_haploid_genome",
+  "formal_validation_used": false,
+  "manuscript_adoption": false,
+  "dependencies": {
+    "xlrd": "2.0.2",
+    "bed_reader": "1.1.0"
+  }
+}

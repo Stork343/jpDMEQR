@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "genotypes_checked": 768,
+  "genotype_error": 0,
+  "interaction_error": 0,
+  "copy_transform_error": 0,
+  "population_component_center_error": 3.03755525963867e-16,
+  "population_component_scale_error": 1.99840144432528e-15,
+  "training_markers": 50159,
+  "training_copy_families": 7507,
+  "prediction_columns": 115350,
+  "adjustment_columns": 18,
+  "formal_validation_used": false
+}
