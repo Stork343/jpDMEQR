@@ -1,0 +1,28 @@
+{
+  "source_doi": "10.1073/pnas.2319211121",
+  "data_doi": "10.5281/zenodo.10567083",
+  "archive_member": "data_upload/DIA-NN_1.8/SCmedia_MBR_CommonPeptide_Approach/211025_ProteomicsData_SCmediaMBR_DIA-NN-1.8_genes_ORF.tsv",
+  "source_proteins": 630,
+  "source_strains": 942,
+  "matched_strains": 798,
+  "missing_fraction": 0.03260532283088674,
+  "maximum_strain_missing_fraction": 0.17777777777777778,
+  "source_processing": "DIA_NN_maxLFQ_with_published_precursor_median_batch_adjustment",
+  "source_imputed": false,
+  "source_cross_layer_quantile_normalized": false,
+  "roles_inherited": true,
+  "formal_validation_used": false,
+  "association_fitted": false,
+  "annotation_columns": [
+    "SGD_name",
+    "systematic_name",
+    "start",
+    "Chromosome",
+    "stop",
+    "Gene",
+    "feature_description",
+    "gene_length",
+    "sens"
+  ],
+  "manuscript_adoption": false
+}

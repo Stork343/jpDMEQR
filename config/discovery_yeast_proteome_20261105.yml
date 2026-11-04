@@ -1,0 +1,35 @@
+phase: discovery
+manuscript_adoption: false
+input_directory: data/derived/yeast_proteome_20261104
+output_root: results/raw/application/yeast_proteome_20261105/discovery
+source_doi: 10.1073/pnas.2319211121
+data_doi: 10.5281/zenodo.10567083
+roles: inherited_before_association_analysis
+response: reported_stress_growth_ratio_to_YPD_30C
+decision_quantile: 0.25
+quantiles: [0.25, 0.5, 0.75]
+assays:
+  Anisomycin: [YPDANISO10, YPDANISO20, YPDANISO50]
+  Cycloheximide: [YPDCHX05, YPDCHX1]
+  Temperature: [YPD40, YPD42]
+  Formamide: [YPDFORMAMIDE4, YPDFORMAMIDE5]
+  Caffeine: [YPDCAFEIN40, YPDCAFEIN50]
+  Benomyl: [YPDBENOMYL200, YPDBENOMYL500]
+  NaCl: [YPDNACL1M, YPDNACL15M]
+protein_observed_fraction_minimum: 0.80
+protein_transform: log2_abundance_centered_by_sample_observed_median
+protein_imputation: training_median
+adjustment: ploidy_ploidy_squared_aneuploidy_genomic_PCs_log_harvest_OD_median_signal_and_condition_interactions
+genotype_PC_training_roles: same_frozen_roles_with_unlabelled_genotype_training_isolates
+nuisance_design: strain_intercept
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+advancement:
+  exact_quantile_lasso: positive_discovery_gain_over_calibrated_mean
+  quantile_forest_and_published_RF: positive_discovery_gain_over_both_linear_comparators
+  formal_validation: after_question_and_comparator_freeze

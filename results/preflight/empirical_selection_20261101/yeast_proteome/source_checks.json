@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "published_matrix_relative_error": 0.0,
+  "cultivation_OD_observed": 798,
+  "cultivation_OD_missing": 0,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
