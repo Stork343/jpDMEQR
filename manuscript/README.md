@@ -2,7 +2,9 @@
 
 `sjs_profile_quantile_main.tex` builds the article and `sjs_profile_quantile_supplement.tex` builds Supporting Information. Component sources are in `sections/`; `references.bib` supplies both bibliographies. The author and affiliation blocks remain in the two document entry files.
 
-The current estimator is `joint_profile_design_20261026`. Its complete definition is in `docs/METHOD_SPECIFICATION.md`. The application uses the fixed-design coefficient interface and the separately tuned prediction learner in `research/joint_profile_manuscript_20261026/`.
+These article files describe `joint_profile_design_20261026`, defined in `docs/methods/joint_profile_20261026.md`. Their application uses the fixed-design coefficient interface and the separately tuned prediction learner in `research/joint_profile_manuscript_20261026/`.
+
+The active clinical conditional quantile research is defined in `docs/METHOD_SPECIFICATION.md` and `research/clinical_quantile_20261105/`. Its current numerical report is `results/preflight/clinical_quantile_smooth_20261106/REPORT_zh.md`. The article entry files and their generated numerical fragments remain the profile version. Integration of the clinical quantile method into a submission manuscript requires the completed learner rate arguments and application validation.
 
 ## Rebuild numerical content
 

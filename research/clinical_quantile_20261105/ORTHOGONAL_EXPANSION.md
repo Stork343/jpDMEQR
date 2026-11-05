@@ -8,7 +8,7 @@ At sample size n, observe n independent identically distributed patients. A pati
 P(Y_{ij}\le d_{ij}\theta_0+X_{ij}^T\beta_0\mid W_i,m_i)=\tau.
 \]
 
-The conditional densities are bounded, have a bounded derivative near the target quantiles, and are positive there. The quantities below may depend on n through the dimension and the distribution. Let F_i contain these densities. For a positive definite working covariance, define the projection and sensitivity in METHOD.md and write the normalised instrument as a_i=C_i^(-1)F_i r_i/J. It satisfies
+The conditional densities are bounded, have a uniformly bounded derivative on a common neighbourhood of the target quantiles, and are positive there. The quantities below may depend on n through the dimension and the distribution. Let F_i contain these densities. For a positive definite working covariance, define the projection and sensitivity in METHOD.md and write the normalised instrument as a_i=C_i^(-1)F_i r_i/J. It satisfies
 
 \[
 E[a_i^TF_i d_i]=1,\qquad E[a_i^TF_iX_i]=0.

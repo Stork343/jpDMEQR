@@ -1,0 +1,4 @@
+study_id,tau,best_comparator,new_loss,best_comparator_loss,relative_gain_over_best,relative_gain_over_joint_direct,linear_screen_passed,formal_validation_used,manuscript_adoption
+ra_westchina_20261105,0.75,ENET,0.4980024426963299,0.4683322303284017,-0.0633529158288399,-0.0170759653066525,False,False,False
+pregnancy_detroit_20261105,0.5,ENET,0.799561093236163,0.7839832105522592,-0.0198701738433024,0.077166908727866,False,False,False
+gnhs_baseline_bmi_20261105,0.75,CLINICAL_QR,0.4539761271059703,0.4536633942538478,-0.0006893499808087,0.0059095857273843,False,False,False

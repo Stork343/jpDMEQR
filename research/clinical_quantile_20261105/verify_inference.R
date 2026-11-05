@@ -28,7 +28,8 @@ panel <- cp_panel(study$input_directory)
 lambda_errors <- numeric()
 for (fold in seq_len(study$outer_folds)) {
   rows <- fread(file.path(study$output_root, paste0("outer_", fold), "training.csv"))
-  central <- readRDS(file.path(config$output_root, study$study_id, paste0("outer_", fold), "tau075", "fit.rds"))
+  central <- readRDS(file.path(config$output_root, study$study_id, paste0("outer_", fold),
+    sprintf("tau%03d", as.integer(100 * config$inference_quantile)), "fit.rds"))
   features <- cq_features(rows, panel, central$recipe, central$columns)
   nuisance <- readRDS(file.path(config$output_root, paste0("orthogonal_", study$study_id),
     paste0("outer_", fold), "nuisance.rds"))

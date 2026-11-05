@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "fitted_directions": 20,
+  "maximum_influence_error": 0,
+  "studies": ["ra_westchina_20261105", "gnhs_baseline_bmi_20261105"]
+}

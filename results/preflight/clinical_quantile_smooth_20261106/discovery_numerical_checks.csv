@@ -1,0 +1,4 @@
+study_id,fits,optimality_measure,maximum_optimality_error,total_fitting_seconds
+ra_westchina_20261105,15,full_coordinate_kkt,1.1438168524224e-06,3002.796
+pregnancy_detroit_20261105,15,full_coordinate_kkt,9.35501135876371e-07,3802.237
+gnhs_baseline_bmi_20261105,15,full_coordinate_kkt,8.8637932693994e-07,5418.737000000001

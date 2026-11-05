@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "checks": [
+    "patient_pairing",
+    "covariance_identity",
+    "convex_weight_minimisation"
+  ],
+  "role": "exploratory_estimator_development",
+  "formal_validation_used": false
+}

@@ -33,6 +33,9 @@ for directory in sorted(Path(config["output_root"]).glob("orthogonal_*")):
     grid_variance = (1 - grid)**2 * covariance[0, 0] + grid**2 * covariance[1, 1] + 2 * grid * (1 - grid) * covariance[0, 1]
     assert variance <= grid_variance.min() + 1e-12
     standard_error = np.sqrt(variance / len(values))
+    squared = influence**2
+    assert squared.sum() > 0
+    contributions = np.sort(squared / squared.sum())
     record = {"study_id": directory.name.removeprefix("orthogonal_"), "patients": len(values),
               "target": status["target"], "tau": status["tau"], "exchangeable_weight": weight,
               "estimate": float(estimate), "standard_error": standard_error,
@@ -40,6 +43,9 @@ for directory in sorted(Path(config["output_root"]).glob("orthogonal_*")):
               "upper": estimate + norm.ppf(0.975) * standard_error,
               "independence_standard_error": np.sqrt(covariance[0, 0] / len(values)),
               "exchangeable_standard_error": np.sqrt(covariance[1, 1] / len(values)),
+              "estimated_se_reduction": 1 - standard_error / np.sqrt(covariance[0, 0] / len(values)),
+              "largest_patient_variance_share": float(contributions[-1]),
+              "largest_five_patient_variance_share": float(contributions[-5:].sum()),
               "formal_validation_used": False, "manuscript_adoption": False}
     records.append(record)
 assert records
