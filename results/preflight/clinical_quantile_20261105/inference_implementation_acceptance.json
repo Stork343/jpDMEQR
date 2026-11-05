@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "role": "implementation_test_on_actual_discovery_patients",
+  "selected_test_proteins": 12,
+  "target": "C_prior_bmi",
+  "tau": 0.75,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

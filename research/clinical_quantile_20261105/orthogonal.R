@@ -1,5 +1,15 @@
 library(glmnet)
 
+cq_density <- function(features, lower_beta, upper_beta, delta, config) {
+  difference <- drop(features$X %*% (upper_beta - lower_beta))
+  limits <- unlist(config$density_range)
+  floor <- 2 * delta / limits[2L]
+  ceiling <- 2 * delta / limits[1L]
+  density <- 2 * delta / pmax(floor, pmin(ceiling, difference))
+  list(value = density, lower_bound_count = sum(difference <= floor),
+    upper_bound_count = sum(difference >= ceiling), crossing_count = sum(difference <= 0))
+}
+
 cq_transform_blocks <- function(values, cluster, tau, rho, inverse = FALSE) {
   stopifnot(rho >= 0, rho < 1, tau > 0, tau < 1)
   values <- as.matrix(values)
@@ -27,8 +37,9 @@ cq_score_correlation <- function(rows, prediction, tau, config) {
     (sum(values)^2 - sum(values^2)) / (length(values) * (length(values) - 1L))
   }, numeric(1))
   raw <- mean(products) / (tau * (1 - tau))
-  list(raw = raw, working = min(config$score_correlation_range[2L],
-    max(config$score_correlation_range[1L], raw)), repeated_patients = length(repeated))
+  limits <- unlist(config$score_correlation_range)
+  list(raw = raw, working = min(limits[2L], max(limits[1L], raw)),
+    repeated_patients = length(repeated))
 }
 
 cq_projection <- function(features, density, target, rho, tau, fold_id, config) {

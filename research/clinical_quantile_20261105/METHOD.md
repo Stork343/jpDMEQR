@@ -65,6 +65,22 @@ Density estimation uses fitted quantiles at tau-delta and tau+delta, with delta=
 
 The projection uses the transformed design blocks C_i^(-1/2) F_i X_i and response C_i^(-1/2) F_i d_i. Penalised least squares selects its regularisation by patient folds. The projection includes the remaining clinical design without penalty. Its empirical balance residual and sensitivity are recorded.
 
+## Choosing the contribution of working correlation
+
+Compute both the independence and exchangeable orthogonal estimators with the same patient folds. Write their estimates as theta_0 and theta_1 and their paired, fold centred patient influence vectors as v_i=(v_i0,v_i1). Let S_hat=n^(-1)sum_i v_i v_i^T and D_hat=n^(-1)sum_i(v_i1-v_i0)^2. Define
+
+\[
+\widehat t=\operatorname{clip}\{(\widehat S_{00}-\widehat S_{01})/\widehat D,0,1\},
+\qquad
+\widehat\theta_A=(1-\widehat t)\widehat\theta_0+\widehat t\widehat\theta_1.
+\]
+
+When D_hat is exactly zero, set t_hat=0. Its estimated variance is (1-t_hat,t_hat) S_hat (1-t_hat,t_hat)^T/n. Both the point estimate and its influence contributions use the same weights.
+
+Suppose both initial orthogonal estimators have a joint centred asymptotic linear expansion for the same theta, and S_hat consistently estimates their influence covariance S. If D=Var(v_1-v_0)>0, t_hat converges to the minimiser t_star of Var{(1-t)v_0+t v_1} over [0,1]. The additional estimation term is (t_hat-t_star)(theta_1-theta_0)=o_p(n^(-1/2)), regardless of the use of the same patients to estimate S. The asymptotic variance is at most min(S_00,S_11). If D=0, the two leading influence functions agree in L2 and any bounded convex weight gives the same first order limit. This statement requires the centred joint expansion; it is an asymptotic comparison and does not bound finite sample mean squared error.
+
+Covariance based estimator averaging is established methodology. Here it acts on patient orthogonal estimators of a common conditional quantile coefficient. The component estimates and their separate diagnostics remain available.
+
 ## Population argument and conditions
 
 The check loss identity gives
@@ -76,7 +92,7 @@ E[\rho_\tau(Y-q-t)-\rho_\tau(Y-q)\mid W]
 
 When q is the conditional tau quantile and its density is positive in a neighbourhood, this is uniquely minimised at t=0. Averaging with positive patient weights preserves the minimiser. Under the conditional moment, E phi_i=0 for any measurable positive definite working C_i and finite design measurable F_i. Consistency of the point root therefore does not require the working covariance to be the true covariance.
 
-For the orthogonal expansion, require a conditional density with a bounded derivative near the quantile, bounded working covariance eigenvalues and a sensitivity separated from zero. Let a_n bound the preliminary theta error and the L2 error of X_i beta, let b_n be the L2 error of the learned instrument, and let c_n be the difference between the estimated sensitivity and E[estimated instrument times F_i d_i]. Sufficient remainder conditions are sqrt(n) a_n^2 -> 0, sqrt(n) a_n b_n -> 0 and sqrt(n) a_n c_n -> 0, together with consistent influence variance and a patient level Lindeberg condition. The instrument norm and moments must be controlled in these statements. Nuisance fitting uses a fixed number of patient folds.
+For the orthogonal expansion, require a conditional density with a bounded derivative near the quantile, bounded working covariance eigenvalues and a sensitivity separated from zero. Let a_n bound the preliminary theta error and the L4 error of X_i beta, let b_n be the L2 error of the learned instrument, and let c_n be the difference between the estimated sensitivity and E[estimated instrument times F_i d_i]. Sufficient remainder conditions are sqrt(n) a_n^2 -> 0, sqrt(n) a_n b_n -> 0 and sqrt(n) a_n c_n -> 0, together with consistent influence variance and a patient level Lindeberg condition. Require a bounded fourth moment for the target design and bounded fourth moments for the learned instruments. Nuisance fitting uses a fixed number of patient folds.
 
 Conditional on each training sample, the heldout empirical error of the estimated influence function is o_p(n^(-1/2)) when its L2 difference tends to zero. A Taylor expansion of the conditional distribution gives the quadratic prediction remainder. The projection identity removes the first order nuisance coefficient term; the estimated instrument and balance errors give the two product remainders. The independent patient central limit theorem then yields
 

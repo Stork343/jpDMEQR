@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "density_direct_fit_comparisons": 10,
+  "maximum_density_lambda_difference": 0,
+  "maximum_aggregate_estimate_error": 6.9389e-18,
+  "maximum_aggregate_se_error": 3.4694e-18
+}

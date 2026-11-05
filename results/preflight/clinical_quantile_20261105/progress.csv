@@ -1,0 +1,4 @@
+study_id,completed,expected,percent,status
+ra_westchina_20261105,15,15,100.0,completed
+pregnancy_detroit_20261105,15,15,100.0,completed
+gnhs_baseline_bmi_20261105,0,15,0.0,running
