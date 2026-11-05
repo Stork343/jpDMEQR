@@ -1,0 +1,30 @@
+library(data.table)
+library(jsonlite)
+library(yaml)
+library(matrixStats)
+source("research/drugmatrix_application_20261101/prediction.R")
+source("research/drugmatrix_application_20261101/offset_features.R")
+source("research/empirical_selection_20261101/prediction_core.R")
+source("research/empirical_selection_20261101/ridge_direction.R")
+source("research/score_validity_20261026/load_joint.R")
+source("research/joint_profile_manuscript_20261026/conic_search.R")
+config <- read_yaml("config/development_drugmatrix_offset_20261105.yml")
+panel <- dmo_panel(config)
+rows <- fread(file.path(config$input_directory, "ALT", "discovery.csv"))[exploration_role == "training"]
+recipe <- readRDS(file.path(config$output_root, "ALT", "recipes.rds"))$training
+features <- ep_offset_features(rows, panel, recipe, dmo_features)
+press <- fread(file.path(config$output_root, "press_checks.csv"))
+stopifnot(nrow(press) == 2L, all(press$press_error < 1e-7))
+checks <- rbindlist(lapply(unlist(config$quantiles), function(value) {
+  fit <- ep_path(features, "JOINT", value, config, 2L, list(Lambda = 1, size = 2L))
+  gap <- max(vapply(fit$diagnostics[[1L]], `[[`, numeric(1), "gap"))
+  stopifnot(is.finite(gap), gap <= config$gap_tolerance, all(is.finite(fit$beta)))
+  data.table(tau = value, compounds = features$n, animals = nrow(features$X), variables = ncol(features$X), maximum_gap = gap)
+}))
+output <- "results/preflight/empirical_selection_20261101/drugmatrix_offset_checks"
+dir.create(output, recursive = TRUE, showWarnings = FALSE)
+fwrite(checks, file.path(output, "solver_checks.csv"))
+fwrite(press, file.path(output, "press_checks.csv"))
+write_json(list(status = "passed", formal_validation_used = FALSE),
+  file.path(output, "status.json"), auto_unbox = TRUE, pretty = TRUE)
+print(checks)

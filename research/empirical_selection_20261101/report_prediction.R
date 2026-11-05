@@ -1,6 +1,8 @@
 ep_report_prediction <- function(config, queue, panel, feature_function, output,
                                  target_method = "JOINT", stage = "discovery",
-                                 feature_functions = NULL, prediction_functions = NULL) {
+                                 feature_functions = NULL, prediction_functions = NULL,
+                                 cluster_count_column = "strains") {
+  stopifnot(cluster_count_column %in% c("strains", "compounds", "participants", "clusters"))
   stopifnot(nrow(queue) > 0L, all(queue$status == "completed"), !anyDuplicated(queue$directory))
   records <- checks <- selections <- settings <- list()
   for (j in seq_len(nrow(queue))) {
@@ -67,11 +69,13 @@ ep_report_prediction <- function(config, queue, panel, feature_function, output,
   }
   dir.create(output, recursive = TRUE, showWarnings = FALSE)
   comparison <- data.table::rbindlist(comparisons)
+  data.table::setnames(comparison, "strains", cluster_count_column)
   data.table::fwrite(comparison, file.path(output, "comparisons.csv"))
   data.table::fwrite(data.table::rbindlist(checks), file.path(output, "artifact_checks.csv"))
   data.table::fwrite(data.table::rbindlist(selections), file.path(output, "selected_coefficients.csv"))
   data.table::fwrite(data.table::rbindlist(settings, fill = TRUE), file.path(output, "settings.csv"))
   summary <- losses[, .(strains = .N, loss = mean(loss), se = sd(loss) / sqrt(.N)), by = .(assay, method, tau)]
+  data.table::setnames(summary, "strains", cluster_count_column)
   data.table::fwrite(summary, file.path(output, "summary.csv"))
   jsonlite::write_json(list(stage = stage, target_method = target_method, completed_runs = nrow(queue), formal_validation_used = FALSE,
                            manuscript_adoption = FALSE), file.path(output, "status.json"), auto_unbox = TRUE, pretty = TRUE)
