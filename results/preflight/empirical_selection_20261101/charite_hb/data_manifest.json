@@ -1,0 +1,138 @@
+{
+  "status": "downloaded_with_si",
+  "provider": "NIH_NLM_PMC_Cloud_Service",
+  "doi": "10.1016/j.cels.2021.05.005",
+  "article_version": 2,
+  "files": [
+    {
+      "file": "mmc7.xlsx",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc7.xlsx",
+      "bytes": 2735423,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.490956+00:00"
+    },
+    {
+      "file": "PMC8201874.2.txt",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/PMC8201874.2.txt",
+      "bytes": 121901,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.447172+00:00"
+    },
+    {
+      "file": "PMC8201874.2.xml",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/PMC8201874.2.xml",
+      "bytes": 280162,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.446433+00:00"
+    },
+    {
+      "file": "mmc1.pdf",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc1.pdf",
+      "bytes": 10122150,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.461580+00:00"
+    },
+    {
+      "file": "mmc10.zip",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc10.zip",
+      "bytes": 2147807,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.493224+00:00"
+    },
+    {
+      "file": "mmc11.pdf",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc11.pdf",
+      "bytes": 18962597,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.479823+00:00"
+    },
+    {
+      "file": "mmc2.xlsx",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc2.xlsx",
+      "bytes": 92986,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.483215+00:00"
+    },
+    {
+      "file": "mmc3.xlsx",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc3.xlsx",
+      "bytes": 319238,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.488145+00:00"
+    },
+    {
+      "file": "mmc4.xlsx",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc4.xlsx",
+      "bytes": 1314607,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.501031+00:00"
+    },
+    {
+      "file": "mmc5.xlsx",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc5.xlsx",
+      "bytes": 289666,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.494925+00:00"
+    },
+    {
+      "file": "mmc6.xlsx",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc6.xlsx",
+      "bytes": 779229,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.500987+00:00"
+    },
+    {
+      "file": "mmc8.xlsx",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc8.xlsx",
+      "bytes": 63399,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.498661+00:00"
+    },
+    {
+      "file": "mmc9.xlsx",
+      "source": "https://pmc-oa-opendata.s3.amazonaws.com/PMC8201874.2/mmc9.xlsx",
+      "bytes": 30526,
+      "status": "verified",
+      "source_version": 2,
+      "license": "CC BY",
+      "doi": "10.1016/j.cels.2021.05.005",
+      "checked_utc": "2026-11-05T05:21:55.506812+00:00"
+    }
+  ]
+}

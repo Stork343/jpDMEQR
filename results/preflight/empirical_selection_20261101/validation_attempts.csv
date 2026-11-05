@@ -1,2 +1,2 @@
-attempt_index,study_id,outcome,decision_quantile,total_alpha,prediction_alpha,inference_alpha,status,registered_utc
-1,charite_hb_20261105,"Hemoglobin, g/dl",0.25,0.025,0.0125,0.0125,registered,2026-11-05 04:57:06 UTC
+attempt_index,study_id,outcome,decision_quantile,total_alpha,prediction_alpha,inference_alpha,status,registered_utc,prediction_superiority_pass,association_contrast_pass,manuscript_adoption
+1,charite_hb_20261105,"Hemoglobin, g/dl",0.25,0.025,0.0125,0.0125,completed,2026-11-05 04:57:06 UTC,FALSE,FALSE,FALSE

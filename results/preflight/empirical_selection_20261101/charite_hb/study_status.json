@@ -1,0 +1,14 @@
+{
+  "study_id": "charite_hb_20261105",
+  "status": "completed",
+  "data_complete": true,
+  "completed_training_jobs": 19,
+  "methods": 11,
+  "training_patients": 93,
+  "validation_patients": 40,
+  "prediction_superiority_pass": false,
+  "association_contrast_pass": false,
+  "formal_validation_used": true,
+  "manuscript_adoption": false,
+  "completed_utc": "2026-11-05T05:24:37.875951+00:00"
+}

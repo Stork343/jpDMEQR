@@ -1,0 +1,4 @@
+multiplier,influence_error,coefficient_error,contrast_error,se_error,passed
+1,9.76996261670138e-15,0,0,4.44089209850063e-16,TRUE
+0.75,7.105427357601e-15,0,0,3.33066907387547e-16,TRUE
+1.25,1.24344978758018e-14,0,0,2.22044604925031e-16,TRUE

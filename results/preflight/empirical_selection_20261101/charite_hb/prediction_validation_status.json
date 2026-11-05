@@ -1,0 +1,12 @@
+{
+  "status": "completed",
+  "stage": "formal_validation",
+  "patients": 40,
+  "records": 164,
+  "primary_quantile": 0.25,
+  "primary_scoring": "nonnegative_sorted_quantiles",
+  "prediction_alpha": 0.0125,
+  "superiority_pass": false,
+  "formal_validation_used": true,
+  "manuscript_adoption": false
+}

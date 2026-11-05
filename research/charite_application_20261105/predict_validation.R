@@ -6,6 +6,7 @@ library(grf)
 source("research/charite_application_20261105/features.R")
 source("research/charite_application_20261105/predict.R")
 source("research/empirical_selection_20261101/prediction_core.R")
+source("research/empirical_selection_20261101/ridge_direction.R")
 source("research/ridge_direction_20261105/forest.R")
 config <- read_yaml("config/application_charite_hb_20261105.yml")
 root <- config$output_root

@@ -1,0 +1,28 @@
+R version 4.3.2 (2023-10-31)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS 15.4.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
+
+locale:
+[1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8
+
+time zone: Asia/Shanghai
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base
+
+other attached packages:
+ [1] glmnet_4.1-9        Matrix_1.6-4        RcppEigen_0.3.4.0.2
+ [4] Rcpp_1.1.0          jpDMEQR_0.4.0       filelock_1.0.3
+ [7] matrixStats_1.5.0   yaml_2.3.11         jsonlite_2.0.0
+[10] data.table_1.17.8
+
+loaded via a namespace (and not attached):
+ [1] codetools_0.2-20  shape_1.4.6.1     lattice_0.22-7    splines_4.3.2
+ [5] iterators_1.0.14  R.utils_2.13.0    foreach_1.5.2     R.methodsS3_1.8.2
+ [9] grid_4.3.2        compiler_4.3.2    R.oo_1.27.1       tools_4.3.2
+[13] survival_3.8-3

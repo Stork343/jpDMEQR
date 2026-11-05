@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "patients": 40,
+  "records": 164,
+  "dimension": 16,
+  "target_proteins": ["HP", "HPX", "TF", "GSN", "FBLN1", "C6"],
+  "clinical_columns": ["(Intercept)", "C_age", "C_bmi", "C_charlson", "C_log_day", "C_who4", "C_who5", "C_who6", "C_who7", "C_bmi_missing"],
+  "dropped_unidentified_controls": [],
+  "family_size": 12,
+  "inference_alpha": 0.0125,
+  "formal_validation_used": true,
+  "manuscript_adoption": false
+}

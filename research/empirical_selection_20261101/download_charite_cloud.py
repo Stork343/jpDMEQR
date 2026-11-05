@@ -35,9 +35,12 @@ def download(source):
     url = "https://pmc-oa-opendata.s3.amazonaws.com/" + key
     if not destination.exists():
         partial = destination.with_name(destination.name + ".partial")
-        subprocess.run(["curl", "--silent", "--show-error", "--fail", "--location",
-                        "--proxy", "http://127.0.0.1:7897", "--connect-timeout", "20",
-                        "--max-time", "180", "--continue-at", "-", "--output", str(partial), url], check=True)
+        if partial.exists():
+            assert partial.stat().st_size <= sizes[key]
+        if not partial.exists() or partial.stat().st_size < sizes[key]:
+            subprocess.run(["curl", "--silent", "--show-error", "--fail", "--location",
+                            "--proxy", "http://127.0.0.1:7897", "--connect-timeout", "20",
+                            "--max-time", "180", "--continue-at", "-", "--output", str(partial), url], check=True)
         assert partial.stat().st_size == sizes[key]
         partial.rename(destination)
     assert destination.stat().st_size == sizes[key]

@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "inference_reconstructions": 3,
+  "completed_training_jobs": 19,
+  "patients": 40,
+  "code_commit": "7dc28df6aad5fac0df3e5c61225783c1ad4f3dc2"
+}

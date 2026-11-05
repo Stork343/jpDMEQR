@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "training_patients": 93,
+  "validation_patients": 40,
+  "validation_records": 164,
+  "methods": 11,
+  "prediction_rows_checked": 10824,
+  "maximum_errors": {
+    "y": 0.0,
+    "prediction": 5.1514348342607263e-14,
+    "loss": 5.329070518200751e-15,
+    "patient_loss": 6.106226635438361e-16,
+    "patient_standard_error": 5.551115123125783e-17,
+    "paired_gain": 5.273559366969494e-16
+  },
+  "patient_overlap": 0
+}
