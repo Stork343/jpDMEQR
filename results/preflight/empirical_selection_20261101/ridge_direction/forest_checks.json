@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "actual_training_clusters": 60,
+  "trees": 2000,
+  "oob_option_prediction_error": 0,
+  "native_prediction_mapping_error": 0,
+  "package_version": "2.6.1",
+  "formal_validation_used": false
+}
