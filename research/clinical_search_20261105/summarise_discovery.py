@@ -56,7 +56,7 @@ folds = patient.groupby(["scoring", "method", "tau", "outer_fold"], observed=Tru
 folds.to_csv(output / "discovery_fold_loss.csv", index=False)
 pd.DataFrame(runtime).to_csv(output / "discovery_runtime.csv", index=False)
 scored.to_csv(root / "discovery_scored_predictions.csv", index=False)
-comparators = [method for method in config["comparators"] if not method.startswith(("QRF", "XGB"))]
+comparators = [method for method in config["comparators"] if not method.startswith(("QRF", "XGB", "LGB"))]
 records = []
 for scoring in ["primary", "raw"]:
     for tau in config["quantiles"]:

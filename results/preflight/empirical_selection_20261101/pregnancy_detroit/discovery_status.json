@@ -1,0 +1,16 @@
+{
+  "study_id": "pregnancy_detroit_20261105",
+  "status": "linear_screen_completed",
+  "completed_jobs": 75,
+  "discovery_patients": 100,
+  "discovery_records": 410,
+  "decision_quantile": 0.5,
+  "best_screening_candidate": "JOINT_DIRECT",
+  "minimum_gain_by_candidate": {
+    "JOINT_DIRECT": -0.10515128194785692,
+    "JOINT_OFFSET": -0.17829084092524228
+  },
+  "continue_nonlinear_comparison": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

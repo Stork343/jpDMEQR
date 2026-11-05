@@ -1,0 +1,15 @@
+{
+  "status": "prepared",
+  "source_doi": "10.1016/j.xcrm.2023.101172",
+  "patients": 2773,
+  "records": 4436,
+  "patients_with_repeats": 1663,
+  "maximum_cluster_size": 2,
+  "protein_candidates": 413,
+  "role_assignment": "original_author_cohorts",
+  "patient_overlap": 0,
+  "outcome_imputed": false,
+  "future_assay_used_as_predictor": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

@@ -33,7 +33,7 @@ cp_recipe <- function(rows, panel, config) {
   columns <- names(scale)[is.finite(scale) & scale > 1e-8]
   y_center <- sum(rows$y * weight) / length(ids)
   y_scale <- sqrt(sum((rows$y - y_center)^2 * weight) / length(ids))
-  stopifnot(y_scale > 0, length(columns) > length(ids), length(unique(rows$condition)) == 1L)
+  stopifnot(y_scale > 0, length(columns) > 0L, length(unique(rows$condition)) == 1L)
   c(recipe, list(columns = columns, center = center[columns], scale = scale[columns],
     y_center = y_center, y_scale = y_scale, training_strains = ids, search_dimension = length(columns),
     contrasts = matrix(numeric(), 1L, 0L, dimnames = list(unique(rows$condition), character()))))
