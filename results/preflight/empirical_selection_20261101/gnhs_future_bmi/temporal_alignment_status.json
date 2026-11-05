@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "patient_overlap": 0,
+  "folds_checked": 5,
+  "records_checked": 4436,
+  "formal_validation_used": false
+}

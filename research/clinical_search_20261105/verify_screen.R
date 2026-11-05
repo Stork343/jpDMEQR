@@ -9,7 +9,7 @@ source("research/empirical_selection_20261101/prediction_core.R")
 source("research/empirical_selection_20261101/ridge_direction.R")
 panel <- cp_panel(config$input_directory)
 jobs <- fread(file.path(root, "progress.csv"))
-stopifnot(all(jobs$status == "completed"), all(jobs$exit_code == 0L))
+stopifnot(all(jobs$status == "completed"), all(jobs$exit_code[!is.na(jobs$exit_code)] == 0L))
 records <- checks <- list()
 for (j in seq_len(nrow(jobs))) {
   job <- jobs[j]

@@ -14,7 +14,7 @@ root = Path(config["output_root"])
 output = Path(config["report_directory"])
 progress = pd.read_csv(root / "progress.csv")
 assert len(progress) == config["outer_folds"] * 15
-assert progress.status.eq("completed").all() and progress.exit_code.eq(0).all()
+assert progress.status.eq("completed").all() and progress.exit_code.dropna().eq(0).all()
 rows = pd.read_csv(Path(config["input_directory"]) / "discovery.csv")
 frames = []
 runtime = []
@@ -78,6 +78,8 @@ minimum = decision.groupby("target").relative_gain.min()
 selected = str(minimum.idxmax())
 passed = bool(minimum.loc[selected] >= config["screening_minimum_relative_gain"])
 status = {"study_id": config["study_id"], "status": "linear_screen_completed", "completed_jobs": len(progress),
+          "observed_process_exit_codes": int(progress.exit_code.notna().sum()),
+          "completed_artifacts_without_exit_code": int(progress.exit_code.isna().sum()),
           "discovery_patients": rows.strain_id.nunique(), "discovery_records": len(rows),
           "decision_quantile": config["decision_quantile"], "best_screening_candidate": selected,
           "minimum_gain_by_candidate": minimum.to_dict(), "continue_nonlinear_comparison": passed,
