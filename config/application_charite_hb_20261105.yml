@@ -1,0 +1,64 @@
+study_id: charite_hb_20261105
+phase: prospective_holdout_analysis
+source_directory: data/raw/covid_charite_20261105/official_cloud
+input_directory: data/derived/charite_hb_20261105
+output_root: results/raw/application/charite_hb_20261105
+report_directory: results/preflight/empirical_selection_20261101/charite_hb
+source_doi: 10.1016/j.cels.2021.05.005
+response: Hemoglobin, g/dl
+response_unit: g_per_dl
+decision_quantile: 0.25
+quantiles: [0.25, 0.5, 0.75]
+training_fraction: 0.7
+role_seed: 20261105
+inner_folds: 3
+protein_minimum_peptides: 3
+protein_observed_training_fraction: 0.8
+protein_transform: log2_source_normalized_abundance
+protein_imputation: training_patient_weighted_median
+protein_missing_indicators: true
+excluded_gene_tokens: [HBA1, HBA2, HBB, HBD, HBG1, HBG2, HBM, HBQ1, HBZ]
+clinical_covariates: [age, bmi, charlson, log_admission_day, current_who_grade, bmi_missing]
+always_included_prediction: intercept
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+primary_prediction_rule: nonnegative_sorted_quantiles
+target_method: JOINT_OFFSET
+comparators: [JOINT_DIRECT, POOLED, POOLED_OFFSET, ENET, PRESS_RIDGE, CLINICAL_QR, QRF_RAW, QRF_OFFSET, XGB_RAW, XGB_OFFSET]
+forest:
+  trees: 2000
+  regression_splitting: [false, true]
+  mtry_multiplier: [1, 5]
+  min_node_size: [2, 5, 10]
+  honesty: [true, false]
+  calibration: [none, training, oob]
+xgboost:
+  objective: reg:quantileerror
+  max_depth: [2, 4]
+  learning_rate: [0.03, 0.1]
+  reg_lambda: [1, 20]
+  rounds: [100, 300, 600]
+  subsample: 0.5
+  max_bin: 64
+  calibration: [none, training]
+inference:
+  prespecified_proteins: [HP, HPX, TF]
+  additional_training_selected_proteins: 3
+  selection_rule: largest_absolute_total_prediction_slope_difference_tau025_tau075
+  selection_minimum_observed_fraction: 0.9
+  working_lambda: 1.0
+  bandwidth_multipliers: [1.0, 0.75, 1.25]
+  contrasts: [tau025_minus_tau050, tau025_minus_tau075]
+validation:
+  attempt_index: 1
+  total_alpha: 0.025
+  prediction_alpha: 0.0125
+  inference_alpha: 0.0125
+  bootstrap_repetitions: 20000
+  all_models_and_targets_frozen_before_validation: true
+manuscript_adoption: false
