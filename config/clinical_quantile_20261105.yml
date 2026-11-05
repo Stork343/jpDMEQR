@@ -1,0 +1,28 @@
+method_id: clinical_quantile_20261105
+status: development
+source_studies:
+  - config/application_ra_westchina_20261105.yml
+  - config/application_pregnancy_detroit_20261105.yml
+  - config/application_gnhs_baseline_bmi_20261105.yml
+quantiles: [0.25, 0.5, 0.75]
+alpha: [0, 0.1, 0.5, 1]
+path_length: 40
+lambda_min_ratio: 0.001
+ridge_lambda_reference_alpha: 0.05
+path_tolerance: 1.0e-9
+path_max_iterations: 100000
+exact_fit_tolerance: 1.0e-8
+maximum_path_objective_difference: 0.005
+clinical_columns: all_estimable_C_and_M_C
+prediction_rule: nonnegative_sorted_quantiles
+evaluation_weight: equal_patients
+inference_study: gnhs_baseline_bmi_20261105
+inference_target: C_prior_bmi
+inference_quantile: 0.75
+density_spacing: 0.05
+minimum_spacing: 0.02
+score_correlation_range: [0, 0.95]
+projection_path_length: 60
+projection_lambda_min_ratio: 0.001
+formal_validation_used: false
+manuscript_adoption: false
