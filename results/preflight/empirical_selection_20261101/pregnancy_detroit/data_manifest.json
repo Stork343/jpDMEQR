@@ -1,0 +1,62 @@
+{
+  "status": "downloaded_with_si",
+  "article": "PMC5524331.1",
+  "doi": "10.1371/journal.pone.0181468",
+  "license": "CC0",
+  "files": [
+    {
+      "file": "PMC5524331.1.json",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC5524331.1/PMC5524331.1.json",
+      "bytes": 1894,
+      "status": "verified",
+      "article": "PMC5524331.1",
+      "doi": "10.1371/journal.pone.0181468",
+      "checked_utc": "2026-11-05T07:53:44.431056+00:00"
+    },
+    {
+      "file": "PMC5524331.1.txt",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC5524331.1/PMC5524331.1.txt",
+      "bytes": 107061,
+      "status": "verified",
+      "article": "PMC5524331.1",
+      "doi": "10.1371/journal.pone.0181468",
+      "checked_utc": "2026-11-05T07:53:50.029422+00:00"
+    },
+    {
+      "file": "pone.0181468.s002.xls",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC5524331.1/pone.0181468.s002.xls",
+      "bytes": 49664,
+      "status": "verified",
+      "article": "PMC5524331.1",
+      "doi": "10.1371/journal.pone.0181468",
+      "checked_utc": "2026-11-05T07:53:47.320364+00:00"
+    },
+    {
+      "file": "PMC5524331.1.xml",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC5524331.1/PMC5524331.1.xml",
+      "bytes": 326802,
+      "status": "verified",
+      "article": "PMC5524331.1",
+      "doi": "10.1371/journal.pone.0181468",
+      "checked_utc": "2026-11-05T07:53:49.992042+00:00"
+    },
+    {
+      "file": "pone.0181468.s001.csv",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC5524331.1/pone.0181468.s001.csv",
+      "bytes": 5089220,
+      "status": "verified",
+      "article": "PMC5524331.1",
+      "doi": "10.1371/journal.pone.0181468",
+      "checked_utc": "2026-11-05T07:54:04.431568+00:00"
+    },
+    {
+      "file": "PMC5524331.1.pdf",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC5524331.1/PMC5524331.1.pdf",
+      "bytes": 6341994,
+      "status": "verified",
+      "article": "PMC5524331.1",
+      "doi": "10.1371/journal.pone.0181468",
+      "checked_utc": "2026-11-05T07:55:14.345570+00:00"
+    }
+  ]
+}

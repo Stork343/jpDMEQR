@@ -62,7 +62,7 @@ metadata_record = fetch(metadata_key)
 metadata = json.loads((output / Path(metadata_key).name).read_text())
 assert metadata["doi"] == args.doi and not metadata["is_manuscript"]
 assert not metadata["is_retracted"]
-keys = [key for key in objects if Path(key).suffix in {".txt", ".xml", ".pdf", ".xlsx", ".zip", ".docx"}]
+keys = [key for key in objects if Path(key).suffix in {".txt", ".xml", ".pdf", ".xlsx", ".xls", ".csv", ".tsv", ".zip", ".docx"}]
 keys.sort(key=lambda key: (Path(key).suffix not in {".txt", ".xlsx"}, objects[key]))
 with ThreadPoolExecutor(max_workers=3) as executor:
     records = list(executor.map(fetch, keys))

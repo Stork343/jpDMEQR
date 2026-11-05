@@ -1,0 +1,43 @@
+study_id: pregnancy_detroit_20261105
+source_doi: 10.1371/journal.pone.0181468
+source_directory: data/raw/pregnancy_detroit_20261105/official_cloud
+input_directory: data/derived/pregnancy_detroit_20261105
+output_root: results/raw/application/pregnancy_detroit_20261105
+report_directory: results/preflight/empirical_selection_20261101/pregnancy_detroit
+response: gestational_age_weeks
+decision_quantile: 0.5
+quantiles: [0.25, 0.5, 0.75]
+training_fraction: 0.6
+role_seed: 202611052
+outer_folds: 5
+inner_folds: 3
+minimum_observed_fraction: 0.8
+target_candidates: [JOINT_DIRECT, JOINT_OFFSET]
+comparators: [POOLED, POOLED_OFFSET, ENET, PRESS_RIDGE, CLINICAL_QR, QRF_RAW, QRF_OFFSET, XGB_RAW, XGB_OFFSET]
+screening_minimum_relative_gain: 0.02
+primary_prediction_rule: nonnegative_sorted_quantiles
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+forest:
+  trees: 2000
+  regression_splitting: [false, true]
+  mtry_multiplier: [1, 5]
+  min_node_size: [5, 10]
+  honesty: [true, false]
+  calibration: [none, training, oob]
+xgboost:
+  objective: reg:quantileerror
+  max_depth: [2, 4]
+  learning_rate: [0.03, 0.1]
+  reg_lambda: [1, 20]
+  rounds: [100, 300, 600]
+  subsample: 0.5
+  max_bin: 64
+  calibration: [none, training]
+formal_validation_used: false
+manuscript_adoption: false

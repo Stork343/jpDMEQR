@@ -1,0 +1,14 @@
+{
+  "status": "prepared",
+  "source_doi": "10.1371/journal.pone.0181468",
+  "patients": 166,
+  "records": 666,
+  "patients_with_repeats": 166,
+  "maximum_cluster_size": 6,
+  "protein_candidates": 1125,
+  "clinical_predictors": [],
+  "outcome_imputed": false,
+  "source_protein_processing": "supplier_normalization_and_published_abundance_thresholding",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

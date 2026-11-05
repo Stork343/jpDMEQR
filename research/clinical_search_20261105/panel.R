@@ -12,7 +12,7 @@ cp_values <- function(rows, panel, recipe) {
   missing <- is.na(X)
   for (j in seq_along(recipe$features)) X[missing[, j], j] <- recipe$impute[j]
   M <- missing[, recipe$missing_features, drop = FALSE] * 1
-  colnames(M) <- paste0("M_", recipe$missing_features)
+  if (length(recipe$missing_features)) colnames(M) <- paste0("M_", recipe$missing_features)
   cbind(X, M)
 }
 
