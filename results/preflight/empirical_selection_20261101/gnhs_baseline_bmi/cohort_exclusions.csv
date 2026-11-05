@@ -1,0 +1,5 @@
+role,origin,available_protein_records,missing_prior_or_future_bmi
+discovery,baseline,1785,27
+discovery,baseline,1785,290
+validation,baseline,1630,815
+validation,baseline,1630,1174

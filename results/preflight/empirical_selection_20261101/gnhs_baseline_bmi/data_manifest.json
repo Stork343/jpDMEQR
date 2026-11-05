@@ -1,0 +1,23 @@
+[
+  {
+    "file": "tableS1.zip",
+    "source": "https://guomics-web.oss-cn-beijing.aliyuncs.com/main/assets/archive/3d6a2b7b68da829d5ba1.zip",
+    "bytes": 585531,
+    "status": "verified",
+    "source_doi": "10.1016/j.xcrm.2023.101172"
+  },
+  {
+    "file": "tableS2.zip",
+    "source": "https://guomics-web.oss-cn-beijing.aliyuncs.com/main/assets/archive/8640544f964978b16234.zip",
+    "bytes": 22095972,
+    "status": "verified",
+    "source_doi": "10.1016/j.xcrm.2023.101172"
+  },
+  {
+    "file": "tableS3.zip",
+    "source": "https://guomics-web.oss-cn-beijing.aliyuncs.com/main/assets/archive/c15e581cd51a2c857c28.zip",
+    "bytes": 15948208,
+    "status": "verified",
+    "source_doi": "10.1016/j.xcrm.2023.101172"
+  }
+]

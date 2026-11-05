@@ -1,5 +1,6 @@
 selection_id: empirical_selection_20261101
 status: discovery
+active_candidate: gnhs_baseline_bmi_20261105
 adopted_dataset: null
 requirements:
   observed_continuous_response: true

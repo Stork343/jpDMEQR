@@ -1,3 +1,4 @@
+import argparse
 import json
 from pathlib import Path
 
@@ -5,7 +6,10 @@ import numpy as np
 import pandas as pd
 import yaml
 
-config = yaml.safe_load(Path("config/application_gnhs_future_bmi_20261105.yml").read_text())
+parser = argparse.ArgumentParser()
+parser.add_argument("config", type=Path)
+args = parser.parse_args()
+config = yaml.safe_load(args.config.read_text())
 source = Path(config["source_directory"]) / "tables"
 directory = Path(config["input_directory"])
 clinical = pd.read_excel(source / "tableS1" / "tableS1.xlsx", sheet_name="Clinical information")
@@ -25,7 +29,8 @@ for label, role in [("tableS2", "discovery"), ("tableS3", "validation")]:
     parts = rows.sample_id.str.extract(r"^(NL\d+)_(baseline|F2)_to_(F2|F3)$")
     assert parts.notna().all().all() and parts[0].equals(rows.strain_id)
     pairs = list(zip(parts[1], parts[2]))
-    assert set(pairs).issubset({("baseline", "F2"), ("F2", "F3")})
+    expected_pairs = {("baseline", "F2"), ("baseline", "F3")} if config.get("prediction_origin") == "baseline" else {("baseline", "F2"), ("F2", "F3")}
+    assert set(pairs).issubset(expected_pairs)
     start_key = pd.MultiIndex.from_arrays([rows.strain_id, parts[1]])
     end_key = pd.MultiIndex.from_arrays([rows.strain_id, parts[2]])
     expected_y = bmi.loc[end_key].to_numpy()

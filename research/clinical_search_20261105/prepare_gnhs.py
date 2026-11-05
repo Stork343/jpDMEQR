@@ -1,3 +1,4 @@
+import argparse
 import json
 from pathlib import Path
 
@@ -5,7 +6,10 @@ import numpy as np
 import pandas as pd
 import yaml
 
-config = yaml.safe_load(Path("config/application_gnhs_future_bmi_20261105.yml").read_text())
+parser = argparse.ArgumentParser()
+parser.add_argument("config", type=Path)
+args = parser.parse_args()
+config = yaml.safe_load(args.config.read_text())
 source = Path(config["source_directory"]) / "tables"
 output = Path(config["input_directory"])
 assert not output.exists()
@@ -34,8 +38,9 @@ features = []
 exclusions = []
 bmi = {"baseline": "BMI_BS", "F2": "BMI__F2", "F3": "BMI__F3"}
 age = {"baseline": "Age_BS", "F2": "Age__F2", "F3": "Age__F3"}
+intervals = [("baseline", "F2"), ("baseline", "F3")] if config.get("prediction_origin") == "baseline" else [("baseline", "F2"), ("F2", "F3")]
 for role, frame in matrices.items():
-    for start, end in [("baseline", "F2"), ("F2", "F3")]:
+    for start, end in intervals:
         current = frame.loc[frame.visit.eq(start)].copy()
         phenotypes = clinical.loc[current.strain_id].copy()
         eligible = phenotypes[bmi[start]].notna() & phenotypes[bmi[end]].notna()
@@ -57,6 +62,8 @@ for role, frame in matrices.items():
                           "C_sex_code": phenotypes.Sex.to_numpy(), "C_horizon": horizon,
                           "C_origin_F2": float(start == "F2"), "C_bmi_horizon": prior * horizon,
                           "C_age_horizon": start_age * horizon}).set_index("sample_id")
+        if config.get("prediction_origin") == "baseline":
+            C["C_target_F3"] = float(end == "F3")
         suffix = "BS" if start == "baseline" else "F2"
         for name in ["Waist", "Glucose", "TG", "HDL", "SBP/DBP"]:
             values = phenotypes[f"{name}_{suffix}"].replace(999, np.nan)
@@ -70,6 +77,10 @@ for role, frame in matrices.items():
 rows = pd.concat(rows, ignore_index=True).sort_values(["strain_id", "sample_id"])
 features = pd.concat(features).loc[rows.sample_id]
 assert rows.sample_id.is_unique and features.index.is_unique
+if config.get("prediction_origin") == "baseline":
+    fixed = features[[column for column in features.columns if column.startswith("P_") or column.startswith("C_prior_") or column == "C_sex_code"]].copy()
+    fixed["strain_id"] = rows.strain_id.to_numpy()
+    assert fixed.groupby("strain_id").nunique(dropna=False).le(1).all().all()
 participants = rows[["strain_id", "role"]].drop_duplicates().sort_values("strain_id").reset_index(drop=True)
 assert participants.strain_id.is_unique
 participants["outer_fold"] = 0
@@ -94,6 +105,7 @@ sizes = rows.groupby("strain_id").size()
 status = {"status": "prepared", "source_doi": config["source_doi"], "patients": rows.strain_id.nunique(),
           "records": len(rows), "patients_with_repeats": int(sizes.ge(2).sum()), "maximum_cluster_size": int(sizes.max()),
           "protein_candidates": len(proteins), "role_assignment": config["role_assignment"],
+          "prediction_origin": config.get("prediction_origin", "adjacent_visits"),
           "patient_overlap": 0, "outcome_imputed": False, "future_assay_used_as_predictor": False,
           "formal_validation_used": False, "manuscript_adoption": False}
 (report / "cohort_status.json").write_text(json.dumps(status, indent=2) + "\n")
