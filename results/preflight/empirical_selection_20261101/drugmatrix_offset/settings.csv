@@ -1,0 +1,8 @@
+assay,method,tau,runtime_sec,Lambda,size,lambda,alpha,penalty_index
+ALT,JOINT_OFFSET,0.75,18.97,2,1,,,
+ALT,PRESS_RIDGE,,0.898,,,6.878734909605,,
+ALT,ENET,,127.914,,,,0,53
+ALT,POOLED_OFFSET,0.75,869.647,,,,,5
+ALT,JOINT_DIRECT,0.75,18.093,0.5,20,,,
+ALT,JOINT_OFFSET,0.25,18.51,2,1,,,
+ALT,JOINT_OFFSET,0.5,18.6,0.5,0,,,
