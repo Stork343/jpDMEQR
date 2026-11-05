@@ -1,0 +1,18 @@
+{
+  "study_id": "gnhs_baseline_bmi_20261105",
+  "status": "linear_screen_completed",
+  "completed_jobs": 75,
+  "observed_process_exit_codes": 75,
+  "completed_artifacts_without_exit_code": 0,
+  "discovery_patients": 1765,
+  "discovery_records": 3253,
+  "decision_quantile": 0.75,
+  "best_screening_candidate": "JOINT_OFFSET",
+  "minimum_gain_by_candidate": {
+    "JOINT_DIRECT": -0.0066381645104398295,
+    "JOINT_OFFSET": -0.003499019605053595
+  },
+  "continue_nonlinear_comparison": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
