@@ -1,0 +1,18 @@
+phase: method_development
+input_directory: data/derived/yeast_proteome_20261104
+recipe_directory: results/raw/application/ridge_offset_series_20261105
+selection_table: results/preflight/empirical_selection_20261101/ridge_offset_series/selected_coefficients.csv
+output_root: results/raw/application/proteome_associations_20261105
+report_directory: results/preflight/empirical_selection_20261101/proteome_associations
+assays:
+  Benomyl: [YKL024C, YNR050C]
+  Caffeine: [YBR115C, YKR035W-A, YMR246W, YEL071W]
+estimation_role: evaluation
+quantiles: [0.25, 0.5, 0.75]
+working_lambda: 1
+bandwidth_multipliers: [1, 0.75, 1.25]
+reference_bandwidth_multiplier: 1
+contrast_family_size_per_bandwidth: 120
+confidence: 0.95
+formal_validation_used: false
+manuscript_adoption: false
