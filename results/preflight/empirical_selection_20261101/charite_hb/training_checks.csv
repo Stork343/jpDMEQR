@@ -1,0 +1,9 @@
+check,tau,maximum_error
+joint_qp,0.25,4.981630400903e-12
+joint_qp,0.5,6.13549832206611e-13
+joint_qp,0.75,1.76692113747914e-12
+ridge_delete_1,,1.53210777398272e-14
+ridge_delete_15,,1.7874590696465e-14
+training_interface_JOINT,0.25,0
+training_interface_POOLED,0.25,0
+training_interface_ENET,0.25,0

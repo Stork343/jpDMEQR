@@ -1,0 +1,16 @@
+{
+  "status": "prepared",
+  "source_doi": "10.1016/j.cels.2021.05.005",
+  "source_rows": 687,
+  "patients": 133,
+  "records": 667,
+  "protein_candidates": 210,
+  "excluded_response_protein_groups": 4,
+  "maximum_cluster_size": 15,
+  "protein_missing_fraction": 0.09099021917612622,
+  "outcome_imputed": false,
+  "response_unit": "g_per_dl",
+  "formal_validation_used": false,
+  "outcome_associations_fitted": false,
+  "manuscript_adoption": false
+}
