@@ -1,0 +1,2 @@
+study_id,rows,variables,models,runtime_sec,total_iterations,maximum_iterations,objective_difference
+ra_westchina_20261105,139,1364,40,2.824,1925,100,-1.6775910521849e-11

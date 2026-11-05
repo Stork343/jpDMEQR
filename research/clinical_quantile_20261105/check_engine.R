@@ -15,7 +15,7 @@ columns <- c(clinical, protein)
 features$X <- features$X[, columns, drop = FALSE]
 features$penalty_factor <- features$penalty_factor[columns]
 checks <- list()
-for (tau in unlist(config$quantiles)) for (alpha in c(0, 0.5, 1)) {
+for (tau in unlist(config$quantiles)) for (alpha in unlist(config$alpha)) {
   path <- cq_path(features, tau, alpha, config)
   index <- 20L
   exact <- cq_exact(features, tau, path$lambda[index], alpha, config)
@@ -23,7 +23,8 @@ for (tau in unlist(config$quantiles)) for (alpha in c(0, 0.5, 1)) {
   weight <- nrow(features$X) * features$weight / features$n
   transformed <- mean(ep_loss(features$y * weight, drop(features$X %*% exact$beta) * weight, tau))
   direct <- sum(features$weight * ep_loss(features$y, drop(features$X %*% exact$beta), tau)) / features$n
-  stopifnot(abs(transformed - direct) < 1e-12, approximate - exact$objective < 0.005)
+  stopifnot(abs(transformed - direct) < 1e-12,
+    abs(approximate - exact$objective) < config$maximum_path_objective_difference)
   checks[[length(checks) + 1L]] <- data.table(tau, alpha, objective = exact$objective,
     path_objective_difference = approximate - exact$objective,
     homogeneity_error = abs(transformed - direct), gap = exact$diagnostics$gap,

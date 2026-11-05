@@ -1,6 +1,6 @@
 {
   "status": "passed",
   "source": "actual_ra_discovery_training_patients",
-  "objective_checks": 9,
+  "objective_checks": 12,
   "generated_observations": 0
 }

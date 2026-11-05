@@ -1,6 +1,5 @@
 library(data.table)
 library(Matrix)
-library(hqreg)
 library(clarabel)
 library(quantreg)
 library(matrixStats)
@@ -44,16 +43,20 @@ cq_lambda <- function(features, tau, alpha, config) {
 }
 
 cq_path <- function(features, tau, alpha, config) {
-  lambda <- cq_lambda(features, tau, alpha, config)
-  weight <- nrow(features$X) * features$weight / features$n
-  fitted <- hqreg::hqreg_raw(features$X * weight, features$y * weight,
-    method = "quantile", tau = tau, alpha = alpha, lambda = lambda, intercept = FALSE,
-    penalty.factor = features$penalty_factor, screen = "ASR", dfmax = ncol(features$X) + 1L,
-    max.iter = config$path_max_iterations, eps = config$path_tolerance)
-  stopifnot(ncol(fitted$beta) == length(lambda), all(is.finite(fitted$beta)),
-    all(fitted$iter < config$path_max_iterations), !as.logical(fitted$saturated),
-    max(abs(fitted$lambda - lambda)) < 1e-12)
-  list(beta = fitted$beta, lambda = lambda, alpha = alpha, iterations = fitted$iter)
+  if (alpha == 1) {
+    lambda <- cq_lambda(features, tau, alpha, config)
+    weight <- nrow(features$X) * features$weight / features$n
+    fit <- soy_pooled_lp_cpp(features$X * weight, features$y * weight,
+      features$penalty_factor, tau, as.integer(config$path_length), config$lambda_min_ratio,
+      lambda, FALSE)
+    stopifnot(ncol(fit$beta) == length(lambda), max(abs(fit$primal_dual_gap)) < 1e-7,
+      max(fit$dual_violation) < 1e-7)
+    rownames(fit$beta) <- colnames(features$X)
+    return(list(beta = fit$beta, lambda = lambda, alpha = alpha, iterations = fit$iterations,
+      diagnostics = fit[c("primal_dual_gap", "dual_violation")], solver = "highs_exact_lasso_path"))
+  }
+  if (alpha > 0) return(cq_elastic_path(features, tau, alpha, config))
+  cq_qp_path(features, tau, alpha, config)
 }
 
 cq_sparse <- function(value) as(as(Matrix::Matrix(value, sparse = TRUE), "generalMatrix"), "CsparseMatrix")
@@ -146,3 +149,7 @@ cq_fit <- function(rows, evaluation, panel, recipes, study, config, tau, directo
   saveRDS(fit, file.path(directory, "fit.rds"))
   fit
 }
+
+source("research/clinical_quantile_20261105/qp_path.R")
+source("research/clinical_quantile_20261105/elastic_path.R")
+source("research/soynam_application_20261031/load_pooled_lp.R")

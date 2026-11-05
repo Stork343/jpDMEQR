@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "source": "actual_gnhs_discovery_training_design",
+  "checks": 3,
+  "clinical_outcomes_used_in_identity_test": false
+}

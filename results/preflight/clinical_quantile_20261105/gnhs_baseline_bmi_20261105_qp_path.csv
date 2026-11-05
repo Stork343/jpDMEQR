@@ -1,0 +1,2 @@
+study_id,rows,variables,models,runtime_sec,total_iterations,maximum_iterations,objective_difference
+gnhs_baseline_bmi_20261105,1728,671,40,204.512,30700,2775,-4.79200013003833e-13

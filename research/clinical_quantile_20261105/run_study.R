@@ -5,12 +5,14 @@ args <- commandArgs(trailingOnly = TRUE)
 stopifnot(length(args) == 1L)
 study <- read_yaml(args[1L])
 config <- read_yaml("config/clinical_quantile_20261105.yml")
-root <- file.path("results/raw/clinical_quantile_20261105", study$study_id)
+root <- file.path(config$output_root, study$study_id)
 if (dir.exists(root)) stop("计算目录已经存在")
 dir.create(root, recursive = TRUE)
 stopifnot(file.copy("config/clinical_quantile_20261105.yml", file.path(root, "method_config.yml")),
   file.copy(args[1L], file.path(root, "source_config.yml")),
-  file.copy("research/clinical_quantile_20261105/engine.R", file.path(root, "engine.R")))
+  file.copy("research/clinical_quantile_20261105/engine.R", file.path(root, "engine.R")),
+  file.copy("research/clinical_quantile_20261105/qp_path.R", file.path(root, "qp_path.R")),
+  file.copy("research/clinical_quantile_20261105/elastic_path.R", file.path(root, "elastic_path.R")))
 write_json(list(status = "running", method = config$method_id,
   source_commit = system2("git", c("rev-parse", "HEAD"), stdout = TRUE),
   formal_validation_used = FALSE, manuscript_adoption = FALSE),
