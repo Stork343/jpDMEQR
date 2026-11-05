@@ -18,10 +18,11 @@ Rcpp::List soy_pooled_lp_cpp(const Eigen::Map<Eigen::MatrixXd> X,
                             const Eigen::Map<Eigen::VectorXd> y,
                             const Eigen::Map<Eigen::VectorXd> factor,
                             double tau, int nlambda, double lambda_min,
-                            Rcpp::NumericVector requested, bool progress) {
+                            Rcpp::NumericVector requested, bool progress,
+                            int maximum_solutions = 0) {
   const int N = X.rows(), p = X.cols();
   if (y.size() != N || factor.size() != p || !X.allFinite() || !y.allFinite() ||
-      tau <= 0 || tau >= 1 || nlambda < 2 || lambda_min <= 0 || lambda_min > 1)
+      tau <= 0 || tau >= 1 || nlambda < 2 || lambda_min <= 0 || lambda_min > 1 || maximum_solutions < 0)
     Rcpp::stop("Invalid pooled quantile path input.");
   Highs solver;
   soy_highs_status(solver.setOptionValue("output_flag", false));
@@ -87,14 +88,19 @@ Rcpp::List soy_pooled_lp_cpp(const Eigen::Map<Eigen::MatrixXd> X,
     for (int j = 0; j < nlambda; ++j)
       lambdas.push_back(maximum * std::exp(std::log(lambda_min) * j / (nlambda - 1)));
   }
+  const int full_grid_size = lambdas.size();
+  for (int point = 0; point < full_grid_size; ++point)
+    if (!std::isfinite(lambdas[point]) || lambdas[point] < 0 ||
+        (point && lambdas[point] > lambdas[point - 1]))
+      Rcpp::stop("Invalid decreasing pooled penalty grid.");
+  if (maximum_solutions > full_grid_size) Rcpp::stop("The requested solution count exceeds the pooled grid.");
+  if (maximum_solutions > 0) lambdas.resize(maximum_solutions);
   const int count = lambdas.size();
   Eigen::MatrixXd coefficients = Eigen::MatrixXd::Zero(p, count);
   Rcpp::NumericVector gaps(count), violations(count);
   Rcpp::IntegerVector constraints(count), nonzero(count), generations(count), iterations(count);
   for (int point = 0; point < count; ++point) {
     const double lambda = lambdas[point];
-    if (!std::isfinite(lambda) || lambda < 0 || (point && lambda > lambdas[point - 1]))
-      Rcpp::stop("Invalid decreasing pooled penalty grid.");
     std::vector<double> lower, upper;
     for (int k : selected) {
       lower.push_back(-N * lambda * factor[k]);
@@ -163,5 +169,6 @@ Rcpp::List soy_pooled_lp_cpp(const Eigen::Map<Eigen::MatrixXd> X,
     Rcpp::_["primal_dual_gap"] = gaps, Rcpp::_["dual_violation"] = violations,
     Rcpp::_["active_constraints"] = constraints, Rcpp::_["selected_variables"] = nonzero,
     Rcpp::_["generations"] = generations, Rcpp::_["iterations"] = iterations,
-    Rcpp::_["highs_version"] = solver.version());
+    Rcpp::_["highs_version"] = solver.version(), Rcpp::_["full_grid_size"] = full_grid_size,
+    Rcpp::_["solved_grid_size"] = count);
 }

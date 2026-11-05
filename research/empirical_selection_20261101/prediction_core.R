@@ -98,7 +98,8 @@ ep_path <- function(features, method, tau, config, maximum, setting = NULL) {
     stopifnot(method == "POOLED")
     row_weight <- nrow(features$X) * features$weight / features$n
     fit <- soy_pooled_lp_cpp(features$X * row_weight, features$y * row_weight,
-      features$penalty_factor, tau, 40L, 0.01, numeric(), TRUE)
+      features$penalty_factor, tau, 40L, 0.01, numeric(), TRUE,
+      maximum_solutions = if (is.null(setting)) 0L else as.integer(setting$penalty_index))
     grid <- data.table(penalty_index = seq_len(ncol(fit$beta)))
     beta <- fit$beta
     diagnostics <- fit[c("primal_dual_gap", "dual_violation", "iterations")]

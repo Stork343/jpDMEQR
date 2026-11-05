@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "reference": "saved_complete_native_paths",
+  "grid_size": 40,
+  "solver": "HiGHS",
+  "formal_validation_used": false
+}
