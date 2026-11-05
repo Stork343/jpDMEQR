@@ -1,0 +1,23 @@
+{
+  "status": "prepared",
+  "source_doi": "10.1038/s41467-025-62032-1",
+  "correction_doi": "10.1038/s41467-026-78081-z",
+  "ra_source_patients": 278,
+  "ra_source_records": 477,
+  "patients": 267,
+  "records": 436,
+  "patients_with_repeats": 122,
+  "maximum_cluster_size": 3,
+  "protein_candidates": 995,
+  "excluded_protein_components": 1,
+  "clinical_predictors": [
+    "C_age",
+    "C_male",
+    "C_acpa",
+    "C_visit2",
+    "C_visit3"
+  ],
+  "outcome_imputed": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

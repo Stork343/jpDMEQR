@@ -1,0 +1,107 @@
+{
+  "status": "downloaded_with_si",
+  "article": "PMC12279936.1",
+  "doi": "10.1038/s41467-025-62032-1",
+  "license": "CC BY-NC-ND",
+  "files": [
+    {
+      "file": "PMC12279936.1.json",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/PMC12279936.1.json",
+      "bytes": 2188,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:17.075316+00:00"
+    },
+    {
+      "file": "41467_2025_62032_MOESM3_ESM.xlsx",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/41467_2025_62032_MOESM3_ESM.xlsx",
+      "bytes": 78899,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:23.523551+00:00"
+    },
+    {
+      "file": "PMC12279936.1.txt",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/PMC12279936.1.txt",
+      "bytes": 101332,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:20.025378+00:00"
+    },
+    {
+      "file": "41467_2025_62032_MOESM4_ESM.xlsx",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/41467_2025_62032_MOESM4_ESM.xlsx",
+      "bytes": 6018671,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:23.335319+00:00"
+    },
+    {
+      "file": "41467_2025_62032_MOESM2_ESM.pdf",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/41467_2025_62032_MOESM2_ESM.pdf",
+      "bytes": 171453,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:23.684615+00:00"
+    },
+    {
+      "file": "PMC12279936.1.xml",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/PMC12279936.1.xml",
+      "bytes": 193148,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:27.875212+00:00"
+    },
+    {
+      "file": "41467_2025_62032_MOESM5_ESM.pdf",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/41467_2025_62032_MOESM5_ESM.pdf",
+      "bytes": 244440,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:29.297760+00:00"
+    },
+    {
+      "file": "41467_2025_62032_MOESM1_ESM.pdf",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/41467_2025_62032_MOESM1_ESM.pdf",
+      "bytes": 2149956,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:30.299101+00:00"
+    },
+    {
+      "file": "41467_2025_62032_MOESM6_ESM.pdf",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/41467_2025_62032_MOESM6_ESM.pdf",
+      "bytes": 2316421,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:39.465823+00:00"
+    },
+    {
+      "file": "PMC12279936.1.pdf",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/PMC12279936.1.pdf",
+      "bytes": 3914474,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:52.942011+00:00"
+    },
+    {
+      "file": "41467_2025_62032_MOESM7_ESM.zip",
+      "source": "https://pmc-oa-opendata.s3.us-east-1.amazonaws.com/PMC12279936.1/41467_2025_62032_MOESM7_ESM.zip",
+      "bytes": 22009567,
+      "status": "verified",
+      "article": "PMC12279936.1",
+      "doi": "10.1038/s41467-025-62032-1",
+      "checked_utc": "2026-11-05T07:04:38.624737+00:00"
+    }
+  ]
+}
