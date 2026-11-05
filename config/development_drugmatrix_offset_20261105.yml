@@ -1,0 +1,27 @@
+phase: method_development
+input_directory: data/derived/drugmatrix_offset_20261105
+input_panel: data/derived/drugmatrix_20261101/panel.rds
+input_growth: data/derived/drugmatrix_20261101/discovery.rds
+input_annotation: data/derived/drugmatrix_20261101/probe_annotation.csv
+output_root: results/raw/application/drugmatrix_offset_20261105
+outcome: log_ALT_U_per_L
+decision_quantile: 0.75
+quantiles: [0.25, 0.5, 0.75]
+cluster: test_article
+roles: inherited_from_drugmatrix_20261101
+probe_type: DISCOVERY
+expression_observed_training_fraction: 0.8
+missing_predictors: training_median
+standardization: training_compound_weighted_mean_sd
+background: cluster_deleted_ridge
+correction: sparse_quantile_specific_covariate_and_ridge_direction_terms
+always_included_correction: intercept
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+formal_validation_used: false
+manuscript_adoption: false
