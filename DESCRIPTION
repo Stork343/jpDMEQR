@@ -66,6 +66,7 @@ Suggests:
     ranger,
     readr,
     readxl,
+    reticulate,
     rcmdcheck,
     rqPen,
     statmod,

@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "source": "actual_ra_training_data",
+  "checks": 12,
+  "maximum_objective_error": 5.7104e-11,
+  "maximum_prediction_rmse": 9.0258e-06
+}

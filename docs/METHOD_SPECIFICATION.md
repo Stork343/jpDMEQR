@@ -4,7 +4,7 @@ The active research direction is conditional quantile estimation for independent
 
 The scientific parameter is defined by the conditional outcome distribution. Regularisation and working correlation are estimation choices. They do not enter the definition of the parameter.
 
-`CQ-ENET` fits patient weighted quantile regression with unpenalised prespecified clinical covariates and an elastic net penalty on the remaining covariates. `CQ-ORTH` uses a patient level orthogonal score for a prespecified coefficient. Its working covariance acts on quantile scores. Its validity requires the conditional moment and nuisance rate conditions stated in the specification.
+The active preliminary estimator is `CQ-SMOOTH`, defined in `research/clinical_quantile_20261105/CENTERED_SMOOTHING.md` and configured in `config/clinical_quantile_smooth_20261106.yml`. It uses a centred kernel, retained clinical directions, an elastic net penalty on the protein coefficients and a vanishing numerical ridge. `CQ-ENET` supplies a nonsmooth reference comparison. `CQ-ORTH` uses the original patient quantile score for a prespecified coefficient. Its working covariance acts on quantile scores. Its validity requires the conditional moment and nuisance rate conditions stated in the specification.
 
 Numerical verification uses actual discovery patients and deterministic mathematical calculations. Empirical tuning uses patient folds. The reserved validation cohorts remain assigned to independent validation after the revised procedure and clinical question have been fixed.
 

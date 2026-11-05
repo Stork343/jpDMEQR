@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "calculation": "deterministic_population_integration",
+  "random_observations_generated": 0,
+  "cases": 108,
+  "minimum_halving_error_ratio": 3.9577035028341436,
+  "maximum_halving_error_ratio": 3.9976475932235775
+}

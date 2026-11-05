@@ -1,0 +1,6 @@
+numpy==2.5.4
+scipy==1.18.1
+numba==0.68.1
+llvmlite==0.50.0
+scikit-learn==1.9.1
+skglm @ git+https://github.com/scikit-learn-contrib/skglm.git@c73abe71b89752ec9c6444932fffb5bb73ff7a9c
