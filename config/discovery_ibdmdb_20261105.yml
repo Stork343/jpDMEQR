@@ -1,0 +1,27 @@
+phase: discovery
+input_directory: data/derived/ibdmdb_20261105
+output_root: results/raw/application/ibdmdb_20261105
+source_doi: 10.1038/s41586-019-1237-9
+response: log_reported_calprotectin
+decision_quantile: 0.75
+quantiles: [0.25, 0.5, 0.75]
+outer_folds: 5
+inner_folds: 3
+positive_fraction_minimum: 0.2
+feature_rule: named_metabolites_minimum_pooled_QC_CV_at_most_0.3
+zero_handling: half_smallest_positive_training_value
+predictor_transform: log2_signal_minus_same_sample_method_median
+clinical_candidates: [age, sex, diagnosis, site, week_num, antibiotics, immunosuppressants, method_signal]
+always_included: intercept
+background: cluster_deleted_ridge
+offset_calibration: training_residual_quantile
+nuisance_design: participant_intercept
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+formal_validation_used: false
+manuscript_adoption: false

@@ -1,0 +1,16 @@
+{
+  "status": "prepared",
+  "participants": 85,
+  "records": 349,
+  "named_features": 519,
+  "maximum_measurements": 7,
+  "features_without_method_annotation": 4,
+  "exact_specimen_matching": true,
+  "matching_key": "site_sub_coll",
+  "specimens_with_both_source_fields": 97,
+  "maximum_source_field_difference": 9.729999999308347e-05,
+  "source_units": "ng_per_ml_in_fecalcal_ng_ml_export",
+  "outcome_associations_fitted": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

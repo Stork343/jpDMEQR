@@ -1,0 +1,3 @@
+assay,method,inner_folds,forest_settings,calibration_settings,maximum_error
+Benomyl,QRF_RAW,3,16,48,0
+Benomyl,QRF_OFFSET,3,16,48,0

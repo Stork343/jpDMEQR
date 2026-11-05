@@ -1,0 +1,7 @@
+role,diagnosis,participants,records
+discovery,CD,29,129
+discovery,UC,18,63
+discovery,nonIBD,21,77
+validation_reserved,CD,8,35
+validation_reserved,UC,7,34
+validation_reserved,nonIBD,2,11

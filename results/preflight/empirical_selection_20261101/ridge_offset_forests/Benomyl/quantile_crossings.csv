@@ -1,0 +1,7 @@
+assay,method,quantiles,records,crossed_records,maximum_crossing
+Benomyl,QRF_RAW,3,286,0,0
+Benomyl,QRF_OFFSET,3,286,0,0
+Benomyl,JOINT_OFFSET,3,286,0,0
+Benomyl,PRESS_RIDGE,3,286,0,0
+Benomyl,POOLED_OFFSET,1,286,,
+Benomyl,ENET,3,286,0,0

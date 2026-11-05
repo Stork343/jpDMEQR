@@ -1,0 +1,11 @@
+role,site_name,participants
+discovery,Cedars-Sinai,18
+discovery,Cincinnati,19
+discovery,Emory,3
+discovery,MGH,18
+discovery,MGH Pediatrics,10
+validation_reserved,Cedars-Sinai,4
+validation_reserved,Cincinnati,5
+validation_reserved,Emory,1
+validation_reserved,MGH,5
+validation_reserved,MGH Pediatrics,2

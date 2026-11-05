@@ -1,0 +1,7 @@
+assay,method,tau,runtime_sec,forest_index,calibration,regression_splitting,mtry_multiplier,min_node_size,honesty
+Benomyl,QRF_RAW,0.25,1674.416,12,training,TRUE,5,5,FALSE
+Benomyl,QRF_RAW,0.5,1674.416,12,oob,TRUE,5,5,FALSE
+Benomyl,QRF_RAW,0.75,1674.416,12,oob,TRUE,5,5,FALSE
+Benomyl,QRF_OFFSET,0.25,1645.815,14,oob,TRUE,1,10,FALSE
+Benomyl,QRF_OFFSET,0.5,1645.815,14,none,TRUE,1,10,FALSE
+Benomyl,QRF_OFFSET,0.75,1645.815,10,training,TRUE,1,5,FALSE
