@@ -25,7 +25,8 @@ rs_forest_predict <- function(fit, features, oob = FALSE) {
   prediction
 }
 
-rs_forest_prediction <- function(rows, evaluation, panel, recipes, offset_model, progress, directory) {
+rs_forest_prediction <- function(rows, evaluation, panel, recipes, offset_model, progress, directory,
+                                 base_feature_function = proteome_features) {
   grid <- expand.grid(regression_splitting = c(FALSE, TRUE), mtry_multiplier = c(1, 5),
                        min_node_size = c(5L, 10L), honesty = c(TRUE, FALSE))
   settings <- data.table::rbindlist(lapply(seq_len(nrow(grid)), function(j)
@@ -33,8 +34,8 @@ rs_forest_prediction <- function(rows, evaluation, panel, recipes, offset_model,
   quantiles <- c(0.25, 0.5, 0.75)
   loss <- matrix(0, nrow(settings), length(quantiles))
   feature_function <- function(current, recipe) {
-    result <- if (offset_model) ep_offset_features(current, panel, recipe, proteome_features) else
-      proteome_features(current, panel, recipe$direction_recipe$base_recipe)
+    result <- if (offset_model) ep_offset_features(current, panel, recipe, base_feature_function) else
+      base_feature_function(current, panel, recipe$direction_recipe$base_recipe)
     result$sample_id <- current$sample_id
     result
   }

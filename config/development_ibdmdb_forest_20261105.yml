@@ -1,0 +1,21 @@
+phase: method_development
+input_directory: data/derived/ibdmdb_20261105
+source_root: results/raw/application/ibdmdb_20261105
+output_root: results/raw/application/ibdmdb_forests_20261105
+decision_quantile: 0.5
+quantiles: [0.25, 0.5, 0.75]
+selection_basis: positive_discovery_median_gain_over_four_linear_comparators
+outer_folds: 5
+inner_folds: 3
+methods: [QRF_RAW, QRF_OFFSET]
+trees: 2000
+settings:
+  regression_splitting: [false, true]
+  mtry_multiplier: [1, 5]
+  min_node_size: [5, 10]
+  honesty: [true, false]
+calibration: [none, training, oob]
+cluster: strain_id
+equalize_cluster_weights: true
+formal_validation_used: false
+manuscript_adoption: false
