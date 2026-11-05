@@ -1,0 +1,16 @@
+{
+  "study_id": "ra_westchina_20261105",
+  "status": "linear_screen_completed",
+  "completed_jobs": 75,
+  "discovery_patients": 160,
+  "discovery_records": 261,
+  "decision_quantile": 0.75,
+  "best_screening_candidate": "JOINT_OFFSET",
+  "minimum_gain_by_candidate": {
+    "JOINT_DIRECT": -0.04549999419977939,
+    "JOINT_OFFSET": -0.009645813148733683
+  },
+  "continue_nonlinear_comparison": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
