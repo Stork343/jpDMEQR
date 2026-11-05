@@ -1,0 +1,3 @@
+role,patients,records,clinical_alignment_error,protein_alignment_error,predictor_visit_precedes_response
+discovery,1765,3253,1.7763568394002505e-15,1.7763568394002505e-15,True
+validation,884,1271,3.552713678800501e-15,1.7763568394002505e-15,True
