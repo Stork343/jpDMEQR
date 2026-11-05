@@ -2,7 +2,7 @@ phase: method_development
 input_directory: data/derived/yeast_proteome_20261104
 recipe_directory: results/raw/application/ridge_offset_series_20261105
 selection_table: results/preflight/empirical_selection_20261101/ridge_offset_series/selected_coefficients.csv
-output_root: results/raw/application/proteome_associations_20261105
+output_root: results/raw/application/proteome_associations_20261105_v2
 report_directory: results/preflight/empirical_selection_20261101/proteome_associations
 assays:
   Benomyl: [YKL024C, YNR050C]

@@ -8,6 +8,7 @@ source("research/yeast_proteome_application_20261105/features.R")
 
 config_path <- "config/development_proteome_associations_20261105.yml"
 config <- read_yaml(config_path)
+Lambda <- matrix(as.numeric(config$working_lambda))
 root <- config$output_root
 if (dir.exists(root)) stop("运行目录已经存在")
 dir.create(root, recursive = TRUE)
@@ -61,7 +62,7 @@ for (assay_name in names(config$assays)) {
     for (value in unlist(config$quantiles)) {
       cat(format(Sys.time(), tz = "UTC", usetz = TRUE), assay_name, multiplier, value, "\n")
       flush.console()
-      fit <- jp_fit_fixed(data$y, X, data$Z, data$cluster_id, value, Lambda = matrix(config$working_lambda),
+      fit <- jp_fit_fixed(data$y, X, data$Z, data$cluster_id, value, Lambda = Lambda,
         h = data$n^(-0.3) * multiplier)
       stopifnot(max(fit$diagnostics$full_kkt, fit$diagnostics$half_kkt) < 1e-8,
         max(fit$diagnostics$full_nuisance_gradient, fit$diagnostics$half_nuisance_gradient) < 1e-8)
@@ -69,7 +70,7 @@ for (assay_name in names(config$assays)) {
       order <- c(coordinate, setdiff(seq_len(ncol(X)), coordinate))
       reference_data <- sb_data(data$y, X[, order, drop = FALSE], data$Z, data$cluster_id)
       reference <- ds_pair_small(reference_data, fit$full$beta[order], value,
-        data$n^(-0.3) * multiplier, matrix(config$working_lambda))
+        data$n^(-0.3) * multiplier, Lambda)
       reference_se <- sqrt(sum((reference$influence - mean(reference$influence))^2)) / data$n
       estimate_error <- abs(reference$estimate - fit$beta[coordinate])
       se_error <- abs(reference_se - fit$table$se[coordinate])
