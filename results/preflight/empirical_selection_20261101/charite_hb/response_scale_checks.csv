@@ -1,0 +1,15 @@
+panel,mode,part,maximum_error
+training,raw,fitting,8.88178419700125e-16
+training,offset,fitting,0
+inner_1,raw,fitting,0
+inner_1,raw,validation,0
+inner_1,offset,fitting,0
+inner_1,offset,validation,0
+inner_2,raw,fitting,8.88178419700125e-16
+inner_2,raw,validation,8.88178419700125e-16
+inner_2,offset,fitting,0
+inner_2,offset,validation,0
+inner_3,raw,fitting,8.88178419700125e-16
+inner_3,raw,validation,8.88178419700125e-16
+inner_3,offset,fitting,0
+inner_3,offset,validation,0

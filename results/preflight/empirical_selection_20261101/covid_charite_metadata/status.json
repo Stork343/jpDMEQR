@@ -13,9 +13,7 @@
   "bmi_missing_among_horowitz_records": 2,
   "source_clinical_timing": "latest_value_from_up_to_two_preceding_days_when_current_day_missing",
   "individual_clinical_measurement_timestamps_provided": false,
-  "protein_matrix_complete": false,
-  "roles_assigned": false,
-  "outcome_associations_fitted": false,
-  "formal_validation_used": false,
-  "manuscript_adoption": false
+  "protein_matrix_complete": true,
+  "audit_scope": "source_file_integrity_and_metadata",
+  "analysis_report_directory": "results/preflight/empirical_selection_20261101/charite_hb"
 }

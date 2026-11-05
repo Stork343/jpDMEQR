@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "prediction_error": 0.0,
+  "metric_error": 1.7207018032650012e-09,
+  "reload_error": 0.0,
+  "xgboost_version": "3.4.1",
+  "formal_validation_used": false
+}

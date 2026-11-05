@@ -43,7 +43,7 @@ for (key in c("training", "inner_1", "inner_2", "inner_3")) {
         y = value$y, raw_y = value$raw_y, weight = value$weight, offset = offset),
         file.path(directory, paste0(name, "_meta.csv")))
       write_json(list(y_scale = value$recipe$y_scale, y_center = value$recipe$y_center,
-        columns = colnames(value$X)[-1L]), file.path(directory, "scaling.json"), auto_unbox = TRUE, pretty = TRUE)
+        columns = colnames(value$X)[-1L]), file.path(directory, "scaling.json"), auto_unbox = TRUE, pretty = TRUE, digits = NA)
     }
   }
   cat(key, "prepared\n")
