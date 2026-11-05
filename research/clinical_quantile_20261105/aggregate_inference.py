@@ -1,13 +1,14 @@
 import json
 from pathlib import Path
+import sys
 
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
 import yaml
 
-config = yaml.safe_load(Path("config/clinical_quantile_20261105.yml").read_text())
-output = Path("results/preflight/clinical_quantile_20261105")
+config = yaml.safe_load(Path(sys.argv[1] if len(sys.argv) > 1 else "config/clinical_quantile_20261105.yml").read_text())
+output = Path(config["report_directory"])
 records = []
 for directory in sorted(Path(config["output_root"]).glob("orthogonal_*")):
     status = json.loads((directory / "status.json").read_text())

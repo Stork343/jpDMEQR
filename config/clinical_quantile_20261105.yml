@@ -1,4 +1,6 @@
 method_id: clinical_quantile_20261105
+prediction_method: CQ_ENET
+report_directory: results/preflight/clinical_quantile_20261105
 status: development
 output_root: results/raw/clinical_quantile_qp_20261105
 source_studies:

@@ -2,11 +2,17 @@ library(yaml)
 library(jsonlite)
 source("research/clinical_quantile_20261105/engine.R")
 source("research/clinical_quantile_20261105/orthogonal.R")
-config <- read_yaml("config/clinical_quantile_20261105.yml")
 args <- commandArgs(trailingOnly = TRUE)
-stopifnot(length(args) %in% c(0L, 2L))
+stopifnot(length(args) %in% c(0L, 2L, 3L))
+config <- read_yaml(if (length(args) == 3L) args[1L] else "config/clinical_quantile_20261105.yml")
+if (length(args) == 3L) args <- args[-1L]
 study <- read_yaml(if (length(args)) args[1L] else "config/application_gnhs_baseline_bmi_20261105.yml")
 if (length(args)) config$inference_target <- args[2L]
+if (config$prediction_method == "CQ_SMOOTH") {
+  reticulate::use_python(file.path(getwd(), "results/scratch/cq_solver_env/bin/python"), required = TRUE)
+  Sys.setenv(NUMBA_CACHE_DIR = normalizePath("results/scratch/runtime", mustWork = TRUE))
+  reticulate::source_python(file.path(config$output_root, "implementation", "smooth_path.py"))
+}
 base <- file.path(config$output_root, study$study_id)
 root <- file.path(config$output_root, paste0("orthogonal_", study$study_id))
 if (dir.exists(root)) stop("推断目录已经存在")
@@ -29,7 +35,13 @@ for (fold in seq_len(study$outer_folds)) {
   fitted <- lapply(c(tau - delta, tau + delta), function(value) {
     lambda <- cq_lambda(training, value, central$alpha, config)
     index <- central$grid[central$choice]$index
-    cq_exact(training, value, lambda[index], central$alpha, config)
+    if (config$prediction_method == "CQ_ENET") return(cq_exact(training, value, lambda[index], central$alpha, config))
+    stopifnot(config$prediction_method == "CQ_SMOOTH")
+    fitted <- fit_smooth_path(training$X, training$y, training$weight, training$penalty_factor,
+      c(lambda[index]), central$alpha, value, training$n, central$beta, config$solver_tolerance)
+    beta <- setNames(fitted$beta[, 1L], colnames(training$X))
+    list(beta = beta, tau = value, alpha = central$alpha, lambda = lambda[index],
+      bandwidth = fitted$bandwidth, diagnostics = fitted$diagnostics)
   })
   density_train <- cq_density(training, fitted[[1L]]$beta, fitted[[2L]]$beta, delta, config)
   density_test <- cq_density(testing, fitted[[1L]]$beta, fitted[[2L]]$beta, delta, config)
@@ -62,7 +74,7 @@ summary <- all[, .(patients = .N, estimate = mean(initial + influence),
 summary[, `:=`(lower = estimate - qnorm(0.975) * standard_error,
   upper = estimate + qnorm(0.975) * standard_error)]
 fwrite(all, file.path(root, "patient_influence.csv"))
-report <- "results/preflight/clinical_quantile_20261105"
+report <- config$report_directory
 fwrite(summary, file.path(report, paste0(study$study_id, "_orthogonal_summary.csv")))
 fwrite(rbindlist(diagnostics), file.path(report, paste0(study$study_id, "_orthogonal_diagnostics.csv")))
 write_json(list(status = "completed", role = "exploratory_conditional_inference",

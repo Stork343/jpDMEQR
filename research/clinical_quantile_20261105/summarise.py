@@ -1,12 +1,13 @@
 import json
 from pathlib import Path
+import sys
 
 import numpy as np
 import pandas as pd
 import yaml
 
-config = yaml.safe_load(Path("config/clinical_quantile_20261105.yml").read_text())
-output = Path("results/preflight/clinical_quantile_20261105")
+config = yaml.safe_load(Path(sys.argv[1] if len(sys.argv) > 1 else "config/clinical_quantile_20261105.yml").read_text())
+output = Path(config["report_directory"])
 summaries = []
 comparisons = []
 checks = []
@@ -31,7 +32,7 @@ for path in config["source_studies"]:
         patient = predictions.groupby(["tau", "strain_id"])["loss"].mean().reset_index()
         summary = patient.groupby("tau")["loss"].agg(["mean", "count"]).reset_index()
         summary["study_id"] = study["study_id"]
-        summary["method"] = "CQ_ENET"
+        summary["method"] = config["prediction_method"]
         summary["rule"] = rule
         summaries.append(summary.rename(columns={"mean": "loss", "count": "patients"}))
     archived_path = Path(study["report_directory"]) / "discovery_loss.csv"
@@ -42,17 +43,24 @@ for path in config["source_studies"]:
     current = summary.set_index("tau")["mean"]
     for row in archived.itertuples():
         comparisons.append({"study_id": study["study_id"], "tau": row.tau,
-            "method": "CQ_ENET", "comparator": row.method, "current_loss": current.loc[row.tau],
+            "method": config["prediction_method"], "comparator": row.method, "current_loss": current.loc[row.tau],
             "comparator_loss": row.loss, "relative_improvement": 1 - current.loc[row.tau] / row.loss,
             "decision_quantile": row.tau == study["decision_quantile"]})
     diagnostics = pd.read_csv(root / "diagnostics.csv")
     assert len(diagnostics) == study["outer_folds"] * len(config["quantiles"])
-    assert diagnostics["gap"].abs().max() < config["exact_fit_tolerance"]
-    assert diagnostics["path_objective_difference"].abs().max() < config["maximum_path_objective_difference"]
+    if config["prediction_method"] == "CQ_ENET":
+        assert diagnostics["gap"].abs().max() < config["exact_fit_tolerance"]
+        assert diagnostics["path_objective_difference"].abs().max() < config["maximum_path_objective_difference"]
+        measure = "primal_dual_gap"
+        maximum_error = diagnostics["gap"].abs().max()
+    else:
+        assert config["prediction_method"] == "CQ_SMOOTH"
+        assert diagnostics["maximum_kkt"].max() < config["maximum_kkt"]
+        measure = "full_coordinate_kkt"
+        maximum_error = diagnostics["maximum_kkt"].max()
     diagnostics.to_csv(output / f"{study['study_id']}_fit_diagnostics.csv", index=False)
     checks.append({"study_id": study["study_id"], "fits": len(diagnostics),
-                  "maximum_gap": diagnostics["gap"].abs().max(),
-                  "maximum_stationarity": diagnostics["stationarity"].max(),
+                  "optimality_measure": measure, "maximum_optimality_error": maximum_error,
                   "total_fitting_seconds": diagnostics["runtime_sec"].sum()})
 assert summaries, "尚无完整队列结果"
 pd.concat(summaries, ignore_index=True).to_csv(output / "discovery_losses.csv", index=False)

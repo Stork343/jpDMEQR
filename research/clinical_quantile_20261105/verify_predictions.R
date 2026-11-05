@@ -4,7 +4,8 @@ library(data.table)
 library(matrixStats)
 source("research/clinical_search_20261105/panel.R")
 source("research/empirical_selection_20261101/prediction_core.R")
-config <- read_yaml("config/clinical_quantile_20261105.yml")
+args <- commandArgs(trailingOnly = TRUE)
+config <- read_yaml(if (length(args)) args[1L] else "config/clinical_quantile_20261105.yml")
 records <- checks <- list()
 for (path in unlist(config$source_studies)) {
   study <- read_yaml(path)
@@ -46,7 +47,7 @@ for (path in unlist(config$source_studies)) {
 }
 patient <- rbindlist(records)[, .(loss = mean(loss)), by = .(study_id, tau, rule, strain_id)]
 summary <- patient[, .(loss = mean(loss), patients = .N), by = .(study_id, tau, rule)]
-output <- "results/preflight/clinical_quantile_20261105"
+output <- config$report_directory
 saved <- fread(file.path(output, "discovery_losses.csv"))
 comparison <- merge(summary, saved, by = c("study_id", "tau", "rule"), suffixes = c("_R", "_Python"))
 stopifnot(nrow(comparison) == nrow(summary), all(comparison$patients_R == comparison$patients_Python))

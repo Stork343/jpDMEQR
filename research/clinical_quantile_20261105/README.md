@@ -1,8 +1,20 @@
 # 临床条件分位数计算
 
-METHOD.md 定义 CQ ENET 点估计、患者正交得分和协方差加权组合。THEORY_REVIEW.md 记录已经核验的推导及收敛速度要求，RELATED_WORK.md 保存相近研究的比较。
+当前点估计使用 CENTERED_SMOOTHING.md 中的中心化平滑，CQ ENET 提供非平滑比较。METHOD.md 定义患者正交得分和协方差加权组合。THEORY_REVIEW.md 记录已经核验的推导及收敛速度要求，RELATED_WORK.md 保存相近研究的比较。
 
-## 运行
+当前运行配置为 `config/clinical_quantile_smooth_20261106.yml`。启动 `run_smooth_queue.py` 后，三个进程按患者折计算，并保存每个训练参数路径。全部队列的验证受试者继续保留。
+
+```sh
+mkdir -p results/scratch/runtime
+export TMPDIR="$PWD/results/scratch/runtime"
+results/scratch/charite_env/bin/python -m venv results/scratch/cq_solver_env
+results/scratch/cq_solver_env/bin/python -m pip install -r research/clinical_quantile_20261105/requirements-solver.txt
+results/scratch/charite_env/bin/python research/clinical_quantile_20261105/run_smooth_queue.py
+results/scratch/charite_env/bin/python research/clinical_quantile_20261105/summarise.py config/clinical_quantile_smooth_20261106.yml
+Rscript research/clinical_quantile_20261105/verify_predictions.R config/clinical_quantile_smooth_20261106.yml
+```
+
+## 比较方法运行
 
 工作目录为 `/Users/houjian/Projects/jpDMEQR`。R 依赖均已列入项目安装脚本，包括 quantreg、clarabel、osqp、glmnet、Rcpp、Matrix、data.table、yaml、jsonlite 和 matrixStats。HiGHS 使用已有的 `load_pooled_lp.R` 接口。Python 使用 `results/scratch/charite_env/bin/python`，需要 numpy、pandas、scipy、PyYAML 和 tabulate。
 

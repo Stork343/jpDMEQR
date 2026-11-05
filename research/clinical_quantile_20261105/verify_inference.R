@@ -1,8 +1,9 @@
 library(yaml)
 library(jsonlite)
 source("research/clinical_quantile_20261105/engine.R")
-config <- read_yaml("config/clinical_quantile_20261105.yml")
-output <- "results/preflight/clinical_quantile_20261105"
+args <- commandArgs(trailingOnly = TRUE)
+config <- read_yaml(if (length(args)) args[1L] else "config/clinical_quantile_20261105.yml")
+output <- config$report_directory
 aggregate <- fread(file.path(output, "adaptive_inference.csv"))
 checks <- list()
 for (j in seq_len(nrow(aggregate))) {

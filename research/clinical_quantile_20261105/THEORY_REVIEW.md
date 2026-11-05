@@ -24,6 +24,15 @@ This verifies the expansion conditional on the rates in METHOD.md. A primitive r
 
 At the true conditional density and score covariance, E[phi_i^2]=E[r_i^T F_i C_i^(-1)F_i r_i]=J. The resulting influence variance is 1/J. For a working covariance, the variance is E[phi_i^2]/J^2 and is estimated from complete patient contributions. Observations within a patient must remain combined before computing variance.
 
+Consider any square integrable design measurable instrument a_i whose target sensitivity is one and whose nuisance sensitivities are zero. For a_i^*=C_i^(-1)F_i r_i/J, these restrictions give E[a_i^T C_i a_i^*]=E[a_i^T F_i(d_i-X_i gamma)]/J=1/J. Expanding the nonnegative squared distance yields
+
+\[
+E[(a_i-a_i^*)^TC_i(a_i-a_i^*)]
+=E[a_i^TC_i a_i]-J^{-1}\geq0.
+\]
+
+Thus the variance bound covers arbitrary design measurable instruments satisfying the orthogonality restrictions. Estimating the optimal instrument requires consistent conditional density and score covariance estimation. The adaptive convex combination separately protects the first order variance relative to its two fitted working choices under their joint expansion.
+
 The numerical checks compare the analytic exchangeable transformation with direct matrix inversion on actual GNHS designs. They also verify the projection derivative and the equality between sensitivity and variance in the density constant oracle calculation. These are algebraic checks, not tests of clinical coverage.
 
 ## Computational certificate

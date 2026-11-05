@@ -25,6 +25,8 @@ orthogonal = pd.read_csv(root / "ra_westchina_20261105_orthogonal_summary.csv")
 orthogonal["method"] = orthogonal["method"].map({"independence": "独立工作协方差", "exchangeable": "交换型工作协方差"})
 orthogonal.columns = ["计算方式", "患者数", "系数", "标准误", "区间下限", "区间上限"]
 adaptive = pd.read_csv(root / "adaptive_inference.csv").set_index("study_id").loc["ra_westchina_20261105"]
+gnhs_state = progress.set_index("study_id").loc["gnhs_baseline_bmi_20261105", "status"]
+gnhs_text = "GNHS 的完整参数选择正在计算。" if gnhs_state == "running" else "该版本的 GNHS 计算已经结束，新版本使用 config/clinical_quantile_smooth_20261106.yml。"
 text = f"""# 临床分位数方法开发记录
 
 ## 参数和估计方法
@@ -65,7 +67,7 @@ RA 使用第75百分位和预定临床列 C_age 检查完整计算。两个工�
 
 总体分位数的识别和正交导数已经写出。高维 elastic net、条件密度间距和目标投影的具体收敛速度仍需联合推导，现有一般误差乘积条件尚不能替代这一部分。
 
-GNHS 的完整参数选择耗时较长，计算正在进行。后续优化需要在相同目标和误差检查下完成。独立验证尚未启动，formal_validation_used=false，manuscript_adoption=false。
+{gnhs_text} 独立验证尚未启动，formal_validation_used=false，manuscript_adoption=false。
 
 ## 文件
 
