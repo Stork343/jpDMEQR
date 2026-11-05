@@ -1,0 +1,2 @@
+assay,comparators,smallest_relative_gain,smallest_interval_lower,point_gain_all_comparators,positive_interval_all_comparators,formal_validation_used,manuscript_adoption
+Caffeine,5,0.00141118638439099,-0.0413818870998123,TRUE,FALSE,FALSE,FALSE

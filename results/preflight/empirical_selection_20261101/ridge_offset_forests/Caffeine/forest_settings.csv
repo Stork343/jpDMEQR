@@ -1,0 +1,7 @@
+assay,method,tau,runtime_sec,forest_index,calibration,regression_splitting,mtry_multiplier,min_node_size,honesty
+Caffeine,QRF_RAW,0.25,1742.661,11,oob,FALSE,5,5,FALSE
+Caffeine,QRF_RAW,0.5,1742.661,16,oob,TRUE,5,10,FALSE
+Caffeine,QRF_RAW,0.75,1742.661,15,oob,FALSE,5,10,FALSE
+Caffeine,QRF_OFFSET,0.25,1595.18,11,training,FALSE,5,5,FALSE
+Caffeine,QRF_OFFSET,0.5,1595.18,11,none,FALSE,5,5,FALSE
+Caffeine,QRF_OFFSET,0.75,1595.18,11,training,FALSE,5,5,FALSE

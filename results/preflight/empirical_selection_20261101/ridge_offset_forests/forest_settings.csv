@@ -1,0 +1,13 @@
+assay,method,tau,runtime_sec,forest_index,calibration,regression_splitting,mtry_multiplier,min_node_size,honesty
+Benomyl,QRF_RAW,0.25,1674.416,12,training,True,5,5,False
+Benomyl,QRF_RAW,0.5,1674.416,12,oob,True,5,5,False
+Benomyl,QRF_RAW,0.75,1674.416,12,oob,True,5,5,False
+Benomyl,QRF_OFFSET,0.25,1645.815,14,oob,True,1,10,False
+Benomyl,QRF_OFFSET,0.5,1645.815,14,none,True,1,10,False
+Benomyl,QRF_OFFSET,0.75,1645.815,10,training,True,1,5,False
+Caffeine,QRF_RAW,0.25,1742.661,11,oob,False,5,5,False
+Caffeine,QRF_RAW,0.5,1742.661,16,oob,True,5,10,False
+Caffeine,QRF_RAW,0.75,1742.661,15,oob,False,5,10,False
+Caffeine,QRF_OFFSET,0.25,1595.18,11,training,False,5,5,False
+Caffeine,QRF_OFFSET,0.5,1595.18,11,none,False,5,5,False
+Caffeine,QRF_OFFSET,0.75,1595.18,11,training,False,5,5,False

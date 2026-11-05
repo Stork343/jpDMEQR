@@ -1,0 +1,3 @@
+assay,comparators,smallest_relative_gain,smallest_interval_lower,point_gain_all_comparators,positive_interval_all_comparators,formal_validation_used,manuscript_adoption
+Benomyl,5,0.006730458822889,-0.0473193342186061,True,False,False,False
+Caffeine,5,0.0014111863843909,-0.0413818870998123,True,False,False,False

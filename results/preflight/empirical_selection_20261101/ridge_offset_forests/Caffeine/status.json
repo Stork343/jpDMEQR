@@ -1,0 +1,12 @@
+{
+  "status": "completed",
+  "phase": "method_development",
+  "assay": "Caffeine",
+  "completed_runs": 8,
+  "formal_validation_used": false,
+  "manuscript_adoption": false,
+  "interval_type": "exploratory_paired_strain_bootstrap_95_percent",
+  "bootstrap_repetitions": 10000,
+  "primary_scoring": "registered",
+  "sensitivity": "nonnegative_projection_of_all_predictions"
+}

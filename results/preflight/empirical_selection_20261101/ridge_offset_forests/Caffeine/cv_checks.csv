@@ -1,0 +1,3 @@
+assay,method,inner_folds,forest_settings,calibration_settings,maximum_error
+Caffeine,QRF_RAW,3,16,48,0
+Caffeine,QRF_OFFSET,3,16,48,0

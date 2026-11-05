@@ -1,0 +1,10 @@
+{
+  "status": "completed",
+  "phase": "method_development",
+  "assays": [
+    "Benomyl",
+    "Caffeine"
+  ],
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

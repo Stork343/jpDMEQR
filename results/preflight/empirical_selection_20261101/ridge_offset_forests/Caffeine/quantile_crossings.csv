@@ -1,0 +1,7 @@
+assay,method,quantiles,records,crossed_records,maximum_crossing
+Caffeine,QRF_RAW,3,286,0,0
+Caffeine,QRF_OFFSET,3,286,0,0
+Caffeine,JOINT_OFFSET,3,286,4,0.016651329344119
+Caffeine,PRESS_RIDGE,3,286,0,0
+Caffeine,POOLED_OFFSET,1,286,,
+Caffeine,ENET,3,286,0,0
