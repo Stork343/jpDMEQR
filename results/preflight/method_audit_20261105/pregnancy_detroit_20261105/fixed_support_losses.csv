@@ -1,0 +1,5 @@
+study_id,variant,patients,loss,descriptive_se
+pregnancy_detroit_20261105,profile_selected,100,0.928818811078133,0.0514724245588343
+pregnancy_detroit_20261105,pinball_selected,100,0.971178824282396,0.0516081545653829
+pregnancy_detroit_20261105,profile_full_clinical,100,0.928818811078133,0.0514724245588343
+pregnancy_detroit_20261105,pinball_full_clinical,100,0.971178824282396,0.0516081545653829

@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "calculation": "deterministic_population_integration",
+  "random_samples_generated": 0,
+  "clinical_data_used": false,
+  "maximum_score_identity_error": 1.1102230246251565e-16,
+  "maximum_objective_derivative_error": 8.32243995940729e-12
+}

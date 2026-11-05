@@ -1,0 +1,16 @@
+study_id,fold,method,alpha,penalty_index,selected_columns,selected_proteins
+ra_westchina_20261105,1,ENET,0,44,1369,728
+ra_westchina_20261105,2,ENET,0.5,23,27,11
+ra_westchina_20261105,3,ENET,0.5,12,6,6
+ra_westchina_20261105,4,ENET,1,12,1,1
+ra_westchina_20261105,5,ENET,0,38,1370,719
+pregnancy_detroit_20261105,1,ENET,1,81,70,70
+pregnancy_detroit_20261105,2,ENET,0.5,87,81,81
+pregnancy_detroit_20261105,3,ENET,0.5,77,56,56
+pregnancy_detroit_20261105,4,ENET,0.5,81,74,74
+pregnancy_detroit_20261105,5,ENET,0.5,87,73,73
+gnhs_baseline_bmi_20261105,1,ENET,1,77,21,6
+gnhs_baseline_bmi_20261105,2,ENET,1,75,17,3
+gnhs_baseline_bmi_20261105,3,ENET,1,77,13,3
+gnhs_baseline_bmi_20261105,4,ENET,1,75,11,2
+gnhs_baseline_bmi_20261105,5,ENET,1,76,15,2

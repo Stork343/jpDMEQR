@@ -1,0 +1,4 @@
+study_id,variant,absolute_gain,relative_gain,patients
+gnhs_baseline_bmi_20261105,pinball_selected,-0.000502759774357673,-0.00110085290316753,1765
+gnhs_baseline_bmi_20261105,profile_full_clinical,0.00102561275480819,0.00224570229410003,1765
+gnhs_baseline_bmi_20261105,pinball_full_clinical,0.000159381064576127,0.000348983981211949,1765

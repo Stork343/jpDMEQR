@@ -1,0 +1,4 @@
+study_id,variant,absolute_gain,relative_gain,patients
+ra_westchina_20261105,pinball_selected,-0.00291951925098429,-0.00593777286986612,160
+ra_westchina_20261105,profile_full_clinical,-0.0220007877209863,-0.0447456136489984,160
+ra_westchina_20261105,pinball_full_clinical,-0.0227161393509515,-0.0462005091765377,160

@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "saved_models_checked": 60,
+  "saved_search_models_audited": 90,
+  "maximum_independent_loss_error": 4.973799150320701e-14,
+  "maximum_original_prediction_error": 2.8503421845016396e-11,
+  "maximum_primal_dual_gap": 3.0211285669539294e-11,
+  "maximum_beta_kkt": 8.38466849783628e-12,
+  "maximum_gamma_kkt": 3.28764793167125e-13,
+  "calibration_nonunique_warnings": 18,
+  "calibration_optimality_checks_passed": 60,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

@@ -1,0 +1,7 @@
+study_id,method,fits,maximum_grid_Lambda_selected,minimum_selected_additions,median_selected_additions,maximum_selected_additions,fits_with_omitted_clinical_columns,median_selected_proteins
+ra_westchina_20261105,JOINT_DIRECT,5,0,0,0,3,5,0
+ra_westchina_20261105,JOINT_OFFSET,5,0,0,0,1,5,0
+pregnancy_detroit_20261105,JOINT_DIRECT,5,1,10,12,13,0,12
+pregnancy_detroit_20261105,JOINT_OFFSET,5,1,0,12,13,0,11
+gnhs_baseline_bmi_20261105,JOINT_DIRECT,5,2,3,3,7,5,0
+gnhs_baseline_bmi_20261105,JOINT_OFFSET,5,3,4,4,5,5,0
