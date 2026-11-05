@@ -1,0 +1,11 @@
+fold,method,maximum_cv_loss_error,maximum_calibration_violation
+1,QRF_RAW,0,0
+1,QRF_OFFSET,0,0
+2,QRF_RAW,0,0
+2,QRF_OFFSET,0,0
+3,QRF_RAW,0,0
+3,QRF_OFFSET,0,0
+4,QRF_RAW,0,0
+4,QRF_OFFSET,0,0
+5,QRF_RAW,0,0
+5,QRF_OFFSET,0,0

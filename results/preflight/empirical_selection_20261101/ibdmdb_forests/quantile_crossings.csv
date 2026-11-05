@@ -1,0 +1,8 @@
+method,quantiles,samples,crossed_samples,maximum_crossing
+JOINT_OFFSET,3,269,8,0.15891471186472
+PRESS_RIDGE,3,269,0,0
+ENET,3,269,0,0
+POOLED_OFFSET,2,269,,
+JOINT_DIRECT,2,269,,
+QRF_RAW,3,269,0,0
+QRF_OFFSET,3,269,0,0

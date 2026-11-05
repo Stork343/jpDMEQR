@@ -1,0 +1,11 @@
+{
+  "status": "completed",
+  "phase": "discovery",
+  "runs": 55,
+  "participants": 68,
+  "formal_validation_used": false,
+  "manuscript_adoption": false,
+  "uncertainty": "descriptive_participant_bootstrap_of_cross_validated_losses",
+  "decision_quantile": 0.5,
+  "nonlinear_comparison_required": false
+}
