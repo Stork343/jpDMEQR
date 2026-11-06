@@ -1,7 +1,7 @@
 selection_id: empirical_selection_20261101
 status: method_development
 active_method: clinical_quantile_smooth_20261106
-active_candidate: null
+active_candidate: iobp2_night_20261106
 latest_completed_candidate: gnhs_baseline_bmi_20261105
 adopted_dataset: null
 requirements:
