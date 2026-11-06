@@ -156,6 +156,40 @@ def registry_roles(source, seed):
     return frame.sort_values("patient")
 
 
+def prostate_roles(source, seed):
+    folder = source / "msk_chord_2024"
+    def read(file, columns):
+        return pd.read_csv(folder / ("data_"+file+".txt"), sep="\t", comment="#", usecols=columns, dtype=str)
+    sample = read("clinical_sample", ["PATIENT_ID","SAMPLE_ID","SAMPLE_TYPE","GENE_PANEL","CANCER_TYPE_DETAILED"])
+    sample = sample.loc[sample.CANCER_TYPE_DETAILED.eq("Prostate Adenocarcinoma")
+                        & sample.GENE_PANEL.isin(["IMPACT341","IMPACT410","IMPACT468","IMPACT505"])]
+    panel = read("gene_panel_matrix", ["SAMPLE_ID","mutations","cna"])
+    sample = sample.merge(panel, on="SAMPLE_ID", validate="one_to_one")
+    sample = sample.loc[sample.mutations.eq(sample.GENE_PANEL) & sample.cna.eq(sample.GENE_PANEL)]
+    time = read("timeline_specimen", ["PATIENT_ID","SAMPLE_ID","START_DATE"])
+    sample = sample.merge(time, on=["PATIENT_ID","SAMPLE_ID"],validate="one_to_one")
+    sample["specimen_day"] = pd.to_numeric(sample.pop("START_DATE"))
+    treatment = read("timeline_treatment", ["PATIENT_ID","START_DATE","AGENT"])
+    treatment["index_day"] = pd.to_numeric(treatment.pop("START_DATE"))
+    agents = ["ABIRATERONE","ENZALUTAMIDE","APALUTAMIDE","DAROLUTAMIDE"]
+    treatment = treatment.loc[treatment.AGENT.isin(agents) & treatment.index_day.notna()].drop_duplicates()
+    first = treatment.loc[treatment.index_day.eq(treatment.groupby("PATIENT_ID").index_day.transform("min"))].copy()
+    first = first.loc[first.groupby("PATIENT_ID").AGENT.transform("nunique").eq(1)].drop_duplicates("PATIENT_ID")
+    frame = first.merge(sample, on="PATIENT_ID")
+    frame = frame.loc[(frame.index_day-frame.specimen_day).between(30,730)].sort_values(
+        ["PATIENT_ID","specimen_day","SAMPLE_ID"],ascending=[True,False,True]).drop_duplicates("PATIENT_ID")
+    frame = frame.rename(columns={"PATIENT_ID":"patient"})
+    frame["role"] = "discovery"
+    frame["outer_fold"] = 0
+    rng = np.random.default_rng(seed)
+    for _, cell in frame.groupby(["AGENT",frame.SAMPLE_TYPE.eq("Metastasis")]):
+        index = rng.permutation(cell.sort_values("patient").index)
+        n = round(len(index)*registry["validation_fraction"])
+        frame.loc[index[:n],"role"] = "reserved"
+        frame.loc[index[n:],"outer_fold"] = (np.arange(len(index)-n)+rng.integers(5))%5+1
+    return frame.sort_values("patient")
+
+
 application = template("application_template")
 method = template("method_template")
 shared = ["comparators", "target_candidates", "primary_prediction_rule", "working_penalties", "gap_tolerance",
@@ -183,7 +217,7 @@ for name, definition in registry["questions"].items():
     source = Path(study["source_directory"])
     readers = {"uwhvf_central": eye_roles, "eicu_lactate": icu_roles, "eicu_creatinine": icu_roles,
                "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles, "ispy2_volume": breast_roles,
-               "ispy2_signaling": protein_roles, "t1dx_monitoring": registry_roles}
+               "ispy2_signaling": protein_roles, "t1dx_monitoring": registry_roles, "chord_psa": prostate_roles}
     frame = readers[name](source, study["role_seed"])
     assert frame.patient.is_unique and frame.outer_fold.eq(0).equals(frame.role.eq("reserved"))
     immutable(inputs / "roles.csv", frame.to_csv(index=False))

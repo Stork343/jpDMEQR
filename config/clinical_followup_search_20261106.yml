@@ -83,3 +83,11 @@ questions:
     decision_quantile: 0.75
     inference_target: C_check_gap
     response: subsequent_laboratory_hba1c_percent
+  chord_psa:
+    study_id: chord_psa_20261106
+    source_doi: 10.1038/s41586-024-08167-5
+    source_directory: data/raw/mpc_20261106
+    role_seed: 202611069
+    decision_quantile: 0.75
+    inference_target: C_tp53_late
+    response: log1p_reportable_psa_fraction
