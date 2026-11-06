@@ -1,4 +1,6 @@
 from pathlib import Path
+import csv
+import gzip
 import json
 import subprocess
 from zipfile import ZipFile
@@ -108,6 +110,25 @@ def surgical_roles(source, seed):
     return cases.sort_values("patient")
 
 
+def breast_roles(source, seed):
+    clinical = pd.read_excel(source / "ISPY2-Imaging-Cohort-1-Clinical-Data.xlsx", dtype={"Patient_ID": str},
+                             usecols=["Patient_ID", "HR", "HER2", "Arm", "MP", "Age_at_Screening"])
+    ids = pd.read_excel(source / "Multi-feature-MRI-NACT-Data.xlsx", dtype=str, usecols=["CLINICAL-TRIAL-SUBJECT-ID"])
+    with gzip.open(source / "gene_header.part", "rt") as stream:
+        genes = next(csv.reader([stream.readline()], delimiter="\t"))
+    assert clinical.Patient_ID.is_unique and ids.iloc[:, 0].is_unique and len(set(genes)) == len(genes)
+    frame = clinical.loc[clinical.Patient_ID.isin(set(genes) & set(ids.iloc[:, 0]))].rename(columns={"Patient_ID": "patient"}).copy()
+    frame["role"] = "discovery"
+    frame["outer_fold"] = 0
+    random = np.random.default_rng(seed)
+    for _, cell in frame.groupby(["HR", "HER2", "Arm"]):
+        index = random.permutation(cell.sort_values("patient").index)
+        n = round(len(index) * registry["validation_fraction"])
+        frame.loc[index[:n], "role"] = "reserved"
+        frame.loc[index[n:], "outer_fold"] = (np.arange(len(index)-n) + random.integers(5)) % 5 + 1
+    return frame.sort_values("patient")
+
+
 application = template("application_template")
 method = template("method_template")
 shared = ["comparators", "target_candidates", "primary_prediction_rule", "working_penalties", "gap_tolerance",
@@ -123,7 +144,7 @@ for name, definition in registry["questions"].items():
         directory.mkdir(parents=True, exist_ok=True)
     study.update(input_directory=str(inputs), output_root=f"results/raw/application/{study_id}",
                  report_directory=str(report), outer_folds=registry["outer_folds"], inner_folds=registry["inner_folds"],
-                 quantiles=registry["quantiles"], minimum_observed_fraction=registry["eligible_fraction"],
+                 quantiles=registry["quantiles"], minimum_observed_fraction=definition.get("minimum_observed_fraction", registry["eligible_fraction"]),
                  screening_minimum_relative_gain=registry["required_relative_gain"], formal_validation_used=False,
                  manuscript_adoption=False)
     study_file = root / f"{name}.yml"
@@ -134,7 +155,7 @@ for name, definition in registry["questions"].items():
     immutable(root / f"cq_{name}.yml", yaml.safe_dump(fit, sort_keys=False))
     source = Path(study["source_directory"])
     readers = {"uwhvf_central": eye_roles, "eicu_lactate": icu_roles, "eicu_creatinine": icu_roles,
-               "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles}
+               "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles, "ispy2_volume": breast_roles}
     frame = readers[name](source, study["role_seed"])
     assert frame.patient.is_unique and frame.outer_fold.eq(0).equals(frame.role.eq("reserved"))
     immutable(inputs / "roles.csv", frame.to_csv(index=False))

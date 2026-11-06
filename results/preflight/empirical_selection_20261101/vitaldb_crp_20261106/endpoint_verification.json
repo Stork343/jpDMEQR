@@ -1,0 +1,8 @@
+{
+  "source": "independent DuckDB reconstruction of the historical VitalDB case and laboratory tables",
+  "patients": 1296,
+  "records": 1885,
+  "maximum_endpoint_difference": 0.0,
+  "maximum_clinical_input_difference": 2.220446049250313e-16,
+  "reserved_outcomes_used": false
+}

@@ -1,0 +1,8 @@
+{
+  "source": "independent SQL aggregation of published bilateral AP signals",
+  "records": 1445,
+  "patients": 797,
+  "maximum_outcome_difference": 3.552713678800501e-15,
+  "maximum_timing_difference": 5.773159728050814e-15,
+  "reserved_outcomes_used": false
+}

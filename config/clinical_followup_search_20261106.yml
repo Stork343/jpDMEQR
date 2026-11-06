@@ -55,3 +55,13 @@ questions:
     decision_quantile: 0.75
     inference_target: C_open_duration
     response: postoperative_crp_mg_dl
+  ispy2_volume:
+    study_id: ispy2_volume_20261106
+    source_doi: 10.1038/s41523-020-00203-7
+    source_directory: data/raw/ispy_20261106
+    role_seed: 202611067
+    decision_quantile: 0.75
+    inference_target: C_cyt_late
+    response: log1p_residual_enhancing_volume_fraction
+    maximum_high_features: 300
+    minimum_observed_fraction: 0.80

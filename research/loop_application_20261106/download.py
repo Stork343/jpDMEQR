@@ -26,7 +26,7 @@ if len(sys.argv) > 1:
     size = int(expected_size)
     if len(sys.argv) == 5:
         expected_digest = sys.argv[4]
-        assert len(expected_digest) in (32, 64)
+        assert expected_digest == "gzip" or len(expected_digest) in (32, 64)
 block = 1024 ** 2
 directory.mkdir(parents=True, exist_ok=True)
 parts = directory / ("ranges" if len(sys.argv) == 1 else final.name + ".ranges")
@@ -58,6 +58,11 @@ def verify(path):
     if expected_digest is None:
         with ZipFile(path) as archive:
             assert archive.testzip() is None
+    elif expected_digest == "gzip":
+        import gzip
+        with gzip.open(path, "rb") as stream:
+            while stream.read(1024 ** 2):
+                pass
     else:
         with path.open("rb") as stream:
             algorithm = "md5" if len(expected_digest) == 32 else "sha256"

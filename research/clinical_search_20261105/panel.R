@@ -23,6 +23,18 @@ cp_recipe <- function(rows, panel, config) {
   observed <- colSums(!is.na(X) * weight) / length(ids)
   keep <- observed >= config$minimum_observed_fraction |
     (startsWith(colnames(X), "C_") & observed > 0)
+  if (!is.null(config$maximum_high_features)) {
+    candidates <- which(keep & startsWith(colnames(X), "P_"))
+    if (length(candidates) > config$maximum_high_features) {
+      values <- X[, candidates, drop = FALSE]
+      mass <- colSums(!is.na(values) * weight)
+      center <- colSums(values * weight, na.rm = TRUE) / mass
+      variance <- colSums(sweep(values, 2L, center, "-")^2 * weight, na.rm = TRUE) / mass
+      ranking <- order(-variance, colnames(values), method = "radix")
+      selected <- candidates[head(ranking, config$maximum_high_features)]
+      keep[setdiff(candidates, selected)] <- FALSE
+    }
+  }
   features <- colnames(X)[keep]
   impute <- vapply(features, function(column) matrixStats::weightedMedian(X[, column], weight, na.rm = TRUE), numeric(1))
   missing_features <- features[colSums(is.na(X[, features, drop = FALSE])) > 0L]

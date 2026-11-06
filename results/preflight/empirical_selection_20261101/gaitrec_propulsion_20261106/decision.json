@@ -1,0 +1,14 @@
+{
+  "study_id": "gaitrec_propulsion_20261106",
+  "patients": 797,
+  "records": 1445,
+  "decision_quantile": 0.25,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0040113239352596,
+    "ENET": -0.0261775677595774
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
