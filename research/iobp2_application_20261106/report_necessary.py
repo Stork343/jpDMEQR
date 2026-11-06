@@ -33,6 +33,7 @@ state = {"study_id": study["study_id"], "discovery_patients": panel["discovery_p
 (report / "decision.json").write_text(json.dumps(state, indent=2) + "\n")
 is_loop = study.get("single_arm_study", False)
 name = "Loop" if is_loop else "IOBP2"
+origin = "入组" if is_loop else "随机分组"
 attribution = ("The source of the data is the Loop Study (sponsored by the Jaeb Center for Health Research and "
                "funded by the Helmsley Charitable Trust), but the analyses, content and conclusions presented "
                "herein are solely the responsibility of the authors and have not been reviewed or approved by the study sponsor."
@@ -41,7 +42,7 @@ attribution = ("The source of the data is the Loop Study (sponsored by the Jaeb 
                "reviewed or approved by the Bionic Pancreas Research Group or Beta Bionics.")
 source = ("Lum 等，Diabetes Technology & Therapeutics，2021，DOI 10.1089/dia.2020.0535。" if is_loop
           else "Bionic Pancreas Research Group，New England Journal of Medicine，2022，DOI 10.1056/NEJMoa2205225。")
-lines = [f"# {name} 入组两周时的夜间血糖预测", "",
+lines = [f"# {name} {origin}两周时的夜间血糖预测", "",
          f"探索侧登记 {roster['discovery_patients']} 人，达到监测条件的患者有 {state['discovery_patients']} 人，"
          f"每人提供三个时段，共 {state['discovery_measurements']} 个结局。{roster['reserved_patients']} 名患者留作验证。",
          "", "到第 14 日结束时，以已经取得的监测数据预测随后三个 21 日时段的夜间高值。"

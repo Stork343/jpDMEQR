@@ -75,6 +75,9 @@ checks = {"patients": bool(len(eligible) >= config["minimum_discovery_patients"]
           "endpoint_support": outcomes.nunique() >= 20, "boundary": boundary is not None and boundary < 0.05}
 if not single_arm:
     checks["arms"] = bool(by_arm.analysis_eligible.min() >= config["minimum_per_arm"])
+else:
+    support = outcomes.groupby(level="period").nunique().reindex(range(1, config["periods"] + 1), fill_value=0)
+    checks["endpoint_support_each_period"] = bool(support.ge(20).all())
 status = {"discovery_patients": len(eligible), "period_records": len(outcomes),
           "distinct_endpoint_values": outcomes.nunique(), "periods_at_sensor_ceiling": boundary,
           "criteria": checks, "passed": all(checks.values()), "formal_validation_used": False,
