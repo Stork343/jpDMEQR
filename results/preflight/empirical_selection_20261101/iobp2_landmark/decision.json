@@ -1,0 +1,22 @@
+{
+  "study_id": "iobp2_landmark_20261106",
+  "discovery_patients": 160,
+  "discovery_measurements": 480,
+  "reserved_roster": 114,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": 0.023259689741621,
+    "ENET": -0.0485234017114741
+  },
+  "profile_features_per_fold": [
+    0,
+    0,
+    2,
+    0,
+    0
+  ],
+  "necessary_comparisons_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

@@ -1,0 +1,14 @@
+{
+  "discovery_CGM_mg_dl_records": 7160562,
+  "window_records": 1626454,
+  "lower_coded_records": 1912,
+  "upper_coded_records": 10310,
+  "missing_window_glucose": 0,
+  "missing_device_clock": 135,
+  "valid_window_records": 1626454,
+  "unique_five_minute_slots": 1625404,
+  "extra_records_in_occupied_slots": 1050,
+  "discovery_patients_with_window_readings": 212,
+  "reserved_patients_processed": 0,
+  "source_table": "IOBP2DeviceCGM"
+}

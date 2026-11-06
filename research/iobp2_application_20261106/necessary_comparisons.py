@@ -23,11 +23,13 @@ environment = dict(os.environ, TMPDIR=str(Path("results/scratch/runtime").resolv
 
 def fit(job):
     directory = Path(job.directory)
+    exit_code = None
     if not (directory / "status.json").exists():
         with (root / f"{job.trait}_{job.method}.log").open("a") as stream:
-            subprocess.run(["Rscript", str(implementation / "run_discovery.R"), job.trait, job.method,
+            process = subprocess.run(["Rscript", str(implementation / "run_discovery.R"), job.trait, job.method,
                             job.run_id, "NA", str(implementation.resolve())], env=environment,
                            stdout=stream, stderr=subprocess.STDOUT, check=True)
+            exit_code = process.returncode
     status = json.loads((directory / "status.json").read_text())
     assert status["status"] == "completed" and not status["formal_validation_used"]
     predictions = pd.read_csv(directory / "prediction.csv")
@@ -38,11 +40,19 @@ def fit(job):
                               validate="many_to_one")
     assert len(frame) == len(predictions) and set(frame.sample_id) == set(rows.sample_id)
     print(f"{job.trait} {job.method} completed", flush=True)
-    return frame
+    return frame, {"trait": job.trait, "method": job.method, "directory": str(directory),
+                   "status": status["status"], "exit_code": exit_code}
 
 
 with ThreadPoolExecutor(max_workers=2) as executor:
-    records = pd.concat(list(executor.map(fit, jobs.itertuples())), ignore_index=True)
+    results = list(executor.map(fit, jobs.itertuples()))
+records = pd.concat([frame for frame, _ in results], ignore_index=True)
+progress = pd.DataFrame([state for _, state in results])
+progress_file = root / "necessary_progress.csv"
+if progress_file.exists():
+    previous = pd.read_csv(progress_file).set_index(["trait", "method"]).exit_code
+    progress["exit_code"] = progress.set_index(["trait", "method"]).exit_code.fillna(previous).to_numpy()
+progress.to_csv(progress_file, index=False)
 groups = ["method", "sample_id", "strain_id", "y", "outer_fold"]
 wide = records.pivot(index=groups, columns="tau", values="prediction")
 assert list(wide.columns) == config["quantiles"] and np.isfinite(wide).all().all()

@@ -1,0 +1,16 @@
+{
+  "discovery_patients": 160,
+  "period_records": 480,
+  "distinct_endpoint_values": 480,
+  "periods_at_sensor_ceiling": 0.0,
+  "criteria": {
+    "patients": true,
+    "folds": true,
+    "endpoint_support": true,
+    "boundary": true,
+    "arms": true
+  },
+  "passed": true,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

@@ -1,0 +1,10 @@
+{
+  "discovery_patients_reconstructed": 160,
+  "records_reconstructed": 480,
+  "reserved_patient_readings": 0,
+  "maximum_endpoint_difference": 8.526512829121202e-14,
+  "maximum_baseline_night_tail_difference": 1.1368683772161603e-13,
+  "maximum_dawn_difference": 8.881784197001252e-16,
+  "period_prediction_rows": 480,
+  "profile_columns_reconstructed": 288
+}
