@@ -1,0 +1,22 @@
+{
+  "study_id": "eicu_lactate_20261106",
+  "discovery_patients": 52,
+  "records": 76,
+  "repeated_patients": 18,
+  "maximum_records_per_patient": 3,
+  "distinct_outcomes": 38,
+  "additional_features_at_registered_frequency": 218,
+  "target_observed_fraction": 1.0,
+  "criteria": {
+    "discovery_patients": false,
+    "repeated_patients": false,
+    "fold_patients": false,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true
+  },
+  "passed": false,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

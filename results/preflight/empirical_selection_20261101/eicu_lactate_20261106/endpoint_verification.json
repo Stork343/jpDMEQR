@@ -1,0 +1,8 @@
+{
+  "source": "independent DuckDB reconstruction from published compressed tables",
+  "patients": 52,
+  "records": 76,
+  "maximum_endpoint_difference": 0.0,
+  "maximum_clinical_input_difference": 2.220446049250313e-16,
+  "reserved_outcomes_used": false
+}

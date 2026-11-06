@@ -1,0 +1,22 @@
+{
+  "study_id": "eicu_creatinine_20261106",
+  "discovery_patients": 418,
+  "records": 607,
+  "repeated_patients": 152,
+  "maximum_records_per_patient": 3,
+  "distinct_outcomes": 226,
+  "additional_features_at_registered_frequency": 187,
+  "target_observed_fraction": 0.9784688995215312,
+  "criteria": {
+    "discovery_patients": true,
+    "repeated_patients": true,
+    "fold_patients": true,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true
+  },
+  "passed": true,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
