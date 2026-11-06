@@ -70,6 +70,23 @@ def icu_roles(source, seed):
     return frame.sort_values("patient")
 
 
+def gait_roles(source, seed):
+    metadata = pd.read_csv(source / "GRF_metadata.csv", dtype={"SUBJECT_ID": str})
+    patients = metadata.loc[metadata.CLASS_LABEL.isin(["A", "C", "H", "K"])].copy()
+    assert patients.TRAIN.add(patients.TEST).eq(1).all()
+    assert patients.groupby("SUBJECT_ID").TEST.nunique().eq(1).all()
+    patients["date"] = pd.to_datetime(patients.SESSION_DATE, format="%d.%m.%Y")
+    frame = patients.sort_values(["date", "SESSION_ID"]).drop_duplicates("SUBJECT_ID")
+    frame = frame[["SUBJECT_ID", "CLASS_LABEL", "TEST"]].rename(columns={"SUBJECT_ID": "patient"}).copy()
+    frame["role"] = frame.TEST.map({0: "discovery", 1: "reserved"})
+    frame["outer_fold"] = 0
+    rng = np.random.default_rng(seed)
+    for _, group in frame.loc[frame.role.eq("discovery")].groupby("CLASS_LABEL"):
+        indices = rng.permutation(group.sort_values("patient").index)
+        frame.loc[indices, "outer_fold"] = np.arange(len(indices)) % registry["outer_folds"] + 1
+    return frame.drop(columns="TEST").sort_values("patient")
+
+
 application = template("application_template")
 method = template("method_template")
 shared = ["comparators", "target_candidates", "primary_prediction_rule", "working_penalties", "gap_tolerance",
@@ -95,7 +112,9 @@ for name, definition in registry["questions"].items():
                inference_target=study["inference_target"], inference_quantile=study["decision_quantile"])
     immutable(root / f"cq_{name}.yml", yaml.safe_dump(fit, sort_keys=False))
     source = Path(study["source_directory"])
-    frame = eye_roles(source, study["role_seed"]) if name == "uwhvf_central" else icu_roles(source, study["role_seed"])
+    readers = {"uwhvf_central": eye_roles, "eicu_lactate": icu_roles, "eicu_creatinine": icu_roles,
+               "gaitrec_propulsion": gait_roles}
+    frame = readers[name](source, study["role_seed"])
     assert frame.patient.is_unique and frame.outer_fold.eq(0).equals(frame.role.eq("reserved"))
     immutable(inputs / "roles.csv", frame.to_csv(index=False))
     inventory = frame.groupby(["role", "outer_fold"]).size().rename("patients")

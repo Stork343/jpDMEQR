@@ -39,3 +39,11 @@ questions:
     decision_quantile: 0.75
     inference_target: C_pulse_pressure
     response: future_creatinine_mg_dl
+  gaitrec_propulsion:
+    study_id: gaitrec_propulsion_20261106
+    source_doi: 10.6084/m9.figshare.c.4788012
+    source_directory: data/raw/gaitrec_20261106
+    role_seed: 202611065
+    decision_quantile: 0.25
+    inference_target: C_propulsion_delay
+    response: affected_late_stance_propulsive_peak_percent_body_weight
