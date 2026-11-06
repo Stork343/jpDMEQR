@@ -161,3 +161,13 @@ questions:
     decision_quantile: 0.25
     inference_target: C_ventilation
     response: subsequent_measured_blood_ph
+  vaccine_cxcl10:
+    study_id: vaccine_cxcl10_20261106
+    source_doi: 10.1038/s41597-022-01714-7
+    source_directory: data/raw/vaccine_20261106
+    role_seed: 202611076
+    decision_quantile: 0.75
+    inference_target: C_isg_change
+    response: log1p_concurrent_serum_cxcl10_pg_ml
+    minimum_observed_fraction: 0.80
+    maximum_high_features: 300
