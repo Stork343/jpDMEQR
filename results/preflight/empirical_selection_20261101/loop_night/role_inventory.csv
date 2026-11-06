@@ -1,0 +1,26 @@
+role,outer_fold,pediatric,use_at_enrollment,patients
+discovery,1,False,Less than 7 days,10
+discovery,1,False,Not using Loop,29
+discovery,1,True,Less than 7 days,13
+discovery,1,True,Not using Loop,28
+discovery,2,False,Less than 7 days,9
+discovery,2,False,Not using Loop,30
+discovery,2,True,Less than 7 days,14
+discovery,2,True,Not using Loop,28
+discovery,3,False,Less than 7 days,9
+discovery,3,False,Not using Loop,30
+discovery,3,True,Less than 7 days,13
+discovery,3,True,Not using Loop,28
+discovery,4,False,Less than 7 days,9
+discovery,4,False,Not using Loop,30
+discovery,4,True,Less than 7 days,13
+discovery,4,True,Not using Loop,28
+discovery,5,False,Less than 7 days,10
+discovery,5,False,Not using Loop,30
+discovery,5,False,Unknown,1
+discovery,5,True,Less than 7 days,13
+discovery,5,True,Not using Loop,29
+reserved,0,False,Less than 7 days,25
+reserved,0,False,Not using Loop,80
+reserved,0,True,Less than 7 days,35
+reserved,0,True,Not using Loop,76
