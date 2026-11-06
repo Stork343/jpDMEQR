@@ -1,0 +1,41 @@
+application_template: config/application_loop_20261106.yml
+method_template: config/clinical_quantile_loop_20261106.yml
+template_commit: 7cfe4cf
+eligible_fraction: 0.20
+quantiles: [0.25, 0.5, 0.75]
+outer_folds: 5
+inner_folds: 3
+validation_fraction: 0.35
+required_relative_gain: 0.02
+minimum_discovery_patients: 100
+minimum_repeated_patients: 35
+minimum_fold_patients: 12
+minimum_distinct_outcomes: 25
+minimum_target_observed_fraction: 0.70
+minimum_additional_measurements: 25
+questions:
+  uwhvf_central:
+    study_id: uwhvf_central_20261106
+    source_doi: 10.1167/tvst.11.1.1
+    source_directory: data/raw/uwhvf_20261106
+    source_commit: 0c07384b1345aca702f503a959d8815ff0bfa17a
+    role_seed: 202611063
+    decision_quantile: 0.25
+    inference_target: C_ring_persistent
+    response: central_four_sensitivity_db
+  eicu_lactate:
+    study_id: eicu_lactate_20261106
+    source_doi: 10.13026/4mxk-na84
+    source_directory: data/raw/critical_care_20261106
+    role_seed: 202611064
+    decision_quantile: 0.75
+    inference_target: C_dsi
+    response: future_lactate_mmol_l
+  eicu_creatinine:
+    study_id: eicu_creatinine_20261106
+    source_doi: 10.13026/4mxk-na84
+    source_directory: data/raw/critical_care_20261106
+    role_seed: 202611064
+    decision_quantile: 0.75
+    inference_target: C_pulse_pressure
+    response: future_creatinine_mg_dl

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 from urllib.parse import quote
 from zipfile import ZipFile
 
@@ -13,9 +14,16 @@ bucket = "live-jchrpublicdatasets"
 key = "Diabetes/Public Datasets/Loop study public dataset 2023-01-31.zip"
 url = f"https://{bucket}.s3.amazonaws.com/{quote(key)}"
 size = 1626077053
+if len(sys.argv) > 1:
+    if len(sys.argv) != 4:
+        raise ValueError("需要提供数据来源网址、ZIP 文件路径和字节数")
+    url, filename, expected_size = sys.argv[1:]
+    final = Path(filename)
+    directory = final.parent
+    size = int(expected_size)
 block = 1024 ** 2
 directory.mkdir(parents=True, exist_ok=True)
-parts = directory / "ranges"
+parts = directory / ("ranges" if len(sys.argv) == 1 else final.name + ".ranges")
 parts.mkdir(exist_ok=True)
 
 
@@ -40,7 +48,7 @@ def download_range(start):
 
 
 if not final.exists():
-    incoming = directory / "Loop.s3.incoming"
+    incoming = final.with_suffix(".s3.incoming")
     with ThreadPoolExecutor(max_workers=32) as executor:
         chunks = list(executor.map(download_range, range(0, size, block)))
     with incoming.open("wb") as dest:
@@ -55,7 +63,9 @@ else:
     assert final.stat().st_size == size
     with ZipFile(final) as archive:
         assert archive.testzip() is None
-record = {"bucket": bucket, "key": key, "bytes": size, "all_members_verified": True,
+record = {"url": url, "bytes": size, "all_members_verified": True,
           "verified_utc": datetime.now(timezone.utc).isoformat()}
+if len(sys.argv) == 1:
+    record.update(bucket=bucket, key=key)
 (directory / "verified.json").write_text(json.dumps(record, indent=2) + "\n")
 print(json.dumps(record))

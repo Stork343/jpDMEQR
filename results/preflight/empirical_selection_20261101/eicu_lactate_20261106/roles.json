@@ -1,0 +1,9 @@
+{
+  "study_id": "eicu_lactate_20261106",
+  "roster_patients": 1834,
+  "reserved_patients": 641,
+  "discovery_patients": 1193,
+  "reserved_outcomes_used": false,
+  "hospital_codes": 186,
+  "reserved_hospital_codes": 65
+}
