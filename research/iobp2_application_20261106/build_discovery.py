@@ -12,7 +12,7 @@ inputs = Path(config["input_directory"])
 report = Path(config["report_directory"])
 roles = pd.read_csv(inputs / "roles.csv", dtype={"PtID": str})
 discovery = roles.loc[roles.role.eq("discovery")].set_index("PtID")
-dates = pd.to_datetime(discovery.RandDt.str.split().str[0], format="%m/%d/%Y")
+single_arm = config.get("single_arm_study", False)
 slots = pd.read_parquet(inputs / "discovery_slots.parquet")
 assert set(slots.PtID).issubset(discovery.index)
 assert not slots.duplicated(["PtID", "day", "slot"]).any()
@@ -53,25 +53,28 @@ baseline_ok = ((coverage.baseline_days >= config["minimum_baseline_days"])
                & (coverage.baseline_nights >= config["minimum_baseline_nights"]))
 all_periods = coverage.filter(regex="^period_").ge(config["minimum_nights_per_period"]).all(axis=1)
 eligible = coverage.index[baseline_ok & all_periods]
-inventory = coverage.join(discovery[["TrtGroup", "outer_fold"]])
+group_name = "use_at_enrollment" if single_arm else "TrtGroup"
+inventory = coverage.join(discovery[[group_name, "outer_fold"]])
 inventory["baseline_eligible"] = baseline_ok
 inventory["three_periods_eligible"] = all_periods
 inventory["analysis_eligible"] = baseline_ok & all_periods
 inventory.to_csv(inputs / "discovery_coverage.csv")
-by_arm = inventory.groupby("TrtGroup").agg(randomized=("outer_fold", "size"),
+entry_name = "enrolled" if single_arm else "randomized"
+by_arm = inventory.groupby(group_name).agg(registered=("outer_fold", "size"),
     baseline_eligible=("baseline_eligible", "sum"), three_periods_eligible=("three_periods_eligible", "sum"),
     analysis_eligible=("analysis_eligible", "sum"))
-by_arm.to_csv(report / "coverage_by_arm.csv")
-by_fold = inventory.groupby("outer_fold").agg(randomized=("TrtGroup", "size"),
+by_arm.rename(columns={"registered": entry_name}).to_csv(report / ("coverage_by_initial_use.csv" if single_arm else "coverage_by_arm.csv"))
+by_fold = inventory.groupby("outer_fold").agg(registered=(group_name, "size"),
     analysis_eligible=("analysis_eligible", "sum"))
-by_fold.to_csv(report / "coverage_by_fold.csv")
+by_fold.rename(columns={"registered": entry_name}).to_csv(report / "coverage_by_fold.csv")
 outcomes = periods.mean().loc[lambda x: x.index.get_level_values("PtID").isin(eligible)]
 assert len(outcomes) == len(eligible) * config["periods"] and outcomes.between(40, 400).all()
 boundary = float(outcomes.eq(400).mean()) if len(outcomes) else None
 checks = {"patients": bool(len(eligible) >= config["minimum_discovery_patients"]),
-          "arms": bool(by_arm.analysis_eligible.min() >= config["minimum_per_arm"]),
           "folds": bool(by_fold.analysis_eligible.min() >= config["minimum_per_fold"]),
           "endpoint_support": outcomes.nunique() >= 20, "boundary": boundary is not None and boundary < 0.05}
+if not single_arm:
+    checks["arms"] = bool(by_arm.analysis_eligible.min() >= config["minimum_per_arm"])
 status = {"discovery_patients": len(eligible), "period_records": len(outcomes),
           "distinct_endpoint_values": outcomes.nunique(), "periods_at_sensor_ceiling": boundary,
           "criteria": checks, "passed": all(checks.values()), "formal_validation_used": False,
@@ -83,11 +86,14 @@ if not status["passed"]:
 
 base = discovery.loc[eligible]
 features = pd.DataFrame(index=eligible)
-features["C_age"] = base.AgeAsofEnrollDt
+features["C_age"] = base.AgeAtEnrollment if single_arm else base.AgeAsofEnrollDt
 features["C_pediatric"] = base.pediatric.astype(int)
-features["C_armBP"] = base.TrtGroup.eq("BP").astype(int)
-
-with ZipFile(Path(config["source_directory"]) / "IOBP2_RCT.zip") as archive:
+if single_arm:
+    features["C_started"] = base.LoopUseTimeAtEnroll.map({"Not using Loop": 0, "Less than 7 days": 1})
+else:
+    features["C_armBP"] = base.TrtGroup.eq("BP").astype(int)
+    dates = pd.to_datetime(discovery.RandDt.str.split().str[0], format="%m/%d/%Y")
+    archive = ZipFile(Path(config["source_directory"]) / "IOBP2_RCT.zip")
     def read_fields(table, fields):
         with archive.open(f"Data Tables/{table}.txt") as stream:
             frame = pd.read_csv(stream, sep="|", dtype=str, usecols=["PtID", *fields])
@@ -120,6 +126,7 @@ with ZipFile(Path(config["source_directory"]) / "IOBP2_RCT.zip") as archive:
                           ["PtID", "available", "Value"]].rename(columns={"Value": "HbA1cTestRes"})
     known = pd.concat([local, central]).sort_values("available").drop_duplicates("PtID", keep="last")
     features["C_hba1c"] = pd.to_numeric(known.set_index("PtID").HbA1cTestRes, errors="raise")
+    archive.close()
 
 b = baseline.loc[baseline.PtID.isin(eligible)].copy()
 g = b.groupby("PtID").glucose
@@ -133,7 +140,13 @@ bn = b.loc[b.slot.lt(72)].merge(baseline_nights.reset_index()[["PtID", "day"]], 
 half = bn.groupby(["PtID", "day", bn.slot.ge(36)]).glucose.mean().unstack()
 assert half.notna().all().all()
 features["C_dawn"] = (half[True] - half[False]).groupby(level="PtID").mean() / 20
-features["C_arm_dawn"] = features.C_dawn * features.C_armBP
+if not single_arm:
+    features["C_arm_dawn"] = features.C_dawn * features.C_armBP
+if "forecast_day" in config:
+    history = baseline_nights.reset_index()
+    weekly = history.groupby(["PtID", history.day.ge(-7)])["tail"].mean().unstack()
+    features["C_recent_tail"] = weekly[True]
+    features["C_week_change"] = weekly[True] - weekly[False]
 b["bin"] = b.slot // 3
 by_bin = b.groupby(["PtID", "bin"])
 profile = by_bin.glucose.quantile([0.1, 0.5, 0.9]).unstack()
@@ -141,10 +154,11 @@ profile.loc[by_bin.day.nunique() < config["minimum_days_per_profile_bin"]] = np.
 profile = profile.unstack("bin").reindex(columns=pd.MultiIndex.from_product([[0.1, 0.5, 0.9], range(96)]))
 profile.columns = [f"P_q{int(q * 100):02d}_bin{k:02d}" for q, k in profile.columns]
 features = features.join(profile)
-assert profile.shape[1] == 288 and features.C_arm_dawn.notna().all()
+assert profile.shape[1] == 288 and features[config["inference_target"]].notna().all()
 rows = outcomes.rename("y").reset_index()
-rows["sample_id"] = "IO_" + rows.PtID + "_P" + rows.period.astype(str)
-rows["strain_id"] = "IO_" + rows.PtID
+prefix = config.get("patient_prefix", "IO")
+rows["sample_id"] = prefix + "_" + rows.PtID + "_P" + rows.period.astype(str)
+rows["strain_id"] = prefix + "_" + rows.PtID
 rows["outer_fold"] = rows.PtID.map(base.outer_fold)
 rows["condition"] = config["response"]
 rows["role"] = "discovery"

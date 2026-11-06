@@ -3,7 +3,7 @@ prediction_method: CQ_SMOOTH
 status: development
 output_root: results/raw/clinical_quantile_iobp2_20261106
 report_directory: results/preflight/clinical_quantile_iobp2_20261106
-source_studies: [config/application_iobp2_runin_20261106.yml]
+source_studies: [config/application_iobp2_landmark_20261106.yml]
 quantiles: [0.25, 0.5, 0.75]
 alpha: [0, 0.1, 0.5, 1]
 path_length: 40
@@ -18,7 +18,7 @@ clinical_columns: all_estimable_C_and_M_C
 prediction_rule: nonnegative_sorted_quantiles
 evaluation_weight: equal_patients
 inference_quantile: 0.75
-inference_target: C_arm_dawn
+inference_target: C_dawn
 density_spacing: 0.05
 density_range: [0.01, 10]
 score_correlation_range: [0, 0.95]

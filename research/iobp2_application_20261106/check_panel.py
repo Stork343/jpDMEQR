@@ -14,8 +14,10 @@ status = json.loads((report / "eligibility.json").read_text())
 connection = duckdb.connect()
 connection.read_parquet(str(inputs / "discovery_slots.parquet")).create_view("slots")
 roles = pd.read_csv(inputs / "roles.csv", dtype={"PtID": str})
-assert roles.PtID.is_unique and roles.groupby("SiteID").role.nunique().eq(1).all()
-assert roles.groupby("SiteID").outer_fold.nunique().eq(1).all()
+assert roles.PtID.is_unique
+if "SiteID" in roles:
+    assert roles.groupby("SiteID").role.nunique().eq(1).all()
+    assert roles.groupby("SiteID").outer_fold.nunique().eq(1).all()
 actual_ids = set(connection.sql("select distinct PtID from slots").df().PtID)
 assert actual_ids.issubset(set(roles.loc[roles.role.eq("discovery"), "PtID"]))
 days_needed = config["minimum_baseline_days"]
@@ -60,7 +62,7 @@ audit = {"discovery_patients_reconstructed": stats.PtID.nunique(), "records_reco
 if status["passed"]:
     rows = pd.read_csv(inputs / "discovery.csv")
     features = pd.read_csv(inputs / "features.csv.gz")
-    stats["sample_id"] = "IO_" + stats.PtID + "_P" + stats.period.astype(str)
+    stats["sample_id"] = config.get("patient_prefix", "IO") + "_" + stats.PtID + "_P" + stats.period.astype(str)
     paired = stats.merge(rows, on="sample_id", validate="one_to_one", suffixes=("_SQL", "_Python"))
     paired = paired.merge(features, on="sample_id", validate="one_to_one")
     assert len(paired) == len(rows) == len(stats) == len(features)

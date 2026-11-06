@@ -33,8 +33,11 @@ with ZipFile(Path(config["source_directory"]) / "IOBP2_RCT.zip") as archive:
             assert times.notna().all()
             day = (times.dt.normalize() - chunk.PtID.map(randomization)).dt.days
             slot = (times.dt.hour * 60 + times.dt.minute) // 5
+            if "forecast_day" in config:
+                landmark = config["forecast_day"]
+                day = day - landmark - day.le(landmark).astype(int)
             baseline = day.lt(0) if config.get("baseline_window") == "run_in" else day.between(-14, -1)
-            keep = baseline | (day.between(1, 84) & slot.lt(72))
+            keep = baseline | (day.between(1, config["period_days"] * config["periods"]) & slot.lt(72))
             if not keep.any():
                 continue
             sample = chunk.loc[keep, ["PtID"]].copy()

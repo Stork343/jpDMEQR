@@ -1,0 +1,18 @@
+{
+  "roster": 326,
+  "archive_site_codes": 17,
+  "discovery_patients": 212,
+  "reserved_patients": 114,
+  "discovery_site_codes": 11,
+  "reserved_site_codes": 6,
+  "discovery_patients_per_fold": [
+    41,
+    40,
+    40,
+    42,
+    49
+  ],
+  "source": "IOBP2PtRoster",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
