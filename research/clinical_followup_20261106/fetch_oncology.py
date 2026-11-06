@@ -3,8 +3,10 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
+import tarfile
 from dulwich.lfs import LFSPointer
 
 root = Path("data/raw/mpc_20261106")
@@ -13,7 +15,8 @@ commit = "a8ea891da32add81fabaa8e744cf8cb72a8a0e66"
 clinical = {"mpcproject_broad_2021": ["data_clinical_patient.txt", "data_clinical_sample.txt", "data_timeline_psa.txt",
     "data_timeline_treatment.txt", "data_timeline_sample.txt", "data_gene_panel_matrix.txt"],
     "msk_chord_2024": ["data_clinical_patient.txt", "data_clinical_sample.txt", "data_timeline_psa_labs.txt",
-    "data_timeline_treatment.txt", "data_timeline_specimen.txt", "data_gene_panel_matrix.txt", "data_timeline_gleason.txt"]}
+    "data_timeline_treatment.txt", "data_timeline_specimen.txt", "data_gene_panel_matrix.txt", "data_timeline_gleason.txt",
+    "data_timeline_cea_labs.txt","data_timeline_ca_19-9_labs.txt","data_timeline_ca_15-3_labs.txt"]}
 
 
 def fetch(url, dest):
@@ -42,14 +45,17 @@ def obtain(job):
     if mode == "index":
         return record
     path = dest / filename
-    url = "https://media.githubusercontent.com/media/" + suffix
-    if size > 1024 ** 2:
-        env = dict(os.environ, CLINICAL_DOWNLOAD_WORKERS="6")
-        subprocess.run([sys.executable, "research/loop_application_20261106/download.py", url, str(path),
-                        str(size), digest], env=env, check=True)
+    if not path.exists():
+        with tarfile.open(root / f"{study}.tar.gz","r:gz") as archive:
+            member, = [m for m in archive.getmembers() if m.isfile() and Path(m.name).name == filename]
+            assert member.size == size
+            partial = path.with_name(path.name + ".archive.incoming")
+            with archive.extractfile(member) as stream, partial.open("wb") as output:
+                shutil.copyfileobj(stream, output)
+            with partial.open("rb") as stream:
+                assert hashlib.file_digest(stream,"sha256").hexdigest() == digest
+            partial.replace(path)
     else:
-        if not path.exists():
-            fetch(url, path)
         with path.open("rb") as stream:
             assert path.stat().st_size == size and hashlib.file_digest(stream,"sha256").hexdigest() == digest
     print(study, filename, size, flush=True)
@@ -58,6 +64,14 @@ def obtain(job):
 
 mode = sys.argv[1]
 assert mode in {"index","clinical","genomics"}
+archives = {"msk_chord_2024": 46876803, "mpcproject_broad_2021": 22961713}
+if mode != "index":
+    for study, size in archives.items():
+        path = root / f"{study}.tar.gz"
+        if not path.with_name(path.name + ".verified.json").exists():
+            subprocess.run([sys.executable,"research/loop_application_20261106/download.py",
+                f"https://datahub.assets.cbioportal.org/{study}.tar.gz",str(path),str(size),"gzip"],
+                env=dict(os.environ, CLINICAL_DOWNLOAD_WORKERS="8"),check=True)
 jobs = [(s,n) for s, files in clinical.items() for n in (files if mode == "clinical" else
         [*files,"data_cna.txt","data_mutations.txt"] if mode == "index" else ["data_cna.txt","data_mutations.txt"])]
 with ThreadPoolExecutor(max_workers=3) as executor:

@@ -13,7 +13,7 @@ def study_config(name):
     return yaml.safe_load((settings_directory / f"{name}.yml").read_text())
 
 
-def finish_panel(config, rows, features, audit):
+def finish_panel(config, rows, features, audit, additional_criteria=None, additional_summary=None):
     inputs = Path(config["input_directory"])
     report = Path(config["report_directory"])
     roles = pd.read_csv(inputs / "roles.csv", dtype={"patient": str}).set_index("patient")
@@ -41,14 +41,20 @@ def finish_panel(config, rows, features, audit):
                 "distinct_outcomes": rows.y.nunique() >= registry["minimum_distinct_outcomes"],
                 "clinical_target_observed": float(target_observed) >= registry["minimum_target_observed_fraction"],
                 "additional_features": int(extra.sum()) >= registry["minimum_additional_measurements"]}
+    if additional_criteria is not None:
+        criteria.update(additional_criteria)
     state = {"study_id": config["study_id"], "discovery_patients": len(patients), "records": len(rows),
              "repeated_patients": int(patients.ge(2).sum()), "maximum_records_per_patient": int(patients.max()),
              "distinct_outcomes": rows.y.nunique(), "additional_features_at_registered_frequency": int(extra.sum()),
              "target_observed_fraction": float(target_observed), "criteria": criteria, "passed": all(criteria.values()),
              "reserved_outcomes_used": False, "formal_validation_used": False, "manuscript_adoption": False}
+    if additional_summary is not None:
+        state.update(additional_summary)
     rows[["sample_id", "strain_id", "y", "condition", "role", "outer_fold"]].to_csv(inputs / "discovery.csv", index=False)
     x.to_csv(inputs / "features.csv.gz")
     pd.DataFrame(audit).to_csv(inputs / "time_audit.csv", index=False)
     folds.rename("patients").to_csv(report / "eligible_by_fold.csv")
-    (report / "eligibility.json").write_text(json.dumps(state, indent=2) + "\n")
+    temporary = report / "eligibility.incoming"
+    temporary.write_text(json.dumps(state, indent=2) + "\n")
+    temporary.replace(report / "eligibility.json")
     print(json.dumps(state), flush=True)

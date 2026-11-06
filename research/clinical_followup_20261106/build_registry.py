@@ -1,13 +1,14 @@
 from pathlib import Path
 from zipfile import ZipFile
 import json
+import sys
 
 import numpy as np
 import pandas as pd
 
 from panel import study_config, finish_panel
 
-study = study_config("t1dx_monitoring")
+study = study_config(sys.argv[1] if len(sys.argv)>1 else "t1dx_monitoring")
 inputs = Path(study["input_directory"])
 source = Path(study["source_directory"])
 roles = pd.read_csv(inputs / "roles.csv", dtype={"patient": str})
@@ -42,7 +43,9 @@ def number(field):
 
 matrix["C_age"] = number("ageConsent")
 matrix["C_duration"] = number("diabDur")
-matrix["C_female"] = visits.Pt_Gender.map({"Female":1, "Male":0})
+assert set(visits.Pt_Gender.dropna()).issubset({"F","M","T"})
+matrix["C_female"] = visits.Pt_Gender.map({"F":1,"M":0,"T":0})
+matrix["C_transgender"] = visits.Pt_Gender.map({"F":0,"M":0,"T":1})
 matrix["C_bmi"] = number("bmi")
 matrix["C_lab"] = last.value
 matrix["C_lab_change"] = last.value-first.value
@@ -71,7 +74,7 @@ categorical = ["Pt_PumpManuf","Pt_PumpModel","Pt_CGMManuf","Pt_CGMModel","Pt_Ins
 encodings = {}
 extra = []
 for field in categorical:
-    values = visits[field].replace({"Unknown":np.nan,"Unk":np.nan,"Don't Know":np.nan})
+    values = visits[field].where(~visits[field].isin(["Unknown","Unk","Don't Know"]))
     codes = pd.get_dummies(values, dtype=float)
     encodings[field] = list(codes.columns.astype(str))
     codes.columns = [f"P_{field}_{i:02d}" for i in range(len(codes.columns))]

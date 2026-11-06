@@ -91,3 +91,45 @@ questions:
     decision_quantile: 0.75
     inference_target: C_tp53_late
     response: log1p_reportable_psa_fraction
+  chord_colorectal:
+    study_id: chord_colorectal_20261106
+    source_doi: 10.1038/s41586-024-08167-5
+    source_directory: data/raw/mpc_20261106
+    role_seed: 202611070
+    decision_quantile: 0.75
+    inference_target: C_genotype_late
+    response: log1p_cea_fraction
+    marker: cea
+    index_agents: [OXALIPLATIN, IRINOTECAN]
+    histologies: [Colon Adenocarcinoma, Rectal Adenocarcinoma, Colorectal Adenocarcinoma]
+    baseline_threshold: 5
+    report_floor: 0.5
+    marker_genes: [KRAS, NRAS]
+  chord_pancreas:
+    study_id: chord_pancreas_20261106
+    source_doi: 10.1038/s41586-024-08167-5
+    source_directory: data/raw/mpc_20261106
+    role_seed: 202611071
+    decision_quantile: 0.75
+    inference_target: C_genotype_late
+    response: log1p_ca199_fraction
+    marker: ca_19-9
+    index_agents: [GEMCITABINE, OXALIPLATIN]
+    histologies: [Pancreatic Adenocarcinoma]
+    baseline_threshold: 37
+    report_floor: 1
+    marker_genes: [SMAD4]
+  chord_breast:
+    study_id: chord_breast_20261106
+    source_doi: 10.1038/s41586-024-08167-5
+    source_directory: data/raw/mpc_20261106
+    role_seed: 202611072
+    decision_quantile: 0.75
+    inference_target: C_genotype_late
+    response: log1p_ca153_fraction
+    marker: ca_15-3
+    index_agents: [PALBOCICLIB, RIBOCICLIB, ABEMACICLIB]
+    histologies: [Breast Invasive Ductal Carcinoma, Breast Invasive Lobular Carcinoma, Invasive Breast Carcinoma]
+    baseline_threshold: 30
+    report_floor: 1
+    marker_genes: [ESR1]

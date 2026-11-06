@@ -8,6 +8,7 @@ from zipfile import ZipFile
 import numpy as np
 import pandas as pd
 import yaml
+from serum import serum_roles
 
 registry = yaml.safe_load(Path("config/clinical_followup_search_20261106.yml").read_text())
 root = Path("results/raw/clinical_followup_settings_20261106")
@@ -218,7 +219,10 @@ for name, definition in registry["questions"].items():
     readers = {"uwhvf_central": eye_roles, "eicu_lactate": icu_roles, "eicu_creatinine": icu_roles,
                "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles, "ispy2_volume": breast_roles,
                "ispy2_signaling": protein_roles, "t1dx_monitoring": registry_roles, "chord_psa": prostate_roles}
-    frame = readers[name](source, study["role_seed"])
+    if "marker" in study:
+        frame = serum_roles(source, study["role_seed"], study, registry["validation_fraction"], registry["outer_folds"])
+    else:
+        frame = readers[name](source, study["role_seed"])
     assert frame.patient.is_unique and frame.outer_fold.eq(0).equals(frame.role.eq("reserved"))
     immutable(inputs / "roles.csv", frame.to_csv(index=False))
     inventory = frame.groupby(["role", "outer_fold"]).size().rename("patients")
