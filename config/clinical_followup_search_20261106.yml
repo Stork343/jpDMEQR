@@ -65,3 +65,13 @@ questions:
     response: log1p_residual_enhancing_volume_fraction
     maximum_high_features: 300
     minimum_observed_fraction: 0.80
+  ispy2_signaling:
+    study_id: ispy2_signaling_20261106
+    source_doi: 10.1016/j.xcrm.2023.101312
+    source_accession: GSE196093
+    source_directory: data/raw/ispy_20261106
+    role_seed: 202611067
+    decision_quantile: 0.75
+    inference_target: C_cyt_late
+    response: log1p_residual_enhancing_volume_fraction
+    minimum_observed_fraction: 0.80

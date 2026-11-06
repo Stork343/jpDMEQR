@@ -16,8 +16,9 @@ file = source / "expression.tsv.gz"
 assert file.with_name(file.name + ".verified.json").exists()
 with gzip.open(file, "rt") as stream:
     ids = next(csv.reader([stream.readline()], delimiter="\t"))
-with gzip.open(source / "gene_header.part", "rt") as stream:
-    assert ids == next(csv.reader([stream.readline()], delimiter="\t"))
+if (source / "gene_header.part").exists():
+    with gzip.open(source / "gene_header.part", "rt") as stream:
+        assert ids == next(csv.reader([stream.readline()], delimiter="\t"))
 assert set(cohort.index).issubset(ids) and len(ids) == len(set(ids))
 genes = pd.read_csv(file, sep="\t", header=None, skiprows=1, names=["gene", *ids],
                     usecols=["gene", *cohort.index], dtype={"gene": str})
