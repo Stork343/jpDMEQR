@@ -1,0 +1,9 @@
+{
+  "source": "independent published JSON arrays",
+  "patients": 964,
+  "records": 2865,
+  "clinical_coefficients_checked_rows": 2865,
+  "maximum_endpoint_difference_db": 3.552713678800501e-15,
+  "maximum_target_input_difference": 0.0,
+  "reserved_outcomes_used": false
+}

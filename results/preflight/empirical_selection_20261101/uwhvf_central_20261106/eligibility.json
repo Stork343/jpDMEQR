@@ -1,0 +1,22 @@
+{
+  "study_id": "uwhvf_central_20261106",
+  "discovery_patients": 964,
+  "records": 2865,
+  "repeated_patients": 812,
+  "maximum_records_per_patient": 6,
+  "distinct_outcomes": 2423,
+  "additional_features_at_registered_frequency": 192,
+  "target_observed_fraction": 1.0,
+  "criteria": {
+    "discovery_patients": true,
+    "repeated_patients": true,
+    "fold_patients": true,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true
+  },
+  "passed": true,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
