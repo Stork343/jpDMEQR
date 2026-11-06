@@ -1,27 +1,52 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import shutil
+import subprocess
+from urllib.parse import quote
 from zipfile import ZipFile
-
-import boto3
-from boto3.s3.transfer import TransferConfig
-from botocore import UNSIGNED
-from botocore.config import Config
 
 directory = Path("data/raw/loop_20261106")
 final = directory / "Loop.zip"
 bucket = "live-jchrpublicdatasets"
 key = "Diabetes/Public Datasets/Loop study public dataset 2023-01-31.zip"
-client = boto3.client("s3", region_name="us-east-1", config=Config(signature_version=UNSIGNED,
-    max_pool_connections=36, connect_timeout=20, read_timeout=90, retries={"mode": "standard", "max_attempts": 6},
-    proxies={"https": "http://127.0.0.1:7897"}))
-size = client.head_object(Bucket=bucket, Key=key)["ContentLength"]
-assert size == 1626077053
+url = f"https://{bucket}.s3.amazonaws.com/{quote(key)}"
+size = 1626077053
+block = 1024 ** 2
 directory.mkdir(parents=True, exist_ok=True)
+parts = directory / "ranges"
+parts.mkdir(exist_ok=True)
+
+
+def download_range(start):
+    last = min(start + block, size) - 1
+    count = last - start + 1
+    stored = parts / f"{start:010d}.bin"
+    if stored.exists():
+        assert stored.stat().st_size == count
+        return stored
+    incoming = stored.with_suffix(".incoming")
+    expected = f"206 bytes {start}-{last}/{size}"
+    result = subprocess.run(["curl", "--silent", "--show-error", "--fail", "--location", "--retry", "6",
+        "--retry-all-errors", "--retry-delay", "1", "--connect-timeout", "15", "--max-time", "90",
+        "--proxy", "http://127.0.0.1:7897", "--range", f"{start}-{last}", "--max-filesize", str(count),
+        "--output", str(incoming), "--write-out", "%{response_code} %header{content-range}", url],
+        check=True, capture_output=True, text=True)
+    assert result.stdout.strip() == expected, (result.stdout, expected)
+    assert incoming.stat().st_size == count
+    incoming.replace(stored)
+    return stored
+
+
 if not final.exists():
     incoming = directory / "Loop.s3.incoming"
-    client.download_file(bucket, key, str(incoming), Config=TransferConfig(multipart_chunksize=2 * 1024 ** 2,
-                         max_concurrency=32, num_download_attempts=8, preferred_transfer_client="classic"))
+    with ThreadPoolExecutor(max_workers=32) as executor:
+        chunks = list(executor.map(download_range, range(0, size, block)))
+    with incoming.open("wb") as dest:
+        for piece in chunks:
+            with piece.open("rb") as stream:
+                shutil.copyfileobj(stream, dest)
     assert incoming.stat().st_size == size
     with ZipFile(incoming) as archive:
         assert archive.testzip() is None

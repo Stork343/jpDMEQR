@@ -55,5 +55,13 @@ lines = [f"# {name} 入组两周时的夜间血糖预测", "",
          "", ("两项必要比较均达到 2% 条件，尚须完成登记的其余比较。" if passed else
               "必要比较未达到登记的 2% 条件。保留患者的随访结局继续封存，本次计算未形成经独立验证的临床发现。"),
          "", source, "", attribution, ""]
+increment = report / "exploratory_profile_increment.csv"
+if increment.exists():
+    diagnostic = pd.read_csv(increment).iloc[0]
+    assert diagnostic.patients == state["discovery_patients"]
+    lines[lines.index(source):lines.index(source)] = [
+        "为核查完整曲线能否提供额外的预测信息，探索比较结束后，又在相同患者、相同训练组中拟合了"
+        f"只使用临床变量的校准 elastic net。其损失为 {diagnostic.clinical_loss:.4f}，加入 288 个曲线变量后"
+        f"为 {diagnostic.curve_loss:.4f}，相对改善为 {diagnostic.relative_gain_with_curve:+.2%}。", ""]
 (output / "REPORT_zh.md").write_text("\n".join(lines))
 print(json.dumps(state))

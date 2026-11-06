@@ -10,6 +10,8 @@ CQ_SMOOTH 的损失为 7.4488。临床分位数回归为 7.6262，经分位数�
 
 必要比较未达到登记的 2% 条件。保留患者的随访结局继续封存，本次计算未形成经独立验证的临床发现。
 
+为核查完整曲线能否提供额外的预测信息，探索比较结束后，又在相同患者、相同训练组中拟合了只使用临床变量的校准 elastic net。其损失为 6.9969，加入 288 个曲线变量后为 7.1041，相对改善为 -1.53%。
+
 Bionic Pancreas Research Group，New England Journal of Medicine，2022，DOI 10.1056/NEJMoa2205225。
 
 The source of the data is the Insulin Only Bionic Pancreas Pivotal Trial, but the analyses, content and conclusions presented herein are solely the responsibility of the authors and have not been reviewed or approved by the Bionic Pancreas Research Group or Beta Bionics.
