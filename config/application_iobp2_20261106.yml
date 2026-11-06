@@ -36,5 +36,29 @@ elastic_net_lambda_min_ratio: 0.01
 ridge_variance_ratio_max: 1000
 ridge_variance_ratio_min: 0.00001
 inference_target: C_arm_dawn
+forest:
+  trees: 2000
+  regression_splitting: [false, true]
+  mtry_multiplier: [1, 5]
+  min_node_size: [5, 10]
+  honesty: [true, false]
+  calibration: [none, training, oob]
+xgboost:
+  objective: reg:quantileerror
+  max_depth: [2, 4]
+  learning_rate: [0.03, 0.1]
+  reg_lambda: [1, 20]
+  rounds: [100, 300, 600]
+  subsample: 0.5
+  max_bin: 64
+  calibration: [none, training]
+lightgbm:
+  objective: quantile
+  num_leaves: [15, 31]
+  min_child_samples: [10, 30]
+  learning_rate: [0.03, 0.1]
+  reg_lambda: [1, 20]
+  rounds: [100, 300, 600]
+  calibration: [none, training]
 formal_validation_used: false
 manuscript_adoption: false
