@@ -1,0 +1,10 @@
+{
+  "source": "quantitative MRI volume columns and independently extracted gene expression rows",
+  "patients": 251,
+  "records": 753,
+  "max_endpoint_difference": 2.220446049250313e-16,
+  "max_clinical_input_difference": 1.7763568394002505e-15,
+  "reported_change_units": "percent",
+  "reported_change_maximum_discrepancy": 4.320099833421409e-12,
+  "reserved_outcomes_used": false
+}

@@ -1,0 +1,5 @@
+fold,panel,patients,original_features,corrected_features,removed,added,numerical_design_equivalent,maximum_observation_fraction_error
+1,training,93,207,180,27,0,FALSE,0
+1,inner_1,61,207,180,27,0,FALSE,0
+1,inner_2,62,207,180,27,0,FALSE,0
+1,inner_3,63,207,180,27,0,FALSE,0

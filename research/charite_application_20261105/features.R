@@ -30,7 +30,8 @@ ch_recipe <- function(rows, panel, config) {
   ids <- sort(unique(rows$strain_id))
   weight <- 1 / as.numeric(table(rows$strain_id)[rows$strain_id])
   P <- panel$protein[rows$sample_id, , drop = FALSE]
-  observed <- colSums(!is.na(P) * weight) / length(ids)
+  observed <- colSums((!is.na(P)) * weight) / length(ids)
+  stopifnot(all(observed >= 0), max(observed) <= 1 + 1e-12)
   genes <- colnames(P)[observed >= config$protein_observed_training_fraction]
   impute <- vapply(genes, function(gene) matrixStats::weightedMedian(P[, gene], weight, na.rm = TRUE), numeric(1))
   missing_genes <- genes[colSums(is.na(P[, genes, drop = FALSE])) > 0L]

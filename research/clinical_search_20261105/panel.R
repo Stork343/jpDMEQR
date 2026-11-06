@@ -20,14 +20,15 @@ cp_recipe <- function(rows, panel, config) {
   ids <- sort(unique(rows$strain_id))
   weight <- 1 / as.numeric(table(rows$strain_id)[rows$strain_id])
   X <- panel$X[rows$sample_id, , drop = FALSE]
-  observed <- colSums(!is.na(X) * weight) / length(ids)
+  observed <- colSums((!is.na(X)) * weight) / length(ids)
+  stopifnot(all(observed >= 0), max(observed) <= 1 + 1e-12)
   keep <- observed >= config$minimum_observed_fraction |
     (startsWith(colnames(X), "C_") & observed > 0)
   if (!is.null(config$maximum_high_features)) {
     candidates <- which(keep & startsWith(colnames(X), "P_"))
     if (length(candidates) > config$maximum_high_features) {
       values <- X[, candidates, drop = FALSE]
-      mass <- colSums(!is.na(values) * weight)
+      mass <- observed[candidates] * length(ids)
       center <- colSums(values * weight, na.rm = TRUE) / mass
       variance <- colSums(sweep(values, 2L, center, "-")^2 * weight, na.rm = TRUE) / mass
       ranking <- order(-variance, colnames(values), method = "radix")

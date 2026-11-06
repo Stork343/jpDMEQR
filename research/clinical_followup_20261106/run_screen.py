@@ -8,12 +8,12 @@ import sys
 import pandas as pd
 import yaml
 
-from panel import settings_directory, study_config
+from panel import settings_directory
 
 name = sys.argv[1]
-study = study_config(name)
 config = settings_directory / f"{name}.yml"
 method = settings_directory / f"cq_{name}.yml"
+study = yaml.safe_load(config.read_text())
 report = Path(study["report_directory"])
 root = Path(study["output_root"])
 smooth = Path("research/clinical_quantile_20261105")
