@@ -1,0 +1,4 @@
+use_at_enrollment,enrolled,baseline_eligible,three_periods_eligible,analysis_eligible
+Less than 7 days,113,85,75,71
+Not using Loop,290,214,202,181
+Unknown,1,0,0,0

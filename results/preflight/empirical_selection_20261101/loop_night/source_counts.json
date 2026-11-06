@@ -1,0 +1,14 @@
+{
+  "selected_patient_cgm": 44518392,
+  "without_standard_hour": 0,
+  "window_readings": 3708393,
+  "invalid_or_missing": 0,
+  "below_range": 5732,
+  "above_range": 8417,
+  "valid_window_records": 3708393,
+  "unique_five_minute_slots": 2731741,
+  "extra_records_in_occupied_slots": 976652,
+  "reserved_patients_processed": 0,
+  "clock": "UTC plus participant enrollment offset",
+  "mmol_to_mg_dl": 18.01559
+}
