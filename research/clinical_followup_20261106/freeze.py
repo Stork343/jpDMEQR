@@ -137,6 +137,25 @@ def protein_roles(source, seed):
     return original.merge(protein, on="patient", how="inner", validate="one_to_one").sort_values("patient")
 
 
+def registry_roles(source, seed):
+    cols = ["PtID","SiteID","Visit","ExamDtMnC","ageConsent","diabDur","BGTestAvgNumMeter","BGTestAvgNumPtRep"]
+    with ZipFile(source / "registry.zip") as archive:
+        name, = [s for s in archive.namelist() if s.endswith("/VisitsLong.txt")]
+        frame = pd.read_csv(archive.open(name), sep="|", usecols=cols, dtype={"PtID": str})
+    frame = frame.loc[frame.Visit.isin(["Enrollment1","Enrollment2"]) & frame.ageConsent.between(14,24)
+                      & frame.ExamDtMnC.between(-1,1) & frame.diabDur.ge(1)
+                      & frame.BGTestAvgNumMeter.between(0,30) & frame.BGTestAvgNumPtRep.between(0,30)
+                      & frame.SiteID.notna()].copy()
+    frame = frame.sort_values(["PtID","ExamDtMnC","Visit"]).drop_duplicates("PtID").rename(columns={"PtID":"patient"})
+    rng = np.random.default_rng(seed)
+    sites = allocate_sites(frame.SiteID.value_counts(), [1-registry["validation_fraction"], registry["validation_fraction"]], rng)
+    frame["role"] = frame.SiteID.map(sites).map({0:"discovery",1:"reserved"})
+    groups = allocate_sites(frame.loc[frame.role.eq("discovery"),"SiteID"].value_counts(), [1]*registry["outer_folds"], rng)
+    frame["outer_fold"] = frame.SiteID.map(groups).fillna(-1).astype(int)+1
+    assert frame.groupby("SiteID").role.nunique().eq(1).all() and frame.groupby("SiteID").outer_fold.nunique().eq(1).all()
+    return frame.sort_values("patient")
+
+
 application = template("application_template")
 method = template("method_template")
 shared = ["comparators", "target_candidates", "primary_prediction_rule", "working_penalties", "gap_tolerance",
@@ -164,7 +183,7 @@ for name, definition in registry["questions"].items():
     source = Path(study["source_directory"])
     readers = {"uwhvf_central": eye_roles, "eicu_lactate": icu_roles, "eicu_creatinine": icu_roles,
                "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles, "ispy2_volume": breast_roles,
-               "ispy2_signaling": protein_roles}
+               "ispy2_signaling": protein_roles, "t1dx_monitoring": registry_roles}
     frame = readers[name](source, study["role_seed"])
     assert frame.patient.is_unique and frame.outer_fold.eq(0).equals(frame.role.eq("reserved"))
     immutable(inputs / "roles.csv", frame.to_csv(index=False))

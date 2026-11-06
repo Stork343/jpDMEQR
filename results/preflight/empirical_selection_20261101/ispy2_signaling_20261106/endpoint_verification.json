@@ -1,0 +1,9 @@
+{
+  "source": "published GEO ExpressionSet and verified MRI and gene-expression source match",
+  "patients": 183,
+  "records": 549,
+  "protein_measurements": 139,
+  "treatment_interactions": 21,
+  "patient_roles_preserved": true,
+  "reserved_outcomes_used": false
+}

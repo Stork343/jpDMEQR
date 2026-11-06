@@ -1,0 +1,14 @@
+{
+  "study_id": "ispy2_signaling_20261106",
+  "patients": 183,
+  "records": 549,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0101034107292022,
+    "ENET": 0.0397370040702196
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

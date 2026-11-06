@@ -75,3 +75,11 @@ questions:
     inference_target: C_cyt_late
     response: log1p_residual_enhancing_volume_fraction
     minimum_observed_fraction: 0.80
+  t1dx_monitoring:
+    study_id: t1dx_monitoring_20261106
+    source_doi: 10.1111/pedi.12295
+    source_directory: data/raw/t1dx_20261106
+    role_seed: 202611068
+    decision_quantile: 0.75
+    inference_target: C_check_gap
+    response: subsequent_laboratory_hba1c_percent

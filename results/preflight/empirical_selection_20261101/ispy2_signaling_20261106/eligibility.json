@@ -1,0 +1,22 @@
+{
+  "study_id": "ispy2_signaling_20261106",
+  "discovery_patients": 183,
+  "records": 549,
+  "repeated_patients": 183,
+  "maximum_records_per_patient": 3,
+  "distinct_outcomes": 548,
+  "additional_features_at_registered_frequency": 106,
+  "target_observed_fraction": 1.0,
+  "criteria": {
+    "discovery_patients": true,
+    "repeated_patients": true,
+    "fold_patients": true,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true
+  },
+  "passed": true,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

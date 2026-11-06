@@ -1,0 +1,7 @@
+tau,loss,patients,study_id,method,rule
+0.25,0.0565950324827427,183,ispy2_signaling_20261106,CQ_SMOOTH,raw
+0.5,0.08437370762157279,183,ispy2_signaling_20261106,CQ_SMOOTH,raw
+0.75,0.08628912232487101,183,ispy2_signaling_20261106,CQ_SMOOTH,raw
+0.25,0.0558759092423962,183,ispy2_signaling_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.5,0.0839736447294172,183,ispy2_signaling_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.75,0.08622137712400212,183,ispy2_signaling_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
