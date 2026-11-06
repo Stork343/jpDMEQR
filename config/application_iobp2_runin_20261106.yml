@@ -1,0 +1,66 @@
+study_id: iobp2_runin_20261106
+source_doi: 10.1056/NEJMoa2205225
+source_directory: data/raw/iobp2_20261106
+input_directory: data/derived/iobp2_runin_20261106
+output_root: results/raw/application/iobp2_runin_20261106
+report_directory: results/preflight/empirical_selection_20261101/iobp2_runin
+frozen_roles: data/derived/iobp2_night_20261106/roles.csv
+baseline_window: run_in
+response: mean_nightly_upper_decile_glucose_mg_dl
+decision_quantile: 0.75
+quantiles: [0.25, 0.5, 0.75]
+role_seed: 202611061
+validation_fraction: 0.35
+outer_folds: 5
+inner_folds: 3
+minimum_observed_fraction: 0.8
+minimum_discovery_patients: 100
+minimum_per_arm: 20
+minimum_per_fold: 8
+minimum_reserved_roster: 60
+minimum_baseline_days: 14
+minimum_baseline_nights: 5
+minimum_days_per_profile_bin: 5
+minimum_slots_per_day: 202
+minimum_slots_per_night: 51
+minimum_nights_per_period: 20
+period_days: 28
+periods: 3
+screening_minimum_relative_gain: 0.02
+target_candidates: [CQ_SMOOTH]
+comparators: [CLINICAL_QR, ENET, POOLED, POOLED_OFFSET, PRESS_RIDGE, JOINT_DIRECT, JOINT_OFFSET, QRF_RAW, QRF_OFFSET, XGB_RAW, XGB_OFFSET, LGB_RAW, LGB_OFFSET]
+primary_prediction_rule: nonnegative_sorted_quantiles
+working_penalties: [0.5, 1, 2]
+gap_tolerance: 1.0e-8
+elastic_net_alpha: [0, 0.5, 1]
+elastic_net_path_length: 100
+elastic_net_lambda_min_ratio: 0.01
+ridge_variance_ratio_max: 1000
+ridge_variance_ratio_min: 0.00001
+inference_target: C_arm_dawn
+forest:
+  trees: 2000
+  regression_splitting: [false, true]
+  mtry_multiplier: [1, 5]
+  min_node_size: [5, 10]
+  honesty: [true, false]
+  calibration: [none, training, oob]
+xgboost:
+  objective: reg:quantileerror
+  max_depth: [2, 4]
+  learning_rate: [0.03, 0.1]
+  reg_lambda: [1, 20]
+  rounds: [100, 300, 600]
+  subsample: 0.5
+  max_bin: 64
+  calibration: [none, training]
+lightgbm:
+  objective: quantile
+  num_leaves: [15, 31]
+  min_child_samples: [10, 30]
+  learning_rate: [0.03, 0.1]
+  reg_lambda: [1, 20]
+  rounds: [100, 300, 600]
+  calibration: [none, training]
+formal_validation_used: false
+manuscript_adoption: false

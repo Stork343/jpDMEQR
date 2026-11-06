@@ -3,12 +3,13 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 
 import pandas as pd
 import yaml
 
-config_path = Path("config/clinical_quantile_smooth_20261106.yml")
+config_path = Path(sys.argv[1] if len(sys.argv) > 1 else "config/clinical_quantile_smooth_20261106.yml")
 config = yaml.safe_load(config_path.read_text())
 root = Path(config["output_root"])
 if not root.exists():

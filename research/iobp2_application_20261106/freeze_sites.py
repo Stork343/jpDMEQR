@@ -1,13 +1,14 @@
 from itertools import combinations
 from pathlib import Path
 import json
+import sys
 from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
 import yaml
 
-config = yaml.safe_load(Path("config/application_iobp2_20261106.yml").read_text())
+config = yaml.safe_load(Path(sys.argv[1] if len(sys.argv) > 1 else "config/application_iobp2_20261106.yml").read_text())
 destination = Path(config["input_directory"])
 report = Path(config["report_directory"])
 destination.mkdir(parents=True, exist_ok=True)
@@ -48,6 +49,8 @@ assert roster.groupby("SiteID").outer_fold.nunique().eq(1).all()
 assert roster.role.eq("reserved").sum() >= config["minimum_reserved_roster"]
 roles_path = destination / "roles.csv"
 csv = roster.sort_values("PtID").to_csv(index=False)
+if "frozen_roles" in config:
+    assert Path(config["frozen_roles"]).read_text() == csv
 if roles_path.exists():
     assert roles_path.read_text() == csv
 else:

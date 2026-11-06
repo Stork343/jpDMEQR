@@ -1,21 +1,22 @@
 from pathlib import Path
 import json
+import sys
 from zipfile import ZipFile
 
 import pandas as pd
 import yaml
 
-config = yaml.safe_load(Path("config/application_iobp2_20261106.yml").read_text())
+config = yaml.safe_load(Path(sys.argv[1] if len(sys.argv) > 1 else "config/application_iobp2_20261106.yml").read_text())
 inputs = Path(config["input_directory"])
 report = Path(config["report_directory"])
 roles = pd.read_csv(inputs / "roles.csv", dtype={"PtID": str})
 discovery = roles.loc[roles.role.eq("discovery")].set_index("PtID")
 assert len(discovery) == json.loads((report / "roles.json").read_text())["discovery_patients"]
 stamp = "%m/%d/%Y %I:%M:%S %p"
-randomization = pd.to_datetime(discovery.RandDt, format=stamp).dt.normalize()
+randomization = pd.to_datetime(discovery.RandDt.str.split().str[0], format="%m/%d/%Y")
 frames = []
 counts = {"discovery_CGM_mg_dl_records": 0, "window_records": 0, "lower_coded_records": 0,
-          "upper_coded_records": 0, "missing_window_glucose": 0}
+          "upper_coded_records": 0, "missing_window_glucose": 0, "missing_device_clock": 0}
 columns = ["PtID", "DeviceDtTm", "RecordType", "Value", "Units"]
 with ZipFile(Path(config["source_directory"]) / "IOBP2_RCT.zip") as archive:
     with archive.open("Data Tables/IOBP2DeviceCGM.txt") as stream:
@@ -25,11 +26,15 @@ with ZipFile(Path(config["source_directory"]) / "IOBP2_RCT.zip") as archive:
                 continue
             assert chunk.Units.eq("mg/dL").all()
             counts["discovery_CGM_mg_dl_records"] += len(chunk)
+            clock = chunk.DeviceDtTm.str.contains(":", regex=False, na=False)
+            counts["missing_device_clock"] += int((~clock).sum())
+            chunk = chunk.loc[clock]
             times = pd.to_datetime(chunk.DeviceDtTm, format=stamp)
             assert times.notna().all()
             day = (times.dt.normalize() - chunk.PtID.map(randomization)).dt.days
             slot = (times.dt.hour * 60 + times.dt.minute) // 5
-            keep = day.between(-14, -1) | (day.between(1, 84) & slot.lt(72))
+            baseline = day.lt(0) if config.get("baseline_window") == "run_in" else day.between(-14, -1)
+            keep = baseline | (day.between(1, 84) & slot.lt(72))
             if not keep.any():
                 continue
             sample = chunk.loc[keep, ["PtID"]].copy()
