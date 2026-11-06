@@ -2,7 +2,8 @@ library(yaml)
 library(jsonlite)
 source("research/clinical_quantile_20261105/engine.R")
 source("research/clinical_quantile_20261105/orthogonal.R")
-config <- read_yaml("config/clinical_quantile_smooth_20261106.yml")
+args <- commandArgs(trailingOnly = TRUE)
+config <- read_yaml(if (length(args)) args[1L] else "config/clinical_quantile_smooth_20261106.yml")
 checks <- list()
 for (path in unlist(config$source_studies)) {
   study <- read_yaml(path)
@@ -44,7 +45,9 @@ for (path in unlist(config$source_studies)) {
     max(abs(comparison$estimate_reconstructed - comparison$estimate_stored)) < 1e-10,
     max(abs(comparison$standard_error_reconstructed - comparison$standard_error_stored)) < 1e-10)
 }
-stopifnot(length(checks) == 20L)
+expected <- if (length(args)) 2L * sum(vapply(unlist(config$source_studies),
+  function(path) read_yaml(path)$outer_folds, integer(1))) else 20L
+stopifnot(length(checks) == expected)
 fwrite(rbindlist(checks), file.path(config$report_directory, "influence_reconstruction_checks.csv"))
 write_json(list(status = "passed", fitted_directions = length(checks),
   maximum_influence_error = max(rbindlist(checks)$reconstruction_error),

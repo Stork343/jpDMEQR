@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "source": "existing frozen discovery dataset and patient folds",
+  "discovery_patients": 1881,
+  "records": 3228
+}

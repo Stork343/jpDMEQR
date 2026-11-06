@@ -1,0 +1,14 @@
+{
+  "study_id": "chord_breast_20261106",
+  "patients": 184,
+  "records": 458,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0195165292502679,
+    "ENET": -0.0309125902612088
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

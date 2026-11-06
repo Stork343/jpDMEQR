@@ -1,0 +1,2 @@
+study_id,patients,target,tau,exchangeable_weight,estimate,standard_error,lower,upper,independence_standard_error,exchangeable_standard_error,estimated_se_reduction,largest_patient_variance_share,largest_five_patient_variance_share,formal_validation_used,manuscript_adoption
+ra_westchina_20261105,160,C_age,0.75,0.631592687881704,0.11782598370934279,0.31766063343466255,-0.5047774171287759,0.7404293845474615,0.318149671753758,0.3178271071115848,0.0015371328733413403,0.8051931914499869,0.9453187407052174,False,False

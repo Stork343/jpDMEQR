@@ -1,0 +1,7 @@
+tau,loss,patients,study_id,method,rule
+0.25,0.36898158160311784,160,ra_westchina_20261105,CQ_SMOOTH,raw
+0.5,0.5291166334167807,160,ra_westchina_20261105,CQ_SMOOTH,raw
+0.75,0.4888727930849788,160,ra_westchina_20261105,CQ_SMOOTH,raw
+0.25,0.367414778146035,160,ra_westchina_20261105,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.5,0.5303749327389439,160,ra_westchina_20261105,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.75,0.4870239219857611,160,ra_westchina_20261105,CQ_SMOOTH,nonnegative_sorted_quantiles

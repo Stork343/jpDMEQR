@@ -1,0 +1,21 @@
+{
+  "public_cases_downloaded": 495,
+  "reserved_cases_requested": 0,
+  "source": "GDC cases endpoint",
+  "fields": [
+    "case_id",
+    "submitter_id",
+    "demographic.age_at_index",
+    "diagnoses.age_at_diagnosis",
+    "diagnoses.treatments.therapeutic_agents",
+    "diagnoses.treatments.days_to_treatment_start",
+    "follow_ups.follow_up_id",
+    "follow_ups.days_to_follow_up",
+    "follow_ups.molecular_tests.laboratory_test",
+    "follow_ups.molecular_tests.test_units",
+    "follow_ups.molecular_tests.test_value",
+    "follow_ups.molecular_tests.test_result",
+    "follow_ups.molecular_tests.days_to_test",
+    "follow_ups.molecular_tests.biospecimen_type"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "study_id": "t1dx_monitoring_20261106",
+  "patients": 1481,
+  "records": 1953,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0003529669548227,
+    "ENET": 0.024830723559538
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

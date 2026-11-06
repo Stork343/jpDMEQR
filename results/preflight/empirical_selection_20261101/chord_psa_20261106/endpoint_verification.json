@@ -1,0 +1,9 @@
+{
+  "source": "separate SQL reconstruction of reportable assay records, follow-up windows and genomic contrast",
+  "patients": 120,
+  "records": 269,
+  "maximum_endpoint_difference": 2.220446049250313e-16,
+  "maximum_contrast_difference": 0.0,
+  "specimen_and_assay_days_verified": true,
+  "reserved_outcomes_used": false
+}

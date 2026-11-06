@@ -1,0 +1,9 @@
+{
+  "source": "independent DuckDB reconstruction of the public longitudinal visit and HbA1c tables",
+  "patients": 1481,
+  "records": 1953,
+  "maximum_endpoint_difference": 0.0,
+  "maximum_monitoring_input_difference": 0.0,
+  "sex_codes_verified": true,
+  "reserved_outcomes_used": false
+}

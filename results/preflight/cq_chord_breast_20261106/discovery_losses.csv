@@ -1,0 +1,7 @@
+tau,loss,patients,study_id,method,rule
+0.25,0.07335009905669225,184,chord_breast_20261106,CQ_SMOOTH,raw
+0.5,0.10722234865216457,184,chord_breast_20261106,CQ_SMOOTH,raw
+0.75,0.11070740198554921,184,chord_breast_20261106,CQ_SMOOTH,raw
+0.25,0.07351109994045082,184,chord_breast_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.5,0.10723096279658165,184,chord_breast_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.75,0.10991635256442088,184,chord_breast_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles

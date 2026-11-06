@@ -1,0 +1,7 @@
+tau,loss,patients,study_id,method,rule
+0.25,0.34756072300116375,1481,t1dx_monitoring_20261106,CQ_SMOOTH,raw
+0.5,0.4649363405079844,1481,t1dx_monitoring_20261106,CQ_SMOOTH,raw
+0.75,0.41590539920513026,1481,t1dx_monitoring_20261106,CQ_SMOOTH,raw
+0.25,0.3473776396135661,1481,t1dx_monitoring_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.5,0.46486752964594763,1481,t1dx_monitoring_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.75,0.415718385513293,1481,t1dx_monitoring_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles

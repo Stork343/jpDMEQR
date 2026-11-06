@@ -1,0 +1,14 @@
+{
+  "study_id": "chord_colorectal_20261106",
+  "patients": 667,
+  "records": 1412,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": -0.00029962053533,
+    "ENET": -0.0239665879037984
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

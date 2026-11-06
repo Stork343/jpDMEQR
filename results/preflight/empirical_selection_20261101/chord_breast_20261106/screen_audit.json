@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "models_checked": 10,
+  "maximum_prediction_error": 0,
+  "independent_loss_error": 6.93889390390723e-17,
+  "formal_validation_used": false
+}

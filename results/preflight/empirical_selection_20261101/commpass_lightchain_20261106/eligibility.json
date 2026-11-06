@@ -1,0 +1,29 @@
+{
+  "study_id": "commpass_lightchain_20261106",
+  "discovery_patients": 252,
+  "records": 660,
+  "repeated_patients": 230,
+  "maximum_records_per_patient": 3,
+  "distinct_outcomes": 655,
+  "additional_features_at_registered_frequency": 19452,
+  "target_observed_fraction": 1.0,
+  "criteria": {
+    "discovery_patients": true,
+    "repeated_patients": true,
+    "fold_patients": true,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true,
+    "zero_fraction": true
+  },
+  "passed": true,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false,
+  "zero_by_period": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 0.004807692307692308
+  },
+  "protein_coding_gene_features": 19933
+}

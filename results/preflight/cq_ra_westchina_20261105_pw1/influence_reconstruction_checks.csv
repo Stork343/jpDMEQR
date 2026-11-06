@@ -1,0 +1,11 @@
+study_id,fold,method,patients,reconstruction_error
+ra_westchina_20261105,1,independence,33,0
+ra_westchina_20261105,1,exchangeable,33,0
+ra_westchina_20261105,2,independence,33,0
+ra_westchina_20261105,2,exchangeable,33,0
+ra_westchina_20261105,3,independence,32,0
+ra_westchina_20261105,3,exchangeable,32,0
+ra_westchina_20261105,4,independence,31,0
+ra_westchina_20261105,4,exchangeable,31,0
+ra_westchina_20261105,5,independence,31,0
+ra_westchina_20261105,5,exchangeable,31,0

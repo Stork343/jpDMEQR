@@ -23,7 +23,7 @@ for (j in seq_len(nrow(aggregate))) {
   checks[[length(checks) + 1L]] <- data.table(study_id = record$study_id,
     estimate_error = abs(estimate - record$estimate), standard_error_difference = abs(se - record$standard_error))
 }
-study <- read_yaml("config/application_ra_westchina_20261105.yml")
+study <- read_yaml(if (length(args) >= 2L) args[2L] else "config/application_ra_westchina_20261105.yml")
 panel <- cp_panel(study$input_directory)
 lambda_errors <- numeric()
 for (fold in seq_len(study$outer_folds)) {

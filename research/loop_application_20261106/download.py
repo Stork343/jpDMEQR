@@ -1,4 +1,4 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -42,7 +42,7 @@ def download_range(start):
         return stored
     incoming = stored.with_suffix(".incoming")
     expected = f"206 bytes {start}-{last}/{size}"
-    result = subprocess.run(["curl", "--silent", "--show-error", "--fail", "--location", "--retry", "6",
+    result = subprocess.run(["curl", "--http1.1", "--silent", "--show-error", "--fail", "--location", "--retry", "6",
         "--retry-all-errors", "--retry-delay", "1", "--connect-timeout", "15", "--max-time", "90",
         "--proxy", "http://127.0.0.1:7897", "--range", f"{start}-{last}", "--max-filesize", str(count),
         "--output", str(incoming), "--write-out", "%{response_code} %header{content-range}", url],
@@ -72,7 +72,9 @@ def verify(path):
 if not final.exists():
     incoming = final.with_suffix(".s3.incoming")
     with ThreadPoolExecutor(max_workers=int(os.environ.get("CLINICAL_DOWNLOAD_WORKERS", 32))) as executor:
-        chunks = list(executor.map(download_range, range(0, size, block)))
+        requests = [executor.submit(download_range, start) for start in range(0, size, block)]
+        wait(requests)
+        chunks = [request.result() for request in requests]
     with incoming.open("wb") as dest:
         for piece in chunks:
             with piece.open("rb") as stream:

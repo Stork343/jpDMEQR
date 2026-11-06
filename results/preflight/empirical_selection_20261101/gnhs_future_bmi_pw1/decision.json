@@ -1,0 +1,14 @@
+{
+  "study_id": "gnhs_future_bmi_20261105",
+  "patients": 1881,
+  "records": 3228,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0008964612772223,
+    "ENET": 0.016656533594758
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

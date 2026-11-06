@@ -1,0 +1,14 @@
+{
+  "study_id": "commpass_lightchain_20261106",
+  "patients": 252,
+  "records": 660,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": -0.0424924865444975,
+    "ENET": 0.0129861526695753
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

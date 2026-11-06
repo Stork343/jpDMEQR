@@ -1,0 +1,14 @@
+{
+  "study_id": "chord_pancreas_20261106",
+  "patients": 418,
+  "records": 888,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": -0.0007246029724974,
+    "ENET": 0.0105860940927384
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

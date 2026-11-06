@@ -5,9 +5,9 @@ from pathlib import Path
 import subprocess
 import sys
 
-from panel import study_config
+from panel import registry
 
-study = study_config("gaitrec_propulsion")
+study = registry["questions"]["gaitrec_propulsion"]
 root = Path(study["source_directory"])
 root.mkdir(parents=True, exist_ok=True)
 catalog = root / "index"
@@ -42,6 +42,9 @@ with ThreadPoolExecutor(max_workers=5) as executor:
 assert len(files) == 21
 (root / "files.json").write_text(json.dumps(files, indent=2) + "\n")
 mode = sys.argv[1]
+metadata, = [f for f in files if f["filename"] == "GRF_metadata.csv"]
+subprocess.run([sys.executable, "research/loop_application_20261106/download.py", metadata["url"],
+                str(root / metadata["filename"]), str(metadata["size"]), metadata["md5"]], check=True)
 if mode == "index":
     print(json.dumps({key: sum(f["size"] for f in files if key in f["filename"]) for key in ["_PRO_", "_RAW_", "metadata"]}))
     raise SystemExit(0)

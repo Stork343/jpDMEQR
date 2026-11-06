@@ -1,0 +1,14 @@
+{
+  "study_id": "ispy2_volume_20261106",
+  "patients": 251,
+  "records": 753,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0025243677430275,
+    "ENET": 0.067207263392191
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

@@ -1,0 +1,11 @@
+study_id,fold,method,patients,reconstruction_error
+gnhs_baseline_bmi_20261105,1,independence,353,0
+gnhs_baseline_bmi_20261105,1,exchangeable,353,0
+gnhs_baseline_bmi_20261105,2,independence,353,0
+gnhs_baseline_bmi_20261105,2,exchangeable,353,0
+gnhs_baseline_bmi_20261105,3,independence,353,0
+gnhs_baseline_bmi_20261105,3,exchangeable,353,0
+gnhs_baseline_bmi_20261105,4,independence,353,0
+gnhs_baseline_bmi_20261105,4,exchangeable,353,0
+gnhs_baseline_bmi_20261105,5,independence,353,0
+gnhs_baseline_bmi_20261105,5,exchangeable,353,0

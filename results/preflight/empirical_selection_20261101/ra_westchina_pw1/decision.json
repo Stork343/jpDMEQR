@@ -1,0 +1,14 @@
+{
+  "study_id": "ra_westchina_20261105",
+  "patients": 160,
+  "records": 261,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0198185170792998,
+    "ENET": -0.0712991110805121
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

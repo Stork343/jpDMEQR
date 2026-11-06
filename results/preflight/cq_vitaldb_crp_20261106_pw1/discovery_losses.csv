@@ -1,0 +1,7 @@
+tau,loss,patients,study_id,method,rule
+0.25,1.504117578918133,1296,vitaldb_crp_20261106,CQ_SMOOTH,raw
+0.5,2.1529717461137863,1296,vitaldb_crp_20261106,CQ_SMOOTH,raw
+0.75,1.9641251674813733,1296,vitaldb_crp_20261106,CQ_SMOOTH,raw
+0.25,1.497594927798608,1296,vitaldb_crp_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.5,2.1470290463771255,1296,vitaldb_crp_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.75,1.9619137199868386,1296,vitaldb_crp_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles

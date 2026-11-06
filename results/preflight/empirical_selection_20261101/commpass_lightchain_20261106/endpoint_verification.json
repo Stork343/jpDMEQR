@@ -1,0 +1,9 @@
+{
+  "source": "independent SQL reconstruction from GDC nested records and a separate five-gene extraction from Xena",
+  "patients": 252,
+  "records": 660,
+  "maximum_endpoint_difference": 2.220446049250313e-16,
+  "maximum_contrast_difference": 1.3322676295501878e-15,
+  "baseline_chain_and_units_verified": true,
+  "reserved_outcomes_used": false
+}
