@@ -8,6 +8,7 @@ import yaml
 
 parser = argparse.ArgumentParser()
 parser.add_argument("config", type=Path)
+parser.add_argument("--comparators-only", action="store_true")
 args = parser.parse_args()
 config = yaml.safe_load(args.config.read_text())
 root = Path(config["output_root"])
@@ -56,6 +57,9 @@ folds = patient.groupby(["scoring", "method", "tau", "outer_fold"], observed=Tru
 folds.to_csv(output / "discovery_fold_loss.csv", index=False)
 pd.DataFrame(runtime).to_csv(output / "discovery_runtime.csv", index=False)
 scored.to_csv(root / "discovery_scored_predictions.csv", index=False)
+if args.comparators_only:
+    print(summary.loc[summary.scoring.eq("primary")].pivot(index="method", columns="tau", values="loss").to_string())
+    raise SystemExit(0)
 comparators = [method for method in config["comparators"] if not method.startswith(("QRF", "XGB", "LGB"))]
 records = []
 for scoring in ["primary", "raw"]:
