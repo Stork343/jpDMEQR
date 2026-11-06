@@ -143,3 +143,13 @@ questions:
     response: log1p_involved_free_light_chain_fraction
     minimum_observed_fraction: 0.80
     maximum_high_features: 300
+  ispy_diameter:
+    study_id: ispy_diameter_20261106
+    source_doi: 10.1148/radiol.12110748
+    source_accession: GSE22226
+    source_directory: data/raw/ispy_20261106
+    role_seed: 202611074
+    decision_quantile: 0.75
+    inference_target: C_proliferation_late
+    response: log1p_residual_mri_diameter_fraction
+    minimum_observed_fraction: 0.80

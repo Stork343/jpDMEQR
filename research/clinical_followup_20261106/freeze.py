@@ -216,6 +216,30 @@ def myeloma_roles(source, seed):
     return frame
 
 
+def diameter_roles(source, seed):
+    fields = ["SUBJECTID", "HR Pos", "Her2MostPos"]
+    trial = pd.read_excel(source / "ispy1_clinical.xlsx", sheet_name="TCIA Patient Clinical Subset",
+                         usecols=fields, dtype={"SUBJECTID": str}).rename(columns={"SUBJECTID": "patient"})
+    expression = pd.read_csv(source / "ispy1_expression_roster.csv", dtype=str)
+    training = expression.merge(trial, on="patient", validate="one_to_one")
+    training["source_id"] = training.patient
+    training["patient"] = "IS1_" + training.patient
+    training["role"] = "discovery"
+    training["outer_fold"] = 0
+    generator = np.random.default_rng(seed)
+    strata = training.groupby(["HR Pos", "Her2MostPos", "platform"], dropna=False)
+    for _, cell in strata:
+        order = generator.permutation(cell.sort_values("patient").index)
+        training.loc[order, "outer_fold"] = (np.arange(len(order))+generator.integers(5)) % 5 + 1
+    held = pd.read_csv("data/derived/ispy2_volume_20261106/roles.csv", dtype={"patient": str})
+    held = held.loc[held.role.eq("reserved"), ["patient", "role", "outer_fold"]].copy()
+    assert len(held) == 132 and held.outer_fold.eq(0).all()
+    held["source_id"] = held.patient
+    held["patient"] = "IS2_" + held.patient
+    columns = ["patient", "source_id", "role", "outer_fold"]
+    return pd.concat([training[columns], held[columns]]).sort_values("patient")
+
+
 application = template("application_template")
 method = template("method_template")
 shared = ["comparators", "target_candidates", "primary_prediction_rule", "working_penalties", "gap_tolerance",
@@ -244,7 +268,7 @@ for name, definition in registry["questions"].items():
     readers = {"uwhvf_central": eye_roles, "eicu_lactate": icu_roles, "eicu_creatinine": icu_roles,
                "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles, "ispy2_volume": breast_roles,
                "ispy2_signaling": protein_roles, "t1dx_monitoring": registry_roles, "chord_psa": prostate_roles,
-               "commpass_lightchain": myeloma_roles}
+               "commpass_lightchain": myeloma_roles, "ispy_diameter": diameter_roles}
     if "marker" in study:
         frame = serum_roles(source, study["role_seed"], study, registry["validation_fraction"], registry["outer_folds"])
     else:
