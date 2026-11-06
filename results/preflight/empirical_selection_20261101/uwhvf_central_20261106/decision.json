@@ -1,0 +1,14 @@
+{
+  "study_id": "uwhvf_central_20261106",
+  "patients": 964,
+  "records": 2865,
+  "decision_quantile": 0.25,
+  "relative_gains": {
+    "CLINICAL_QR": -0.0043123142692256,
+    "ENET": 0.0323400647049351
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

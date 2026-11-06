@@ -47,3 +47,11 @@ questions:
     decision_quantile: 0.25
     inference_target: C_propulsion_delay
     response: affected_late_stance_propulsive_peak_percent_body_weight
+  vitaldb_crp:
+    study_id: vitaldb_crp_20261106
+    source_doi: 10.1038/s41597-022-01411-5
+    source_directory: data/raw/vitaldb_20261106
+    role_seed: 202611066
+    decision_quantile: 0.75
+    inference_target: C_open_duration
+    response: postoperative_crp_mg_dl

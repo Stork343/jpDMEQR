@@ -87,6 +87,27 @@ def gait_roles(source, seed):
     return frame.drop(columns="TEST").sort_values("patient")
 
 
+def surgical_roles(source, seed):
+    columns = ["caseid", "subjectid", "department", "optype", "approach", "age", "opstart", "opend", "caseend", "aneend"]
+    cases = pd.read_csv(source / "cases.csv.gz", usecols=columns, dtype={"subjectid": str})
+    types = ["Colorectal", "Biliary/Pancreas", "Stomach", "Hepatic"]
+    cases = cases.loc[cases.department.eq("General surgery") & cases.age.ge(18) & cases.optype.isin(types)
+                      & cases.approach.isin(["Open", "Videoscopic", "Robotic"])
+                      & cases.opend.gt(cases.opstart) & cases.caseend.ge(cases.opend)].copy()
+    cases["landmark"] = cases[["caseend", "aneend", "opend"]].max(axis=1)
+    cases = cases.sort_values("caseid").drop_duplicates("subjectid").rename(columns={"subjectid": "patient"})
+    cases["role"] = "discovery"
+    cases["outer_fold"] = 0
+    random = np.random.default_rng(seed)
+    for _, cell in cases.groupby(["optype", "approach"]):
+        index = random.permutation(cell.sort_values("patient").index)
+        n = round(len(cell) * registry["validation_fraction"])
+        cases.loc[index[:n], "role"] = "reserved"
+        cases.loc[index[n:], "outer_fold"] = (np.arange(len(index)-n) + random.integers(5)) % 5 + 1
+    assert cases.caseid.is_unique and cases.patient.notna().all()
+    return cases.sort_values("patient")
+
+
 application = template("application_template")
 method = template("method_template")
 shared = ["comparators", "target_candidates", "primary_prediction_rule", "working_penalties", "gap_tolerance",
@@ -113,7 +134,7 @@ for name, definition in registry["questions"].items():
     immutable(root / f"cq_{name}.yml", yaml.safe_dump(fit, sort_keys=False))
     source = Path(study["source_directory"])
     readers = {"uwhvf_central": eye_roles, "eicu_lactate": icu_roles, "eicu_creatinine": icu_roles,
-               "gaitrec_propulsion": gait_roles}
+               "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles}
     frame = readers[name](source, study["role_seed"])
     assert frame.patient.is_unique and frame.outer_fold.eq(0).equals(frame.role.eq("reserved"))
     immutable(inputs / "roles.csv", frame.to_csv(index=False))

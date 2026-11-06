@@ -1,0 +1,7 @@
+tau,loss,patients,study_id,method,rule
+0.25,0.1262386325747898,418,eicu_creatinine_20261106,CQ_SMOOTH,raw
+0.5,0.16379942797122876,418,eicu_creatinine_20261106,CQ_SMOOTH,raw
+0.75,0.1562915197248145,418,eicu_creatinine_20261106,CQ_SMOOTH,raw
+0.25,0.12671458208704778,418,eicu_creatinine_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.5,0.1659417634490251,418,eicu_creatinine_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.75,0.1515939762528852,418,eicu_creatinine_20261106,CQ_SMOOTH,nonnegative_sorted_quantiles

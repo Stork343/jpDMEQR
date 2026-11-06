@@ -1,6 +1,8 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
+import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -14,13 +16,17 @@ bucket = "live-jchrpublicdatasets"
 key = "Diabetes/Public Datasets/Loop study public dataset 2023-01-31.zip"
 url = f"https://{bucket}.s3.amazonaws.com/{quote(key)}"
 size = 1626077053
+expected_digest = None
 if len(sys.argv) > 1:
-    if len(sys.argv) != 4:
-        raise ValueError("需要提供数据来源网址、ZIP 文件路径和字节数")
-    url, filename, expected_size = sys.argv[1:]
+    if len(sys.argv) not in (4, 5):
+        raise ValueError("需要提供来源网址、文件路径、字节数和可选的发布方校验值")
+    url, filename, expected_size = sys.argv[1:4]
     final = Path(filename)
     directory = final.parent
     size = int(expected_size)
+    if len(sys.argv) == 5:
+        expected_digest = sys.argv[4]
+        assert len(expected_digest) in (32, 64)
 block = 1024 ** 2
 directory.mkdir(parents=True, exist_ok=True)
 parts = directory / ("ranges" if len(sys.argv) == 1 else final.name + ".ranges")
@@ -47,25 +53,33 @@ def download_range(start):
     return stored
 
 
+def verify(path):
+    assert path.stat().st_size == size
+    if expected_digest is None:
+        with ZipFile(path) as archive:
+            assert archive.testzip() is None
+    else:
+        with path.open("rb") as stream:
+            algorithm = "md5" if len(expected_digest) == 32 else "sha256"
+            assert hashlib.file_digest(stream, algorithm).hexdigest() == expected_digest, str(path)
+
+
 if not final.exists():
     incoming = final.with_suffix(".s3.incoming")
-    with ThreadPoolExecutor(max_workers=32) as executor:
+    with ThreadPoolExecutor(max_workers=int(os.environ.get("CLINICAL_DOWNLOAD_WORKERS", 32))) as executor:
         chunks = list(executor.map(download_range, range(0, size, block)))
     with incoming.open("wb") as dest:
         for piece in chunks:
             with piece.open("rb") as stream:
                 shutil.copyfileobj(stream, dest)
-    assert incoming.stat().st_size == size
-    with ZipFile(incoming) as archive:
-        assert archive.testzip() is None
+    verify(incoming)
     incoming.rename(final)
 else:
-    assert final.stat().st_size == size
-    with ZipFile(final) as archive:
-        assert archive.testzip() is None
+    verify(final)
 record = {"url": url, "bytes": size, "all_members_verified": True,
           "verified_utc": datetime.now(timezone.utc).isoformat()}
 if len(sys.argv) == 1:
     record.update(bucket=bucket, key=key)
-(directory / "verified.json").write_text(json.dumps(record, indent=2) + "\n")
+marker = directory / "verified.json" if len(sys.argv) == 1 else final.with_name(final.name + ".verified.json")
+marker.write_text(json.dumps(record, indent=2) + "\n")
 print(json.dumps(record))

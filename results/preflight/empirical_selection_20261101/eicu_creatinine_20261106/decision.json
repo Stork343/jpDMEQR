@@ -1,0 +1,14 @@
+{
+  "study_id": "eicu_creatinine_20261106",
+  "patients": 418,
+  "records": 607,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": -0.0549224842361162,
+    "ENET": 0.2099608177683242
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
