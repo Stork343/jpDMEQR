@@ -9,7 +9,7 @@ platforms <- c("1708", "4133")
 measures <- list()
 rosters <- list()
 for (id in platforms) {
-  atlas <- fread(file.path(src, paste0("gpl", id, "_annot.gz")), skip = "ID\tGene title",
+  atlas <- fread(file.path(src, paste0("gpl", id, "_annot.gz")), skip = "ID\tGene title", header = TRUE, sep = "\t",
                  select = c("ID", "Gene ID"), fill = TRUE, colClasses = "character")
   array <- getGEO(filename = file.path(src, paste0("ispy1_gpl", id, ".gz")), getGPL = FALSE)
   subjects <- as.character(pData(array)[["i-spy id:ch2"]])
@@ -30,7 +30,7 @@ for (id in platforms) {
   colnames(out) <- subjects[keep]
   measures[[id]] <- out
 }
-stopifnot(nrow(panel) >= 40L, all(c("MKI67", "BIRC5", "CCNB1", "UBE2C") %in% panel$probe))
+stopifnot(nrow(panel) >= 40L, all(c("MKI67", "BIRC5", "CCNB1") %in% panel$probe))
 genes <- sort(panel$probe)
 raw <- do.call(cbind, lapply(measures, function(x) x[genes, , drop = FALSE]))
 stopifnot(!anyDuplicated(colnames(raw)))

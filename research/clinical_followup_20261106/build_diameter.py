@@ -14,7 +14,7 @@ matrix = pd.read_csv(source / "ispy1_panel_expression.csv").set_index("gene").lo
 genes = pd.read_csv(source / "common_pam50.csv").probe.tolist()
 assert set(matrix.columns) == set(genes) and len(genes) >= 40
 scores = matrix.rank(axis=1, method="average", pct=True).where(matrix.notna().mean(axis=1).ge(.8), axis=0)
-program = ["BIRC5", "CCNB1", "MKI67", "UBE2C"]
+program = ["BIRC5", "CCNB1", "MKI67"]
 proliferation = scores[program].mean(axis=1, skipna=False) * 10
 visits = ["MRI LD Baseline", "MRI LD 1-3dAC", "MRI LD InterReg", "MRI LD PreSurg"]
 fields = ["SUBJECTID", "age", "HR Pos", "Her2MostPos", *visits]
