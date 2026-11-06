@@ -191,6 +191,31 @@ def prostate_roles(source, seed):
     return frame.sort_values("patient")
 
 
+def myeloma_roles(source, seed):
+    records = json.loads((source/"transcript_roster.json").read_text())["data"]["hits"]
+    with gzip.open(source/"transcripts.tsv.gz","rt") as stream:
+        samples = next(csv.reader([stream.readline()],delimiter="\t"))[1:]
+    assert len(set(samples)) == len(samples)
+    rows = []
+    for record in records:
+        for case in record["cases"]:
+            for sample in case.get("samples",[]):
+                if (record["analysis"]["workflow_type"] == "STAR - Counts" and
+                    sample["sample_type"] == "Primary Blood Derived Cancer - Bone Marrow" and
+                    sample["submitter_id"].endswith("_1_BM_CD138pos") and sample["submitter_id"] in samples):
+                    rows.append((case["submitter_id"],case["case_id"],sample["submitter_id"]))
+    frame = pd.DataFrame(rows,columns=["patient","gdc_case","sample"]).drop_duplicates().sort_values("patient").reset_index(drop=True)
+    assert frame.patient.is_unique and frame.gdc_case.is_unique and frame["sample"].is_unique
+    rng = np.random.default_rng(seed)
+    order = rng.permutation(frame.index)
+    n = round(len(frame)*registry["validation_fraction"])
+    frame["role"] = "discovery"
+    frame["outer_fold"] = 0
+    frame.loc[order[:n],"role"] = "reserved"
+    frame.loc[order[n:],"outer_fold"] = np.arange(len(order)-n)%registry["outer_folds"]+1
+    return frame
+
+
 application = template("application_template")
 method = template("method_template")
 shared = ["comparators", "target_candidates", "primary_prediction_rule", "working_penalties", "gap_tolerance",
@@ -218,7 +243,8 @@ for name, definition in registry["questions"].items():
     source = Path(study["source_directory"])
     readers = {"uwhvf_central": eye_roles, "eicu_lactate": icu_roles, "eicu_creatinine": icu_roles,
                "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles, "ispy2_volume": breast_roles,
-               "ispy2_signaling": protein_roles, "t1dx_monitoring": registry_roles, "chord_psa": prostate_roles}
+               "ispy2_signaling": protein_roles, "t1dx_monitoring": registry_roles, "chord_psa": prostate_roles,
+               "commpass_lightchain": myeloma_roles}
     if "marker" in study:
         frame = serum_roles(source, study["role_seed"], study, registry["validation_fraction"], registry["outer_folds"])
     else:

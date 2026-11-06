@@ -1,0 +1,35 @@
+{
+  "study_id": "chord_colorectal_20261106",
+  "discovery_patients": 667,
+  "records": 1412,
+  "repeated_patients": 466,
+  "maximum_records_per_patient": 3,
+  "distinct_outcomes": 1373,
+  "additional_features_at_registered_frequency": 486,
+  "target_observed_fraction": 1.0,
+  "criteria": {
+    "discovery_patients": true,
+    "repeated_patients": true,
+    "fold_patients": true,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true,
+    "boundary": true,
+    "genomic_groups": true
+  },
+  "passed": true,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false,
+  "boundary_by_period": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 0.0
+  },
+  "clinical_genotype_groups": {
+    "0": 303,
+    "1": 364
+  },
+  "common_assayed_genes": 341,
+  "marker_records_without_unique_reportable_value": 0
+}

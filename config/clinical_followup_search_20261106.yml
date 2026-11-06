@@ -133,3 +133,13 @@ questions:
     baseline_threshold: 30
     report_floor: 1
     marker_genes: [ESR1]
+  commpass_lightchain:
+    study_id: commpass_lightchain_20261106
+    source_doi: 10.1038/s41588-024-01853-0
+    source_directory: data/raw/commpass_20261106
+    role_seed: 202611073
+    decision_quantile: 0.75
+    inference_target: C_proliferation_late
+    response: log1p_involved_free_light_chain_fraction
+    minimum_observed_fraction: 0.80
+    maximum_high_features: 300
