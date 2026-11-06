@@ -1,0 +1,14 @@
+{
+  "study_id": "vaccine_cxcl10_20261106",
+  "patients": 139,
+  "records": 277,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0205113025199324,
+    "ENET": 0.0485111171997219
+  },
+  "necessary_pass": true,
+  "phase": "additional_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

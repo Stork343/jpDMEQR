@@ -1,0 +1,29 @@
+{
+  "study_id": "vaccine_cxcl10_20261106",
+  "discovery_patients": 139,
+  "records": 277,
+  "repeated_patients": 138,
+  "maximum_records_per_patient": 2,
+  "distinct_outcomes": 272,
+  "additional_features_at_registered_frequency": 15992,
+  "target_observed_fraction": 1.0,
+  "criteria": {
+    "discovery_patients": true,
+    "repeated_patients": true,
+    "fold_patients": true,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true,
+    "repeated_days_in_each_study": true
+  },
+  "passed": true,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false,
+  "paired_days_per_study": {
+    "SDY269": 2,
+    "SDY67": 2
+  },
+  "source_extra_genes": 26919,
+  "nonquantitative_serum_records": 0
+}

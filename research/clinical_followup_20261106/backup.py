@@ -10,7 +10,8 @@ backup = Path("/Users/houjian/jpDMEQR-backups/empirical_selection_20261101/clini
 backup.mkdir(parents=True,exist_ok=True)
 paths = set()
 for name in ["uwhvf_20261106","critical_care_20261106","gaitrec_20261106","vitaldb_20261106",
-             "ispy_20261106","t1dx_20261106","mpc_20261106","commpass_20261106","physionet_sepsis_20261106"]:
+             "ispy_20261106","t1dx_20261106","mpc_20261106","commpass_20261106","physionet_sepsis_20261106",
+             "vaccine_20261106"]:
     root = Path("data/raw")/name
     for file in root.rglob("*"):
         if not file.is_file() or any(part.endswith(".ranges") or part=="ranges" for part in file.parts):
@@ -18,6 +19,8 @@ for name in ["uwhvf_20261106","critical_care_20261106","gaitrec_20261106","vital
         if any(v in file.name for v in [".pypdl", ".incoming",".part",".download.log"]) or file.suffix==".html":
             continue
         if name == "physionet_sepsis_20261106" and file.suffix != ".zip" and file.name not in {"catalog.csv","LICENSE.txt"}:
+            continue
+        if name == "vaccine_20261106" and file.suffix not in {".rds",".csv",".json",".xml"}:
             continue
         paths.add(file)
 for settings in settings_directory.glob("*.yml"):
@@ -29,6 +32,8 @@ for settings in settings_directory.glob("*.yml"):
     if not (report/"eligibility.json").exists():
         continue
     paths.update(f for f in Path(cfg["input_directory"]).rglob("*") if f.is_file())
+    if not (report/"decision.json").exists():
+        continue
     paths.update(f for f in Path(cfg["output_root"]).rglob("*") if f.is_file())
     methodfile = settings_directory/("cq_"+settings.name)
     if not methodfile.exists():

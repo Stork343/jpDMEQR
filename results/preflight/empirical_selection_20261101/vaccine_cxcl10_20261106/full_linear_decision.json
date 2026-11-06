@@ -1,0 +1,16 @@
+{
+  "study_id": "vaccine_cxcl10_20261106",
+  "comparators": {
+    "CLINICAL_QR": 0.0205113025199316,
+    "ENET": 0.0485111171997214,
+    "JOINT_DIRECT": -0.0347604211781729,
+    "JOINT_OFFSET": -0.0211384934690468,
+    "POOLED": 0.0115457129823918,
+    "POOLED_OFFSET": 0.0980492701421165,
+    "PRESS_RIDGE": 0.1192489776034188
+  },
+  "full_linear_pass": false,
+  "phase": "closed_after_full_linear_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

@@ -1,0 +1,5 @@
+study_id,rows,penalized_variables,lambda_values,system_dimension,solver,coefficient_difference,prediction_difference,lambda_difference,maximum_system_residual,seconds,reserved_outcomes_used
+ispy_diameter_20261106,221,103,100,103,weighted_qr_primal_ridge,1.46712669790716e-10,8.35170821389397e-11,0,2.55524768011384e-15,0.102,FALSE
+ispy2_volume_20261106,402,345,100,345,weighted_qr_primal_ridge,9.94959253874939e-11,1.31530314417816e-10,0,5.41233724504764e-15,0.0990000000000002,FALSE
+ra_westchina_20261105,139,687,100,139,weighted_qr_kernel_ridge,0,0,0,7.12763181809351e-14,0.0169999999999995,FALSE
+physionet_ph_20261106,8786,204,100,204,weighted_qr_primal_ridge,2.30594476846591e-09,2.15715001417038e-09,0,3.48332473976143e-15,0.392,FALSE

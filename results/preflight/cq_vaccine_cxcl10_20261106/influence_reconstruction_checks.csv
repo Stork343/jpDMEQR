@@ -1,0 +1,11 @@
+study_id,fold,method,patients,reconstruction_error
+vaccine_cxcl10_20261106,1,independence,28,0
+vaccine_cxcl10_20261106,1,exchangeable,28,0
+vaccine_cxcl10_20261106,2,independence,29,0
+vaccine_cxcl10_20261106,2,exchangeable,29,0
+vaccine_cxcl10_20261106,3,independence,29,0
+vaccine_cxcl10_20261106,3,exchangeable,29,0
+vaccine_cxcl10_20261106,4,independence,26,0
+vaccine_cxcl10_20261106,4,exchangeable,26,0
+vaccine_cxcl10_20261106,5,independence,27,0
+vaccine_cxcl10_20261106,5,exchangeable,27,0

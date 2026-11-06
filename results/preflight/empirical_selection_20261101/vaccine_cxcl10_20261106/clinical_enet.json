@@ -1,0 +1,10 @@
+{
+  "method": "CLINICAL_ENET",
+  "patients": 139,
+  "tau": 0.75,
+  "loss": 0.22464119207394,
+  "cq_loss": 0.213246845778001,
+  "gain": 0.0507224262422415,
+  "passed": true,
+  "formal_validation_used": false
+}

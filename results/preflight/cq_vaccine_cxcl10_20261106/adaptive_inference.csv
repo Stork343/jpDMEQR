@@ -1,0 +1,2 @@
+study_id,patients,target,tau,exchangeable_weight,estimate,standard_error,lower,upper,independence_standard_error,exchangeable_standard_error,estimated_se_reduction,largest_patient_variance_share,largest_five_patient_variance_share,formal_validation_used,manuscript_adoption
+vaccine_cxcl10_20261106,139,C_isg_change,0.75,0.7608647796017382,-1.7852718148685205,1.3393483409468436,-4.410346325877807,0.8398026961407661,1.773080886599459,1.3882377907519476,0.24462084551847973,0.30910699494782495,0.5777089409728964,False,False

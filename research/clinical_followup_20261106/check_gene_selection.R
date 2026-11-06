@@ -14,19 +14,22 @@ for (fold in seq_len(study$outer_folds)) {
   stopifnot(all(training$role == "training"))
   for (key in names(recipes)) {
     samples <- if (key == "training") training else training[inner_fold != as.integer(sub("inner_", "", key))]
-    samples <- samples[!duplicated(strain_id)]
-    panels <- panel_data[match(samples$sample_id, sample_id), ..genes]
-    observed <- vapply(panels, function(x) mean(is.finite(x)), numeric(1))
-    variance <- vapply(panels, function(x) {
-      v <- x[is.finite(x)]
-      if (length(v)) mean((v - mean(v))^2) else NA_real_
-    }, numeric(1))
+    panels <- as.matrix(panel_data[match(samples$sample_id, sample_id), ..genes])
+    observed_mask <- is.finite(panels)
+    group <- samples$strain_id
+    visits <- as.numeric(table(group)[group])
+    observed <- colMeans(rowsum(observed_mask / visits, group))
+    panels[!observed_mask] <- 0
+    mean_value <- colMeans(rowsum(panels / visits, group)) / observed
+    residual <- sweep(panels, 2L, mean_value, "-")
+    residual[!observed_mask] <- 0
+    variance <- colMeans(rowsum(residual^2 / visits, group)) / observed
     eligible <- genes[observed >= study$minimum_observed_fraction & is.finite(variance)]
     expected <- head(eligible[order(-variance[eligible], eligible, method = "radix")], study$maximum_high_features)
     recipe <- recipes[[key]]$direction_recipe$base_recipe
     selected <- intersect(genes, recipe$features)
     stopifnot(setequal(selected, expected), setequal(recipe$training_strains, samples$strain_id))
-    records[[length(records)+1L]] <- data.table(fold, panel = key, patients = nrow(samples), genes = length(selected))
+    records[[length(records)+1L]] <- data.table(fold, panel = key, patients = uniqueN(group), genes = length(selected))
   }
 }
 summary <- rbindlist(records)

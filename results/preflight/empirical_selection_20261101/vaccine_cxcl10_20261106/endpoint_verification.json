@@ -1,0 +1,9 @@
+{
+  "source": "separate assay read and direct counting of all genes below each interferon gene in the published ExpressionSet",
+  "patients": 139,
+  "records": 277,
+  "maximum_endpoint_difference": 4.44089209850063e-16,
+  "maximum_contrast_difference": 5.99520433297585e-15,
+  "maximum_baseline_difference": 4.44089209850063e-16,
+  "reserved_outcomes_used": false
+}

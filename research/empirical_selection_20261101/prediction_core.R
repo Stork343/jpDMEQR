@@ -52,24 +52,28 @@ ep_mean_path <- function(features, alpha, config, lambda = NULL) {
     }
   }
   stopifnot(length(lambda) == config$elastic_net_path_length, all(is.finite(lambda)), all(lambda > 0))
-  kernel <- tcrossprod(weighted_X) / N
-  decomposition <- eigen(kernel, symmetric = TRUE)
+  primal <- p < N
+  gram <- if (primal) crossprod(weighted_X) / N else tcrossprod(weighted_X) / N
+  rhs <- if (primal) drop(crossprod(weighted_X, weighted_y)) / N else weighted_y
+  decomposition <- eigen(gram, symmetric = TRUE)
   eigen_tolerance <- 10 * max(N, p) * .Machine$double.eps * max(1, decomposition$values[1L])
   stopifnot(min(decomposition$values) >= -eigen_tolerance)
   values <- pmax(decomposition$values, 0)
-  projected_y <- drop(crossprod(decomposition$vectors, weighted_y))
+  projected_y <- drop(crossprod(decomposition$vectors, rhs))
   inverse_scores <- outer(projected_y, rep(1, length(lambda))) / outer(values, lambda, "+")
-  dual <- decomposition$vectors %*% inverse_scores
-  system_error <- apply(abs(kernel %*% dual + sweep(dual, 2L, lambda, "*") - weighted_y), 2L, max)
-  stopifnot(max(system_error) < 1e-8 * max(1, max(abs(weighted_y))))
-  high_beta <- crossprod(weighted_X, dual) / N
+  solution <- decomposition$vectors %*% inverse_scores
+  system_error <- apply(abs(gram %*% solution + sweep(solution, 2L, lambda, "*") - rhs), 2L, max)
+  stopifnot(max(system_error) < 1e-8 * max(1, max(abs(rhs))))
+  high_beta <- if (primal) solution else crossprod(weighted_X, solution) / N
   low_beta <- matrix(low_y, length(low_y), length(lambda)) - low_X %*% high_beta
   beta <- rbind(Matrix::Matrix(low_beta, sparse = TRUE), Matrix::Matrix(high_beta, sparse = TRUE))
   rownames(beta) <- colnames(features$X)
   colnames(beta) <- paste0("s", seq_along(lambda) - 1L)
   list(beta = beta, lambda = lambda,
-       diagnostics = list(solver = "weighted_qr_kernel_ridge", alpha = alpha, lambda = lambda,
-         linear_system_error = system_error, minimum_kernel_eigenvalue = min(decomposition$values)))
+       diagnostics = list(solver = if (primal) "weighted_qr_primal_ridge" else "weighted_qr_kernel_ridge",
+         alpha = alpha, lambda = lambda, linear_system_error = system_error,
+         minimum_kernel_eigenvalue = if (primal) 0 else min(decomposition$values),
+         system_dimension = nrow(gram), minimum_system_eigenvalue = min(decomposition$values)))
 }
 
 ep_path <- function(features, method, tau, config, maximum, setting = NULL) {
