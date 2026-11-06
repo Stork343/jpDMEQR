@@ -1,8 +1,8 @@
 selection_id: empirical_selection_20261101
 status: method_development
 active_method: clinical_quantile_smooth_20261106
-active_candidate: loop_night_20261106
-latest_completed_candidate: iobp2_landmark_20261106
+active_candidate: null
+latest_completed_candidate: loop_night_20261106
 adopted_dataset: null
 requirements:
   observed_continuous_response: true

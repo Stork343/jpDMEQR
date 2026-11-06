@@ -61,7 +61,7 @@ if increment.exists():
     diagnostic = pd.read_csv(increment).iloc[0]
     assert diagnostic.patients == state["discovery_patients"]
     lines[lines.index(source):lines.index(source)] = [
-        "为核查完整曲线能否提供额外的预测信息，探索比较结束后，又在相同患者、相同训练组中拟合了"
+        "为核查完整曲线能否提供额外的预测信息，在相同患者和相同训练组中另行拟合了"
         f"只使用临床变量的校准 elastic net。其损失为 {diagnostic.clinical_loss:.4f}，加入 288 个曲线变量后"
         f"为 {diagnostic.curve_loss:.4f}，相对改善为 {diagnostic.relative_gain_with_curve:+.2%}。", ""]
 (output / "REPORT_zh.md").write_text("\n".join(lines))

@@ -1,0 +1,22 @@
+{
+  "study_id": "loop_night_20261106",
+  "discovery_patients": 252,
+  "discovery_measurements": 756,
+  "reserved_roster": 216,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0048863484673281,
+    "ENET": 0.0791839415262386
+  },
+  "profile_features_per_fold": [
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "necessary_comparisons_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}
