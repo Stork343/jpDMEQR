@@ -1,0 +1,14 @@
+{
+  "study_id": "ispy_diameter_20261106",
+  "patients": 146,
+  "records": 417,
+  "decision_quantile": 0.75,
+  "relative_gains": {
+    "CLINICAL_QR": -0.0015547502549251,
+    "ENET": 0.0176900102551051
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

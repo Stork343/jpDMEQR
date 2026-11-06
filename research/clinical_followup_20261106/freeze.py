@@ -3,6 +3,7 @@ import csv
 import gzip
 import json
 import subprocess
+import sys
 from zipfile import ZipFile
 
 import numpy as np
@@ -240,12 +241,26 @@ def diameter_roles(source, seed):
     return pd.concat([training[columns], held[columns]]).sort_values("patient")
 
 
+def acid_base_roles(source, seed):
+    catalog = pd.read_csv(source / "catalog.csv", usecols=["patient", "site"])
+    assert catalog.patient.is_unique and catalog.groupby("site").size().to_dict() == {"A": 20336, "B": 20000}
+    catalog["role"] = catalog.site.map({"A": "discovery", "B": "reserved"})
+    catalog["outer_fold"] = 0
+    rng = np.random.default_rng(seed)
+    order = rng.permutation(catalog.loc[catalog.site.eq("A")].sort_values("patient").index)
+    catalog.loc[order, "outer_fold"] = np.arange(len(order)) % registry["outer_folds"] + 1
+    return catalog.sort_values("patient")
+
+
 application = template("application_template")
 method = template("method_template")
 shared = ["comparators", "target_candidates", "primary_prediction_rule", "working_penalties", "gap_tolerance",
           "elastic_net_alpha", "elastic_net_path_length", "elastic_net_lambda_min_ratio",
           "ridge_variance_ratio_max", "ridge_variance_ratio_min", "forest", "xgboost", "lightgbm"]
-for name, definition in registry["questions"].items():
+requested = sys.argv[1:] or list(registry["questions"])
+assert set(requested) <= set(registry["questions"])
+for name in requested:
+    definition = registry["questions"][name]
     study = {key: application[key] for key in shared}
     study.update(definition)
     study_id = study["study_id"]
@@ -268,7 +283,8 @@ for name, definition in registry["questions"].items():
     readers = {"uwhvf_central": eye_roles, "eicu_lactate": icu_roles, "eicu_creatinine": icu_roles,
                "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles, "ispy2_volume": breast_roles,
                "ispy2_signaling": protein_roles, "t1dx_monitoring": registry_roles, "chord_psa": prostate_roles,
-               "commpass_lightchain": myeloma_roles, "ispy_diameter": diameter_roles}
+               "commpass_lightchain": myeloma_roles, "ispy_diameter": diameter_roles,
+               "physionet_ph": acid_base_roles}
     if "marker" in study:
         frame = serum_roles(source, study["role_seed"], study, registry["validation_fraction"], registry["outer_folds"])
     else:

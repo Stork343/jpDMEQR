@@ -1,0 +1,23 @@
+{
+  "study_id": "ispy_diameter_20261106",
+  "discovery_patients": 146,
+  "records": 417,
+  "repeated_patients": 144,
+  "maximum_records_per_patient": 3,
+  "distinct_outcomes": 301,
+  "additional_features_at_registered_frequency": 86,
+  "target_observed_fraction": 0.9931506849315068,
+  "criteria": {
+    "discovery_patients": true,
+    "repeated_patients": true,
+    "fold_patients": true,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true
+  },
+  "passed": true,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false,
+  "common_pam50_genes": 46
+}

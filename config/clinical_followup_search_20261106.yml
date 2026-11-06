@@ -153,3 +153,11 @@ questions:
     inference_target: C_proliferation_late
     response: log1p_residual_mri_diameter_fraction
     minimum_observed_fraction: 0.80
+  physionet_ph:
+    study_id: physionet_ph_20261106
+    source_doi: 10.13026/v64v-d857
+    source_directory: data/raw/physionet_sepsis_20261106
+    role_seed: 202611075
+    decision_quantile: 0.25
+    inference_target: C_ventilation
+    response: subsequent_measured_blood_ph

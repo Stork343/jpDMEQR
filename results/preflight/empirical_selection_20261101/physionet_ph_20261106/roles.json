@@ -1,0 +1,7 @@
+{
+  "study_id": "physionet_ph_20261106",
+  "roster_patients": 40336,
+  "reserved_patients": 20000,
+  "discovery_patients": 20336,
+  "reserved_outcomes_used": false
+}
