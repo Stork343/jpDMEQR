@@ -34,7 +34,7 @@ if not eligibility["passed"]:
     print(json.dumps(eligibility))
     raise SystemExit(0)
 if not (root / "preparation.json").exists():
-    run(["Rscript", clinical / "prepare_discovery.R", config])
+    run(["Rscript", clinical / "prepare_discovery.R", config, "necessary"])
 with ThreadPoolExecutor(max_workers=2) as executor:
     baselines = executor.submit(run, [sys.executable, helper / "necessary_comparisons.py", config])
     candidate = executor.submit(run, [sys.executable, smooth / "run_smooth_queue.py", method])

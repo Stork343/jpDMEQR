@@ -19,7 +19,12 @@ evaluation <- fread(file.path(outer, "evaluation.csv"))
 stopifnot(all(rows$role == "training"), all(evaluation$role == "discovery_evaluation"),
   !length(intersect(rows$strain_id, evaluation$strain_id)))
 panel <- cp_panel(config$input_directory)
-panel$recipes <- readRDS(file.path(outer, "recipes.rds"))
+recipe_file <- file.path(outer, "recipes.rds")
+if (method %in% c("JOINT_OFFSET", "POOLED_OFFSET", "PRESS_RIDGE")) {
+  prepared <- read_json(file.path(config$output_root, "preparation.json"))
+  if (identical(prepared$stage, "necessary")) recipe_file <- file.path(outer, "offset_recipes.rds")
+}
+panel$recipes <- readRDS(recipe_file)
 directory <- file.path(outer, "models", paste0(method, "_", args[3L]))
 if (dir.exists(directory)) stop("拟合目录已经存在")
 dir.create(directory, recursive = TRUE)

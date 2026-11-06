@@ -1,0 +1,9 @@
+{
+  "source": "second reading of the original hospital A PSV files using a separate patient and visit selector",
+  "patients": 8642,
+  "records": 16431,
+  "maximum_endpoint_difference": 0.0,
+  "maximum_contrast_difference": 8.881784197001252e-16,
+  "hours_verified": true,
+  "reserved_outcomes_used": false
+}

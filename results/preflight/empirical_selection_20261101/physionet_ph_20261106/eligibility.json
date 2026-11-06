@@ -1,0 +1,22 @@
+{
+  "study_id": "physionet_ph_20261106",
+  "discovery_patients": 8642,
+  "records": 16431,
+  "repeated_patients": 5188,
+  "maximum_records_per_patient": 3,
+  "distinct_outcomes": 73,
+  "additional_features_at_registered_frequency": 82,
+  "target_observed_fraction": 0.9576486924323073,
+  "criteria": {
+    "discovery_patients": true,
+    "repeated_patients": true,
+    "fold_patients": true,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true
+  },
+  "passed": true,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

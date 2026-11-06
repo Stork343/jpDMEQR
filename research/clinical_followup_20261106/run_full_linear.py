@@ -28,6 +28,8 @@ commands = [
     ["Rscript", "research/clinical_search_20261105/verify_screen.R", settings],
     [sys.executable, "research/clinical_quantile_20261105/summarise.py", method_path],
     ["Rscript", "research/clinical_quantile_20261105/verify_predictions.R", method_path]]
+if json.loads((root/"preparation.json").read_text()).get("stage") == "necessary":
+    commands.insert(0, ["Rscript","research/clinical_search_20261105/prepare_discovery.R",settings,"offsets"])
 for command in commands:
     subprocess.run(list(map(str, command)), check=True, env=environment)
 comparison = pd.read_csv(Path(method["report_directory"]) / "discovery_comparisons.csv").query("decision_quantile")

@@ -1,0 +1,8 @@
+{
+  "patients": 146,
+  "records": 417,
+  "source": "TCIA clinical workbook and independent within-array ranking of the common GEO measurements",
+  "maximum_endpoint_difference": 1.1102230246251565e-16,
+  "maximum_contrast_difference": 1.7763568394002505e-15,
+  "reserved_outcomes_used": false
+}

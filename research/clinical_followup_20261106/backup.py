@@ -10,12 +10,14 @@ backup = Path("/Users/houjian/jpDMEQR-backups/empirical_selection_20261101/clini
 backup.mkdir(parents=True,exist_ok=True)
 paths = set()
 for name in ["uwhvf_20261106","critical_care_20261106","gaitrec_20261106","vitaldb_20261106",
-             "ispy_20261106","t1dx_20261106","mpc_20261106","commpass_20261106"]:
+             "ispy_20261106","t1dx_20261106","mpc_20261106","commpass_20261106","physionet_sepsis_20261106"]:
     root = Path("data/raw")/name
     for file in root.rglob("*"):
         if not file.is_file() or any(part.endswith(".ranges") or part=="ranges" for part in file.parts):
             continue
         if any(v in file.name for v in [".pypdl", ".incoming",".part",".download.log"]) or file.suffix==".html":
+            continue
+        if name == "physionet_sepsis_20261106" and file.suffix != ".zip" and file.name not in {"catalog.csv","LICENSE.txt"}:
             continue
         paths.add(file)
 for settings in settings_directory.glob("*.yml"):
@@ -24,7 +26,7 @@ for settings in settings_directory.glob("*.yml"):
     if "input_directory" not in cfg or "report_directory" not in cfg:
         continue
     report = Path(cfg["report_directory"])
-    if not (report/"decision.json").exists():
+    if not (report/"eligibility.json").exists():
         continue
     paths.update(f for f in Path(cfg["input_directory"]).rglob("*") if f.is_file())
     paths.update(f for f in Path(cfg["output_root"]).rglob("*") if f.is_file())
@@ -33,6 +35,8 @@ for settings in settings_directory.glob("*.yml"):
         continue
     method = yaml.safe_load(methodfile.read_text())
     paths.update(f for f in Path(method["output_root"]).rglob("*") if f.is_file())
+for location in ["results/raw/clinical_followup_superseded_20261106", "results/preflight/clinical_patient_weights_20261106"]:
+    paths.update(f for f in Path(location).rglob("*") if f.is_file())
 assert paths
 payload = "\n".join(str(f) for f in sorted(paths))+"\n"
 subprocess.run(["rsync","-aR","--files-from=-","./",str(backup)+"/"],input=payload,text=True,check=True)
