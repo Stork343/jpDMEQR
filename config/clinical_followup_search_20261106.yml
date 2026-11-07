@@ -171,3 +171,13 @@ questions:
     response: log1p_concurrent_serum_cxcl10_pg_ml
     minimum_observed_fraction: 0.80
     maximum_high_features: 300
+  trialnet_cpeptide:
+    study_id: trialnet_cpeptide_20261107
+    source_doi: 10.1172/jci.insight.125556
+    source_directory: data/raw/trialnet_20261107
+    role_seed: 202611077
+    decision_quantile: 0.25
+    inference_target: C_nlr_late
+    response: log1p_reportable_mixed_meal_mean_cpeptide_nmol_l
+    minimum_observed_fraction: 0.80
+    maximum_high_features: 300
