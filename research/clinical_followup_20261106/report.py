@@ -19,7 +19,8 @@ question_names = {
     "t1dx_monitoring": "糖尿病登记随访 HbA1c", "chord_psa": "前列腺癌 PSA", "chord_colorectal": "结直肠癌 CEA",
     "chord_pancreas": "胰腺癌 CA19-9", "chord_breast": "乳腺癌 CA15-3", "commpass_lightchain": "骨髓瘤受累血清轻链",
     "ispy_diameter": "乳腺癌 MRI 最长径", "physionet_ph": "医院 A 血液 pH",
-    "vaccine_cxcl10": "流感疫苗接种后的血清 CXCL10"}
+    "vaccine_cxcl10": "流感疫苗接种后的血清 CXCL10",
+    "trialnet_cpeptide": "初诊糖尿病 C-peptide 随访"}
 
 
 def read(path):
@@ -133,6 +134,34 @@ if len(vaccine) and pd.notna(vaccine.iloc[0].get("gain_over_joint_direct")):
         f"区间为 {inference.lower:.3f} 至 {inference.upper:.3f}，跨过零。"
         f"{int(trial.reserved_roster)} 名验证参与者保持封存。"
         " [患者推断](../cq_vaccine_cxcl10_20261106/adaptive_inference.csv)"])
+hospital = frame.loc[frame.study_id.eq("physionet_ph_20261106")]
+if len(hospital) and pd.notna(hospital.iloc[0].get("cq_loss")):
+    record = hospital.iloc[0]
+    document.extend(["", "## 医院 A 的血液 pH", "",
+        f"{int(record.patients)} 名患者提供 {int(record.records)} 次随访检查。在预定的第 25 百分位，"
+        f"CQ_SMOOTH 相对临床分位数回归的损失降低 {record.gain_over_clinical_qr:.2%}，"
+        f"相对校准 elastic net 降低 {record.gain_over_enet:.2%}。两项增幅均小于 2%。"
+        " [必要比较](../empirical_selection_20261101/physionet_ph_20261106/decision.json)"])
+    if record.get("joint_direct_status") == "verified":
+        document.append(f"相对 JOINT_DIRECT 的损失改善为 {record.gain_over_joint_direct:.2%}，"
+            "系数预测和按患者计算的损失均已独立复核。"
+            " [直接比较](../empirical_selection_20261101/physionet_ph_20261106/joint_direct_comparison.json)")
+    else:
+        cfg = yaml.safe_load(Path(record.study_settings).read_text())
+        jobs = pd.read_csv(Path(cfg["output_root"])/"jobs.csv").query("method == 'JOINT_DIRECT'")
+        completed = sum((Path(path)/"status.json").exists() for path in jobs.directory)
+        document.append(f"JOINT_DIRECT 已完成 {completed}/{len(jobs)} 项拟合，采用已登记的 Clarabel 求解器。"
+                        "医院 B 的随访数值保持封存。")
+trialnet = frame.loc[frame.study_id.eq("trialnet_cpeptide_20261107")]
+if len(trialnet) and pd.notna(trialnet.iloc[0].get("cq_loss")):
+    record = trialnet.iloc[0]
+    document.extend(["", "## 初诊糖尿病的 C-peptide 随访", "",
+        f"完整采样曲线对应 {int(record.patients)} 名探索患者、{int(record.records)} 次随访。"
+        "采用统一报告下界后的两小时平均浓度，已用另一套日期选择及积分程序逐项复算。"
+        f"第 25 百分位的损失相对临床分位数回归降低 {record.gain_over_clinical_qr:.2%}，"
+        f"相对校准 elastic net 降低 {record.gain_over_enet:.2%}。"
+        f"该队列结束于必要比较，TN02 和 START 的 {int(record.reserved_roster)} 名验证患者继续封存。"
+        " [比较结果](../empirical_selection_20261101/trialnet_cpeptide_20261107/decision.json)"])
 (out / "REPORT_zh.md").write_text("\n".join(document)+"\n")
 
 subprocess.run([sys.executable, "research/clinical_quantile_20261105/write_smooth_report.py"], check=True)

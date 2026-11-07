@@ -266,6 +266,19 @@ def vaccine_roles(source, seed):
     return cohort.sort_values("patient")
 
 
+def trialnet_roles(source, seed):
+    cohort = pd.read_csv(source/"roster.csv",dtype={"patient":str})
+    assert cohort.patient.is_unique
+    cohort["role"] = np.where(cohort.study.isin(["TN02","START"]),"reserved","discovery")
+    cohort["outer_fold"] = 0
+    rng = np.random.default_rng(seed)
+    for _, group in cohort.loc[cohort.role.eq("discovery")].groupby(["study","treatment"]):
+        order = rng.permutation(group.sort_values("patient").index)
+        cohort.loc[order,"outer_fold"] = (np.arange(len(order))+rng.integers(5))%5+1
+    assert cohort.groupby("patient").role.nunique().eq(1).all()
+    return cohort.sort_values("patient")
+
+
 application = template("application_template")
 method = template("method_template")
 shared = ["comparators", "target_candidates", "primary_prediction_rule", "working_penalties", "gap_tolerance",
@@ -298,7 +311,8 @@ for name in requested:
                "gaitrec_propulsion": gait_roles, "vitaldb_crp": surgical_roles, "ispy2_volume": breast_roles,
                "ispy2_signaling": protein_roles, "t1dx_monitoring": registry_roles, "chord_psa": prostate_roles,
                "commpass_lightchain": myeloma_roles, "ispy_diameter": diameter_roles,
-               "physionet_ph": acid_base_roles, "vaccine_cxcl10": vaccine_roles}
+               "physionet_ph": acid_base_roles, "vaccine_cxcl10": vaccine_roles,
+               "trialnet_cpeptide": trialnet_roles}
     if "marker" in study:
         frame = serum_roles(source, study["role_seed"], study, registry["validation_fraction"], registry["outer_folds"])
     else:

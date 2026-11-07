@@ -41,6 +41,8 @@ for (fold in seq_len(study$outer_folds)) {
     data.table(sample_id=held$sample_id,strain_id=held$strain_id,method="CLINICAL_ENET",
                tau=fit$quantiles[j],prediction=rebuilt[,j])))
   fwrite(stored,file.path(directory,"prediction.csv"))
+  write_json(list(status="completed",stage="verified_discovery_prediction",formal_validation_used=FALSE),
+             file.path(directory,"status.json"),auto_unbox=TRUE,pretty=TRUE)
   selected <- pmax(0,apply(rebuilt,1,sort)[match(tau,fit$quantiles),])
   predictions[[fold]] <- data.table(patient=held$strain_id,loss=ep_loss(held$y,selected,tau))
 }

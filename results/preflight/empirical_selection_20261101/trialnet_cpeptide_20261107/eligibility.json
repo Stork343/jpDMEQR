@@ -1,0 +1,34 @@
+{
+  "study_id": "trialnet_cpeptide_20261107",
+  "discovery_patients": 138,
+  "records": 385,
+  "repeated_patients": 130,
+  "maximum_records_per_patient": 3,
+  "distinct_outcomes": 361,
+  "additional_features_at_registered_frequency": 50375,
+  "target_observed_fraction": 1.0,
+  "criteria": {
+    "discovery_patients": true,
+    "repeated_patients": true,
+    "fold_patients": true,
+    "distinct_outcomes": true,
+    "clinical_target_observed": true,
+    "additional_features": true,
+    "reporting_boundary": true
+  },
+  "passed": true,
+  "reserved_outcomes_used": false,
+  "formal_validation_used": false,
+  "manuscript_adoption": false,
+  "reporting_boundary_by_period": {
+    "1": 0.0,
+    "2": 0.015625,
+    "3": 0.06299212598425197
+  },
+  "reporting_floor_nmol_l": 0.016554701700830052,
+  "common_baseline_genes": 50375,
+  "reserved_trials": [
+    "TN02",
+    "START"
+  ]
+}

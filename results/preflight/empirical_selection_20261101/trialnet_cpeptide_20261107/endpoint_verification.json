@@ -1,0 +1,9 @@
+{
+  "source": "independent SQL visit selection and date arithmetic, author-normalized and integral C-peptide tables",
+  "patients": 138,
+  "records": 385,
+  "overlapping_unit_checks": 233,
+  "maximum_endpoint_difference": 2.220446049250313e-16,
+  "maximum_contrast_difference": 2.220446049250313e-16,
+  "reserved_outcomes_used": false
+}

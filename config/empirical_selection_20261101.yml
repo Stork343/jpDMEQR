@@ -2,7 +2,7 @@ selection_id: empirical_selection_20261101
 status: method_development
 active_method: clinical_quantile_smooth_20261106
 active_candidate: clinical_followup_search_20261106
-latest_completed_candidate: loop_night_20261106
+latest_completed_candidate: trialnet_cpeptide_20261107
 adopted_dataset: null
 requirements:
   observed_continuous_response: true

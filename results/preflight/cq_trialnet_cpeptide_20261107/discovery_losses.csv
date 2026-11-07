@@ -1,0 +1,7 @@
+tau,loss,patients,study_id,method,rule
+0.25,0.04746326435995891,138,trialnet_cpeptide_20261107,CQ_SMOOTH,raw
+0.5,0.06317275308014496,138,trialnet_cpeptide_20261107,CQ_SMOOTH,raw
+0.75,0.05219754558642149,138,trialnet_cpeptide_20261107,CQ_SMOOTH,raw
+0.25,0.046662968941205536,138,trialnet_cpeptide_20261107,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.5,0.06268667974553396,138,trialnet_cpeptide_20261107,CQ_SMOOTH,nonnegative_sorted_quantiles
+0.75,0.05217026181787464,138,trialnet_cpeptide_20261107,CQ_SMOOTH,nonnegative_sorted_quantiles

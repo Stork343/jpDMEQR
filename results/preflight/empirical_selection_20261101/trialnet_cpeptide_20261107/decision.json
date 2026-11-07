@@ -1,0 +1,14 @@
+{
+  "study_id": "trialnet_cpeptide_20261107",
+  "patients": 138,
+  "records": 385,
+  "decision_quantile": 0.25,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0056426212405354,
+    "ENET": 0.034375782767803
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

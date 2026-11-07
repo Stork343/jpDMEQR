@@ -1,0 +1,15 @@
+{
+  "study_id": "physionet_ph_20261106",
+  "training_patients": 4591,
+  "evaluation_patients": 2296,
+  "tau": 0.25,
+  "lambda": 0.5,
+  "columns": 205,
+  "design_rank": 175,
+  "extensions": 174,
+  "identical_selected_paths": false,
+  "maximum_evaluation_prediction_difference": 0.0284717574919263,
+  "fast_seconds": 186.603,
+  "reference_seconds": 372.616,
+  "reserved_outcomes_used": false
+}
