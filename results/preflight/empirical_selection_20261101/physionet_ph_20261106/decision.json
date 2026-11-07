@@ -1,0 +1,14 @@
+{
+  "study_id": "physionet_ph_20261106",
+  "patients": 8642,
+  "records": 16431,
+  "decision_quantile": 0.25,
+  "relative_gains": {
+    "CLINICAL_QR": 0.0114346479767512,
+    "ENET": 0.0056010109238233
+  },
+  "necessary_pass": false,
+  "phase": "closed_after_necessary_comparisons",
+  "formal_validation_used": false,
+  "manuscript_adoption": false
+}

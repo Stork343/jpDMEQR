@@ -49,7 +49,7 @@ environment.update({"TMPDIR": str(Path("results/scratch/runtime").resolve()),
     "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "VECLIB_MAXIMUM_THREADS": "1",
     "NUMBA_NUM_THREADS": "1", "R_MAX_VSIZE": "24Gb"})
 running = []
-while pending or running:
+while True:
     while pending and len(running) < config["workers"]:
         path, study, fold = pending.pop(0)
         log = (root / f"{study}_fold_{fold}.log").open("a")
@@ -94,7 +94,8 @@ while pending or running:
     report = Path(config["report_directory"])
     report.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(progress).to_csv(report / "progress.csv", index=False)
-    if pending or running:
-        time.sleep(5)
+    if not pending and not running:
+        break
+    time.sleep(5)
 (root / "status.json").write_text(json.dumps({"status": "completed", "fits": sum(row["expected"] for row in progress),
     "formal_validation_used": False, "manuscript_adoption": False}, indent=2) + "\n")

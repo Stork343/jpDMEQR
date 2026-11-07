@@ -133,6 +133,18 @@ ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
   counts <- vapply(folds, function(fold) uniqueN(rows[inner_fold != fold][[cluster_column]]), integer(1))
   maximum <- min(vapply(seq_along(folds), function(j)
     min(recipes[[j]]$search_dimension, floor(counts[j] / log(counts[j]))), numeric(1)))
+  if (method == "JOINT") {
+    ranks <- vapply(seq_along(folds), function(j) {
+      features <- feature_function(rows[inner_fold != folds[j]], panel, recipes[[j]])
+      weighted <- features$X * sqrt(features$weight / features$n)
+      qr(weighted, tol = 1e-5)$rank - sum(features$penalty_factor == 0)
+    }, integer(1))
+    stopifnot(all(ranks >= 0L))
+    final_recipe <- recipe_function(rows, panel, config)
+    final_design <- feature_function(rows, panel, final_recipe)
+    final_rank <- qr(final_design$X * sqrt(final_design$weight/final_design$n), tol=1e-5)$rank
+    maximum <- min(maximum, ranks, final_rank-sum(final_design$penalty_factor==0))
+  }
   loss <- NULL
   oof <- NULL
   for (f in seq_along(folds)) {
@@ -191,5 +203,6 @@ ep_fit_prediction <- function(rows, evaluation, panel, method, tau, config, prog
   stopifnot(all(is.finite(prediction)))
   list(beta = beta, recipe = recipe, prediction = prediction, quantiles = quantiles,
        calibration = calibration, choice = choice, grid = grid, loss = loss,
-       oof = oof[, choice], final_diagnostics = final_diagnostics, calibration_mode = calibration_mode)
+       oof = oof[, choice], final_diagnostics = final_diagnostics, calibration_mode = calibration_mode,
+       maximum_search_size = maximum)
 }

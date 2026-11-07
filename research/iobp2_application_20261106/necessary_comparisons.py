@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+import argparse
 import json
 from pathlib import Path
 import os
@@ -9,11 +10,15 @@ import numpy as np
 import pandas as pd
 import yaml
 
-config = yaml.safe_load(Path(sys.argv[1]).read_text())
+parser = argparse.ArgumentParser()
+parser.add_argument("config", type=Path)
+parser.add_argument("--implementation", type=Path)
+args = parser.parse_args()
+config = yaml.safe_load(args.config.read_text())
 root = Path(config["output_root"])
 report = Path(config["report_directory"])
 assert json.loads((report / "eligibility.json").read_text())["passed"]
-implementation = root / "implementation"
+implementation = args.implementation or root / "implementation"
 assert yaml.safe_load((implementation / "config.yml").read_text()) == config
 jobs = pd.read_csv(root / "jobs.csv").query("method in ['CLINICAL_QR', 'ENET']")
 assert len(jobs) == config["outer_folds"] * 2

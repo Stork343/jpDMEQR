@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+import argparse
 import json
 import os
 from pathlib import Path
@@ -10,7 +11,11 @@ import yaml
 
 from panel import settings_directory
 
-name = sys.argv[1]
+parser = argparse.ArgumentParser()
+parser.add_argument("study")
+parser.add_argument("--implementation", type=Path)
+args = parser.parse_args()
+name = args.study
 config = settings_directory / f"{name}.yml"
 method = settings_directory / f"cq_{name}.yml"
 study = yaml.safe_load(config.read_text())
@@ -36,7 +41,10 @@ if not eligibility["passed"]:
 if not (root / "preparation.json").exists():
     run(["Rscript", clinical / "prepare_discovery.R", config, "necessary"])
 with ThreadPoolExecutor(max_workers=2) as executor:
-    baselines = executor.submit(run, [sys.executable, helper / "necessary_comparisons.py", config])
+    baseline_command = [sys.executable, helper / "necessary_comparisons.py", config]
+    if args.implementation is not None:
+        baseline_command.extend(["--implementation", args.implementation])
+    baselines = executor.submit(run, baseline_command)
     candidate = executor.submit(run, [sys.executable, smooth / "run_smooth_queue.py", method])
     baselines.result()
     candidate.result()

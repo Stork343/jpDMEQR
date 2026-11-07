@@ -4,13 +4,13 @@ library(yaml)
 library(matrixStats)
 source("research/clinical_search_20261105/panel.R")
 args <- commandArgs(trailingOnly = TRUE)
-stopifnot(length(args) %in% c(1L, 2L))
+stopifnot(length(args) %in% c(1L, 2L, 3L))
 config <- read_yaml(args[1L])
 root <- config$output_root
 source("research/empirical_selection_20261101/prediction_core.R")
 source("research/empirical_selection_20261101/ridge_direction.R")
 panel <- cp_panel(config$input_directory)
-jobs <- fread(file.path(root, if (length(args) == 2L) args[2L] else "progress.csv"))
+jobs <- fread(file.path(root, if (length(args) >= 2L) args[2L] else "progress.csv"))
 stopifnot(all(jobs$status == "completed"), all(jobs$exit_code[!is.na(jobs$exit_code)] == 0L))
 records <- checks <- list()
 for (j in seq_len(nrow(jobs))) {
@@ -55,13 +55,14 @@ all[, residual := y - prediction]
 all[, loss := abs(residual) * fifelse(residual >= 0, tau, 1 - tau)]
 patient <- all[, .(loss = mean(loss)), by = .(scoring, method, tau, strain_id)]
 summary <- patient[, .(loss = mean(loss), se = sd(loss) / sqrt(.N)), by = .(scoring, method, tau)]
-saved <- fread(file.path(config$report_directory, "discovery_loss.csv"))
+saved <- fread(file.path(config$report_directory, if (length(args) == 3L) args[3L] else "discovery_loss.csv"))
 paired <- merge(summary, saved, by = c("scoring", "method", "tau"), suffixes = c("_new", "_saved"))
 error <- max(abs(paired$loss_new - paired$loss_saved), abs(paired$se_new - paired$se_saved))
 stopifnot(error < 1e-10, nrow(paired) == nrow(summary))
-fwrite(rbindlist(checks), file.path(config$report_directory, "prediction_reconstruction_checks.csv"))
+prefix <- if (length(args) == 3L) "joint_direct_" else ""
+fwrite(rbindlist(checks), file.path(config$report_directory, paste0(prefix, "prediction_reconstruction_checks.csv")))
 write_json(list(status = "passed", models_checked = nrow(jobs),
   maximum_prediction_error = max(rbindlist(checks)$prediction_error),
   independent_loss_error = error, formal_validation_used = FALSE),
-  file.path(config$report_directory, "screen_audit.json"), auto_unbox = TRUE, pretty = TRUE, digits = NA)
+  file.path(config$report_directory, paste0(prefix, "screen_audit.json")), auto_unbox = TRUE, pretty = TRUE, digits = NA)
 cat("Checked", nrow(jobs), "models; loss error", error, "\n")

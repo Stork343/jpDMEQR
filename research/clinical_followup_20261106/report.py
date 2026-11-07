@@ -79,6 +79,14 @@ for name, definition in registry["questions"].items():
             extra = read(report / "clinical_enet.json")
             np.testing.assert_allclose(extra["gain"], 1-row["cq_loss"]/extra["loss"], atol=1e-12)
             row["gain_over_clinical_enet"] = extra["gain"]
+        if (report / "joint_direct_comparison.json").exists():
+            joint = read(report / "joint_direct_comparison.json")
+            assert read(report / "joint_direct_screen_audit.json")["status"] == "passed"
+            np.testing.assert_allclose(joint["cq_loss"], row["cq_loss"], atol=1e-12)
+            row["gain_over_joint_direct"] = joint["relative_gain"]
+            row["joint_direct_status"] = "verified"
+        elif study_id == "physionet_ph_20261106":
+            row["joint_direct_status"] = "running"
     records.append(row)
 frame = pd.DataFrame(records)
 frame.to_csv(out / "screening_register.csv", index=False)

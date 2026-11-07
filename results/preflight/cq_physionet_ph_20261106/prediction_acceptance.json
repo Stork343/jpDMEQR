@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "completed_studies": "physionet_ph_20261106",
+  "maximum_reconstruction_error": 5.3291e-15,
+  "maximum_loss_difference": 6.245e-17
+}
